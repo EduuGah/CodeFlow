@@ -1,0 +1,6 @@
+{
+  "name": "CodeFlow",
+  "description": "An empty GitHub repository imported and scaffolded as a Vite React application.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
