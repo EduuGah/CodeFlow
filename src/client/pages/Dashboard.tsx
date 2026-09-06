@@ -1,23 +1,58 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { supabase } from '../lib/supabase';
 import { Button } from '../components/ui/Button';
 import { Skeleton } from '../components/ui/Skeleton';
-import { LogOut, Code2, BookOpen, Target, LayoutDashboard, ArrowRight } from 'lucide-react';
+import { LogOut, Code2, BookOpen, Target, LayoutDashboard, ArrowRight, FolderCode, Trophy } from 'lucide-react';
 import { mockProgress } from '../data/mock-progress';
 
 export function Dashboard() {
   const { user, logout } = useAuth();
   const [isLoadingData, setIsLoadingData] = useState(true);
+  const [completedLessons, setCompletedLessons] = useState<string[]>([]);
+  const [completedProjects, setCompletedProjects] = useState<string[]>([]);
 
   useEffect(() => {
-    // Simulando o carregamento dos dados de progresso da API
-    const timer = setTimeout(() => {
-      setIsLoadingData(false);
-    }, 1200);
-    return () => clearTimeout(timer);
-  }, []);
+    async function fetchUserData() {
+      if (!user) return;
+      try {
+        const { data, error } = await supabase
+          .from('users')
+          .select('*')
+          .eq('id', user.id)
+          .single();
+          
+        if (data && !error) {
+          setCompletedLessons(data.completedLessons || []);
+          setCompletedProjects(data.completedProjects || []);
+        }
+      } catch (error) {
+        console.error("Erro ao buscar dados do usuário (Supabase):", error);
+      } finally {
+        setIsLoadingData(false);
+      }
+    }
+    
+    fetchUserData();
+  }, [user]);
 
-  const firstName = user?.displayName?.split(' ')[0] || 'Estudante';
+  const firstName = user?.user_metadata?.full_name?.split(' ')[0] || 'Estudante';
+  const avatarUrl = user?.user_metadata?.avatar_url || `https://ui-avatars.com/api/?name=${user?.email}&background=random`;
+  
+  // Lógica dinâmica de progresso baseada nas lições concluidas
+  const totalLessonsInPath = 5;
+  const progressPercentage = Math.min(100, Math.round((completedLessons.length / totalLessonsInPath) * 100));
+
+  let nextLessonId = 'lesson-js-1';
+  let nextLessonTitle = 'Variáveis: Caixas na Memória';
+
+  if (completedLessons.includes('lesson-js-1')) {
+    nextLessonId = 'lesson-js-2';
+    nextLessonTitle = 'Tipos de Dados e Operadores';
+  }
+
+  const isImcProjectCompleted = completedProjects.includes('proj-js-imc');
 
   return (
     <div className="min-h-screen bg-zinc-50 flex flex-col">
@@ -29,10 +64,10 @@ export function Dashboard() {
         
         <div className="flex items-center gap-4">
           <span className="text-sm font-medium text-zinc-700 hidden sm:block">
-            {user?.displayName || user?.email}
+            {user?.user_metadata?.full_name || user?.email}
           </span>
           <img 
-            src={user?.photoURL || `https://ui-avatars.com/api/?name=${user?.displayName || user?.email}&background=random`} 
+            src={avatarUrl} 
             alt="Avatar" 
             className="w-8 h-8 rounded-full bg-zinc-200"
           />
@@ -52,7 +87,9 @@ export function Dashboard() {
           ) : (
             <>
               <h1 className="text-3xl font-bold tracking-tight text-zinc-900">Bom retorno, {firstName}!</h1>
-              <p className="text-zinc-500 mt-2 text-lg">Você concluiu <strong className="text-zinc-700 font-semibold">{mockProgress.currentPath.progressPercentage}%</strong> da trilha de JavaScript. Continue de onde parou.</p>
+              <p className="text-zinc-500 mt-2 text-lg">
+                Você concluiu <strong className="text-zinc-700 font-semibold">{progressPercentage}%</strong> da trilha de JavaScript. Continue de onde parou.
+              </p>
             </>
           )}
         </div>
@@ -72,10 +109,12 @@ export function Dashboard() {
             ) : (
               <>
                 <h3 className="font-semibold text-zinc-900">Seu próximo passo:</h3>
-                <p className="text-sm text-zinc-500 mt-1">{mockProgress.currentPath.nextLesson}</p>
-                <Button size="sm" className="w-full mt-6 gap-2">
-                  Continuar aula <ArrowRight size={16} />
-                </Button>
+                <p className="text-sm text-zinc-500 mt-1">{nextLessonTitle}</p>
+                <Link to={`/lesson/${nextLessonId}`} className="w-full mt-6">
+                  <Button size="sm" className="w-full gap-2">
+                    Continuar aula <ArrowRight size={16} />
+                  </Button>
+                </Link>
               </>
             )}
           </div>
@@ -115,9 +154,54 @@ export function Dashboard() {
               <>
                 <h3 className="font-semibold text-zinc-900">Revisão</h3>
                 <p className="text-sm text-zinc-500 mt-1">{mockProgress.reviews.pendingCount} conceitos aguardam revisão</p>
-                <Button variant="secondary" size="sm" className="w-full mt-6">Revisar agora</Button>
+                <Link to="/review" className="w-full mt-6">
+                  <Button variant="secondary" size="sm" className="w-full">Revisar agora</Button>
+                </Link>
               </>
             )}
+          </div>
+        </div>
+
+        {/* Secao de Projetos Praticos */}
+        <div className="pt-6">
+          <div className="flex items-center gap-2 mb-6">
+            <FolderCode size={24} className="text-zinc-700" />
+            <h2 className="text-2xl font-bold tracking-tight text-zinc-900">Projetos Práticos</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            
+            {/* Projeto 1 */}
+            <div className="bg-white border border-zinc-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow">
+              <div className="flex justify-between items-start mb-4">
+                <span className="text-xs font-semibold px-2 py-1 bg-blue-50 text-blue-700 rounded uppercase tracking-wider">
+                  Nível Fácil
+                </span>
+                {isImcProjectCompleted && (
+                  <span className="text-emerald-500" title="Projeto Entregue">
+                    <Trophy size={20} />
+                  </span>
+                )}
+              </div>
+              <h3 className="text-lg font-bold text-zinc-900 mb-2">Calculadora de IMC</h3>
+              <p className="text-zinc-500 text-sm mb-6 line-clamp-2">
+                Crie uma função que calcula o Índice de Massa Corporal (IMC) e retorna a classificação de saúde.
+              </p>
+              <Link to="/project/proj-js-imc">
+                <Button variant={isImcProjectCompleted ? "outline" : "primary"} className="w-full">
+                  {isImcProjectCompleted ? "Revisar Projeto" : "Iniciar Projeto"}
+                </Button>
+              </Link>
+            </div>
+
+            {/* Placeholder de Projeto futuro */}
+            <div className="bg-zinc-50 border border-dashed border-zinc-300 rounded-2xl p-6 flex flex-col items-center justify-center text-center opacity-75">
+              <div className="w-12 h-12 bg-zinc-200 rounded-full flex items-center justify-center text-zinc-400 mb-3">
+                <LogOut size={24} className="rotate-180" />
+              </div>
+              <h3 className="text-zinc-600 font-medium">Bloqueado</h3>
+              <p className="text-zinc-400 text-sm mt-1">Complete a Lição 3 para desbloquear este projeto.</p>
+            </div>
+
           </div>
         </div>
       </main>

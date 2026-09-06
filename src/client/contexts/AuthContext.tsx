@@ -1,10 +1,10 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { User, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from 'firebase/auth';
-import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
-import { auth, db } from '../lib/firebase';
+import { User, Session } from '@supabase/supabase-js';
+import { supabase } from '../lib/supabase';
 
 interface AuthContextType {
   user: User | null;
+  session: Session | null;
   loading: boolean;
   signInWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
@@ -14,64 +14,49 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      if (currentUser) {
-        // Sync user to Firestore upon sign-in
-        const userRef = doc(db, 'users', currentUser.uid);
-        const userSnap = await getDoc(userRef);
-        
-        if (!userSnap.exists()) {
-          try {
-            await setDoc(userRef, {
-              email: currentUser.email,
-              name: currentUser.displayName,
-              photoURL: currentUser.photoURL,
-              createdAt: serverTimestamp(),
-              lastLoginAt: serverTimestamp(),
-              role: 'student'
-            });
-          } catch (error) {
-            console.error('Error creating user profile in Firestore:', error);
-          }
-        } else {
-          try {
-            await setDoc(userRef, { lastLoginAt: serverTimestamp() }, { merge: true });
-          } catch (error) {
-            console.error('Error updating user login timestamp:', error);
-          }
-        }
-      }
-      
-      setUser(currentUser);
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
       setLoading(false);
     });
 
-    return unsubscribe;
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const signInWithGoogle = async () => {
-    const provider = new GoogleAuthProvider();
     try {
-      await signInWithPopup(auth, provider);
+      await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin + '/dashboard'
+        }
+      });
     } catch (error) {
-      console.error('Erro no login com Google:', error);
+      console.error('Erro no login com Google (Supabase):', error);
       throw error;
     }
   };
 
   const logout = async () => {
     try {
-      await signOut(auth);
+      await supabase.auth.signOut();
     } catch (error) {
-      console.error('Erro ao deslogar:', error);
+      console.error('Erro ao deslogar (Supabase):', error);
     }
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signInWithGoogle, logout }}>
+    <AuthContext.Provider value={{ user, session, loading, signInWithGoogle, logout }}>
       {children}
     </AuthContext.Provider>
   );

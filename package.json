@@ -9,7 +9,11 @@
     "start": "node dist/server.cjs"
   },
   "dependencies": {
+    "@google/genai": "^2.21.0",
     "@hookform/resolvers": "^5.9.1",
+    "@monaco-editor/react": "^4.7.0",
+    "@supabase/supabase-js": "^2.115.0",
+    "canvas-confetti": "^1.9.4",
     "clsx": "^2.1.1",
     "express": "^5.2.1",
     "firebase": "^12.18.0",
@@ -17,12 +21,16 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.87.0",
+    "react-markdown": "^10.1.0",
     "react-router-dom": "^7.18.3",
+    "remark-gfm": "^4.0.1",
     "tailwind-merge": "^3.6.0",
     "zod": "^4.5.4"
   },
   "devDependencies": {
+    "@tailwindcss/typography": "^0.5.20",
     "@tailwindcss/vite": "^4.0.0",
+    "@types/canvas-confetti": "^1.9.0",
     "@types/express": "^5.0.6",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",

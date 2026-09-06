@@ -3,6 +3,9 @@ import { Code2, ArrowRight } from 'lucide-react';
 import { Button } from './components/ui/Button';
 import { Login } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
+import { Lesson } from './pages/Lesson';
+import { Review } from './pages/Review';
+import { ProjectWorkspace } from './pages/ProjectWorkspace';
 import { ProtectedRoute } from './components/ProtectedRoute';
 
 function Landing() {
@@ -58,6 +61,30 @@ function App() {
         element={
           <ProtectedRoute>
             <Dashboard />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/lesson/:id" 
+        element={
+          <ProtectedRoute>
+            <Lesson />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/review" 
+        element={
+          <ProtectedRoute>
+            <Review />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/project/:id" 
+        element={
+          <ProtectedRoute>
+            <ProjectWorkspace />
           </ProtectedRoute>
         } 
       />
