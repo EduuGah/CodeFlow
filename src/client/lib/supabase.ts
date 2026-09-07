@@ -32,10 +32,19 @@ function validateConfig(): string | null {
     return `VITE_SUPABASE_URL não é uma URL válida (recebido: "${rawUrl}"). Use o formato https://SEU-REF.supabase.co`;
   }
 
-  // A anon key é um JWT: três blocos separados por ponto. Pegar a chave errada
-  // (ex.: copiar o Project ID) é um erro silencioso difícil de diagnosticar depois.
-  if (rawAnonKey.split('.').length !== 3) {
-    return 'VITE_SUPABASE_ANON_KEY não parece uma chave válida. Copie a chave "anon public" em Project Settings › API.';
+  // NUNCA deixar uma chave de servidor chegar ao bundle do cliente: qualquer
+  // visitante consegue lê-la no JavaScript servido e ela ignora as políticas de RLS.
+  if (rawAnonKey.startsWith('sb_secret_') || rawAnonKey.startsWith('service_role')) {
+    return 'VITE_SUPABASE_ANON_KEY contém uma chave secreta (de servidor). Ela seria exposta a qualquer visitante e ignora o RLS. Use a chave publishable/anon.';
+  }
+
+  // O Supabase tem dois formatos válidos em circulação: a chave publishable nova
+  // (sb_publishable_…) e a anon key legada, que é um JWT de três blocos.
+  const isPublishable = rawAnonKey.startsWith('sb_publishable_');
+  const isLegacyJwt = rawAnonKey.startsWith('eyJ') && rawAnonKey.split('.').length === 3;
+
+  if (!isPublishable && !isLegacyJwt) {
+    return 'VITE_SUPABASE_ANON_KEY não parece uma chave válida. Copie a chave publishable (ou a anon legada) em Project Settings › API Keys.';
   }
 
   return null;

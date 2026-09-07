@@ -5,6 +5,8 @@ import { Button } from './ui/Button';
 interface Message {
   role: 'user' | 'model';
   text: string;
+  /** Falha da API, renderizada em tom de aviso em vez de resposta do tutor. */
+  isError?: boolean;
 }
 
 export function AITutorChat({ codeContext }: { codeContext: string }) {
@@ -42,12 +44,18 @@ export function AITutorChat({ codeContext }: { codeContext: string }) {
         })
       });
 
-      if (!response.ok) throw new Error('Erro na API');
+      const data = await response.json().catch(() => null);
 
-      const data = await response.json();
+      if (!response.ok) {
+        // O servidor manda uma mensagem específica (sobrecarga, chave ausente…).
+        // Mostrar "problemas de conexão" para tudo esconde a causa real do aluno.
+        throw new Error(data?.error ?? 'Não consegui falar com o tutor agora.');
+      }
+
       setMessages(prev => [...prev, { role: 'model', text: data.text }]);
     } catch (error) {
-      setMessages(prev => [...prev, { role: 'model', text: 'Desculpe, estou com problemas de conexão no momento.' }]);
+      const text = error instanceof Error ? error.message : 'Não consegui falar com o tutor agora.';
+      setMessages(prev => [...prev, { role: 'model', text, isError: true }]);
     } finally {
       setIsLoading(false);
     }
@@ -86,9 +94,11 @@ export function AITutorChat({ codeContext }: { codeContext: string }) {
               <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                 <div 
                   className={`max-w-[85%] rounded-2xl px-4 py-2 text-sm leading-relaxed ${
-                    msg.role === 'user' 
-                      ? 'bg-indigo-600 text-white rounded-br-sm' 
-                      : 'bg-white border border-zinc-200 text-zinc-800 rounded-bl-sm'
+                    msg.role === 'user'
+                      ? 'bg-indigo-600 text-white rounded-br-sm'
+                      : msg.isError
+                        ? 'bg-amber-50 border border-amber-200 text-amber-900 rounded-bl-sm'
+                        : 'bg-white border border-zinc-200 text-zinc-800 rounded-bl-sm'
                   }`}
                 >
                   {msg.text}

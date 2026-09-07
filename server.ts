@@ -3,6 +3,29 @@ import path from "path";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
 
+// Nem o tsx (dev) nem o node (produção) leem o .env sozinhos. Sem isto,
+// process.env.GEMINI_API_KEY fica undefined e o SDK do Gemini cai no fluxo de
+// Application Default Credentials, falhando com um erro que não menciona a chave.
+// process.loadEnvFile é nativo do Node 20.12+ — não precisa de dependência.
+try {
+  process.loadEnvFile();
+} catch {
+  // Em produção as variáveis costumam vir do próprio host, sem arquivo .env.
+}
+
+const TUTOR_MODEL = "gemini-3.8-flash";
+
+/** 503/UNAVAILABLE e 429/RESOURCE_EXHAUSTED sao picos temporarios do provedor. */
+function isOverloaded(error: unknown): boolean {
+  const status = (error as { status?: number })?.status;
+  if (status === 503 || status === 429) return true;
+
+  const message = error instanceof Error ? error.message : String(error);
+  return /"code":\s*(503|429)|UNAVAILABLE|RESOURCE_EXHAUSTED/.test(message);
+}
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 async function startServer() {
   const app = express();
   const PORT = 3000;
@@ -10,10 +33,41 @@ async function startServer() {
   // Middleware para parser de JSON
   app.use(express.json());
 
-  // Initialize Gemini Client
-  // It uses process.env.GEMINI_API_KEY automatically if we pass it explicitly or it grabs it from env.
-  const ai = new GoogleGenAI({ 
-    apiKey: process.env.GEMINI_API_KEY,
+  /**
+   * Chama o Gemini reservando novas tentativas apenas para sobrecarga temporária.
+   * Erros de request (400, 404) falham de imediato: repetir não muda o resultado.
+   */
+  async function generateWithRetry(
+    params: Parameters<typeof ai.models.generateContent>[0],
+    tentativas = 3
+  ) {
+    let ultimoErro: unknown;
+
+    for (let i = 0; i < tentativas; i++) {
+      try {
+        return await ai.models.generateContent(params);
+      } catch (error) {
+        ultimoErro = error;
+        if (!isOverloaded(error) || i === tentativas - 1) throw error;
+
+        // Backoff exponencial: 500ms, 1s, 2s…
+        await sleep(500 * 2 ** i);
+      }
+    }
+
+    throw ultimoErro;
+  }
+
+  const geminiApiKey = process.env.GEMINI_API_KEY?.trim();
+
+  if (!geminiApiKey) {
+    console.warn(
+      "[CodeFlow] GEMINI_API_KEY ausente: o Tutor IA responderá com erro até a chave ser definida no .env."
+    );
+  }
+
+  const ai = new GoogleGenAI({
+    apiKey: geminiApiKey,
     httpOptions: {
       headers: {
         'User-Agent': 'aistudio-build',
@@ -30,39 +84,24 @@ async function startServer() {
   app.post("/api/tutor", async (req, res) => {
     try {
       const { messages, codeContext } = req.body;
-      
+
+      if (!geminiApiKey) {
+        return res.status(503).json({
+          error: "Tutor IA indisponível: defina GEMINI_API_KEY no arquivo .env e reinicie o servidor.",
+        });
+      }
+
       if (!messages || !Array.isArray(messages)) {
         return res.status(400).json({ error: "O corpo da requisição precisa conter um array 'messages'." });
       }
 
-      // Convertendo o formato das mensagens do front para o modelo (text string para o chat)
-      // Usaremos o recurso de chat para manter o histórico
-      const chat = ai.chats.create({
-        model: "gemini-3.8-flash",
-        config: {
-          systemInstruction: `Você é um Tutor de Programação Socrático para a plataforma CodeFlow. 
-REGRAS OBRIGATÓRIAS:
-1. NUNCA, SOB NENHUMA HIPÓTESE, entregue o código ou a resposta pronta.
-2. Seu papel é fazer perguntas que guiem o raciocínio do aluno até a resposta.
-3. Se o aluno pedir a resposta, recuse educadamente e dê uma dica sobre qual conceito ele deve revisar.
-4. Mantenha as mensagens extremamente curtas e diretas. Evite textos longos.
-5. Você tem acesso ao código atual do aluno no momento: \n\`\`\`javascript\n${codeContext || 'Nenhum código no editor.'}\n\`\`\`\nUse isso para dar contexto às suas dicas.`,
-        }
-      });
-
-      // No @google/genai, pra mandar histórico podemos criar um chat, mas como a API cria o chat do zero aqui,
-      // precisamos apenas mandar todas as mensagens passadas? 
-      // A API SDK @google/genai permite passar history na criação do chat:
-      // O código acima criaria um chat em branco. Vamos usar ai.models.generateContent em vez de chat
-      // para passar todo o histórico formatado na request manual.
-      
       const contents = messages.map(m => ({
         role: m.role === 'user' ? 'user' : 'model',
         parts: [{ text: m.text }]
       }));
 
-      const response = await ai.models.generateContent({
-        model: "gemini-3.8-flash",
+      const response = await generateWithRetry({
+        model: TUTOR_MODEL,
         contents,
         config: {
           systemInstruction: `Você é um Tutor de Programação Socrático para a plataforma CodeFlow. 
@@ -79,6 +118,15 @@ REGRAS OBRIGATÓRIAS:
       res.json({ text: response.text });
     } catch (error) {
       console.error("Erro no Tutor IA:", error);
+
+      // 503/429 persistente é sobrecarga do provedor, não erro do aluno nem bug nosso.
+      if (isOverloaded(error)) {
+        return res.status(503).json({
+          error: "O tutor está com muita demanda no momento. Tente de novo em alguns segundos.",
+          retryable: true,
+        });
+      }
+
       res.status(500).json({ error: "Ocorreu um erro ao consultar o Tutor IA." });
     }
   });
