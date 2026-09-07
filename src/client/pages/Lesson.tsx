@@ -10,6 +10,7 @@ import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
 import { LessonBlocks } from '../components/lesson/LessonBlocks';
 import { HintPanel } from '../components/lesson/HintPanel';
+import { useRecordAttempt } from '../hooks/useRecordAttempt';
 import { AITutorChat } from '../components/AITutorChat';
 import { getLesson, getNextLesson, getPrimaryCodeExercise } from '../../content';
 import { LANGUAGE_LABELS } from '../../content/types';
@@ -33,6 +34,9 @@ export function Lesson() {
   // Conclusão precisa sobreviver ao recarregamento: vem do progresso salvo,
   // não apenas do confete disparado nesta sessão.
   const [completedLessons, setCompletedLessons] = useState<string[]>([]);
+  const [dicasAbertas, setDicasAbertas] = useState(0);
+
+  const registrarTentativa = useRecordAttempt();
 
   useEffect(() => {
     let active = true;
@@ -76,6 +80,19 @@ export function Lesson() {
     const execResult = await executeCode(code, exercise.tests);
     setResult(execResult);
     setIsRunning(false);
+
+    // Cada execução é uma tentativa real: é da sequência delas que sai a taxa
+    // de acerto e a detecção de erro recorrente.
+    const passouTudo =
+      execResult.testResults.length > 0 && execResult.testResults.every((t) => t.passed);
+
+    registrarTentativa({
+      exerciseId: exercise.id,
+      lessonId: lesson.id,
+      concepts: exercise.concepts,
+      correct: passouTudo,
+      hintsUsed: dicasAbertas,
+    });
 
     // Fase 11 e 14: Salvar progresso e disparar confetes se tudo passar
     if (execResult.testResults.length > 0 && execResult.testResults.every(t => t.passed)) {
@@ -146,7 +163,7 @@ export function Lesson() {
               <p className="mt-1 text-sm leading-relaxed text-zinc-600">{lesson.objective}</p>
             </div>
 
-            <LessonBlocks blocks={lesson.blocks} />
+            <LessonBlocks blocks={lesson.blocks} lessonId={lesson.id} />
 
             <div className="rounded-lg border border-zinc-200 p-4">
               <h2 className="mb-2 text-xs font-semibold uppercase tracking-wider text-zinc-500">
@@ -161,7 +178,7 @@ export function Lesson() {
           {/* Dicas do exercício de código; os demais exercícios têm as suas. */}
           <div className="border-t border-zinc-100 bg-zinc-50/50 p-6">
             {/* key: o painel guarda estado próprio e precisa reiniciar em outra aula. */}
-            <HintPanel key={exercise.id} hints={hints} />
+            <HintPanel key={exercise.id} hints={hints} onRevealedChange={setDicasAbertas} />
           </div>
         </div>
 

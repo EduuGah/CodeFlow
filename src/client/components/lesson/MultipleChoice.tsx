@@ -4,6 +4,7 @@ import type { MultipleChoiceExercise } from '../../../content/types';
 import { Button } from '../ui/Button';
 import { MarkdownReader } from '../ui/MarkdownReader';
 import { HintPanel } from './HintPanel';
+import { useRecordAttempt } from '../../hooks/useRecordAttempt';
 
 /**
  * Exercício de múltipla escolha.
@@ -11,11 +12,37 @@ import { HintPanel } from './HintPanel';
  * Errar não encerra o exercício: a explicação aparece nos dois casos, e quem
  * errou pode tentar de novo. O objetivo é entender o porquê, não pontuar.
  */
-export function MultipleChoice({ exercise }: { exercise: MultipleChoiceExercise }) {
+export function MultipleChoice({
+  exercise,
+  lessonId,
+}: {
+  exercise: MultipleChoiceExercise;
+  lessonId: string;
+}) {
   const [selecionada, setSelecionada] = useState<number | null>(null);
   const [enviada, setEnviada] = useState(false);
+  const [dicasAbertas, setDicasAbertas] = useState(0);
+  // Evita inflar o histórico quando o aluno clica em "verificar" de novo sem
+  // ter mudado nada: isso não é uma tentativa nova.
+  const [ultimaRegistrada, setUltimaRegistrada] = useState<number | null>(null);
 
+  const registrar = useRecordAttempt();
   const acertou = selecionada === exercise.correctIndex;
+
+  const verificar = () => {
+    setEnviada(true);
+
+    if (selecionada === null || selecionada === ultimaRegistrada) return;
+
+    setUltimaRegistrada(selecionada);
+    registrar({
+      exerciseId: exercise.id,
+      lessonId,
+      concepts: exercise.concepts,
+      correct: selecionada === exercise.correctIndex,
+      hintsUsed: dicasAbertas,
+    });
+  };
 
   return (
     <section className="rounded-lg border border-zinc-200 bg-white p-4">
@@ -69,7 +96,7 @@ export function MultipleChoice({ exercise }: { exercise: MultipleChoiceExercise 
           size="sm"
           className="mt-4 w-full"
           disabled={selecionada === null}
-          onClick={() => setEnviada(true)}
+          onClick={verificar}
         >
           {enviada ? 'Verificar de novo' : 'Verificar resposta'}
         </Button>
@@ -97,7 +124,9 @@ export function MultipleChoice({ exercise }: { exercise: MultipleChoiceExercise 
         </div>
       )}
 
-      {!acertou && <HintPanel hints={exercise.hints} className="mt-3" />}
+      {!acertou && (
+        <HintPanel hints={exercise.hints} className="mt-3" onRevealedChange={setDicasAbertas} />
+      )}
     </section>
   );
 }

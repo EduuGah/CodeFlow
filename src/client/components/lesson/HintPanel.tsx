@@ -7,9 +7,25 @@ import { Button } from '../ui/Button';
  * orientação geral até a solução explicada. Entregar tudo de uma vez elimina
  * justamente o raciocínio que o exercício existe para provocar.
  */
-export function HintPanel({ hints, className = '' }: { hints: string[]; className?: string }) {
+interface HintPanelProps {
+  hints: string[];
+  className?: string;
+  /**
+   * Quantas dicas ficaram visíveis. Quem registra a tentativa precisa disso:
+   * acertar sem dica e acertar na quarta dica são evidências bem diferentes.
+   */
+  onRevealedChange?: (count: number) => void;
+}
+
+export function HintPanel({ hints, className = '', onRevealedChange }: HintPanelProps) {
   const [visivel, setVisivel] = useState(false);
   const [indice, setIndice] = useState(0);
+
+  const revelar = (novoIndice: number) => {
+    setVisivel(true);
+    setIndice(novoIndice);
+    onRevealedChange?.(novoIndice + 1);
+  };
 
   if (hints.length === 0) return null;
 
@@ -18,7 +34,7 @@ export function HintPanel({ hints, className = '' }: { hints: string[]; classNam
       <Button
         variant="outline"
         className={`w-full gap-2 text-zinc-600 ${className}`}
-        onClick={() => setVisivel(true)}
+        onClick={() => revelar(0)}
       >
         <Lightbulb size={16} className="text-amber-500" />
         Precisa de uma dica?
@@ -42,7 +58,7 @@ export function HintPanel({ hints, className = '' }: { hints: string[]; classNam
           variant="ghost"
           size="sm"
           className="mt-3 w-full text-amber-700 hover:bg-amber-100 hover:text-amber-800"
-          onClick={() => setIndice((i) => i + 1)}
+          onClick={() => revelar(indice + 1)}
         >
           Próxima dica
         </Button>

@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import type { Attempt } from './mastery';
 
 export interface UserProgress {
   completedLessons: string[];
@@ -67,4 +68,62 @@ export function markLessonCompleted(userId: string, lessonId: string): Promise<v
 
 export function markProjectCompleted(userId: string, projectId: string): Promise<void> {
   return appendToProgress(userId, 'completed_projects', projectId);
+}
+
+// ------------------------------------------------------- tentativas
+
+/** O que o registrador precisa saber sobre uma tentativa. */
+export interface AttemptInput {
+  exerciseId: string;
+  lessonId: string;
+  concepts: string[];
+  correct: boolean;
+  hintsUsed: number;
+}
+
+/**
+ * Registra uma tentativa.
+ *
+ * Nunca lança e nunca bloqueia: se a gravação falhar, o aluno segue estudando e
+ * o erro fica no console. Perder um registro de telemetria é aceitável;
+ * interromper a aula por causa dele não é.
+ */
+export async function recordAttempt(userId: string, attempt: AttemptInput): Promise<void> {
+  if (!supabase) return;
+
+  const { error } = await supabase.from('exercise_attempts').insert({
+    user_id: userId,
+    exercise_id: attempt.exerciseId,
+    lesson_id: attempt.lessonId,
+    concepts: attempt.concepts,
+    correct: attempt.correct,
+    hints_used: attempt.hintsUsed,
+  });
+
+  if (error) console.error('Falha ao registrar tentativa:', error.message);
+}
+
+/** Histórico de tentativas do aluno, do mais antigo para o mais recente. */
+export async function fetchAttempts(userId: string): Promise<Attempt[]> {
+  if (!supabase) return [];
+
+  const { data, error } = await supabase
+    .from('exercise_attempts')
+    .select('exercise_id, lesson_id, concepts, correct, hints_used, created_at')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: true });
+
+  if (error) {
+    console.error('Falha ao buscar tentativas:', error.message);
+    return [];
+  }
+
+  return (data ?? []).map((row) => ({
+    exerciseId: row.exercise_id,
+    lessonId: row.lesson_id,
+    concepts: row.concepts ?? [],
+    correct: row.correct,
+    hintsUsed: row.hints_used ?? 0,
+    createdAt: row.created_at,
+  }));
 }

@@ -7,7 +7,7 @@ import { PredictOutput } from './PredictOutput';
  * Renderiza os blocos de leitura de uma aula. Cada `kind` tem sua apresentação,
  * então uma aula nova só precisa declarar os blocos que quer — sem tocar aqui.
  */
-export function LessonBlocks({ blocks }: { blocks: LessonBlock[] }) {
+export function LessonBlocks({ blocks, lessonId }: { blocks: LessonBlock[]; lessonId: string }) {
   return (
     <div className="space-y-6">
       {blocks.map((block, index) => {
@@ -49,11 +49,11 @@ export function LessonBlocks({ blocks }: { blocks: LessonBlock[] }) {
             // então é a página que o renderiza. Os demais moram aqui, na ordem em
             // que a aula os declarou, entre os blocos de leitura.
             if (exercise.type === 'multiple-choice') {
-              return <MultipleChoice key={exercise.id} exercise={exercise} />;
+              return <MultipleChoice key={exercise.id} exercise={exercise} lessonId={lessonId} />;
             }
 
             if (exercise.type === 'predict-output') {
-              return <PredictOutput key={exercise.id} exercise={exercise} />;
+              return <PredictOutput key={exercise.id} exercise={exercise} lessonId={lessonId} />;
             }
 
             return null;

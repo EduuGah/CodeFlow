@@ -5,6 +5,7 @@ import { executeCode } from '../../lib/sandbox';
 import { Button } from '../ui/Button';
 import { MarkdownReader } from '../ui/MarkdownReader';
 import { HintPanel } from './HintPanel';
+import { useRecordAttempt } from '../../hooks/useRecordAttempt';
 
 /**
  * Exercício de previsão de saída (§94).
@@ -26,18 +27,40 @@ function normalizar(texto: string): string {
     .trim();
 }
 
-export function PredictOutput({ exercise }: { exercise: PredictOutputExercise }) {
+export function PredictOutput({
+  exercise,
+  lessonId,
+}: {
+  exercise: PredictOutputExercise;
+  lessonId: string;
+}) {
   const [previsao, setPrevisao] = useState('');
   const [saidaReal, setSaidaReal] = useState<string | null>(null);
   const [executando, setExecutando] = useState(false);
+  const [dicasAbertas, setDicasAbertas] = useState(0);
+  const [ultimaRegistrada, setUltimaRegistrada] = useState<string | null>(null);
 
+  const registrar = useRecordAttempt();
   const acertou = saidaReal !== null && normalizar(previsao) === normalizar(saidaReal);
 
   const verificar = async () => {
     setExecutando(true);
     const resultado = await executeCode(exercise.code);
-    setSaidaReal(resultado.error ? `Erro: ${resultado.error}` : resultado.output);
+    const real = resultado.error ? `Erro: ${resultado.error}` : resultado.output;
+    setSaidaReal(real);
     setExecutando(false);
+
+    // Reenviar a mesma previsão não é uma tentativa nova.
+    if (normalizar(previsao) === ultimaRegistrada) return;
+
+    setUltimaRegistrada(normalizar(previsao));
+    registrar({
+      exerciseId: exercise.id,
+      lessonId,
+      concepts: exercise.concepts,
+      correct: normalizar(previsao) === normalizar(real),
+      hintsUsed: dicasAbertas,
+    });
   };
 
   return (
@@ -128,7 +151,9 @@ export function PredictOutput({ exercise }: { exercise: PredictOutputExercise })
         </div>
       )}
 
-      {!acertou && <HintPanel hints={exercise.hints} className="mt-3" />}
+      {!acertou && (
+        <HintPanel hints={exercise.hints} className="mt-3" onRevealedChange={setDicasAbertas} />
+      )}
     </section>
   );
 }

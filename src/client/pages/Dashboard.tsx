@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { fetchProgress } from '../lib/progress';
+import { fetchAttempts, fetchProgress } from '../lib/progress';
+import { conceptsNeedingReview, masteryByConcept, overallStats, type Attempt } from '../lib/mastery';
+import { ConceptProgress } from '../components/dashboard/ConceptProgress';
 import { Button } from '../components/ui/Button';
 import { Skeleton } from '../components/ui/Skeleton';
 import { Badge } from '../components/ui/Badge';
@@ -16,6 +18,7 @@ import {
   listFlashcards,
   getLessonsOfTrack,
   listTracks,
+  listConcepts,
   listProjects,
 } from '../../content';
 
@@ -25,6 +28,7 @@ export function Dashboard() {
   const [completedLessons, setCompletedLessons] = useState<string[]>([]);
   const [completedProjects, setCompletedProjects] = useState<string[]>([]);
   const [progressError, setProgressError] = useState<string | null>(null);
+  const [attempts, setAttempts] = useState<Attempt[]>([]);
 
   useEffect(() => {
     let active = true;
@@ -32,8 +36,13 @@ export function Dashboard() {
     async function fetchUserData() {
       if (!user) return;
 
-      const progress = await fetchProgress(user.id);
+      const [progress, historico] = await Promise.all([
+        fetchProgress(user.id),
+        fetchAttempts(user.id),
+      ]);
       if (!active) return;
+
+      setAttempts(historico);
 
       setCompletedLessons(progress.completedLessons);
       setCompletedProjects(progress.completedProjects);
@@ -63,6 +72,13 @@ export function Dashboard() {
   // Uma seção por trilha, com o progresso de cada uma.
   const tracks = listTracks();
   const reviewCount = listFlashcards().length;
+
+  // Domínio derivado do histórico de tentativas — aula concluída não é conceito
+  // dominado (§78), então estes números são independentes do progresso da trilha.
+  const conceptIds = listConcepts().map((c) => c.id);
+  const mastery = masteryByConcept(conceptIds, attempts);
+  const paraRevisar = conceptsNeedingReview(conceptIds, attempts);
+  const stats = overallStats(attempts);
 
   return (
     <div className="min-h-screen bg-zinc-50 flex flex-col">
@@ -175,7 +191,11 @@ export function Dashboard() {
             ) : (
               <>
                 <h3 className="font-semibold text-zinc-900">Revisão</h3>
-                <p className="text-sm text-zinc-500 mt-1">{reviewCount} cartões disponíveis para revisão</p>
+                <p className="text-sm text-zinc-500 mt-1">
+                  {paraRevisar.length > 0
+                    ? `${paraRevisar.length} ${paraRevisar.length === 1 ? 'conceito precisa' : 'conceitos precisam'} de revisão`
+                    : `${reviewCount} cartões disponíveis`}
+                </p>
                 <Link to="/review" className="w-full mt-6">
                   <Button variant="secondary" size="sm" className="w-full">Revisar agora</Button>
                 </Link>
@@ -248,6 +268,35 @@ export function Dashboard() {
             </div>
           );
         })}
+
+        <div className="pt-6">
+          <h2 className="mb-2 text-2xl font-bold tracking-tight text-zinc-900">
+            Seus conceitos
+          </h2>
+          <p className="mb-5 max-w-2xl text-sm leading-relaxed text-zinc-500">
+            Calculado a partir das suas tentativas, não das aulas concluídas — dá para terminar uma
+            aula sem dominar o conceito dela.
+          </p>
+
+          {isLoadingData ? (
+            <div className="space-y-2">
+              <Skeleton className="h-14 w-full" />
+              <Skeleton className="h-14 w-full" />
+            </div>
+          ) : (
+            <ConceptProgress mastery={mastery} />
+          )}
+
+          {stats.attempts > 0 && (
+            <p className="mt-3 text-sm text-zinc-500">
+              {stats.exercisesSolved}{' '}
+              {stats.exercisesSolved === 1 ? 'exercício resolvido' : 'exercícios resolvidos'} ·{' '}
+              {Math.round(stats.accuracy * 100)}% de acerto em {stats.attempts}{' '}
+              {stats.attempts === 1 ? 'tentativa' : 'tentativas'} · {stats.activeDays}{' '}
+              {stats.activeDays === 1 ? 'dia de estudo' : 'dias de estudo'}
+            </p>
+          )}
+        </div>
 
         <div className="pt-6">
           <div className="flex items-center gap-2 mb-6">

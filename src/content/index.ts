@@ -198,6 +198,7 @@ export const getProject = (id: string): Project | undefined =>
   projects.find((p) => p.id === id && isPublished(p));
 
 export const listFlashcards = (): Flashcard[] => allFlashcards;
+export const listConcepts = (): Concept[] => allConcepts;
 export const getConcept = (id: string): Concept | undefined =>
   allConcepts.find((c) => c.id === id);
 
