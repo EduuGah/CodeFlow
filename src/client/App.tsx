@@ -2,6 +2,7 @@ import { Routes, Route, Link } from 'react-router-dom';
 import { Code2, ArrowRight } from 'lucide-react';
 import { Button } from './components/ui/Button';
 import { Login } from './pages/Login';
+import { AuthCallback } from './pages/AuthCallback';
 import { Dashboard } from './pages/Dashboard';
 import { Lesson } from './pages/Lesson';
 import { Review } from './pages/Review';
@@ -56,6 +57,7 @@ function App() {
     <Routes>
       <Route path="/" element={<Landing />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/auth/callback" element={<AuthCallback />} />
       <Route 
         path="/dashboard/*" 
         element={

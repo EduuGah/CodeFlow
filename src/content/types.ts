@@ -15,6 +15,20 @@ export type ContentStatus = 'draft' | 'published' | 'archived';
 export type Difficulty = 'iniciante' | 'intermediario' | 'avancado';
 
 /**
+ * Identificador da linguagem. Coincide com o id usado pelo Monaco, então serve
+ * tanto para rotular o conteúdo quanto para configurar o editor.
+ * Só JavaScript tem conteúdo hoje; os demais estão previstos no roadmap (§287).
+ */
+export type LanguageId = 'javascript' | 'typescript' | 'python' | 'sql';
+
+export const LANGUAGE_LABELS: Record<LanguageId, string> = {
+  javascript: 'JavaScript',
+  typescript: 'TypeScript',
+  python: 'Python',
+  sql: 'SQL',
+};
+
+/**
  * Unidade de conhecimento. O campo `prerequisites` forma o grafo de dependências
  * pedagógicas (§77) que as trilhas dinâmicas vão consumir mais adiante.
  */
@@ -90,6 +104,8 @@ export interface Lesson {
   id: string;
   trackId: string;
   title: string;
+  /** Linguagem da aula — rotulada na interface e usada para configurar o editor. */
+  language: LanguageId;
   /** O que o aluno consegue fazer ao terminar. Aparece no topo da aula. */
   objective: string;
   concepts: string[];
@@ -103,6 +119,7 @@ export interface Project {
   title: string;
   description: string;
   difficulty: Difficulty;
+  language: LanguageId;
   concepts: string[];
   /** Enunciado completo em Markdown. */
   brief: string;
@@ -121,6 +138,7 @@ export interface Track {
   id: string;
   title: string;
   description: string;
+  language: LanguageId;
   /** Ordem pedagógica das aulas. É esta lista que define "próxima aula". */
   lessonIds: string[];
   status: ContentStatus;

@@ -4,6 +4,7 @@ export const lessonTiposEOperadores: Lesson = {
   id: 'lesson-js-2',
   trackId: 'track-js-fundamentos',
   title: 'Tipos de Dados e Operadores',
+  language: 'javascript',
   objective: 'Distinguir número de texto e prever o resultado de uma operação entre eles.',
   concepts: ['tipos-de-dados', 'operadores'],
   status: 'published',

@@ -10,6 +10,7 @@ import { Button } from '../components/ui/Button';
 import { MarkdownReader } from '../components/ui/MarkdownReader';
 import { AITutorChat } from '../components/AITutorChat';
 import { getProject, listProjects } from '../../content';
+import { LANGUAGE_LABELS } from '../../content/types';
 import { executeCode, ExecutionResult } from '../lib/sandbox';
 
 export function ProjectWorkspace() {
@@ -85,6 +86,9 @@ export function ProjectWorkspace() {
           <div className="flex items-center gap-2">
             <span className="text-xs font-bold px-2 py-1 bg-blue-100 text-blue-700 rounded uppercase tracking-wider">Projeto</span>
             <span className="text-sm font-semibold text-zinc-900">{project.title}</span>
+            <span className="hidden rounded border border-zinc-200 px-1.5 py-0.5 text-xs font-medium text-zinc-500 sm:inline">
+              {LANGUAGE_LABELS[project.language]}
+            </span>
           </div>
         </div>
         
@@ -112,7 +116,7 @@ export function ProjectWorkspace() {
             disabled={isCompleted}
           >
             <Send size={16} />
-            Submeter Projeto
+            {isCompleted ? 'Projeto entregue' : 'Submeter Projeto'}
           </Button>
         </div>
       </header>
@@ -132,7 +136,7 @@ export function ProjectWorkspace() {
           <div className="flex-1 relative">
             <Editor
               height="100%"
-              defaultLanguage="javascript"
+              language={project.language}
               theme="light"
               value={code}
               onChange={(value) => setCode(value || '')}

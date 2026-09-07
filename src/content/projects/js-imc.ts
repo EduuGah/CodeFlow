@@ -6,6 +6,7 @@ export const projetoImc: Project = {
   description:
     'Transforme uma fórmula de saúde em código: calcule o IMC e classifique o resultado.',
   difficulty: 'iniciante',
+  language: 'javascript',
   concepts: ['variaveis', 'operadores', 'condicoes', 'funcoes'],
   status: 'published',
   initialCode: `// 1. Crie a função calcularIMC

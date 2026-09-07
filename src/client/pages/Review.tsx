@@ -59,7 +59,7 @@ export function Review() {
             {/* Flashcard */}
             <div 
               className="bg-white border border-zinc-200 rounded-2xl p-10 min-h-[300px] shadow-sm flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-300"
-              onClick={() => setIsFlipped(true)}
+              onClick={() => setIsFlipped((flipped) => !flipped)}
             >
               {!isFlipped ? (
                 <div className="space-y-4 animate-in fade-in duration-300">
@@ -67,7 +67,7 @@ export function Review() {
                   <h2 className="text-2xl md:text-3xl font-medium text-zinc-900 leading-tight">
                     {currentCard.front}
                   </h2>
-                  <p className="text-sm text-zinc-400 mt-8">(Clique no card para revelar a resposta)</p>
+                  <p className="text-sm text-zinc-400 mt-8">Clique no card para revelar a resposta</p>
                 </div>
               ) : (
                 <div className="space-y-4 animate-in fade-in duration-300">
@@ -75,6 +75,7 @@ export function Review() {
                   <p className="text-xl md:text-2xl text-zinc-700 leading-relaxed">
                     {currentCard.back}
                   </p>
+                  <p className="text-sm text-zinc-400 pt-4">Clique de novo para rever a pergunta</p>
                 </div>
               )}
             </div>

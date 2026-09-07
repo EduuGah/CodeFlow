@@ -79,12 +79,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     setAuthError(null);
 
-    // signInWithOAuth redireciona a aba inteira para o Google. Não navegamos após
-    // esta chamada: quem leva o usuário ao /dashboard é o retorno do OAuth.
+    // signInWithOAuth redireciona a aba inteira para o Google. O retorno vai para
+    // /auth/callback, e não direto para /dashboard: a rota protegida avaliava
+    // `user` antes de o supabase-js trocar o code da URL por uma sessão, e
+    // devolvia o aluno para a tela de login mesmo com o login bem-sucedido.
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/dashboard`,
+        redirectTo: `${window.location.origin}/auth/callback`,
       },
     });
 

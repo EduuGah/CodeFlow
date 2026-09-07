@@ -4,6 +4,7 @@ export const lessonVariaveis: Lesson = {
   id: 'lesson-js-1',
   trackId: 'track-js-fundamentos',
   title: 'Variáveis: Caixas na Memória',
+  language: 'javascript',
   objective: 'Guardar valores na memória e recuperá-los pelo nome.',
   concepts: ['variaveis'],
   status: 'published',

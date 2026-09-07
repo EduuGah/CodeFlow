@@ -4,12 +4,14 @@ import { useAuth } from '../contexts/AuthContext';
 import { fetchProgress } from '../lib/progress';
 import { Button } from '../components/ui/Button';
 import { Skeleton } from '../components/ui/Skeleton';
-import { LogOut, Code2, BookOpen, Target, LayoutDashboard, ArrowRight, FolderCode, Trophy } from 'lucide-react';
+import { LogOut, Code2, BookOpen, Target, LayoutDashboard, ArrowRight, FolderCode, Trophy, CheckCircle2 } from 'lucide-react';
+import { LANGUAGE_LABELS } from '../../content/types';
 import {
   getDefaultTrack,
   getNextLesson,
   getTrackProgress,
   listFlashcards,
+  getLessonsOfTrack,
   listProjects,
 } from '../../content';
 
@@ -50,6 +52,7 @@ export function Dashboard() {
   const track = getDefaultTrack();
   const { percentage: progressPercentage } = getTrackProgress(track.id, completedLessons);
   const nextLesson = getNextLesson(track.id, completedLessons);
+  const lessonsOfTrack = getLessonsOfTrack(track.id);
   const projects = listProjects();
   const reviewCount = listFlashcards().length;
 
@@ -87,7 +90,7 @@ export function Dashboard() {
             <>
               <h1 className="text-3xl font-bold tracking-tight text-zinc-900">Bom retorno, {firstName}!</h1>
               <p className="text-zinc-500 mt-2 text-lg">
-                Você concluiu <strong className="text-zinc-700 font-semibold">{progressPercentage}%</strong> da trilha {track.title}. Continue de onde parou.
+                Você concluiu <strong className="text-zinc-700 font-semibold">{progressPercentage}%</strong> da trilha {track.title} ({LANGUAGE_LABELS[track.language]}). Continue de onde parou.
               </p>
             </>
           )}
@@ -163,6 +166,55 @@ export function Dashboard() {
 
         {/* Secao de Projetos Praticos */}
         <div className="pt-6">
+          <div className="mb-6 flex items-center gap-2">
+            <BookOpen size={24} className="text-zinc-700" />
+            <h2 className="text-2xl font-bold tracking-tight text-zinc-900">Aulas da trilha</h2>
+          </div>
+
+          <ol className="divide-y divide-zinc-200 overflow-hidden rounded-2xl border border-zinc-200 bg-white">
+            {lessonsOfTrack.map((lesson, index) => {
+              const done = completedLessons.includes(lesson.id);
+
+              return (
+                <li key={lesson.id}>
+                  <Link
+                    to={`/lesson/${lesson.id}`}
+                    className="flex items-center gap-4 px-5 py-4 transition-colors hover:bg-zinc-50"
+                  >
+                    <span
+                      className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full text-xs font-semibold ${
+                        done ? 'bg-emerald-100 text-emerald-700' : 'bg-zinc-100 text-zinc-500'
+                      }`}
+                    >
+                      {done ? <CheckCircle2 size={16} /> : index + 1}
+                    </span>
+
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate font-medium text-zinc-900">{lesson.title}</span>
+                      <span className="block truncate text-sm text-zinc-500">{lesson.objective}</span>
+                    </span>
+
+                    <span className="flex flex-shrink-0 items-center gap-3">
+                      <span className="hidden text-xs text-zinc-400 sm:inline">
+                        {lesson.estimatedMinutes} min
+                      </span>
+                      {/* Estado textual, não só a cor do ícone (acessibilidade). */}
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
+                          done ? 'bg-emerald-50 text-emerald-700' : 'bg-zinc-100 text-zinc-600'
+                        }`}
+                      >
+                        {done ? 'Concluída' : 'Pendente'}
+                      </span>
+                    </span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ol>
+        </div>
+
+        <div className="pt-6">
           <div className="flex items-center gap-2 mb-6">
             <FolderCode size={24} className="text-zinc-700" />
             <h2 className="text-2xl font-bold tracking-tight text-zinc-900">Projetos Práticos</h2>
@@ -178,12 +230,18 @@ export function Dashboard() {
                   className="bg-white border border-zinc-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow"
                 >
                   <div className="flex justify-between items-start mb-4">
-                    <span className="text-xs font-semibold px-2 py-1 bg-blue-50 text-blue-700 rounded uppercase tracking-wider">
-                      Nível {project.difficulty}
-                    </span>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="rounded bg-blue-50 px-2 py-1 text-xs font-semibold uppercase tracking-wider text-blue-700">
+                        Nível {project.difficulty}
+                      </span>
+                      <span className="rounded border border-zinc-200 px-2 py-1 text-xs font-medium text-zinc-500">
+                        {LANGUAGE_LABELS[project.language]}
+                      </span>
+                    </div>
                     {isCompleted && (
-                      <span className="text-emerald-500" title="Projeto Entregue">
-                        <Trophy size={20} />
+                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-xs font-semibold text-emerald-700">
+                        <Trophy size={14} />
+                        Entregue
                       </span>
                     )}
                   </div>

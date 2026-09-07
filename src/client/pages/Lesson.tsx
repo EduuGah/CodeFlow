@@ -9,7 +9,9 @@ import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/Button';
 import { LessonBlocks } from '../components/lesson/LessonBlocks';
 import { AITutorChat } from '../components/AITutorChat';
-import { getLesson, getPrimaryCodeExercise, getReadingBlocks } from '../../content';
+import { getLesson, getNextLesson, getPrimaryCodeExercise, getReadingBlocks } from '../../content';
+import { LANGUAGE_LABELS } from '../../content/types';
+import { fetchProgress } from '../lib/progress';
 import { executeCode, ExecutionResult } from '../lib/sandbox';
 
 export function Lesson() {
@@ -30,6 +32,23 @@ export function Lesson() {
   const [showHint, setShowHint] = useState(false);
   const [currentHintIndex, setCurrentHintIndex] = useState(0);
 
+  // Conclusão precisa sobreviver ao recarregamento: vem do progresso salvo,
+  // não apenas do confete disparado nesta sessão.
+  const [completedLessons, setCompletedLessons] = useState<string[]>([]);
+
+  useEffect(() => {
+    let active = true;
+    if (!user) return;
+
+    fetchProgress(user.id).then((progress) => {
+      if (active) setCompletedLessons(progress.completedLessons);
+    });
+
+    return () => {
+      active = false;
+    };
+  }, [user]);
+
   // Trocar de aula reaproveita este componente: sem isto, o código da aula
   // anterior continuaria no editor.
   useEffect(() => {
@@ -45,6 +64,13 @@ export function Lesson() {
   }
 
   const hints = exercise.hints;
+  const isCompleted = completedLessons.includes(lesson.id);
+
+  // Depois de concluir, o aluno precisa saber para onde ir (§108). A próxima aula
+  // sai da lista real de concluídas — usar só a aula atual faria a lição 2
+  // apontar de volta para a lição 1.
+  const nextLesson = getNextLesson(lesson.trackId, completedLessons);
+  const hasNextLesson = nextLesson !== undefined && nextLesson.id !== lesson.id;
 
   const handleRunCode = async () => {
     setIsRunning(true);
@@ -73,6 +99,7 @@ export function Lesson() {
     // Fase 11: Salvar Progresso
     if (user) {
       try {
+        setCompletedLessons((ids) => (ids.includes(lesson.id) ? ids : [...ids, lesson.id]));
         await markLessonCompleted(user.id, lesson.id);
       } catch (error) {
         console.error('Falha ao salvar progresso da aula:', error);
@@ -89,6 +116,15 @@ export function Lesson() {
             <ArrowLeft size={18} />
           </Button>
           <span className="font-medium text-zinc-900">{lesson.title}</span>
+          <span className="hidden rounded border border-zinc-200 px-1.5 py-0.5 text-xs font-medium text-zinc-500 sm:inline">
+            {LANGUAGE_LABELS[lesson.language]}
+          </span>
+          {isCompleted && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700">
+              <CheckCircle2 size={13} />
+              Concluída
+            </span>
+          )}
         </div>
         
         <Button 
@@ -170,7 +206,7 @@ export function Lesson() {
           <div className="flex-1 min-h-0 relative">
             <Editor
               height="100%"
-              defaultLanguage="javascript"
+              language={lesson.language}
               theme="vs-dark"
               value={code}
               onChange={(value) => setCode(value || '')}
@@ -232,10 +268,35 @@ export function Lesson() {
                       </div>
                     ))}
                     
-                    {/* Mensagem Final de Sucesso */}
-                    {result.testResults.every(t => t.passed) && (
-                      <div className="mt-4 p-3 bg-emerald-950/30 border border-emerald-900/50 rounded-md text-emerald-400 font-sans text-center font-medium">
-                        🎉 Parabéns! Você concluiu a lição.
+                    {/* Conclusão: estado claro e um próximo passo explícito. */}
+                    {result.testResults.every((t) => t.passed) && (
+                      <div className="mt-4 rounded-md border border-emerald-900/50 bg-emerald-950/30 p-4 font-sans">
+                        <div className="flex items-center gap-2 font-semibold text-emerald-400">
+                          <CheckCircle2 size={18} />
+                          Aula concluída
+                        </div>
+                        <p className="mt-1 text-sm text-emerald-200/70">
+                          Todos os testes passaram e seu progresso foi salvo.
+                        </p>
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          {hasNextLesson && (
+                            <Button
+                              size="sm"
+                              className="bg-emerald-600 text-white hover:bg-emerald-700"
+                              onClick={() => navigate(`/lesson/${nextLesson.id}`)}
+                            >
+                              Próxima aula: {nextLesson.title}
+                            </Button>
+                          )}
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="border-emerald-900/60 bg-transparent text-emerald-300 hover:bg-emerald-900/30"
+                            onClick={() => navigate('/dashboard')}
+                          >
+                            Voltar ao painel
+                          </Button>
+                        </div>
                       </div>
                     )}
                   </div>

@@ -8,6 +8,7 @@ import { z } from 'zod';
 
 const statusSchema = z.enum(['draft', 'published', 'archived']);
 const difficultySchema = z.enum(['iniciante', 'intermediario', 'avancado']);
+const languageSchema = z.enum(['javascript', 'typescript', 'python', 'sql']);
 const idSchema = z.string().min(1).regex(/^[a-z0-9-]+$/, 'ids usam apenas minúsculas, números e hífen');
 
 export const conceptSchema = z.object({
@@ -74,6 +75,7 @@ export const lessonSchema = z.object({
   id: idSchema,
   trackId: idSchema,
   title: z.string().min(1),
+  language: languageSchema,
   objective: z.string().min(1),
   concepts: z.array(idSchema).min(1),
   blocks: z.array(lessonBlockSchema).min(1),
@@ -86,6 +88,7 @@ export const projectSchema = z.object({
   title: z.string().min(1),
   description: z.string().min(1),
   difficulty: difficultySchema,
+  language: languageSchema,
   concepts: z.array(idSchema).min(1),
   brief: z.string().min(1),
   initialCode: z.string(),
@@ -103,6 +106,7 @@ export const trackSchema = z.object({
   id: idSchema,
   title: z.string().min(1),
   description: z.string().min(1),
+  language: languageSchema,
   lessonIds: z.array(idSchema).min(1),
   status: statusSchema,
 });
