@@ -1,15 +1,16 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams, Navigate } from 'react-router-dom';
 import Editor from '@monaco-editor/react';
-import { Play, ArrowLeft, CheckCircle2, XCircle, Lightbulb } from 'lucide-react';
+import { Play, ArrowLeft, CheckCircle2, XCircle } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 import { markLessonCompleted } from '../lib/progress';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/Button';
 import { LessonBlocks } from '../components/lesson/LessonBlocks';
+import { HintPanel } from '../components/lesson/HintPanel';
 import { AITutorChat } from '../components/AITutorChat';
-import { getLesson, getNextLesson, getPrimaryCodeExercise, getReadingBlocks } from '../../content';
+import { getLesson, getNextLesson, getPrimaryCodeExercise } from '../../content';
 import { LANGUAGE_LABELS } from '../../content/types';
 import { fetchProgress } from '../lib/progress';
 import { executeCode, ExecutionResult } from '../lib/sandbox';
@@ -27,10 +28,6 @@ export function Lesson() {
   const [code, setCode] = useState(exercise?.initialCode ?? '');
   const [isRunning, setIsRunning] = useState(false);
   const [result, setResult] = useState<ExecutionResult | null>(null);
-
-  // Hints state
-  const [showHint, setShowHint] = useState(false);
-  const [currentHintIndex, setCurrentHintIndex] = useState(0);
 
   // Conclusão precisa sobreviver ao recarregamento: vem do progresso salvo,
   // não apenas do confete disparado nesta sessão.
@@ -54,8 +51,6 @@ export function Lesson() {
   useEffect(() => {
     setCode(exercise?.initialCode ?? '');
     setResult(null);
-    setShowHint(false);
-    setCurrentHintIndex(0);
   }, [exercise?.id, exercise?.initialCode]);
 
   // Id inexistente ou aula ainda em rascunho: volta ao painel em vez de quebrar.
@@ -151,7 +146,7 @@ export function Lesson() {
               <p className="mt-1 text-sm leading-relaxed text-zinc-600">{lesson.objective}</p>
             </div>
 
-            <LessonBlocks blocks={getReadingBlocks(lesson)} />
+            <LessonBlocks blocks={lesson.blocks} />
 
             <div className="rounded-lg border border-zinc-200 p-4">
               <h2 className="mb-2 text-xs font-semibold uppercase tracking-wider text-zinc-500">
@@ -163,42 +158,11 @@ export function Lesson() {
             </div>
           </div>
           
-          {/* Hint Section */}
-          {hints.length > 0 && (
-            <div className="border-t border-zinc-100 bg-zinc-50/50 p-6">
-              {!showHint ? (
-                <Button 
-                  variant="outline" 
-                  className="w-full gap-2 text-zinc-600"
-                  onClick={() => setShowHint(true)}
-                >
-                  <Lightbulb size={16} className="text-amber-500" />
-                  Precisa de uma dica?
-                </Button>
-              ) : (
-                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-                  <div className="flex items-center gap-2 font-medium text-amber-800 mb-2">
-                    <Lightbulb size={16} className="text-amber-500" />
-                    Dica {currentHintIndex + 1} de {hints.length}
-                  </div>
-                  <p className="text-amber-900 text-sm leading-relaxed">
-                    {hints[currentHintIndex]}
-                  </p>
-                  
-                  {currentHintIndex < hints.length - 1 && (
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="mt-3 text-amber-700 hover:text-amber-800 hover:bg-amber-100 w-full"
-                      onClick={() => setCurrentHintIndex(i => i + 1)}
-                    >
-                      Próxima dica
-                    </Button>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
+          {/* Dicas do exercício de código; os demais exercícios têm as suas. */}
+          <div className="border-t border-zinc-100 bg-zinc-50/50 p-6">
+            {/* key: o painel guarda estado próprio e precisa reiniciar em outra aula. */}
+            <HintPanel key={exercise.id} hints={hints} />
+          </div>
         </div>
 
         {/* Right Side: Code Editor & Console */}

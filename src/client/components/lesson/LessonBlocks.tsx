@@ -1,5 +1,7 @@
 import type { LessonBlock } from '../../../content/types';
 import { MarkdownReader } from '../ui/MarkdownReader';
+import { MultipleChoice } from './MultipleChoice';
+import { PredictOutput } from './PredictOutput';
 
 /**
  * Renderiza os blocos de leitura de uma aula. Cada `kind` tem sua apresentação,
@@ -40,10 +42,22 @@ export function LessonBlocks({ blocks }: { blocks: LessonBlock[] }) {
               </aside>
             );
 
-          // Exercícios têm interface própria (editor, testes, dicas) e são
-          // renderizados pela página, não aqui.
-          case 'exercise':
+          case 'exercise': {
+            const { exercise } = block;
+
+            // O exercício de código ocupa o editor e o console da página inteira,
+            // então é a página que o renderiza. Os demais moram aqui, na ordem em
+            // que a aula os declarou, entre os blocos de leitura.
+            if (exercise.type === 'multiple-choice') {
+              return <MultipleChoice key={exercise.id} exercise={exercise} />;
+            }
+
+            if (exercise.type === 'predict-output') {
+              return <PredictOutput key={exercise.id} exercise={exercise} />;
+            }
+
             return null;
+          }
         }
       })}
     </div>

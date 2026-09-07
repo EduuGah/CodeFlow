@@ -211,7 +211,3 @@ export const getExercises = (lesson: Lesson): Exercise[] =>
 /** O exercício de código de uma aula — o que alimenta o editor e o sandbox. */
 export const getPrimaryCodeExercise = (lesson: Lesson): CodeExercise | undefined =>
   getExercises(lesson).find((e): e is CodeExercise => e.type === 'code');
-
-/** Blocos exibidos como leitura, sem os exercícios (que têm UI própria). */
-export const getReadingBlocks = (lesson: Lesson): LessonBlock[] =>
-  lesson.blocks.filter((b) => b.kind !== 'exercise');
