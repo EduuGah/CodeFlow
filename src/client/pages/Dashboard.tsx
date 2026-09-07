@@ -12,6 +12,7 @@ import {
   getTrackProgress,
   listFlashcards,
   getLessonsOfTrack,
+  listTracks,
   listProjects,
 } from '../../content';
 
@@ -52,8 +53,10 @@ export function Dashboard() {
   const track = getDefaultTrack();
   const { percentage: progressPercentage } = getTrackProgress(track.id, completedLessons);
   const nextLesson = getNextLesson(track.id, completedLessons);
-  const lessonsOfTrack = getLessonsOfTrack(track.id);
   const projects = listProjects();
+
+  // Uma seção por trilha, com o progresso de cada uma.
+  const tracks = listTracks();
   const reviewCount = listFlashcards().length;
 
   return (
@@ -165,54 +168,72 @@ export function Dashboard() {
         </div>
 
         {/* Secao de Projetos Praticos */}
-        <div className="pt-6">
-          <div className="mb-6 flex items-center gap-2">
-            <BookOpen size={24} className="text-zinc-700" />
-            <h2 className="text-2xl font-bold tracking-tight text-zinc-900">Aulas da trilha</h2>
-          </div>
+        {tracks.map((currentTrack) => {
+          const lessonsOfTrack = getLessonsOfTrack(currentTrack.id);
+          const trackProgress = getTrackProgress(currentTrack.id, completedLessons);
 
-          <ol className="divide-y divide-zinc-200 overflow-hidden rounded-2xl border border-zinc-200 bg-white">
-            {lessonsOfTrack.map((lesson, index) => {
-              const done = completedLessons.includes(lesson.id);
+          return (
+            <div key={currentTrack.id} className="pt-6">
+              <div className="mb-2 flex flex-wrap items-baseline justify-between gap-2">
+                <h2 className="text-2xl font-bold tracking-tight text-zinc-900">
+                  {currentTrack.title}
+                </h2>
+                <span className="text-sm text-zinc-500">
+                  {trackProgress.completed} de {trackProgress.total} aulas concluídas
+                </span>
+              </div>
+              <p className="mb-5 max-w-2xl text-sm leading-relaxed text-zinc-500">
+                {currentTrack.description}
+              </p>
 
-              return (
-                <li key={lesson.id}>
-                  <Link
-                    to={`/lesson/${lesson.id}`}
-                    className="flex items-center gap-4 px-5 py-4 transition-colors hover:bg-zinc-50"
-                  >
-                    <span
-                      className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full text-xs font-semibold ${
-                        done ? 'bg-emerald-100 text-emerald-700' : 'bg-zinc-100 text-zinc-500'
-                      }`}
-                    >
-                      {done ? <CheckCircle2 size={16} /> : index + 1}
-                    </span>
+              <ol className="divide-y divide-zinc-200 overflow-hidden rounded-2xl border border-zinc-200 bg-white">
+                {lessonsOfTrack.map((lesson, index) => {
+                  const done = completedLessons.includes(lesson.id);
 
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate font-medium text-zinc-900">{lesson.title}</span>
-                      <span className="block truncate text-sm text-zinc-500">{lesson.objective}</span>
-                    </span>
-
-                    <span className="flex flex-shrink-0 items-center gap-3">
-                      <span className="hidden text-xs text-zinc-400 sm:inline">
-                        {lesson.estimatedMinutes} min
-                      </span>
-                      {/* Estado textual, não só a cor do ícone (acessibilidade). */}
-                      <span
-                        className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
-                          done ? 'bg-emerald-50 text-emerald-700' : 'bg-zinc-100 text-zinc-600'
-                        }`}
+                  return (
+                    <li key={lesson.id}>
+                      <Link
+                        to={`/lesson/${lesson.id}`}
+                        className="flex items-center gap-4 px-5 py-4 transition-colors hover:bg-zinc-50"
                       >
-                        {done ? 'Concluída' : 'Pendente'}
-                      </span>
-                    </span>
-                  </Link>
-                </li>
-              );
-            })}
-          </ol>
-        </div>
+                        <span
+                          className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full text-xs font-semibold ${
+                            done ? 'bg-emerald-100 text-emerald-700' : 'bg-zinc-100 text-zinc-500'
+                          }`}
+                        >
+                          {done ? <CheckCircle2 size={16} /> : index + 1}
+                        </span>
+
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate font-medium text-zinc-900">
+                            {lesson.title}
+                          </span>
+                          <span className="block truncate text-sm text-zinc-500">
+                            {lesson.objective}
+                          </span>
+                        </span>
+
+                        <span className="flex flex-shrink-0 items-center gap-3">
+                          <span className="hidden text-xs text-zinc-400 sm:inline">
+                            {lesson.estimatedMinutes} min
+                          </span>
+                          {/* Estado textual, não só a cor do ícone (acessibilidade). */}
+                          <span
+                            className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
+                              done ? 'bg-emerald-50 text-emerald-700' : 'bg-zinc-100 text-zinc-600'
+                            }`}
+                          >
+                            {done ? 'Concluída' : 'Pendente'}
+                          </span>
+                        </span>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ol>
+            </div>
+          );
+        })}
 
         <div className="pt-6">
           <div className="flex items-center gap-2 mb-6">

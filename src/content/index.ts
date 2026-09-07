@@ -19,16 +19,27 @@ import {
 import { concepts as allConcepts } from './concepts';
 import { flashcards as allFlashcards } from './flashcards';
 import { trackJsFundamentos } from './tracks/javascript';
+import { trackLogica } from './tracks/logica';
 import { lessonVariaveis } from './lessons/js-01-variaveis';
 import { lessonTiposEOperadores } from './lessons/js-02-tipos-e-operadores';
 import { lessonCondicoes } from './lessons/js-03-condicoes';
 import { lessonLoops } from './lessons/js-04-loops';
 import { lessonFuncoes } from './lessons/js-05-funcoes';
 import { lessonArrays } from './lessons/js-06-arrays';
+import { lessonObjetos } from './lessons/js-07-objetos';
+import { lessonMetodosArray } from './lessons/js-08-metodos-array';
+import { lessonStrings } from './lessons/js-09-strings';
+import { lessonErros } from './lessons/js-10-erros';
+import { lessonDecompor } from './lessons/logica-01-decompor';
+import { lessonCasosExtremos } from './lessons/logica-02-casos-extremos';
+import { lessonSimular } from './lessons/logica-03-simular';
 import { projetoImc } from './projects/js-imc';
 import { projetoConversor } from './projects/js-conversor';
 import { projetoBoletim } from './projects/js-boletim';
 import { projetoCaixa } from './projects/js-caixa';
+import { projetoTarefas } from './projects/js-tarefas';
+import { projetoSenha } from './projects/js-senha';
+import { projetoEstoque } from './projects/js-estoque';
 
 /**
  * Registro de conteúdo. Esta é a única fronteira que as páginas conhecem — se
@@ -42,9 +53,24 @@ const lessons: Lesson[] = [
   lessonLoops,
   lessonFuncoes,
   lessonArrays,
+  lessonObjetos,
+  lessonMetodosArray,
+  lessonStrings,
+  lessonErros,
+  lessonDecompor,
+  lessonCasosExtremos,
+  lessonSimular,
 ];
-const projects: Project[] = [projetoImc, projetoConversor, projetoBoletim, projetoCaixa];
-const tracks: Track[] = [trackJsFundamentos];
+const projects: Project[] = [
+  projetoImc,
+  projetoConversor,
+  projetoBoletim,
+  projetoCaixa,
+  projetoTarefas,
+  projetoSenha,
+  projetoEstoque,
+];
+const tracks: Track[] = [trackJsFundamentos, trackLogica];
 
 /**
  * Checagem de integridade referencial que o Zod sozinho não faz: schema garante
@@ -127,6 +153,9 @@ export const getTrack = (id: string): Track | undefined =>
   tracks.find((t) => t.id === id && isPublished(t));
 
 export const getDefaultTrack = (): Track => trackJsFundamentos;
+
+/** Todas as trilhas publicadas, na ordem em que devem aparecer ao aluno. */
+export const listTracks = (): Track[] => tracks.filter(isPublished);
 
 export const getLesson = (id: string): Lesson | undefined =>
   lessons.find((l) => l.id === id && isPublished(l));
