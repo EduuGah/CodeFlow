@@ -7,6 +7,7 @@ import confetti from 'canvas-confetti';
 import { markLessonCompleted } from '../lib/progress';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/Button';
+import { Badge } from '../components/ui/Badge';
 import { LessonBlocks } from '../components/lesson/LessonBlocks';
 import { HintPanel } from '../components/lesson/HintPanel';
 import { AITutorChat } from '../components/AITutorChat';
@@ -111,14 +112,13 @@ export function Lesson() {
             <ArrowLeft size={18} />
           </Button>
           <span className="font-medium text-zinc-900">{lesson.title}</span>
-          <span className="hidden rounded border border-zinc-200 px-1.5 py-0.5 text-xs font-medium text-zinc-500 sm:inline">
+          <Badge className="hidden bg-transparent ring-1 ring-inset ring-zinc-200 sm:inline-flex">
             {LANGUAGE_LABELS[lesson.language]}
-          </span>
+          </Badge>
           {isCompleted && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700">
-              <CheckCircle2 size={13} />
+            <Badge tone="success" icon={<CheckCircle2 size={13} />}>
               Concluída
-            </span>
+            </Badge>
           )}
         </div>
         

@@ -2,27 +2,96 @@
 
 @plugin "@tailwindcss/typography";
 
+/**
+ * Tokens do CodeFlow.
+ *
+ * A regra que organiza esta paleta: cor carrega significado, não decoração.
+ * O neutro sustenta a interface inteira; cada acento existe porque o aluno
+ * precisa distinguir um estado do outro em meio a texto e código. Nada aqui é
+ * escolhido por moda — ver docs/design-system.md para o raciocínio de cada um.
+ */
 @theme {
+  /* Plus Jakarta Sans: humanista geométrica, boa em texto corrido longo e com
+     números distintos, que importa numa plataforma cheia de índices e valores.
+     JetBrains Mono para código: zero cortado e ligaduras desligadas. */
   --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 
-  /* Cores minimalistas e anti-slop */
-  --color-background: var(--zinc-50);
-  --color-foreground: var(--zinc-900);
-  
-  --color-primary-50: #eff6ff;
-  --color-primary-100: #dbeafe;
-  --color-primary-500: #3b82f6;
-  --color-primary-600: #2563eb;
-  --color-primary-700: #1d4ed8;
+  /* Superfícies. Referenciam a escala zinc pelo nome correto do Tailwind v4
+     (--color-zinc-*); a versão anterior apontava para --zinc-*, que não existe,
+     e deixava ring-offset-background sem valor. */
+  --color-background: var(--color-zinc-50);
+  --color-surface: #ffffff;
+  --color-foreground: var(--color-zinc-900);
+  --color-muted: var(--color-zinc-500);
+  --color-line: var(--color-zinc-200);
 
+  /* Ação primária. Neutro escuro em vez de azul de SaaS: a cor fica reservada
+     para o que comunica estado, e o botão principal se destaca por contraste. */
+  --color-primary-50: #f4f4f5;
+  --color-primary-100: #e4e4e7;
+  --color-primary-500: #52525b;
+  --color-primary-600: #3f3f46;
+  --color-primary-700: #27272a;
+  --color-primary-900: #18181b;
+
+  /* Sucesso — teste passou, aula concluída, projeto entregue. */
+  --color-success-50: #ecfdf5;
+  --color-success-200: #a7f3d0;
+  --color-success-600: #059669;
+  --color-success-700: #047857;
+  --color-success-900: #064e3b;
+
+  /* Atenção — dica revelada e "ainda não é essa". Deliberadamente não é
+     vermelho: errar durante o aprendizado não é falha, é etapa. */
+  --color-caution-50: #fffbeb;
+  --color-caution-200: #fde68a;
+  --color-caution-500: #f59e0b;
+  --color-caution-800: #92400e;
+  --color-caution-900: #78350f;
+
+  /* Erro — apenas falha real: sintaxe inválida, execução quebrada, login negado. */
+  --color-danger-50: #fef2f2;
+  --color-danger-200: #fecaca;
+  --color-danger-500: #ef4444;
+  --color-danger-700: #b91c1c;
+
+  /* Tutor IA. Único acento não semântico, e existe para o aluno distinguir à
+     primeira vista o que é a plataforma do que é a IA falando. */
+  --color-tutor-600: #4f46e5;
+  --color-tutor-700: #4338ca;
+
+  /* Editor e terminal: fundo escuro fixo, independente do resto da interface. */
+  --color-editor: #1e1e1e;
+  --color-terminal: #09090b;
+
+  /* Raios contidos. Nada de pílula sem contexto (§2 do doc de design). */
   --radius-sm: 0.25rem;
   --radius-md: 0.375rem;
   --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
 }
 
 @layer base {
   body {
-    @apply bg-zinc-50 text-zinc-900 antialiased font-sans selection:bg-primary-100 selection:text-primary-700;
+    @apply bg-zinc-50 text-zinc-900 antialiased font-sans selection:bg-zinc-200 selection:text-zinc-900;
+  }
+
+  /* Foco visível e consistente em tudo que recebe teclado. O anel só aparece na
+     navegação por teclado, então não polui o clique de mouse. */
+  :focus-visible {
+    @apply outline-none ring-2 ring-zinc-900 ring-offset-2 ring-offset-white;
+  }
+
+  /* Respeita quem pediu menos movimento no sistema operacional. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 }

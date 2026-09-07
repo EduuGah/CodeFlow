@@ -7,6 +7,7 @@ import confetti from 'canvas-confetti';
 import { fetchProgress, markProjectCompleted } from '../lib/progress';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/Button';
+import { Badge } from '../components/ui/Badge';
 import { MarkdownReader } from '../components/ui/MarkdownReader';
 import { AITutorChat } from '../components/AITutorChat';
 import { getProject, listProjects } from '../../content';
@@ -86,17 +87,17 @@ export function ProjectWorkspace() {
           <div className="flex items-center gap-2">
             <span className="text-xs font-bold px-2 py-1 bg-blue-100 text-blue-700 rounded uppercase tracking-wider">Projeto</span>
             <span className="text-sm font-semibold text-zinc-900">{project.title}</span>
-            <span className="hidden rounded border border-zinc-200 px-1.5 py-0.5 text-xs font-medium text-zinc-500 sm:inline">
+            <Badge className="hidden bg-transparent ring-1 ring-inset ring-zinc-200 sm:inline-flex">
               {LANGUAGE_LABELS[project.language]}
-            </span>
+            </Badge>
           </div>
         </div>
         
         <div className="flex items-center gap-2">
           {isCompleted && (
-            <span className="flex items-center gap-1 text-sm font-medium text-emerald-600 mr-2 bg-emerald-50 px-2 py-1 rounded">
-              <CheckCircle2 size={16} /> Entregue
-            </span>
+            <Badge tone="success" icon={<CheckCircle2 size={14} />} className="mr-2">
+              Entregue
+            </Badge>
           )}
           <Button 
             variant="outline" 

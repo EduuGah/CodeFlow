@@ -4,6 +4,9 @@ import { useAuth } from '../contexts/AuthContext';
 import { fetchProgress } from '../lib/progress';
 import { Button } from '../components/ui/Button';
 import { Skeleton } from '../components/ui/Skeleton';
+import { Badge } from '../components/ui/Badge';
+import { ProgressBar } from '../components/ui/ProgressBar';
+import { EmptyState, ErrorState } from '../components/ui/States';
 import { LogOut, Code2, BookOpen, Target, LayoutDashboard, ArrowRight, FolderCode, Trophy, CheckCircle2 } from 'lucide-react';
 import { LANGUAGE_LABELS } from '../../content/types';
 import {
@@ -21,6 +24,7 @@ export function Dashboard() {
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [completedLessons, setCompletedLessons] = useState<string[]>([]);
   const [completedProjects, setCompletedProjects] = useState<string[]>([]);
+  const [progressError, setProgressError] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -33,6 +37,7 @@ export function Dashboard() {
 
       setCompletedLessons(progress.completedLessons);
       setCompletedProjects(progress.completedProjects);
+      setProgressError(progress.error ?? null);
       setIsLoadingData(false);
     }
 
@@ -99,6 +104,14 @@ export function Dashboard() {
           )}
         </div>
 
+        {progressError && (
+          <ErrorState
+            title="Seu progresso não carregou"
+            message={`${progressError} As aulas continuam acessíveis, mas o que você já concluiu pode não aparecer marcado.`}
+            onRetry={() => window.location.reload()}
+          />
+        )}
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Card: Trilha Atual */}
           <div className="bg-white p-6 rounded-2xl border border-zinc-200 shadow-sm flex flex-col items-start">
@@ -138,8 +151,12 @@ export function Dashboard() {
             ) : (
               <>
                 <h3 className="font-semibold text-zinc-900">Desafio Diário</h3>
-                <p className="text-sm text-zinc-500 mt-1">Em breve: desafios diários</p>
-                <Button variant="outline" size="sm" className="w-full mt-6">Resolver desafio</Button>
+                <p className="text-sm text-zinc-500 mt-1">
+                  Ainda não disponível. Enquanto isso, os projetos abaixo cumprem o mesmo papel de
+                  praticar fora da aula.
+                </p>
+                {/* Sem botão: um clique que não faz nada é pior que a ausência dele. */}
+                <Badge className="mt-6">Em desenvolvimento</Badge>
               </>
             )}
           </div>
@@ -174,17 +191,19 @@ export function Dashboard() {
 
           return (
             <div key={currentTrack.id} className="pt-6">
-              <div className="mb-2 flex flex-wrap items-baseline justify-between gap-2">
-                <h2 className="text-2xl font-bold tracking-tight text-zinc-900">
-                  {currentTrack.title}
-                </h2>
-                <span className="text-sm text-zinc-500">
-                  {trackProgress.completed} de {trackProgress.total} aulas concluídas
-                </span>
-              </div>
-              <p className="mb-5 max-w-2xl text-sm leading-relaxed text-zinc-500">
+              <h2 className="mb-2 text-2xl font-bold tracking-tight text-zinc-900">
+                {currentTrack.title}
+              </h2>
+              <p className="mb-4 max-w-2xl text-sm leading-relaxed text-zinc-500">
                 {currentTrack.description}
               </p>
+              <ProgressBar
+                label="Aulas concluídas"
+                value={trackProgress.completed}
+                max={trackProgress.total}
+                showCount
+                className="mb-5 max-w-sm"
+              />
 
               <ol className="divide-y divide-zinc-200 overflow-hidden rounded-2xl border border-zinc-200 bg-white">
                 {lessonsOfTrack.map((lesson, index) => {
@@ -217,14 +236,9 @@ export function Dashboard() {
                           <span className="hidden text-xs text-zinc-400 sm:inline">
                             {lesson.estimatedMinutes} min
                           </span>
-                          {/* Estado textual, não só a cor do ícone (acessibilidade). */}
-                          <span
-                            className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
-                              done ? 'bg-emerald-50 text-emerald-700' : 'bg-zinc-100 text-zinc-600'
-                            }`}
-                          >
+                          <Badge tone={done ? 'success' : 'neutral'}>
                             {done ? 'Concluída' : 'Pendente'}
-                          </span>
+                          </Badge>
                         </span>
                       </Link>
                     </li>
@@ -240,8 +254,14 @@ export function Dashboard() {
             <FolderCode size={24} className="text-zinc-700" />
             <h2 className="text-2xl font-bold tracking-tight text-zinc-900">Projetos Práticos</h2>
           </div>
+          {projects.length === 0 ? (
+            <EmptyState
+              icon={<FolderCode size={28} />}
+              title="Nenhum projeto disponível ainda"
+              description="Os projetos aparecem aqui conforme são publicados. Enquanto isso, siga pelas aulas da trilha."
+            />
+          ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            
             {projects.map((project) => {
               const isCompleted = completedProjects.includes(project.id);
 
@@ -252,18 +272,15 @@ export function Dashboard() {
                 >
                   <div className="flex justify-between items-start mb-4">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="rounded bg-blue-50 px-2 py-1 text-xs font-semibold uppercase tracking-wider text-blue-700">
-                        Nível {project.difficulty}
-                      </span>
-                      <span className="rounded border border-zinc-200 px-2 py-1 text-xs font-medium text-zinc-500">
+                      <Badge>Nível {project.difficulty}</Badge>
+                      <Badge className="bg-transparent ring-1 ring-inset ring-zinc-200">
                         {LANGUAGE_LABELS[project.language]}
-                      </span>
+                      </Badge>
                     </div>
                     {isCompleted && (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-xs font-semibold text-emerald-700">
-                        <Trophy size={14} />
+                      <Badge tone="success" icon={<Trophy size={13} />}>
                         Entregue
-                      </span>
+                      </Badge>
                     )}
                   </div>
                   <h3 className="text-lg font-bold text-zinc-900 mb-2">{project.title}</h3>
@@ -276,17 +293,8 @@ export function Dashboard() {
                 </div>
               );
             })}
-
-            {/* Placeholder de Projeto futuro */}
-            <div className="bg-zinc-50 border border-dashed border-zinc-300 rounded-2xl p-6 flex flex-col items-center justify-center text-center opacity-75">
-              <div className="w-12 h-12 bg-zinc-200 rounded-full flex items-center justify-center text-zinc-400 mb-3">
-                <LogOut size={24} className="rotate-180" />
-              </div>
-              <h3 className="text-zinc-600 font-medium">Bloqueado</h3>
-              <p className="text-zinc-400 text-sm mt-1">Complete a Lição 3 para desbloquear este projeto.</p>
-            </div>
-
           </div>
+          )}
         </div>
       </main>
     </div>

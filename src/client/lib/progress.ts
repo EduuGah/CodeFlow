@@ -3,6 +3,14 @@ import { supabase } from './supabase';
 export interface UserProgress {
   completedLessons: string[];
   completedProjects: string[];
+  /**
+   * Preenchido quando a leitura falhou.
+   *
+   * Sem isto, uma falha de rede era indistinguível de "aluno sem progresso": o
+   * painel mostrava tudo zerado como se fosse verdade, e quem já tinha concluído
+   * aulas via o próprio avanço desaparecer sem explicação.
+   */
+  error?: string;
 }
 
 const EMPTY_PROGRESS: UserProgress = { completedLessons: [], completedProjects: [] };
@@ -12,7 +20,7 @@ const EMPTY_PROGRESS: UserProgress = { completedLessons: [], completedProjects: 
  * Nunca lança: se a leitura falhar, devolve progresso vazio para não travar a tela.
  */
 export async function fetchProgress(userId: string): Promise<UserProgress> {
-  if (!supabase) return EMPTY_PROGRESS;
+  if (!supabase) return { ...EMPTY_PROGRESS, error: 'Supabase não configurado.' };
 
   // maybeSingle() em vez de single(): um aluno recém-cadastrado ainda não tem linha,
   // e single() trataria isso como erro.
@@ -24,7 +32,7 @@ export async function fetchProgress(userId: string): Promise<UserProgress> {
 
   if (error) {
     console.error('Falha ao buscar progresso do aluno:', error.message);
-    return EMPTY_PROGRESS;
+    return { ...EMPTY_PROGRESS, error: 'Não foi possível carregar seu progresso.' };
   }
 
   return {
