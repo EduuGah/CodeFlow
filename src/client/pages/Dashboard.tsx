@@ -7,6 +7,7 @@ import { conceptsNeedingReview, masteryByConcept, overallStats, type Attempt } f
 import { ConceptProgress } from '../components/dashboard/ConceptProgress';
 import { ResumeCard } from '../components/dashboard/ResumeCard';
 import { LearningPath } from '../components/dashboard/LearningPath';
+import { TrackBanner } from '../components/dashboard/TrackBanner';
 import { LevelCard } from '../components/dashboard/LevelCard';
 import { computeAchievements, computeXp, levelFromXp } from '../lib/gamification';
 import { buildPath, summarizePath } from '../lib/path';
@@ -116,7 +117,7 @@ export function Dashboard() {
 
   return (
     <div className="min-h-screen bg-zinc-50 flex flex-col">
-      <header className="h-16 border-b border-zinc-200 bg-white flex items-center justify-between px-6 sticky top-0 z-10">
+      <header className="h-16 border-b border-zinc-200 bg-white flex items-center justify-between px-6 sticky top-0 z-30">
         <div className="flex items-center gap-2 text-zinc-900 font-semibold tracking-tight">
           <Code2 size={24} className="text-zinc-900" />
           <span>CodeFlow</span>
@@ -251,18 +252,14 @@ export function Dashboard() {
 
           return (
             <div key={currentTrack.id} className="pt-6">
-              <h2 className="mb-2 text-2xl font-bold tracking-tight text-zinc-900">
-                {currentTrack.title}
-              </h2>
-              <p className="mb-4 max-w-2xl text-sm leading-relaxed text-zinc-500">
-                {currentTrack.description}
-              </p>
+              <TrackBanner track={currentTrack} summary={resumo} />
+
               <ProgressBar
                 label="Aulas concluídas"
                 value={resumo.completed}
                 max={resumo.total}
                 showCount
-                className="mb-6 max-w-sm"
+                className="my-6 max-w-sm"
               />
 
               {isLoadingData ? (
