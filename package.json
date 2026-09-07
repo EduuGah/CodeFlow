@@ -12,7 +12,6 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@google/genai": "^2.21.0",
     "@hookform/resolvers": "^5.9.1",
     "@monaco-editor/react": "^4.7.0",
     "@supabase/supabase-js": "^2.115.0",

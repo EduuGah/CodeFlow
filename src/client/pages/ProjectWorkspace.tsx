@@ -9,7 +9,6 @@ import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
 import { MarkdownReader } from '../components/ui/MarkdownReader';
-import { AITutorChat } from '../components/AITutorChat';
 import { getProject, listProjects } from '../../content';
 import { LANGUAGE_LABELS } from '../../content/types';
 import { executeCode, ExecutionResult } from '../lib/sandbox';
@@ -186,7 +185,6 @@ export function ProjectWorkspace() {
       </div>
       
       {/* Tutor IA Flutuante */}
-      <AITutorChat codeContext={code} />
     </div>
   );
 }

@@ -11,7 +11,6 @@ import { Badge } from '../components/ui/Badge';
 import { LessonBlocks } from '../components/lesson/LessonBlocks';
 import { HintPanel } from '../components/lesson/HintPanel';
 import { useRecordAttempt } from '../hooks/useRecordAttempt';
-import { AITutorChat } from '../components/AITutorChat';
 import { getLesson, getNextLesson, getPrimaryCodeExercise } from '../../content';
 import { LANGUAGE_LABELS } from '../../content/types';
 import { fetchProgress } from '../lib/progress';
@@ -290,7 +289,6 @@ export function Lesson() {
       </div>
 
       {/* Tutor IA Flutuante */}
-      <AITutorChat codeContext={code} />
     </div>
   );
 }
