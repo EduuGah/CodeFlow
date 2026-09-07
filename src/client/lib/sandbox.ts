@@ -1,3 +1,6 @@
+import SandboxWorker from './sandbox.worker?worker';
+import type { WorkerRequest, WorkerResponse } from './sandbox.worker';
+
 export interface TestResult {
   passed: boolean;
   message: string;
@@ -6,55 +9,90 @@ export interface TestResult {
 export interface ExecutionResult {
   /** Saída completa do console, já unida por quebras de linha. */
   output: string;
-  /** Cada chamada de console.log como uma entrada separada (usado pelo terminal dos projetos). */
+  /** Cada chamada de console.log como uma entrada separada. */
   logs: string[];
   testResults: TestResult[];
   error?: string;
+  /** true quando a execução estourou o tempo limite e o worker foi encerrado. */
+  timedOut?: boolean;
 }
 
-// O código submetido pelo usuário é encapsulado num bloco Try/Catch para capturar erros sintáticos e de execução.
-// Também sobrescrevemos o console.log para capturar as mensagens de saída em forma de string.
-export function executeCodeInWorker(code: string, testCases: string[]): ExecutionResult {
-  const logs: string[] = [];
-  const testResults: TestResult[] = [];
+/**
+ * Tempo máximo de execução. Um laço infinito é um erro comum e esperado de quem
+ * está aprendendo repetição — precisa virar uma mensagem didática, não uma aba
+ * travada que obriga o aluno a perder o código que escreveu.
+ */
+export const EXECUTION_TIMEOUT_MS = 3000;
 
-  // Intercepta e captura console.log
-  const originalLog = console.log;
-  console.log = (...args) => {
-    logs.push(args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : String(arg)).join(' '));
+function toResult(response: WorkerResponse): ExecutionResult {
+  return {
+    output: response.logs.join('\n'),
+    logs: response.logs,
+    testResults: response.testResults,
+    error: response.error,
   };
+}
 
-  try {
-    // 1. Executa o código do usuário para registrar funções/variáveis no escopo (usando Function de forma controlada)
-    // Atenção: Esta é uma execução em cliente controlada para fins didáticos. O worker real interceptaria isso mais abaixo.
-    const userFunc = new Function(`
-      ${code}
-      // Retorna o escopo global criado pelas variáveis (limitado no strict mode, mas atende o MVP)
-      return { pontuacao: typeof pontuacao !== 'undefined' ? pontuacao : undefined, jogador: typeof jogador !== 'undefined' ? jogador : undefined };
-    `);
-    
-    const userScope = userFunc();
+/**
+ * Executa o código do aluno num Web Worker descartável e resolve com o resultado.
+ *
+ * O worker é criado por execução e encerrado ao final — inclusive no caminho de
+ * timeout, que é o único jeito de interromper um laço infinito em JavaScript.
+ */
+export function executeCode(code: string, testCases: string[] = []): Promise<ExecutionResult> {
+  return new Promise((resolve) => {
+    let worker: Worker;
 
-    // 2. Executa os testes contra o escopo gerado
-    testCases.forEach((test, index) => {
-      try {
-        const testFunc = new Function('scope', `
-          const { pontuacao, jogador } = scope;
-          ${test}
-        `);
-        testFunc(userScope);
-        testResults.push({ passed: true, message: `Teste ${index + 1} passou` });
-      } catch (err: any) {
-        testResults.push({ passed: false, message: err.message });
-      }
-    });
+    try {
+      worker = new SandboxWorker();
+    } catch (error) {
+      resolve({
+        output: '',
+        logs: [],
+        testResults: [],
+        error: `Não foi possível iniciar o ambiente de execução: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      });
+      return;
+    }
 
-  } catch (error: any) {
-    return { output: logs.join('\n'), logs, testResults, error: error.message };
-  } finally {
-    // Restaura o console.log original
-    console.log = originalLog;
-  }
+    let settled = false;
 
-  return { output: logs.join('\n'), logs, testResults };
+    const finish = (result: ExecutionResult) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      worker.terminate();
+      resolve(result);
+    };
+
+    const timer = setTimeout(() => {
+      finish({
+        output: '',
+        logs: [],
+        testResults: [],
+        timedOut: true,
+        error: `Seu código passou de ${
+          EXECUTION_TIMEOUT_MS / 1000
+        } segundos e foi interrompido. Isso costuma indicar um laço que nunca termina — verifique se a condição de parada realmente chega a ser falsa.`,
+      });
+    }, EXECUTION_TIMEOUT_MS);
+
+    worker.onmessage = (event: MessageEvent<WorkerResponse>) => finish(toResult(event.data));
+
+    worker.onerror = (event) => {
+      // Evita que o erro suba para o window.onerror da aplicação.
+      event.preventDefault();
+      finish({
+        output: '',
+        logs: [],
+        testResults: [],
+        error: event.message || 'Erro inesperado ao executar o código.',
+      });
+    };
+
+    const request: WorkerRequest = { code, tests: testCases };
+    worker.postMessage(request);
+  });
 }

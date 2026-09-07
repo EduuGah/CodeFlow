@@ -10,7 +10,7 @@ import { Button } from '../components/ui/Button';
 import { MarkdownReader } from '../components/ui/MarkdownReader';
 import { AITutorChat } from '../components/AITutorChat';
 import { mockProjects } from '../data/mock-projects';
-import { executeCodeInWorker, ExecutionResult } from '../lib/sandbox';
+import { executeCode, ExecutionResult } from '../lib/sandbox';
 
 export function ProjectWorkspace() {
   const { id } = useParams();
@@ -43,16 +43,14 @@ export function ProjectWorkspace() {
     };
   }, [user, project.id]);
 
-  const handleRunCode = () => {
+  const handleRunCode = async () => {
     setIsRunning(true);
     setResult(null);
-    
-    setTimeout(() => {
-      // Para projetos, não temos testes unitários rígidos no MVP, testamos apenas o console livre
-      const execResult = executeCodeInWorker(code, []);
-      setResult(execResult);
-      setIsRunning(false);
-    }, 400);
+
+    // Projetos não têm testes rígidos no MVP: executamos e mostramos o console.
+    const execResult = await executeCode(code);
+    setResult(execResult);
+    setIsRunning(false);
   };
 
   const handleSubmitProject = async () => {

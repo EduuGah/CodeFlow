@@ -10,7 +10,7 @@ import { Button } from '../components/ui/Button';
 import { MarkdownReader } from '../components/ui/MarkdownReader';
 import { AITutorChat } from '../components/AITutorChat';
 import { mockLesson } from '../data/mock-lesson';
-import { executeCodeInWorker, ExecutionResult } from '../lib/sandbox';
+import { executeCode, ExecutionResult } from '../lib/sandbox';
 
 export function Lesson() {
   const navigate = useNavigate();
@@ -30,21 +30,19 @@ export function Lesson() {
     `if (typeof jogador === 'undefined') throw new Error("A constante 'jogador' não foi criada.");`
   ];
 
-  const handleRunCode = () => {
+  const handleRunCode = async () => {
     setIsRunning(true);
     setResult(null);
-    
-    // Pequeno timeout para simular a ida ao Worker
-    setTimeout(async () => {
-      const execResult = executeCodeInWorker(code, lessonTests);
-      setResult(execResult);
-      setIsRunning(false);
 
-      // Fase 11 e 14: Salvar progresso e disparar confetes se tudo passar
-      if (execResult.testResults.length > 0 && execResult.testResults.every(t => t.passed)) {
-        triggerSuccess();
-      }
-    }, 400);
+    // executeCode roda num Web Worker e já tem timeout próprio.
+    const execResult = await executeCode(code, lessonTests);
+    setResult(execResult);
+    setIsRunning(false);
+
+    // Fase 11 e 14: Salvar progresso e disparar confetes se tudo passar
+    if (execResult.testResults.length > 0 && execResult.testResults.every(t => t.passed)) {
+      triggerSuccess();
+    }
   };
 
   const triggerSuccess = async () => {
@@ -171,11 +169,17 @@ export function Lesson() {
 
             {result && (
               <div className="space-y-4">
-                {/* Erro de Sintaxe / Execução Crítica */}
-                {result.error && (
-                  <div className="text-red-400 whitespace-pre-wrap">
-                    Erro de Sintaxe: {result.error}
+                {/* Timeout tem tratamento próprio: não é erro do código, é laço sem fim. */}
+                {result.timedOut ? (
+                  <div className="text-amber-400 whitespace-pre-wrap">
+                    Execução interrompida: {result.error}
                   </div>
+                ) : (
+                  result.error && (
+                    <div className="text-red-400 whitespace-pre-wrap">
+                      Erro na execução: {result.error}
+                    </div>
+                  )
                 )}
                 
                 {/* Console Output */}
