@@ -4,12 +4,14 @@ import { useAuth } from '../contexts/AuthContext';
 import { fetchAttempts, fetchProgress } from '../lib/progress';
 import { conceptsNeedingReview, masteryByConcept, overallStats, type Attempt } from '../lib/mastery';
 import { ConceptProgress } from '../components/dashboard/ConceptProgress';
+import { ResumeCard } from '../components/dashboard/ResumeCard';
+import { currentStreak, daysSinceLastStudy, lastActivity, unsolvedExerciseIds } from '../lib/study';
 import { Button } from '../components/ui/Button';
 import { Skeleton } from '../components/ui/Skeleton';
 import { Badge } from '../components/ui/Badge';
 import { ProgressBar } from '../components/ui/ProgressBar';
 import { EmptyState, ErrorState } from '../components/ui/States';
-import { LogOut, Code2, BookOpen, Target, LayoutDashboard, ArrowRight, FolderCode, Trophy, CheckCircle2 } from 'lucide-react';
+import { LogOut, Code2, Target, LayoutDashboard, FolderCode, Trophy, CheckCircle2 } from 'lucide-react';
 import { LANGUAGE_LABELS } from '../../content/types';
 import {
   getDefaultTrack,
@@ -19,6 +21,7 @@ import {
   getLessonsOfTrack,
   listTracks,
   listConcepts,
+  getExercises,
   listProjects,
 } from '../../content';
 
@@ -80,6 +83,17 @@ export function Dashboard() {
   const paraRevisar = conceptsNeedingReview(conceptIds, attempts);
   const stats = overallStats(attempts);
 
+  // Retomada e ritmo (§108 e §176).
+  const streak = currentStreak(attempts);
+  const daysAway = daysSinceLastStudy(attempts);
+  const resume = lastActivity(attempts);
+
+  const todosExercicios = tracks
+    .flatMap((t) => getLessonsOfTrack(t.id))
+    .flatMap((l) => getExercises(l))
+    .map((e) => e.id);
+  const pendentes = unsolvedExerciseIds(todosExercicios, attempts);
+
   return (
     <div className="min-h-screen bg-zinc-50 flex flex-col">
       <header className="h-16 border-b border-zinc-200 bg-white flex items-center justify-between px-6 sticky top-0 z-10">
@@ -128,31 +142,18 @@ export function Dashboard() {
           />
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Card: Trilha Atual */}
-          <div className="bg-white p-6 rounded-2xl border border-zinc-200 shadow-sm flex flex-col items-start">
-            <div className="w-10 h-10 bg-primary-50 rounded-lg flex items-center justify-center text-primary-600 mb-4">
-              <BookOpen size={20} />
-            </div>
-            {isLoadingData ? (
-              <div className="w-full space-y-3">
-                <Skeleton className="h-5 w-3/4" />
-                <Skeleton className="h-4 w-1/2" />
-                <Skeleton className="h-9 w-full mt-4" />
-              </div>
-            ) : (
-              <>
-                <h3 className="font-semibold text-zinc-900">Seu próximo passo:</h3>
-                <p className="text-sm text-zinc-500 mt-1">{nextLesson?.title ?? 'Trilha concluída'}</p>
-                <Link to={`/lesson/${nextLesson?.id ?? ''}`} className="w-full mt-6">
-                  <Button size="sm" className="w-full gap-2">
-                    Continuar aula <ArrowRight size={16} />
-                  </Button>
-                </Link>
-              </>
-            )}
-          </div>
+        {isLoadingData ? (
+          <Skeleton className="h-40 w-full rounded-2xl" />
+        ) : (
+          <ResumeCard
+            resume={resume}
+            nextLesson={nextLesson}
+            streak={streak}
+            daysAway={daysAway}
+          />
+        )}
 
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Card: Desafio Diário */}
           <div className="bg-white p-6 rounded-2xl border border-zinc-200 shadow-sm flex flex-col items-start">
             <div className="w-10 h-10 bg-amber-50 rounded-lg flex items-center justify-center text-amber-600 mb-4">
@@ -166,13 +167,19 @@ export function Dashboard() {
               </div>
             ) : (
               <>
-                <h3 className="font-semibold text-zinc-900">Desafio Diário</h3>
+                <h3 className="font-semibold text-zinc-900">Exercícios pendentes</h3>
                 <p className="text-sm text-zinc-500 mt-1">
-                  Ainda não disponível. Enquanto isso, os projetos abaixo cumprem o mesmo papel de
-                  praticar fora da aula.
+                  {pendentes.length === 0
+                    ? 'Você resolveu todos os exercícios publicados.'
+                    : `${pendentes.length} de ${todosExercicios.length} ainda não resolvidos`}
                 </p>
-                {/* Sem botão: um clique que não faz nada é pior que a ausência dele. */}
-                <Badge className="mt-6">Em desenvolvimento</Badge>
+                <ProgressBar
+                  label="Resolvidos"
+                  value={todosExercicios.length - pendentes.length}
+                  max={todosExercicios.length}
+                  showCount
+                  className="mt-6 w-full"
+                />
               </>
             )}
           </div>
