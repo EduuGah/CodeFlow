@@ -7,6 +7,8 @@ import { conceptsNeedingReview, masteryByConcept, overallStats, type Attempt } f
 import { ConceptProgress } from '../components/dashboard/ConceptProgress';
 import { ResumeCard } from '../components/dashboard/ResumeCard';
 import { LearningPath } from '../components/dashboard/LearningPath';
+import { LevelCard } from '../components/dashboard/LevelCard';
+import { computeAchievements, computeXp, levelFromXp } from '../lib/gamification';
 import { buildPath, summarizePath } from '../lib/path';
 import { currentStreak, daysSinceLastStudy, lastActivity, unsolvedExerciseIds } from '../lib/study';
 import { Button } from '../components/ui/Button';
@@ -101,6 +103,17 @@ export function Dashboard() {
     .map((e) => e.id);
   const pendentes = unsolvedExerciseIds(todosExercicios, attempts);
 
+  // XP derivado do histórico: não há tabela de pontos para dessincronizar.
+  const gamificacao = {
+    attempts,
+    completedLessons,
+    completedProjects,
+    reviews: cardReviews,
+  };
+  const xp = computeXp(gamificacao);
+  const nivel = levelFromXp(xp.total);
+  const conquistas = computeAchievements(gamificacao);
+
   return (
     <div className="min-h-screen bg-zinc-50 flex flex-col">
       <header className="h-16 border-b border-zinc-200 bg-white flex items-center justify-between px-6 sticky top-0 z-10">
@@ -158,6 +171,12 @@ export function Dashboard() {
             streak={streak}
             daysAway={daysAway}
           />
+        )}
+
+        {isLoadingData ? (
+          <Skeleton className="h-48 w-full rounded-2xl" />
+        ) : (
+          <LevelCard level={nivel} breakdown={xp} achievements={conquistas} />
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
