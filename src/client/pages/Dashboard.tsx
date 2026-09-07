@@ -6,13 +6,15 @@ import { dueCount, type FlashcardReview } from '../lib/review';
 import { conceptsNeedingReview, masteryByConcept, overallStats, type Attempt } from '../lib/mastery';
 import { ConceptProgress } from '../components/dashboard/ConceptProgress';
 import { ResumeCard } from '../components/dashboard/ResumeCard';
+import { LearningPath } from '../components/dashboard/LearningPath';
+import { buildPath, summarizePath } from '../lib/path';
 import { currentStreak, daysSinceLastStudy, lastActivity, unsolvedExerciseIds } from '../lib/study';
 import { Button } from '../components/ui/Button';
 import { Skeleton } from '../components/ui/Skeleton';
 import { Badge } from '../components/ui/Badge';
 import { ProgressBar } from '../components/ui/ProgressBar';
 import { EmptyState, ErrorState } from '../components/ui/States';
-import { LogOut, Code2, Target, LayoutDashboard, FolderCode, Trophy, CheckCircle2 } from 'lucide-react';
+import { LogOut, Code2, Target, LayoutDashboard, FolderCode, Trophy } from 'lucide-react';
 import { LANGUAGE_LABELS } from '../../content/types';
 import {
   getDefaultTrack,
@@ -220,8 +222,13 @@ export function Dashboard() {
 
         {/* Secao de Projetos Praticos */}
         {tracks.map((currentTrack) => {
-          const lessonsOfTrack = getLessonsOfTrack(currentTrack.id);
-          const trackProgress = getTrackProgress(currentTrack.id, completedLessons);
+          const path = buildPath(
+            getLessonsOfTrack(currentTrack.id),
+            completedLessons,
+            listConcepts(),
+            mastery
+          );
+          const resumo = summarizePath(path);
 
           return (
             <div key={currentTrack.id} className="pt-6">
@@ -233,52 +240,21 @@ export function Dashboard() {
               </p>
               <ProgressBar
                 label="Aulas concluídas"
-                value={trackProgress.completed}
-                max={trackProgress.total}
+                value={resumo.completed}
+                max={resumo.total}
                 showCount
-                className="mb-5 max-w-sm"
+                className="mb-6 max-w-sm"
               />
 
-              <ol className="divide-y divide-zinc-200 overflow-hidden rounded-2xl border border-zinc-200 bg-white">
-                {lessonsOfTrack.map((lesson, index) => {
-                  const done = completedLessons.includes(lesson.id);
-
-                  return (
-                    <li key={lesson.id}>
-                      <Link
-                        to={`/lesson/${lesson.id}`}
-                        className="flex items-center gap-4 px-5 py-4 transition-colors hover:bg-zinc-50"
-                      >
-                        <span
-                          className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full text-xs font-semibold ${
-                            done ? 'bg-emerald-100 text-emerald-700' : 'bg-zinc-100 text-zinc-500'
-                          }`}
-                        >
-                          {done ? <CheckCircle2 size={16} /> : index + 1}
-                        </span>
-
-                        <span className="min-w-0 flex-1">
-                          <span className="block truncate font-medium text-zinc-900">
-                            {lesson.title}
-                          </span>
-                          <span className="block truncate text-sm text-zinc-500">
-                            {lesson.objective}
-                          </span>
-                        </span>
-
-                        <span className="flex flex-shrink-0 items-center gap-3">
-                          <span className="hidden text-xs text-zinc-400 sm:inline">
-                            {lesson.estimatedMinutes} min
-                          </span>
-                          <Badge tone={done ? 'success' : 'neutral'}>
-                            {done ? 'Concluída' : 'Pendente'}
-                          </Badge>
-                        </span>
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ol>
+              {isLoadingData ? (
+                <div className="space-y-3">
+                  <Skeleton className="h-24 w-full" />
+                  <Skeleton className="h-24 w-full" />
+                  <Skeleton className="h-24 w-full" />
+                </div>
+              ) : (
+                <LearningPath nodes={path} />
+              )}
             </div>
           );
         })}
