@@ -1,5 +1,7 @@
 import SandboxWorker from './sandbox.worker?worker';
-import type { WorkerRequest, WorkerResponse } from './sandbox.worker';
+import type { SandboxTest, WorkerRequest, WorkerResponse } from './sandbox.worker';
+
+export type { SandboxTest };
 
 export interface TestResult {
   passed: boolean;
@@ -39,7 +41,7 @@ function toResult(response: WorkerResponse): ExecutionResult {
  * O worker é criado por execução e encerrado ao final — inclusive no caminho de
  * timeout, que é o único jeito de interromper um laço infinito em JavaScript.
  */
-export function executeCode(code: string, testCases: string[] = []): Promise<ExecutionResult> {
+export function executeCode(code: string, testCases: SandboxTest[] = []): Promise<ExecutionResult> {
   return new Promise((resolve) => {
     let worker: Worker;
 

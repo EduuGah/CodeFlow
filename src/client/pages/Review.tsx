@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, CheckCircle2 } from 'lucide-react';
 import { Button } from '../components/ui/Button';
-import { mockFlashcards } from '../data/mock-review';
+import { listFlashcards } from '../../content';
 
 export function Review() {
   const navigate = useNavigate();
@@ -10,10 +10,11 @@ export function Review() {
   const [isFlipped, setIsFlipped] = useState(false);
   const [completed, setCompleted] = useState(false);
 
-  const currentCard = mockFlashcards[currentIndex];
+  const cards = listFlashcards();
+  const currentCard = cards[currentIndex];
 
   const handleNext = () => {
-    if (currentIndex < mockFlashcards.length - 1) {
+    if (currentIndex < cards.length - 1) {
       setIsFlipped(false);
       setCurrentIndex((prev) => prev + 1);
     } else {
@@ -34,7 +35,7 @@ export function Review() {
           </div>
         </div>
         <div className="text-sm font-medium text-zinc-500">
-          {!completed ? `${currentIndex + 1} / ${mockFlashcards.length}` : 'Concluído'}
+          {!completed ? `${currentIndex + 1} / ${cards.length}` : 'Concluído'}
         </div>
       </header>
 
@@ -47,7 +48,7 @@ export function Review() {
             </div>
             <div>
               <h2 className="text-2xl font-bold text-zinc-900">Revisão Concluída!</h2>
-              <p className="text-zinc-500 mt-2">Você fortaleceu suas conexões neurais para {mockFlashcards.length} conceitos. A repetição espaçada é o segredo do aprendizado real.</p>
+              <p className="text-zinc-500 mt-2">Você fortaleceu suas conexões neurais para {cards.length} conceitos. A repetição espaçada é o segredo do aprendizado real.</p>
             </div>
             <Button size="lg" className="w-full" onClick={() => navigate('/dashboard')}>
               Voltar ao Painel

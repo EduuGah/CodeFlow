@@ -5,7 +5,13 @@ import { fetchProgress } from '../lib/progress';
 import { Button } from '../components/ui/Button';
 import { Skeleton } from '../components/ui/Skeleton';
 import { LogOut, Code2, BookOpen, Target, LayoutDashboard, ArrowRight, FolderCode, Trophy } from 'lucide-react';
-import { mockProgress } from '../data/mock-progress';
+import {
+  getDefaultTrack,
+  getNextLesson,
+  getTrackProgress,
+  listFlashcards,
+  listProjects,
+} from '../../content';
 
 export function Dashboard() {
   const { user, logout } = useAuth();
@@ -39,19 +45,13 @@ export function Dashboard() {
     (user?.user_metadata?.avatar_url as string | undefined) ||
     `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.email || 'Estudante')}&background=random`;
   
-  // Lógica dinâmica de progresso baseada nas lições concluidas
-  const totalLessonsInPath = 5;
-  const progressPercentage = Math.min(100, Math.round((completedLessons.length / totalLessonsInPath) * 100));
-
-  let nextLessonId = 'lesson-js-1';
-  let nextLessonTitle = 'Variáveis: Caixas na Memória';
-
-  if (completedLessons.includes('lesson-js-1')) {
-    nextLessonId = 'lesson-js-2';
-    nextLessonTitle = 'Tipos de Dados e Operadores';
-  }
-
-  const isImcProjectCompleted = completedProjects.includes('proj-js-imc');
+  // Progresso e próxima aula saem da trilha, não de ifs encadeados: acrescentar
+  // uma aula ao conteúdo passa a bastar para o painel refletir a mudança.
+  const track = getDefaultTrack();
+  const { percentage: progressPercentage } = getTrackProgress(track.id, completedLessons);
+  const nextLesson = getNextLesson(track.id, completedLessons);
+  const projects = listProjects();
+  const reviewCount = listFlashcards().length;
 
   return (
     <div className="min-h-screen bg-zinc-50 flex flex-col">
@@ -87,7 +87,7 @@ export function Dashboard() {
             <>
               <h1 className="text-3xl font-bold tracking-tight text-zinc-900">Bom retorno, {firstName}!</h1>
               <p className="text-zinc-500 mt-2 text-lg">
-                Você concluiu <strong className="text-zinc-700 font-semibold">{progressPercentage}%</strong> da trilha de JavaScript. Continue de onde parou.
+                Você concluiu <strong className="text-zinc-700 font-semibold">{progressPercentage}%</strong> da trilha {track.title}. Continue de onde parou.
               </p>
             </>
           )}
@@ -108,8 +108,8 @@ export function Dashboard() {
             ) : (
               <>
                 <h3 className="font-semibold text-zinc-900">Seu próximo passo:</h3>
-                <p className="text-sm text-zinc-500 mt-1">{nextLessonTitle}</p>
-                <Link to={`/lesson/${nextLessonId}`} className="w-full mt-6">
+                <p className="text-sm text-zinc-500 mt-1">{nextLesson?.title ?? 'Trilha concluída'}</p>
+                <Link to={`/lesson/${nextLesson?.id ?? ''}`} className="w-full mt-6">
                   <Button size="sm" className="w-full gap-2">
                     Continuar aula <ArrowRight size={16} />
                   </Button>
@@ -132,7 +132,7 @@ export function Dashboard() {
             ) : (
               <>
                 <h3 className="font-semibold text-zinc-900">Desafio Diário</h3>
-                <p className="text-sm text-zinc-500 mt-1">{mockProgress.dailyChallenge.title}</p>
+                <p className="text-sm text-zinc-500 mt-1">Em breve: desafios diários</p>
                 <Button variant="outline" size="sm" className="w-full mt-6">Resolver desafio</Button>
               </>
             )}
@@ -152,7 +152,7 @@ export function Dashboard() {
             ) : (
               <>
                 <h3 className="font-semibold text-zinc-900">Revisão</h3>
-                <p className="text-sm text-zinc-500 mt-1">{mockProgress.reviews.pendingCount} conceitos aguardam revisão</p>
+                <p className="text-sm text-zinc-500 mt-1">{reviewCount} cartões disponíveis para revisão</p>
                 <Link to="/review" className="w-full mt-6">
                   <Button variant="secondary" size="sm" className="w-full">Revisar agora</Button>
                 </Link>
@@ -169,28 +169,34 @@ export function Dashboard() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             
-            {/* Projeto 1 */}
-            <div className="bg-white border border-zinc-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow">
-              <div className="flex justify-between items-start mb-4">
-                <span className="text-xs font-semibold px-2 py-1 bg-blue-50 text-blue-700 rounded uppercase tracking-wider">
-                  Nível Fácil
-                </span>
-                {isImcProjectCompleted && (
-                  <span className="text-emerald-500" title="Projeto Entregue">
-                    <Trophy size={20} />
-                  </span>
-                )}
-              </div>
-              <h3 className="text-lg font-bold text-zinc-900 mb-2">Calculadora de IMC</h3>
-              <p className="text-zinc-500 text-sm mb-6 line-clamp-2">
-                Crie uma função que calcula o Índice de Massa Corporal (IMC) e retorna a classificação de saúde.
-              </p>
-              <Link to="/project/proj-js-imc">
-                <Button variant={isImcProjectCompleted ? "outline" : "primary"} className="w-full">
-                  {isImcProjectCompleted ? "Revisar Projeto" : "Iniciar Projeto"}
-                </Button>
-              </Link>
-            </div>
+            {projects.map((project) => {
+              const isCompleted = completedProjects.includes(project.id);
+
+              return (
+                <div
+                  key={project.id}
+                  className="bg-white border border-zinc-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow"
+                >
+                  <div className="flex justify-between items-start mb-4">
+                    <span className="text-xs font-semibold px-2 py-1 bg-blue-50 text-blue-700 rounded uppercase tracking-wider">
+                      Nível {project.difficulty}
+                    </span>
+                    {isCompleted && (
+                      <span className="text-emerald-500" title="Projeto Entregue">
+                        <Trophy size={20} />
+                      </span>
+                    )}
+                  </div>
+                  <h3 className="text-lg font-bold text-zinc-900 mb-2">{project.title}</h3>
+                  <p className="text-zinc-500 text-sm mb-6 line-clamp-2">{project.description}</p>
+                  <Link to={`/project/${project.id}`}>
+                    <Button variant={isCompleted ? 'outline' : 'primary'} className="w-full">
+                      {isCompleted ? 'Revisar Projeto' : 'Iniciar Projeto'}
+                    </Button>
+                  </Link>
+                </div>
+              );
+            })}
 
             {/* Placeholder de Projeto futuro */}
             <div className="bg-zinc-50 border border-dashed border-zinc-300 rounded-2xl p-6 flex flex-col items-center justify-center text-center opacity-75">

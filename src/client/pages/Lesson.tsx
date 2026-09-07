@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams, Navigate } from 'react-router-dom';
 import Editor from '@monaco-editor/react';
 import { Play, ArrowLeft, CheckCircle2, XCircle, Lightbulb } from 'lucide-react';
 import confetti from 'canvas-confetti';
@@ -7,35 +7,51 @@ import confetti from 'canvas-confetti';
 import { markLessonCompleted } from '../lib/progress';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/Button';
-import { MarkdownReader } from '../components/ui/MarkdownReader';
+import { LessonBlocks } from '../components/lesson/LessonBlocks';
 import { AITutorChat } from '../components/AITutorChat';
-import { mockLesson } from '../data/mock-lesson';
+import { getLesson, getPrimaryCodeExercise, getReadingBlocks } from '../../content';
 import { executeCode, ExecutionResult } from '../lib/sandbox';
 
 export function Lesson() {
   const navigate = useNavigate();
+  const { id } = useParams();
   const { user } = useAuth();
-  const [code, setCode] = useState(mockLesson.initialCode);
+
+  // A aula vem da rota. Antes esta página ignorava o :id e sempre mostrava a
+  // Lição 1 — o link para a lição 2 no Dashboard abria o conteúdo errado.
+  const lesson = id ? getLesson(id) : undefined;
+  const exercise = lesson ? getPrimaryCodeExercise(lesson) : undefined;
+
+  const [code, setCode] = useState(exercise?.initialCode ?? '');
   const [isRunning, setIsRunning] = useState(false);
   const [result, setResult] = useState<ExecutionResult | null>(null);
-  
+
   // Hints state
   const [showHint, setShowHint] = useState(false);
   const [currentHintIndex, setCurrentHintIndex] = useState(0);
 
-  // Testes simulados mockados para a Lição 1
-  const lessonTests = [
-    `if (typeof pontuacao === 'undefined') throw new Error("A variável 'pontuacao' não foi criada.");`,
-    `if (pontuacao !== 100) throw new Error("A variável 'pontuacao' deve ter o valor 100.");`,
-    `if (typeof jogador === 'undefined') throw new Error("A constante 'jogador' não foi criada.");`
-  ];
+  // Trocar de aula reaproveita este componente: sem isto, o código da aula
+  // anterior continuaria no editor.
+  useEffect(() => {
+    setCode(exercise?.initialCode ?? '');
+    setResult(null);
+    setShowHint(false);
+    setCurrentHintIndex(0);
+  }, [exercise?.id, exercise?.initialCode]);
+
+  // Id inexistente ou aula ainda em rascunho: volta ao painel em vez de quebrar.
+  if (!lesson || !exercise) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  const hints = exercise.hints;
 
   const handleRunCode = async () => {
     setIsRunning(true);
     setResult(null);
 
     // executeCode roda num Web Worker e já tem timeout próprio.
-    const execResult = await executeCode(code, lessonTests);
+    const execResult = await executeCode(code, exercise.tests);
     setResult(execResult);
     setIsRunning(false);
 
@@ -57,7 +73,7 @@ export function Lesson() {
     // Fase 11: Salvar Progresso
     if (user) {
       try {
-        await markLessonCompleted(user.id, mockLesson.id);
+        await markLessonCompleted(user.id, lesson.id);
       } catch (error) {
         console.error('Falha ao salvar progresso da aula:', error);
       }
@@ -72,7 +88,7 @@ export function Lesson() {
           <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard')} className="px-2">
             <ArrowLeft size={18} />
           </Button>
-          <span className="font-medium text-zinc-900">{mockLesson.title}</span>
+          <span className="font-medium text-zinc-900">{lesson.title}</span>
         </div>
         
         <Button 
@@ -91,12 +107,28 @@ export function Lesson() {
         
         {/* Left Side: Content */}
         <div className="w-full md:w-5/12 lg:w-1/3 flex-shrink-0 border-b md:border-b-0 md:border-r border-zinc-200 bg-white overflow-y-auto flex flex-col">
-          <div className="p-6 md:p-8 flex-1">
-            <MarkdownReader content={mockLesson.markdownContent} />
+          <div className="p-6 md:p-8 flex-1 space-y-6">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
+                Objetivo
+              </p>
+              <p className="mt-1 text-sm leading-relaxed text-zinc-600">{lesson.objective}</p>
+            </div>
+
+            <LessonBlocks blocks={getReadingBlocks(lesson)} />
+
+            <div className="rounded-lg border border-zinc-200 p-4">
+              <h2 className="mb-2 text-xs font-semibold uppercase tracking-wider text-zinc-500">
+                Sua tarefa
+              </h2>
+              <p className="whitespace-pre-line text-sm leading-relaxed text-zinc-700">
+                {exercise.prompt}
+              </p>
+            </div>
           </div>
           
           {/* Hint Section */}
-          {mockLesson.hints && mockLesson.hints.length > 0 && (
+          {hints.length > 0 && (
             <div className="border-t border-zinc-100 bg-zinc-50/50 p-6">
               {!showHint ? (
                 <Button 
@@ -111,13 +143,13 @@ export function Lesson() {
                 <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
                   <div className="flex items-center gap-2 font-medium text-amber-800 mb-2">
                     <Lightbulb size={16} className="text-amber-500" />
-                    Dica {currentHintIndex + 1} de {mockLesson.hints.length}
+                    Dica {currentHintIndex + 1} de {hints.length}
                   </div>
                   <p className="text-amber-900 text-sm leading-relaxed">
-                    {mockLesson.hints[currentHintIndex]}
+                    {hints[currentHintIndex]}
                   </p>
                   
-                  {currentHintIndex < mockLesson.hints.length - 1 && (
+                  {currentHintIndex < hints.length - 1 && (
                     <Button 
                       variant="ghost" 
                       size="sm" 

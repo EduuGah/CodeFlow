@@ -9,7 +9,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/Button';
 import { MarkdownReader } from '../components/ui/MarkdownReader';
 import { AITutorChat } from '../components/AITutorChat';
-import { mockProjects } from '../data/mock-projects';
+import { getProject, listProjects } from '../../content';
 import { executeCode, ExecutionResult } from '../lib/sandbox';
 
 export function ProjectWorkspace() {
@@ -17,7 +17,7 @@ export function ProjectWorkspace() {
   const navigate = useNavigate();
   const { user } = useAuth();
   
-  const project = mockProjects.find(p => p.id === id) || mockProjects[0];
+  const project = (id ? getProject(id) : undefined) ?? listProjects()[0];
   
   const [code, setCode] = useState(project.initialCode);
   const [isRunning, setIsRunning] = useState(false);
@@ -123,7 +123,7 @@ export function ProjectWorkspace() {
         {/* Left Side: Specifications */}
         <div className="w-full md:w-5/12 lg:w-1/3 flex-shrink-0 border-b md:border-b-0 md:border-r border-zinc-200 bg-white overflow-y-auto flex flex-col">
           <div className="p-6 md:p-8 flex-1">
-            <MarkdownReader content={project.markdownContent} />
+            <MarkdownReader content={project.brief} />
           </div>
         </div>
 

@@ -12,9 +12,15 @@
  *  3. Cada execução usa um worker novo, então nada vaza de uma rodada para a outra.
  */
 
+/** Um teste: o JavaScript que verifica, e a frase que o aluno lê quando passa. */
+export interface SandboxTest {
+  description: string;
+  assertion: string;
+}
+
 export interface WorkerRequest {
   code: string;
-  tests: string[];
+  tests: SandboxTest[];
 }
 
 export interface WorkerTestResult {
@@ -83,14 +89,14 @@ function formatArg(arg: unknown): string {
  * variáveis e funções que o aluno declarou — sem precisar saber os nomes de
  * antemão, como a versão anterior fazia ao extrair `pontuacao` e `jogador` na mão.
  */
-function buildProgram(code: string, tests: string[]): string {
+function buildProgram(code: string, tests: SandboxTest[]): string {
   const testExpressions = tests
     .map(
-      (test, index) => `
+      (test) => `
         (function () {
           try {
-            ${test}
-            return { passed: true, message: ${JSON.stringify(`Teste ${index + 1} passou`)} };
+            ${test.assertion}
+            return { passed: true, message: ${JSON.stringify(test.description)} };
           } catch (err) {
             return { passed: false, message: err && err.message ? err.message : String(err) };
           }
