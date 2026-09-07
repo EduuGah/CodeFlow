@@ -246,7 +246,8 @@ export function Dashboard() {
             getLessonsOfTrack(currentTrack.id),
             completedLessons,
             listConcepts(),
-            mastery
+            mastery,
+            attempts
           );
           const resumo = summarizePath(path);
 

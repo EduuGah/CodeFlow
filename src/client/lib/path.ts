@@ -1,5 +1,5 @@
 import type { Concept, Lesson } from '../../content/types';
-import type { ConceptMastery } from './mastery';
+import type { Attempt, ConceptMastery } from './mastery';
 
 /**
  * Caminho de aprendizado: a trilha como uma sequência visual de etapas.
@@ -32,6 +32,14 @@ export interface PathNode {
    * Aviso, nunca impedimento.
    */
   shakyPrerequisites: Concept[];
+  /**
+   * Quando a aula foi concluída, em ISO 8601.
+   *
+   * Derivado do último acerto registrado nela: a lista de aulas concluídas
+   * guarda só ids, sem data. É uma aproximação honesta — a data em que o aluno
+   * de fato resolveu o exercício da aula.
+   */
+  completedAt?: string;
 }
 
 /** Níveis que ainda não sustentam o próximo conceito. */
@@ -77,8 +85,17 @@ export function buildPath(
   lessons: Lesson[],
   completedLessonIds: string[],
   concepts: Concept[],
-  mastery: ConceptMastery[]
+  mastery: ConceptMastery[],
+  attempts: Attempt[] = []
 ): PathNode[] {
+  // Data de conclusão por aula: o acerto mais recente registrado nela.
+  const concluidaEm = new Map<string, string>();
+  for (const a of attempts) {
+    if (!a.correct) continue;
+    const atual = concluidaEm.get(a.lessonId);
+    if (atual === undefined || a.createdAt > atual) concluidaEm.set(a.lessonId, a.createdAt);
+  }
+
   const concluidas = new Set(completedLessonIds);
   const porConceito = new Map(mastery.map((m) => [m.conceptId, m]));
   const ensinados = new Set(lessons.flatMap((l) => l.concepts));
@@ -106,6 +123,7 @@ export function buildPath(
       shakyPrerequisites: concluida
         ? []
         : prerequisitosFracos(lesson, concepts, porConceito, ensinados),
+      completedAt: concluida ? concluidaEm.get(lesson.id) : undefined,
     };
   });
 }
