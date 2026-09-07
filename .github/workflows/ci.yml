@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Um push novo no mesmo branch cancela a execução anterior, que já ficou obsoleta.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verificar:
+    name: Tipos, testes e build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # npm ci respeita o package-lock e falha se ele estiver dessincronizado,
+      # ao contrário de npm install.
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Verificar tipos
+        run: npm run typecheck
+
+      # A suíte que mais importa aqui: um exercício com teste errado não quebra
+      # a aplicação, ele ensina errado — e nada mais nesta lista pegaria isso.
+      - name: Rodar testes
+        run: npm test
+
+      - name: Build de produção
+        run: npm run build
