@@ -1,5 +1,6 @@
 import SandboxWorker from './sandbox.worker?worker';
-import type { SandboxTest, WorkerRequest, WorkerResponse } from './sandbox.worker';
+import type { WorkerRequest, WorkerResponse } from './sandbox.worker';
+import type { SandboxTest } from './sandbox-core';
 
 export type { SandboxTest };
 

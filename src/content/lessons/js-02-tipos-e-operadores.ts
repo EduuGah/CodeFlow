@@ -74,7 +74,9 @@ O tipo importa porque o mesmo operador se comporta de forma diferente conforme o
           },
           {
             description: 'total vale 50',
-            assertion: `if (total !== 50) throw new Error("Esperado 50, mas 'total' vale " + total + ".");`,
+            // typeof antes da comparação: sem isso, o teste vaza um
+            // ReferenceError cru quando a variável nem foi declarada.
+            assertion: `if (typeof total === 'undefined' || total !== 50) throw new Error("Esperado 50, mas 'total' vale " + (typeof total === 'undefined' ? 'indefinido' : total) + ".");`,
           },
         ],
         solution: `const total = Number(precoTexto) + frete;`,
