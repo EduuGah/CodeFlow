@@ -43,13 +43,20 @@ export const exerciseSchema = z.discriminatedUnion('type', [
     tests: z.array(testCaseSchema).min(1, 'exercício de código precisa de ao menos um teste'),
     solution: z.string().optional(),
   }),
-  z.object({
-    ...exerciseBase,
-    type: z.literal('multiple-choice'),
-    options: z.array(z.string().min(1)).min(2),
-    correctIndex: z.number().int().nonnegative(),
-    explanation: z.string().min(1),
-  }),
+  z
+    .object({
+      ...exerciseBase,
+      type: z.literal('multiple-choice'),
+      options: z.array(z.string().min(1)).min(2),
+      correctIndex: z.number().int().nonnegative(),
+      explanation: z.string().min(1),
+    })
+    // Um correctIndex fora da lista faria a alternativa certa ser `undefined`:
+    // o aluno nunca conseguiria acertar, e nada denunciaria o erro.
+    .refine((ex) => ex.correctIndex < ex.options.length, {
+      message: 'correctIndex aponta para uma alternativa que não existe',
+      path: ['correctIndex'],
+    }),
   z.object({
     ...exerciseBase,
     type: z.literal('predict-output'),

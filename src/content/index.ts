@@ -21,15 +21,29 @@ import { flashcards as allFlashcards } from './flashcards';
 import { trackJsFundamentos } from './tracks/javascript';
 import { lessonVariaveis } from './lessons/js-01-variaveis';
 import { lessonTiposEOperadores } from './lessons/js-02-tipos-e-operadores';
+import { lessonCondicoes } from './lessons/js-03-condicoes';
+import { lessonLoops } from './lessons/js-04-loops';
+import { lessonFuncoes } from './lessons/js-05-funcoes';
+import { lessonArrays } from './lessons/js-06-arrays';
 import { projetoImc } from './projects/js-imc';
+import { projetoConversor } from './projects/js-conversor';
+import { projetoBoletim } from './projects/js-boletim';
+import { projetoCaixa } from './projects/js-caixa';
 
 /**
  * Registro de conteúdo. Esta é a única fronteira que as páginas conhecem — se
  * amanhã o conteúdo vier de uma API ou do Postgres, só este arquivo muda.
  */
 
-const lessons: Lesson[] = [lessonVariaveis, lessonTiposEOperadores];
-const projects: Project[] = [projetoImc];
+const lessons: Lesson[] = [
+  lessonVariaveis,
+  lessonTiposEOperadores,
+  lessonCondicoes,
+  lessonLoops,
+  lessonFuncoes,
+  lessonArrays,
+];
+const projects: Project[] = [projetoImc, projetoConversor, projetoBoletim, projetoCaixa];
 const tracks: Track[] = [trackJsFundamentos];
 
 /**

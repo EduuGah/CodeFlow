@@ -8,5 +8,12 @@ export const trackJsFundamentos: Track = {
   language: 'javascript',
   status: 'published',
   // A ordem desta lista é a progressão da trilha: é daqui que sai "próxima aula".
-  lessonIds: ['lesson-js-1', 'lesson-js-2'],
+  lessonIds: [
+    'lesson-js-1',
+    'lesson-js-2',
+    'lesson-js-3',
+    'lesson-js-4',
+    'lesson-js-5',
+    'lesson-js-6',
+  ],
 };

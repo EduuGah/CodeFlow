@@ -40,4 +40,25 @@ export const concepts: Concept[] = [
     prerequisites: ['variaveis'],
     tags: ['javascript', 'fundamentos'],
   },
+  {
+    id: 'loops',
+    title: 'Estruturas de repetição',
+    summary: 'Repetir instruções enquanto uma condição continuar verdadeira, sem duplicar código.',
+    prerequisites: ['condicoes'],
+    tags: ['javascript', 'logica'],
+  },
+  {
+    id: 'arrays',
+    title: 'Arrays',
+    summary: 'Listas ordenadas de valores, acessadas por índice e percorridas com repetição.',
+    prerequisites: ['variaveis', 'loops'],
+    tags: ['javascript', 'estruturas-de-dados'],
+  },
+  {
+    id: 'depuracao',
+    title: 'Depuração',
+    summary: 'Ler a mensagem de erro, formular hipótese e testar até encontrar a causa.',
+    prerequisites: ['variaveis'],
+    tags: ['javascript', 'debugging'],
+  },
 ];
