@@ -179,3 +179,54 @@ describe('progressão da trilha', () => {
     expect(getTrackProgress(track.id, idsDaOutra).completed).toBe(0);
   });
 });
+
+describe('projetos', () => {
+  const projetos = listProjects();
+
+  it.each(projetos.map((p) => [p.id, p] as const))(
+    '%s: a solução de referência fecha todos os checkpoints',
+    (_id, project) => {
+      // Sem isso, eu poderia publicar um critério de aceitação impossível de
+      // satisfazer — e o aluno tentaria para sempre sem nunca conseguir entregar.
+      expect(project.referenceSolution, 'projeto precisa de solução de referência').toBeDefined();
+
+      for (const checkpoint of project.checkpoints) {
+        const resultado = runProgram(
+          `${project.initialCode}
+${project.referenceSolution}`,
+          checkpoint.tests
+        );
+
+        expect(resultado.error, `${checkpoint.id} lançou erro`).toBeUndefined();
+
+        const falhas = resultado.testResults.filter((t) => !t.passed).map((t) => t.message);
+        expect(falhas, `${checkpoint.id} não fechou`).toEqual([]);
+      }
+    }
+  );
+
+  it.each(projetos.map((p) => [p.id, p] as const))(
+    '%s: o código inicial NÃO fecha todos os checkpoints',
+    (_id, project) => {
+      const todosFecham = project.checkpoints.every((checkpoint) => {
+        const r = runProgram(project.initialCode, checkpoint.tests);
+        return r.testResults.length > 0 && r.testResults.every((t) => t.passed);
+      });
+
+      // Um projeto que já vem pronto daria o troféu sem trabalho nenhum.
+      expect(todosFecham, 'o projeto está completo antes de o aluno escrever algo').toBe(false);
+    }
+  );
+
+  it('ids de checkpoint são únicos dentro de cada projeto', () => {
+    for (const project of projetos) {
+      const ids = project.checkpoints.map((c) => c.id);
+      expect(new Set(ids).size, `checkpoints repetidos em ${project.id}`).toBe(ids.length);
+    }
+  });
+
+  it('todo projeto declara ao menos um checkpoint', () => {
+    const semCheckpoint = projetos.filter((p) => p.checkpoints.length === 0).map((p) => p.id);
+    expect(semCheckpoint).toEqual([]);
+  });
+});

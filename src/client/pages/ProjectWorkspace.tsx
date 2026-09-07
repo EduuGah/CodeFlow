@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Editor from '@monaco-editor/react';
-import { Play, ArrowLeft, Send, CheckCircle2 } from 'lucide-react';
+import { Play, ArrowLeft, Send, CheckCircle2, ListChecks } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 import { fetchProgress, markProjectCompleted } from '../lib/progress';
@@ -9,6 +9,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
 import { MarkdownReader } from '../components/ui/MarkdownReader';
+import { CheckpointList, type CheckpointResult } from '../components/project/CheckpointList';
 import { getProject, listProjects } from '../../content';
 import { LANGUAGE_LABELS } from '../../content/types';
 import { executeCode, ExecutionResult } from '../lib/sandbox';
@@ -24,6 +25,14 @@ export function ProjectWorkspace() {
   const [isRunning, setIsRunning] = useState(false);
   const [result, setResult] = useState<ExecutionResult | null>(null);
   const [isCompleted, setIsCompleted] = useState(false);
+
+  // Verificação dos critérios de aceitação.
+  const [checkResults, setCheckResults] = useState<Map<string, CheckpointResult>>(new Map());
+  const [isVerifying, setIsVerifying] = useState(false);
+
+  const verificado = checkResults.size > 0;
+  const todosFechados =
+    verificado && project.checkpoints.every((c) => checkResults.get(c.id)?.passed);
 
   // Check if already completed
   useEffect(() => {
@@ -52,6 +61,32 @@ export function ProjectWorkspace() {
     const execResult = await executeCode(code);
     setResult(execResult);
     setIsRunning(false);
+  };
+
+  /**
+   * Roda os testes de cada checkpoint contra o código atual.
+   *
+   * Um worker por checkpoint: assim um laço infinito num critério não impede os
+   * outros de serem avaliados, e o aluno vê o quadro completo.
+   */
+  const handleVerify = async () => {
+    setIsVerifying(true);
+    setResult(null);
+
+    const resultados = new Map<string, CheckpointResult>();
+
+    for (const checkpoint of project.checkpoints) {
+      const execucao = await executeCode(code, checkpoint.tests);
+
+      const falhas = execucao.error
+        ? [execucao.error]
+        : execucao.testResults.filter((t) => !t.passed).map((t) => t.message);
+
+      resultados.set(checkpoint.id, { failures: falhas, passed: falhas.length === 0 });
+    }
+
+    setCheckResults(resultados);
+    setIsVerifying(false);
   };
 
   const handleSubmitProject = async () => {
@@ -108,12 +143,31 @@ export function ProjectWorkspace() {
             <Play size={16} className={isRunning ? "animate-pulse text-zinc-400" : "text-zinc-700"} />
             {isRunning ? 'Rodando...' : 'Rodar Código'}
           </Button>
-          <Button 
-            variant="primary" 
-            size="sm" 
-            className="gap-2 bg-blue-600 hover:bg-blue-700" 
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2"
+            onClick={handleVerify}
+            disabled={isVerifying}
+          >
+            <ListChecks size={16} className="text-zinc-700" />
+            {isVerifying ? 'Verificando...' : 'Verificar critérios'}
+          </Button>
+          <Button
+            variant="primary"
+            size="sm"
+            className="gap-2"
             onClick={handleSubmitProject}
-            disabled={isCompleted}
+            // Entregar sem os critérios fechados tornaria o selo "Entregue"
+            // uma mentira — era exatamente o que acontecia antes.
+            disabled={isCompleted || !todosFechados}
+            title={
+              isCompleted
+                ? 'Projeto já entregue'
+                : todosFechados
+                  ? 'Todos os critérios foram atendidos'
+                  : 'Feche todos os critérios antes de entregar'
+            }
           >
             <Send size={16} />
             {isCompleted ? 'Projeto entregue' : 'Submeter Projeto'}
@@ -128,6 +182,33 @@ export function ProjectWorkspace() {
         <div className="w-full md:w-5/12 lg:w-1/3 flex-shrink-0 border-b md:border-b-0 md:border-r border-zinc-200 bg-white overflow-y-auto flex flex-col">
           <div className="p-6 md:p-8 flex-1">
             <MarkdownReader content={project.brief} />
+          </div>
+
+          <div className="border-t border-zinc-100 bg-zinc-50/50 p-6">
+            <div className="mb-3 flex items-baseline justify-between gap-2">
+              <h2 className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
+                Critérios de aceitação
+              </h2>
+              {verificado && (
+                <span className="text-xs text-zinc-500">
+                  {project.checkpoints.filter((c) => checkResults.get(c.id)?.passed).length} de{' '}
+                  {project.checkpoints.length}
+                </span>
+              )}
+            </div>
+
+            <CheckpointList
+              checkpoints={project.checkpoints}
+              results={checkResults}
+              verifying={isVerifying}
+            />
+
+            {!verificado && !isVerifying && (
+              <p className="mt-4 text-xs leading-relaxed text-zinc-500">
+                Clique em <strong className="font-semibold">Verificar critérios</strong> para
+                conferir quais já estão atendidos. Você pode verificar quantas vezes quiser.
+              </p>
+            )}
           </div>
         </div>
 

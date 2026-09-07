@@ -90,6 +90,14 @@ export const lessonSchema = z.object({
   estimatedMinutes: z.number().int().positive(),
 });
 
+const checkpointSchema = z.object({
+  id: idSchema,
+  title: z.string().min(1),
+  description: z.string().min(1),
+  // Checkpoint sem teste seria critério de aceitação decorativo.
+  tests: z.array(testCaseSchema).min(1, 'checkpoint precisa de ao menos um teste'),
+});
+
 export const projectSchema = z.object({
   id: idSchema,
   title: z.string().min(1),
@@ -99,6 +107,8 @@ export const projectSchema = z.object({
   concepts: z.array(idSchema).min(1),
   brief: z.string().min(1),
   initialCode: z.string(),
+  checkpoints: z.array(checkpointSchema).min(1, 'projeto precisa de ao menos um checkpoint'),
+  referenceSolution: z.string().optional(),
   status: statusSchema,
 });
 

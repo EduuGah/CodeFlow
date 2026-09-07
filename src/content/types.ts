@@ -114,6 +114,21 @@ export interface Lesson {
   estimatedMinutes: number;
 }
 
+/**
+ * Etapa verificável de um projeto (§169).
+ *
+ * Divide um enunciado grande em marcos que o aluno consegue fechar um a um, e
+ * transforma os critérios de aceitação do §228 em algo que a plataforma checa —
+ * em vez de um texto que ninguém confere.
+ */
+export interface ProjectCheckpoint {
+  id: string;
+  title: string;
+  /** O que precisa estar funcionando para este marco fechar. */
+  description: string;
+  tests: TestCase[];
+}
+
 export interface Project {
   id: string;
   title: string;
@@ -124,6 +139,15 @@ export interface Project {
   /** Enunciado completo em Markdown. */
   brief: string;
   initialCode: string;
+  /** Marcos verificáveis, na ordem sugerida de resolução. */
+  checkpoints: ProjectCheckpoint[];
+  /**
+   * Implementação de referência, usada **apenas** pela suíte de testes para
+   * provar que os checkpoints são satisfazíveis. Nunca é exibida ao aluno: o
+   * §340 pede que projeto aberto seja avaliado por critério, não comparado a
+   * uma solução única.
+   */
+  referenceSolution?: string;
   status: ContentStatus;
 }
 

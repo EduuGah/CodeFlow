@@ -32,6 +32,82 @@ console.log(mediaDoAluno(turma[0]));
 console.log(mediaDaTurma(turma));
 console.log(acimaDaMedia(turma));
 `,
+  checkpoints: [
+    {
+      id: 'cp-bol-aluno',
+      title: 'Média de um aluno',
+      description: 'mediaDoAluno recebe um aluno e devolve a média das notas dele.',
+      tests: [
+        {
+          description: 'A função existe',
+          assertion: `if (typeof mediaDoAluno !== 'function') throw new Error("Crie a função 'mediaDoAluno(aluno)'.");`,
+        },
+        {
+          description: 'Calcula a média das notas',
+          assertion: `const r = mediaDoAluno({ nome: "X", notas: [8, 7, 9] });
+if (Math.abs(r - 8) > 1e-9) throw new Error('A média de [8, 7, 9] é 8, mas veio ' + r + '.');`,
+        },
+      ],
+    },
+    {
+      id: 'cp-bol-turma',
+      title: 'Média da turma',
+      description: 'mediaDaTurma devolve a média das médias individuais.',
+      tests: [
+        {
+          description: 'A função existe',
+          assertion: `if (typeof mediaDaTurma !== 'function') throw new Error("Crie a função 'mediaDaTurma(turma)'.");`,
+        },
+        {
+          description: 'Combina as médias individuais',
+          assertion: `const t = [{ nome: "A", notas: [10, 10] }, { nome: "B", notas: [6, 6] }];
+const r = mediaDaTurma(t);
+if (Math.abs(r - 8) > 1e-9) throw new Error('Médias 10 e 6 dão média de turma 8, mas veio ' + r + '.');`,
+        },
+      ],
+    },
+    {
+      id: 'cp-bol-acima',
+      title: 'Quem está acima da média',
+      description: 'acimaDaMedia devolve um array com os NOMES dos alunos acima da média da turma.',
+      tests: [
+        {
+          description: 'A função existe',
+          assertion: `if (typeof acimaDaMedia !== 'function') throw new Error("Crie a função 'acimaDaMedia(turma)'.");`,
+        },
+        {
+          description: 'Devolve nomes, não objetos',
+          assertion: `const t = [{ nome: "Alta", notas: [10, 10] }, { nome: "Baixa", notas: [4, 4] }];
+const r = acimaDaMedia(t);
+if (!Array.isArray(r)) throw new Error('Deveria devolver um array, mas veio ' + typeof r + '.');
+if (JSON.stringify(r) !== JSON.stringify(["Alta"])) throw new Error('Esperado ["Alta"], mas veio ' + JSON.stringify(r) + '. Devolva os nomes, não os objetos.');`,
+        },
+        {
+          description: 'Turma inteira empatada não tem ninguém acima',
+          assertion: `const t = [{ nome: "A", notas: [7] }, { nome: "B", notas: [7] }];
+const r = acimaDaMedia(t);
+if (r.length !== 0) throw new Error('Com todos na mesma nota, ninguém está ACIMA da média. Veio ' + JSON.stringify(r) + '.');`,
+          hidden: true,
+        },
+      ],
+    },
+  ],
+  referenceSolution: `function mediaDoAluno(aluno) {
+  let soma = 0;
+  for (const n of aluno.notas) soma += n;
+  return soma / aluno.notas.length;
+}
+
+function mediaDaTurma(turma) {
+  let soma = 0;
+  for (const a of turma) soma += mediaDoAluno(a);
+  return soma / turma.length;
+}
+
+function acimaDaMedia(turma) {
+  const geral = mediaDaTurma(turma);
+  return turma.filter(a => mediaDoAluno(a) > geral).map(a => a.nome);
+}`,
   brief: `
 Este é o primeiro projeto em que os dados não são três variáveis soltas: é uma lista de objetos, o formato em que dados reais quase sempre chegam.
 

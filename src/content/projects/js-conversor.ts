@@ -17,6 +17,57 @@ console.log(celsiusParaFahrenheit(0));    // 32
 console.log(celsiusParaFahrenheit(100));  // 212
 console.log(celsiusParaFahrenheit("abc")); // e agora?
 `,
+  checkpoints: [
+    {
+      id: 'cp-conv-formula',
+      title: 'Converte corretamente',
+      description: 'celsiusParaFahrenheit devolve o número convertido pela fórmula c * 9 / 5 + 32.',
+      tests: [
+        {
+          description: 'A função existe',
+          assertion: `if (typeof celsiusParaFahrenheit !== 'function') throw new Error("Crie a função 'celsiusParaFahrenheit(celsius)'.");`,
+        },
+        {
+          description: '0 °C vira 32 °F',
+          assertion: `const r = celsiusParaFahrenheit(0);
+if (r !== 32) throw new Error('celsiusParaFahrenheit(0) deveria devolver 32, mas devolveu ' + r + '. Use return, não console.log.');`,
+        },
+        {
+          description: '100 °C vira 212 °F',
+          assertion: `const r = celsiusParaFahrenheit(100);
+if (r !== 212) throw new Error('celsiusParaFahrenheit(100) deveria devolver 212, mas devolveu ' + r + '.');`,
+        },
+        {
+          description: '-40 é o ponto onde as escalas se encontram',
+          assertion: `const r = celsiusParaFahrenheit(-40);
+if (r !== -40) throw new Error('celsiusParaFahrenheit(-40) deveria devolver -40, mas devolveu ' + r + '.');`,
+          hidden: true,
+        },
+      ],
+    },
+    {
+      id: 'cp-conv-invalido',
+      title: 'Trata entrada inválida',
+      description: 'Recebendo algo que não é número, devolve null em vez de NaN.',
+      tests: [
+        {
+          description: 'Texto devolve null',
+          assertion: `const r = celsiusParaFahrenheit("abc");
+if (Number.isNaN(r)) throw new Error('Com "abc" veio NaN. O requisito pede null: o erro precisa ser explícito, não silencioso.');
+if (r !== null) throw new Error('celsiusParaFahrenheit("abc") deveria devolver null, mas devolveu ' + JSON.stringify(r) + '.');`,
+        },
+        {
+          description: 'undefined também devolve null',
+          assertion: `if (celsiusParaFahrenheit(undefined) !== null) throw new Error('Entrada undefined também deveria devolver null.');`,
+          hidden: true,
+        },
+      ],
+    },
+  ],
+  referenceSolution: `function celsiusParaFahrenheit(celsius) {
+  if (!Number.isFinite(celsius)) return null;
+  return celsius * 9 / 5 + 32;
+}`,
   brief: `
 Todo formulário recebe lixo mais cedo ou mais tarde. Este projeto é sobre a conversão — e sobre o que fazer quando o dado não é o esperado.
 
