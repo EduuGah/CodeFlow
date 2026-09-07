@@ -1,5 +1,6 @@
 import { supabase } from './supabase';
 import type { Attempt } from './mastery';
+import type { FlashcardReview, ReviewRating } from './review';
 
 export interface UserProgress {
   completedLessons: string[];
@@ -124,6 +125,45 @@ export async function fetchAttempts(userId: string): Promise<Attempt[]> {
     concepts: row.concepts ?? [],
     correct: row.correct,
     hintsUsed: row.hints_used ?? 0,
+    createdAt: row.created_at,
+  }));
+}
+
+// ------------------------------------------------- revisao de flashcards
+
+/** Registra a autoavaliação do aluno num cartão. Não bloqueia nem lança. */
+export async function recordFlashcardReview(
+  userId: string,
+  flashcardId: string,
+  rating: ReviewRating
+): Promise<void> {
+  if (!supabase) return;
+
+  const { error } = await supabase
+    .from('flashcard_reviews')
+    .insert({ user_id: userId, flashcard_id: flashcardId, rating });
+
+  if (error) console.error('Falha ao registrar revisão:', error.message);
+}
+
+/** Histórico de revisões do aluno. */
+export async function fetchFlashcardReviews(userId: string): Promise<FlashcardReview[]> {
+  if (!supabase) return [];
+
+  const { data, error } = await supabase
+    .from('flashcard_reviews')
+    .select('flashcard_id, rating, created_at')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: true });
+
+  if (error) {
+    console.error('Falha ao buscar revisões:', error.message);
+    return [];
+  }
+
+  return (data ?? []).map((row) => ({
+    flashcardId: row.flashcard_id,
+    rating: row.rating as ReviewRating,
     createdAt: row.created_at,
   }));
 }

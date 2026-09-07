@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { fetchAttempts, fetchProgress } from '../lib/progress';
+import { fetchAttempts, fetchFlashcardReviews, fetchProgress } from '../lib/progress';
+import { dueCount, type FlashcardReview } from '../lib/review';
 import { conceptsNeedingReview, masteryByConcept, overallStats, type Attempt } from '../lib/mastery';
 import { ConceptProgress } from '../components/dashboard/ConceptProgress';
 import { ResumeCard } from '../components/dashboard/ResumeCard';
@@ -32,6 +33,7 @@ export function Dashboard() {
   const [completedProjects, setCompletedProjects] = useState<string[]>([]);
   const [progressError, setProgressError] = useState<string | null>(null);
   const [attempts, setAttempts] = useState<Attempt[]>([]);
+  const [cardReviews, setCardReviews] = useState<FlashcardReview[]>([]);
 
   useEffect(() => {
     let active = true;
@@ -39,13 +41,15 @@ export function Dashboard() {
     async function fetchUserData() {
       if (!user) return;
 
-      const [progress, historico] = await Promise.all([
+      const [progress, historico, revisoes] = await Promise.all([
         fetchProgress(user.id),
         fetchAttempts(user.id),
+        fetchFlashcardReviews(user.id),
       ]);
       if (!active) return;
 
       setAttempts(historico);
+      setCardReviews(revisoes);
 
       setCompletedLessons(progress.completedLessons);
       setCompletedProjects(progress.completedProjects);
@@ -74,7 +78,8 @@ export function Dashboard() {
 
   // Uma seção por trilha, com o progresso de cada uma.
   const tracks = listTracks();
-  const reviewCount = listFlashcards().length;
+  // Cartões efetivamente vencidos hoje, não o total do catálogo.
+  const cartoesVencidos = dueCount(listFlashcards(), cardReviews);
 
   // Domínio derivado do histórico de tentativas — aula concluída não é conceito
   // dominado (§78), então estes números são independentes do progresso da trilha.
@@ -199,9 +204,11 @@ export function Dashboard() {
               <>
                 <h3 className="font-semibold text-zinc-900">Revisão</h3>
                 <p className="text-sm text-zinc-500 mt-1">
-                  {paraRevisar.length > 0
-                    ? `${paraRevisar.length} ${paraRevisar.length === 1 ? 'conceito precisa' : 'conceitos precisam'} de revisão`
-                    : `${reviewCount} cartões disponíveis`}
+                  {cartoesVencidos === 0
+                    ? 'Nada vencido hoje — os cartões voltam na data certa.'
+                    : `${cartoesVencidos} ${cartoesVencidos === 1 ? 'cartão disponível' : 'cartões disponíveis'}`}
+                  {paraRevisar.length > 0 &&
+                    `, com ${paraRevisar.length} ${paraRevisar.length === 1 ? 'conceito fraco' : 'conceitos fracos'} priorizados`}
                 </p>
                 <Link to="/review" className="w-full mt-6">
                   <Button variant="secondary" size="sm" className="w-full">Revisar agora</Button>

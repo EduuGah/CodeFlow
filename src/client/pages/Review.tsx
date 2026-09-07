@@ -1,99 +1,210 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, CheckCircle2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { ArrowLeft, CalendarCheck, CheckCircle2, Loader2 } from 'lucide-react';
+
+import { listConcepts, listFlashcards } from '../../content';
+import { useAuth } from '../contexts/AuthContext';
+import {
+  fetchAttempts,
+  fetchFlashcardReviews,
+  recordFlashcardReview,
+} from '../lib/progress';
+import { conceptsNeedingReview } from '../lib/mastery';
+import {
+  buildReviewSession,
+  describeNextInterval,
+  type DueCard,
+  type ReviewRating,
+} from '../lib/review';
+import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
-import { listFlashcards } from '../../content';
+import { EmptyState } from '../components/ui/States';
+
+/**
+ * Sessão de revisão com repetição espaçada (§200).
+ *
+ * A versão anterior mostrava todos os cartões, sempre na mesma ordem, e os
+ * botões Difícil/Médio/Fácil chamavam exatamente a mesma função — o aluno
+ * achava que informava dificuldade e nada acontecia.
+ *
+ * Agora a autoavaliação define quando o cartão volta, e a fila prioriza os
+ * conceitos que o aluno vem errando nos exercícios (§202).
+ */
+
+const AVALIACOES: Array<{ rating: ReviewRating; label: string; classe: string }> = [
+  { rating: 'dificil', label: 'Difícil', classe: 'text-red-700 hover:border-red-200 hover:bg-red-50' },
+  { rating: 'medio', label: 'Médio', classe: 'text-amber-700 hover:border-amber-200 hover:bg-amber-50' },
+  { rating: 'facil', label: 'Fácil', classe: 'text-emerald-700 hover:border-emerald-200 hover:bg-emerald-50' },
+];
 
 export function Review() {
   const navigate = useNavigate();
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [isFlipped, setIsFlipped] = useState(false);
-  const [completed, setCompleted] = useState(false);
+  const { user } = useAuth();
 
-  const cards = listFlashcards();
-  const currentCard = cards[currentIndex];
+  const [sessao, setSessao] = useState<DueCard[] | null>(null);
+  const [indice, setIndice] = useState(0);
+  const [virado, setVirado] = useState(false);
 
-  const handleNext = () => {
-    if (currentIndex < cards.length - 1) {
-      setIsFlipped(false);
-      setCurrentIndex((prev) => prev + 1);
-    } else {
-      setCompleted(true);
+  useEffect(() => {
+    let ativo = true;
+
+    async function montar() {
+      const cards = listFlashcards();
+
+      // Sem sessão, a revisão continua utilizável — só não persiste nem prioriza.
+      if (!user) {
+        if (ativo) setSessao(buildReviewSession(cards, [], []));
+        return;
+      }
+
+      const [reviews, attempts] = await Promise.all([
+        fetchFlashcardReviews(user.id),
+        fetchAttempts(user.id),
+      ]);
+      if (!ativo) return;
+
+      const fracos = conceptsNeedingReview(
+        listConcepts().map((c) => c.id),
+        attempts
+      ).map((m) => m.conceptId);
+
+      setSessao(buildReviewSession(cards, reviews, fracos));
     }
+
+    montar();
+    return () => {
+      ativo = false;
+    };
+  }, [user]);
+
+  if (sessao === null) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-zinc-50">
+        <Loader2 className="h-8 w-8 animate-spin text-zinc-400" />
+      </div>
+    );
+  }
+
+  const atual = sessao[indice];
+  const terminou = indice >= sessao.length;
+
+  const avaliar = (rating: ReviewRating) => {
+    if (user && atual) void recordFlashcardReview(user.id, atual.card.id, rating);
+    setVirado(false);
+    setIndice((i) => i + 1);
   };
 
   return (
-    <div className="min-h-screen bg-zinc-50 flex flex-col">
-      {/* Top Navigation */}
-      <header className="h-14 border-b border-zinc-200 bg-white flex items-center justify-between px-4">
+    <div className="flex min-h-screen flex-col bg-zinc-50">
+      <header className="flex h-14 items-center justify-between border-b border-zinc-200 bg-white px-4">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="sm" className="px-2 text-zinc-500" onClick={() => navigate('/dashboard')}>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="px-2 text-zinc-500"
+            onClick={() => navigate('/dashboard')}
+          >
             <ArrowLeft size={18} />
           </Button>
-          <div className="text-sm font-semibold text-zinc-900">
-            Sessão de Revisão
-          </div>
+          <span className="text-sm font-semibold text-zinc-900">Sessão de Revisão</span>
         </div>
-        <div className="text-sm font-medium text-zinc-500">
-          {!completed ? `${currentIndex + 1} / ${cards.length}` : 'Concluído'}
-        </div>
+
+        <span className="text-sm font-medium text-zinc-500">
+          {sessao.length === 0 || terminou ? 'Concluído' : `${indice + 1} / ${sessao.length}`}
+        </span>
       </header>
 
-      {/* Main Content */}
-      <main className="flex-1 flex items-center justify-center p-6">
-        {completed ? (
-          <div className="text-center max-w-md space-y-6">
-            <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto">
+      <main className="flex flex-1 items-center justify-center p-6">
+        {sessao.length === 0 ? (
+          <EmptyState
+            className="max-w-md"
+            icon={<CalendarCheck size={28} />}
+            title="Nada para revisar hoje"
+            description="Todos os cartões já foram revisados e ainda não venceram. Voltar antes da hora atrapalha mais do que ajuda — o intervalo existe para o esquecimento começar a agir."
+            action={
+              <Link to="/dashboard">
+                <Button size="sm">Voltar ao painel</Button>
+              </Link>
+            }
+          />
+        ) : terminou ? (
+          <div className="max-w-md space-y-6 text-center">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
               <CheckCircle2 size={32} />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-zinc-900">Revisão Concluída!</h2>
-              <p className="text-zinc-500 mt-2">Você fortaleceu suas conexões neurais para {cards.length} conceitos. A repetição espaçada é o segredo do aprendizado real.</p>
+              <h2 className="text-2xl font-bold text-zinc-900">Revisão concluída</h2>
+              <p className="mt-2 text-zinc-500">
+                {sessao.length} {sessao.length === 1 ? 'cartão revisado' : 'cartões revisados'}. Cada
+                um volta numa data diferente, conforme o quanto você lembrou dele.
+              </p>
             </div>
             <Button size="lg" className="w-full" onClick={() => navigate('/dashboard')}>
               Voltar ao Painel
             </Button>
           </div>
         ) : (
-          <div className="w-full max-w-xl flex flex-col gap-8">
-            {/* Flashcard */}
-            <div 
-              className="bg-white border border-zinc-200 rounded-2xl p-10 min-h-[300px] shadow-sm flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-300"
-              onClick={() => setIsFlipped((flipped) => !flipped)}
+          <div className="flex w-full max-w-xl flex-col gap-8">
+            <div
+              role="button"
+              tabIndex={0}
+              onClick={() => setVirado((v) => !v)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setVirado((v) => !v);
+                }
+              }}
+              className="flex min-h-[300px] cursor-pointer flex-col items-center justify-center rounded-2xl border border-zinc-200 bg-white p-10 text-center transition-colors hover:border-zinc-300"
             >
-              {!isFlipped ? (
-                <div className="space-y-4 animate-in fade-in duration-300">
-                  <span className="text-xs font-bold tracking-wider uppercase text-zinc-400">Conceito</span>
-                  <h2 className="text-2xl md:text-3xl font-medium text-zinc-900 leading-tight">
-                    {currentCard.front}
+              {!virado ? (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-center gap-2">
+                    <span className="text-xs font-bold uppercase tracking-wider text-zinc-400">
+                      Conceito
+                    </span>
+                    {/* O aluno merece saber por que este cartão veio primeiro. */}
+                    {atual.priority && <Badge tone="caution">Você vem errando isto</Badge>}
+                  </div>
+                  <h2 className="text-2xl font-medium leading-tight text-zinc-900 md:text-3xl">
+                    {atual.card.front}
                   </h2>
-                  <p className="text-sm text-zinc-400 mt-8">Clique no card para revelar a resposta</p>
+                  <p className="pt-6 text-sm text-zinc-400">Clique no card para revelar a resposta</p>
                 </div>
               ) : (
-                <div className="space-y-4 animate-in fade-in duration-300">
-                  <span className="text-xs font-bold tracking-wider uppercase text-emerald-500">Resposta</span>
-                  <p className="text-xl md:text-2xl text-zinc-700 leading-relaxed">
-                    {currentCard.back}
+                <div className="space-y-4">
+                  <span className="text-xs font-bold uppercase tracking-wider text-emerald-500">
+                    Resposta
+                  </span>
+                  <p className="text-xl leading-relaxed text-zinc-700 md:text-2xl">
+                    {atual.card.back}
                   </p>
-                  <p className="text-sm text-zinc-400 pt-4">Clique de novo para rever a pergunta</p>
+                  <p className="pt-4 text-sm text-zinc-400">Clique de novo para rever a pergunta</p>
                 </div>
               )}
             </div>
 
-            {/* Confidence Buttons */}
-            {isFlipped && (
-              <div className="flex flex-col gap-3 animate-in slide-in-from-bottom-4 fade-in duration-500">
-                <p className="text-center text-sm font-medium text-zinc-500 mb-2">Como foi para lembrar disso?</p>
+            {virado && (
+              <div className="flex flex-col gap-3">
+                <p className="mb-1 text-center text-sm font-medium text-zinc-500">
+                  Como foi para lembrar disso?
+                </p>
+
                 <div className="grid grid-cols-3 gap-4">
-                  <Button variant="outline" className="text-red-600 hover:bg-red-50 hover:border-red-200" onClick={handleNext}>
-                    Difícil
-                  </Button>
-                  <Button variant="outline" className="text-amber-600 hover:bg-amber-50 hover:border-amber-200" onClick={handleNext}>
-                    Médio
-                  </Button>
-                  <Button variant="outline" className="text-emerald-600 hover:bg-emerald-50 hover:border-emerald-200" onClick={handleNext}>
-                    Fácil
-                  </Button>
+                  {AVALIACOES.map(({ rating, label, classe }) => (
+                    <Button
+                      key={rating}
+                      variant="outline"
+                      className={`flex-col py-3 ${classe}`}
+                      onClick={() => avaliar(rating)}
+                    >
+                      <span>{label}</span>
+                      {/* Consequência à vista: a resposta muda quando o cartão volta. */}
+                      <span className="text-xs font-normal text-zinc-400">
+                        {describeNextInterval(atual.state, rating)}
+                      </span>
+                    </Button>
+                  ))}
                 </div>
               </div>
             )}
