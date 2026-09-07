@@ -4,7 +4,7 @@ import Editor from '@monaco-editor/react';
 import { Play, ArrowLeft, CheckCircle2, XCircle, Lightbulb } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
-import { supabase } from '../lib/supabase';
+import { markLessonCompleted } from '../lib/progress';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/Button';
 import { MarkdownReader } from '../components/ui/MarkdownReader';
@@ -59,19 +59,9 @@ export function Lesson() {
     // Fase 11: Salvar Progresso
     if (user) {
       try {
-        const { data } = await supabase.from('users').select('*').eq('id', user.id).single();
-        const currentLessons = data?.completedLessons || [];
-        const currentProjects = data?.completedProjects || [];
-        
-        if (!currentLessons.includes(mockLesson.id)) {
-          await supabase.from('users').upsert({
-            id: user.id,
-            completedLessons: [...currentLessons, mockLesson.id],
-            completedProjects: currentProjects
-          });
-        }
+        await markLessonCompleted(user.id, mockLesson.id);
       } catch (error) {
-        console.error('Falha ao salvar progresso (Supabase):', error);
+        console.error('Falha ao salvar progresso da aula:', error);
       }
     }
   };

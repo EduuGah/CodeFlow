@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { supabase } from '../lib/supabase';
+import { fetchProgress } from '../lib/progress';
 import { Button } from '../components/ui/Button';
 import { Skeleton } from '../components/ui/Skeleton';
 import { LogOut, Code2, BookOpen, Target, LayoutDashboard, ArrowRight, FolderCode, Trophy } from 'lucide-react';
@@ -14,31 +14,30 @@ export function Dashboard() {
   const [completedProjects, setCompletedProjects] = useState<string[]>([]);
 
   useEffect(() => {
+    let active = true;
+
     async function fetchUserData() {
       if (!user) return;
-      try {
-        const { data, error } = await supabase
-          .from('users')
-          .select('*')
-          .eq('id', user.id)
-          .single();
-          
-        if (data && !error) {
-          setCompletedLessons(data.completedLessons || []);
-          setCompletedProjects(data.completedProjects || []);
-        }
-      } catch (error) {
-        console.error("Erro ao buscar dados do usuário (Supabase):", error);
-      } finally {
-        setIsLoadingData(false);
-      }
+
+      const progress = await fetchProgress(user.id);
+      if (!active) return;
+
+      setCompletedLessons(progress.completedLessons);
+      setCompletedProjects(progress.completedProjects);
+      setIsLoadingData(false);
     }
-    
+
     fetchUserData();
+    return () => {
+      active = false;
+    };
   }, [user]);
 
-  const firstName = user?.user_metadata?.full_name?.split(' ')[0] || 'Estudante';
-  const avatarUrl = user?.user_metadata?.avatar_url || `https://ui-avatars.com/api/?name=${user?.email}&background=random`;
+  const fullName = user?.user_metadata?.full_name as string | undefined;
+  const firstName = fullName?.split(' ')[0] || 'Estudante';
+  const avatarUrl =
+    (user?.user_metadata?.avatar_url as string | undefined) ||
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.email || 'Estudante')}&background=random`;
   
   // Lógica dinâmica de progresso baseada nas lições concluidas
   const totalLessonsInPath = 5;
@@ -64,7 +63,7 @@ export function Dashboard() {
         
         <div className="flex items-center gap-4">
           <span className="text-sm font-medium text-zinc-700 hidden sm:block">
-            {user?.user_metadata?.full_name || user?.email}
+            {fullName || user?.email}
           </span>
           <img 
             src={avatarUrl} 

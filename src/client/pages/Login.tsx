@@ -1,12 +1,11 @@
-import { useNavigate, Navigate } from 'react-router-dom';
-import { Code2, Github, Loader2 } from 'lucide-react';
+import { Navigate } from 'react-router-dom';
+import { AlertCircle, Code2, Loader2 } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { useAuth } from '../contexts/AuthContext';
 import { useState } from 'react';
 
 export function Login() {
-  const { user, signInWithGoogle, loading } = useAuth();
-  const navigate = useNavigate();
+  const { user, signInWithGoogle, loading, authError, isConfigured } = useAuth();
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   if (loading) {
@@ -21,13 +20,14 @@ export function Login() {
     return <Navigate to="/dashboard" replace />;
   }
 
+  // Não navegamos manualmente após o login: signInWithOAuth redireciona a aba para
+  // o Google e, na volta, o <Navigate> acima leva o usuário ao /dashboard.
   const handleGoogleSignIn = async () => {
     try {
       setIsLoggingIn(true);
       await signInWithGoogle();
-      navigate('/dashboard');
-    } catch (error) {
-      console.error("Falha ao entrar com Google:", error);
+    } catch {
+      // A mensagem amigável já vem do AuthContext em `authError`.
     } finally {
       setIsLoggingIn(false);
     }
@@ -51,7 +51,7 @@ export function Login() {
             className="w-full gap-2" 
             variant="outline" 
             onClick={handleGoogleSignIn}
-            disabled={isLoggingIn}
+            disabled={isLoggingIn || !isConfigured}
           >
             {isLoggingIn ? (
               <Loader2 size={18} className="animate-spin" />
@@ -65,6 +65,16 @@ export function Login() {
             )}
             {isLoggingIn ? "Conectando..." : "Entrar com Google"}
           </Button>
+
+          {authError && (
+            <div
+              role="alert"
+              className="mt-4 flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-left"
+            >
+              <AlertCircle size={16} className="mt-0.5 flex-shrink-0 text-red-500" />
+              <p className="text-xs leading-relaxed text-red-700">{authError}</p>
+            </div>
+          )}
 
           <div className="mt-6 flex items-center justify-center">
             <span className="text-xs text-zinc-400 text-center">

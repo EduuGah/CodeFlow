@@ -4,7 +4,7 @@ import Editor from '@monaco-editor/react';
 import { Play, ArrowLeft, Send, CheckCircle2 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
-import { supabase } from '../lib/supabase';
+import { fetchProgress, markProjectCompleted } from '../lib/progress';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/Button';
 import { MarkdownReader } from '../components/ui/MarkdownReader';
@@ -26,14 +26,21 @@ export function ProjectWorkspace() {
 
   // Check if already completed
   useEffect(() => {
+    let active = true;
+
     async function checkStatus() {
       if (!user) return;
-      const { data } = await supabase.from('users').select('*').eq('id', user.id).single();
-      if (data && data.completedProjects?.includes(project.id)) {
+
+      const progress = await fetchProgress(user.id);
+      if (active && progress.completedProjects.includes(project.id)) {
         setIsCompleted(true);
       }
     }
+
     checkStatus();
+    return () => {
+      active = false;
+    };
   }, [user, project.id]);
 
   const handleRunCode = () => {
@@ -62,19 +69,9 @@ export function ProjectWorkspace() {
 
     if (user) {
       try {
-        const { data } = await supabase.from('users').select('*').eq('id', user.id).single();
-        const currentLessons = data?.completedLessons || [];
-        const currentProjects = data?.completedProjects || [];
-        
-        if (!currentProjects.includes(project.id)) {
-          await supabase.from('users').upsert({
-            id: user.id,
-            completedLessons: currentLessons,
-            completedProjects: [...currentProjects, project.id]
-          });
-        }
+        await markProjectCompleted(user.id, project.id);
       } catch (error) {
-        console.error('Falha ao salvar projeto (Supabase):', error);
+        console.error('Falha ao salvar conclusão do projeto:', error);
       }
     }
   };

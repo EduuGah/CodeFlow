@@ -4,7 +4,10 @@ export interface TestResult {
 }
 
 export interface ExecutionResult {
+  /** Saída completa do console, já unida por quebras de linha. */
   output: string;
+  /** Cada chamada de console.log como uma entrada separada (usado pelo terminal dos projetos). */
+  logs: string[];
   testResults: TestResult[];
   error?: string;
 }
@@ -12,13 +15,13 @@ export interface ExecutionResult {
 // O código submetido pelo usuário é encapsulado num bloco Try/Catch para capturar erros sintáticos e de execução.
 // Também sobrescrevemos o console.log para capturar as mensagens de saída em forma de string.
 export function executeCodeInWorker(code: string, testCases: string[]): ExecutionResult {
-  let output = '';
+  const logs: string[] = [];
   const testResults: TestResult[] = [];
-  
+
   // Intercepta e captura console.log
   const originalLog = console.log;
   console.log = (...args) => {
-    output += args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : String(arg)).join(' ') + '\\n';
+    logs.push(args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : String(arg)).join(' '));
   };
 
   try {
@@ -47,11 +50,11 @@ export function executeCodeInWorker(code: string, testCases: string[]): Executio
     });
 
   } catch (error: any) {
-    return { output, testResults, error: error.message };
+    return { output: logs.join('\n'), logs, testResults, error: error.message };
   } finally {
     // Restaura o console.log original
     console.log = originalLog;
   }
 
-  return { output, testResults };
+  return { output: logs.join('\n'), logs, testResults };
 }
