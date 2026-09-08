@@ -1,3 +1,4 @@
+import { getDefaultTrack, getLessonsOfTrack } from '../src/content';
 import { esperarConteudo, expect, test } from './fixtures';
 
 /**
@@ -11,6 +12,10 @@ import { esperarConteudo, expect, test } from './fixtures';
 
 const DUAS_AULAS = ['lesson-js-1', 'lesson-js-2'];
 
+// Lido do catálogo, não fixado: a trilha cresce a cada aula publicada, e um
+// número escrito à mão aqui quebraria o teste por conteúdo novo, não por defeito.
+const TOTAL = getLessonsOfTrack(getDefaultTrack().id).length;
+
 test.describe('onde estou', () => {
   test('a posição na trilha aparece sem precisar rolar', async ({ logado: page, banco }) => {
     banco.completed_lessons = DUAS_AULAS;
@@ -22,7 +27,7 @@ test.describe('onde estou', () => {
     await expect(barra).toBeInViewport();
     await expect(barra).toHaveAttribute('aria-valuenow', '2');
 
-    await expect(page.getByText(/2 de 10 aulas/)).toBeVisible();
+    await expect(page.getByText(`2 de ${TOTAL} aulas`)).toBeVisible();
   });
 
   test('quem já concluiu aulas não é tratado como novato', async ({ logado: page, banco }) => {
@@ -34,7 +39,7 @@ test.describe('onde estou', () => {
     // O defeito: `primeiraVez` vinha só de tentativas registradas, então duas
     // aulas concluídas ainda mostravam "Comece por aqui" e "Começar aula".
     await expect(page.getByText('Comece por aqui')).toHaveCount(0);
-    await expect(page.getByText('Aula 3 de 10')).toBeVisible();
+    await expect(page.getByText(`Aula 3 de ${TOTAL}`)).toBeVisible();
     await expect(page.getByRole('link', { name: /Continuar aprendendo/ })).toBeVisible();
   });
 
@@ -95,8 +100,8 @@ test.describe('o que vem depois', () => {
 
     await expect(page.getByRole('heading', { name: 'Seu caminho' })).toBeVisible();
 
-    // A trilha tem 10 aulas; a janela é curta de propósito, senão empurraria o
-    // resto da página para baixo da dobra.
+    // A janela é curta de propósito, senão empurraria o resto da página para
+    // baixo da dobra — independentemente do tamanho da trilha.
     const passos = await page.locator('main ol li').count();
     expect(passos).toBeGreaterThanOrEqual(3);
     expect(passos).toBeLessThanOrEqual(6);

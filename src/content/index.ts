@@ -30,6 +30,9 @@ import { lessonObjetos } from './lessons/js-07-objetos';
 import { lessonMetodosArray } from './lessons/js-08-metodos-array';
 import { lessonStrings } from './lessons/js-09-strings';
 import { lessonErros } from './lessons/js-10-erros';
+import { lessonEscopo } from './lessons/js-11-escopo';
+import { lessonClosures } from './lessons/js-12-closures';
+import { lessonCallbacks } from './lessons/js-13-callbacks';
 import { lessonDecompor } from './lessons/logica-01-decompor';
 import { lessonCasosExtremos } from './lessons/logica-02-casos-extremos';
 import { lessonSimular } from './lessons/logica-03-simular';
@@ -57,6 +60,9 @@ const lessons: Lesson[] = [
   lessonMetodosArray,
   lessonStrings,
   lessonErros,
+  lessonEscopo,
+  lessonClosures,
+  lessonCallbacks,
   lessonDecompor,
   lessonCasosExtremos,
   lessonSimular,

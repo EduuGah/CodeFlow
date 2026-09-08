@@ -7,6 +7,9 @@ export default defineConfig({
     // Logica pura roda em node, que e mais rapido. Teste de componente precisa
     // de DOM, e o sufixo .tsx e o que distingue os dois.
     environment: 'node',
+    // Um exercício de callback espera de verdade: cada teste tem prazo de 2s no
+    // sandbox, e o padrão de 5s do Vitest reprovaria por tempo, não por defeito.
+    testTimeout: 20_000,
     environmentMatchGlobs: [['**/*.test.tsx', 'jsdom']],
     setupFiles: ['./src/test-setup.ts'],
     // As migrações também são testadas: uma view citando coluna inexistente só

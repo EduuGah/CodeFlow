@@ -68,6 +68,50 @@ export const PROPERTY_RUNS_MAX = 200;
  */
 export const PROPERTY_SHRINK_MAX = 60;
 
+/**
+ * Prazo de cada teste, em milissegundos.
+ *
+ * Sem ele, um exercício de callback trava para sempre quando o aluno esquece de
+ * chamar o callback: a asserção espera uma promessa que ninguém resolve. E travar
+ * é o pior retorno possível — a tela fica rodando e não diz nada.
+ *
+ * O prazo transforma a trava numa frase que ensina.
+ */
+export const TEST_TIMEOUT_MS = 2000;
+
+/**
+ * Janela para o que ficou agendado terminar antes de fechar a saída.
+ *
+ * `setTimeout(fn, 0)` roda depois do código atual, então sem esta espera o
+ * `console.log` de dentro dele não entraria na saída — e uma aula sobre ordem de
+ * execução não teria como mostrar justamente o que ela ensina.
+ */
+export const SETTLE_MAX_MS = 300;
+
+/**
+ * Espera o que ficou agendado terminar, enquanto a saída continuar crescendo.
+ *
+ * `setTimeout(fn, 0)` só roda depois que o código atual acaba. Sem esta janela, o
+ * `console.log` de dentro dele ficaria de fora da saída — e uma aula sobre ordem
+ * de execução não conseguiria demonstrar o que ensina.
+ *
+ * Para quando a saída para de crescer, e não fica esperando o teto à toa: um
+ * programa comum sai daqui em poucos milissegundos.
+ */
+async function esperarAgendados(medir: () => number): Promise<void> {
+  const passo = 10;
+  let quietas = 0;
+  let anterior = medir();
+
+  for (let esperado = 0; esperado < SETTLE_MAX_MS && quietas < 2; esperado += passo) {
+    await new Promise((resolve) => setTimeout(resolve, passo));
+
+    const agora = medir();
+    quietas = agora === anterior ? quietas + 1 : 0;
+    anterior = agora;
+  }
+}
+
 function formatArg(arg: unknown): string {
   if (typeof arg === 'string') return arg;
   if (arg instanceof Error) return `${arg.name}: ${arg.message}`;
@@ -228,7 +272,16 @@ function expressaoDeTeste(test: SandboxTest): string {
   return `
         (async function () {
           try {
-            ${test.assertion}
+            await Promise.race([
+              (async function () { ${test.assertion} })(),
+              new Promise(function (_, rejeitar) {
+                setTimeout(function () {
+                  rejeitar(new Error(
+                    'O teste não terminou em ${TEST_TIMEOUT_MS}ms. Se o exercício usa callback ou promise, confira se o seu código chega a avisar que terminou.'
+                  ));
+                }, ${TEST_TIMEOUT_MS});
+              })
+            ]);
             return { passed: true, message: ${JSON.stringify(test.description)} };
           } catch (err) {
             return { passed: false, message: err && err.message ? err.message : String(err) };
@@ -248,6 +301,15 @@ function expressaoDePropriedade(propriedade: SandboxProperty): string {
         (async function () {
           var descricao = ${descricao};
           var aleatorio = __cfRnd(__cfSemente(descricao));
+          // O mesmo prazo dos casos fixos: sem ele, um exercício de callback em
+          // que o aluno esqueceu de avisar trava o laço inteiro.
+          var prazo = new Promise(function (_, rejeitar) {
+            setTimeout(function () {
+              rejeitar(new Error(
+                'A propriedade não terminou em ${TEST_TIMEOUT_MS}ms. Se o exercício usa callback ou promise, confira se o seu código chega a avisar que terminou.'
+              ));
+            }, ${TEST_TIMEOUT_MS});
+          });
 
           // As sondas rodam antes do sorteio. Um gerador uniforme quase nunca
           // acerta o caso extremo — em 50 sorteios de 0 a 99, o zero sai em
@@ -262,6 +324,7 @@ function expressaoDePropriedade(propriedade: SandboxProperty): string {
           async function verificar(caso) { ${propriedade.check} }
 
           try {
+            return await Promise.race([prazo, (async function () {
             for (var i = 0; i < ${runs}; i++) {
               rnd = i < sondas.length ? sondas[i] : aleatorio;
               var caso = await gerar();
@@ -279,6 +342,7 @@ function expressaoDePropriedade(propriedade: SandboxProperty): string {
             }
 
             return { passed: true, message: descricao + ' (${runs} casos)' };
+            })()]);
           } catch (err) {
             return {
               passed: false,
@@ -358,6 +422,9 @@ export async function runProgram(
   try {
     const program = new Function(buildProgram(code, tests, properties));
     const testResults = (await program()) as SandboxTestResult[];
+
+    await esperarAgendados(() => logs.length);
+
     return { logs, testResults };
   } catch (error) {
     // Erro de sintaxe (na construção) ou de execução do código do aluno.
