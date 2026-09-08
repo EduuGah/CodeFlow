@@ -69,6 +69,56 @@ console.log(total);`,
     {
       kind: 'exercise',
       exercise: {
+        id: 'ex-js-5-lacuna-return',
+        type: 'fill-blank',
+        prompt:
+          'A estrutura da função já está pronta. Falta a parte que **devolve** o resultado para quem chamou.',
+        concepts: ['funcoes'],
+        difficulty: 'iniciante',
+        tags: ['javascript', 'funcoes'],
+        template: `function areaDoRetangulo(largura, altura) {
+  const area = largura {{1}} altura;
+  {{2}} area;
+}`,
+        blanks: [
+          { placeholder: 'operador', size: 8 },
+          { placeholder: 'palavra-chave', size: 10 },
+        ],
+        tests: [
+          {
+            description: 'areaDoRetangulo(3, 4) devolve 12',
+            assertion: `if (areaDoRetangulo(3, 4) !== 12) throw new Error("areaDoRetangulo(3, 4) deveria devolver 12, mas devolveu " + areaDoRetangulo(3, 4) + ".");`,
+          },
+          {
+            description: 'areaDoRetangulo(1, 1) devolve 1',
+            assertion: `if (areaDoRetangulo(1, 1) !== 1) throw new Error("areaDoRetangulo(1, 1) deveria devolver 1, mas devolveu " + areaDoRetangulo(1, 1) + ".");`,
+          },
+        ],
+        properties: [
+          {
+            description: 'a área é sempre largura vezes altura',
+            generate: `return { largura: Math.floor(rnd() * 50), altura: Math.floor(rnd() * 50) };`,
+            check: `
+              const esperado = caso.largura * caso.altura;
+              const obtido = areaDoRetangulo(caso.largura, caso.altura);
+              if (obtido !== esperado) {
+                throw new Error("areaDoRetangulo(" + caso.largura + ", " + caso.altura + ") deveria devolver " + esperado + ", mas devolveu " + obtido + ".");
+              }
+            `,
+          },
+        ],
+        explanation:
+          '`return` entrega o valor para quem chamou a função. Sem ele, a função executa, calcula, e devolve `undefined` — o cálculo acontece e se perde.',
+        hints: [
+          'A primeira lacuna é uma conta: área de retângulo é largura vezes altura.',
+          'A segunda é a palavra que faz a função **entregar** um valor de volta.',
+        ],
+        solution: ['*', 'return'],
+      },
+    },
+    {
+      kind: 'exercise',
+      exercise: {
         id: 'ex-js-5-media',
         type: 'code',
         prompt: `Crie a função \`media(a, b, c)\` que **retorna** a média aritmética dos três números.\n\nExemplo: \`media(6, 7, 8)\` devolve 7.`,

@@ -9,6 +9,7 @@ import { buildLessonSteps } from '../lib/lesson-steps';
 import { celebrar } from '../lib/celebrar';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { CodeExerciseStep } from '../components/lesson/CodeExerciseStep';
+import { FillBlank } from '../components/lesson/FillBlank';
 import { LessonBlocks } from '../components/lesson/LessonBlocks';
 import { MultipleChoice } from '../components/lesson/MultipleChoice';
 import { PredictOutput } from '../components/lesson/PredictOutput';
@@ -203,6 +204,14 @@ export function Lesson() {
             exercise={passo.exercise}
             lessonId={lesson.id}
             language={lesson.language}
+            onSolved={() => marcarResolvido(passo.exercise.id)}
+          />
+        )}
+
+        {passo.kind === 'exercise' && passo.exercise.type === 'fill-blank' && (
+          <FillBlank
+            exercise={passo.exercise}
+            lessonId={lesson.id}
             onSolved={() => marcarResolvido(passo.exercise.id)}
           />
         )}

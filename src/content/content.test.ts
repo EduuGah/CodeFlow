@@ -10,7 +10,8 @@ import {
   listProjects,
   listTracks,
 } from './index';
-import type { CodeExercise, Exercise, Lesson } from './types';
+import { preencher } from '../client/lib/fill-blank';
+import type { CodeExercise, Exercise, FillBlankExercise, Lesson } from './types';
 
 /**
  * Suíte de integridade do conteúdo.
@@ -33,9 +34,69 @@ const codeExercises = allExercises.filter(
   (item): item is { lesson: Lesson; exercise: CodeExercise } => item.exercise.type === 'code'
 );
 
+const fillBlankExercises = allExercises.filter(
+  (item): item is { lesson: Lesson; exercise: FillBlankExercise } =>
+    item.exercise.type === 'fill-blank'
+);
+
 it('o catálogo não está vazio', () => {
   expect(allLessons.length).toBeGreaterThan(0);
   expect(codeExercises.length).toBeGreaterThan(0);
+});
+
+describe('exercícios de lacuna', () => {
+  it.each(fillBlankExercises.map(({ exercise }) => [exercise.id, exercise] as const))(
+    '%s: a solução declarada preenche e passa',
+    (_id, exercise) => {
+      // Sem solução declarada não há como provar que o exercício é resolvível —
+      // e um molde impossível só apareceria para o aluno.
+      expect(exercise.solution, 'exercício de lacuna precisa declarar uma solução').toBeDefined();
+
+      const resultado = runProgram(
+        preencher(exercise.template, exercise.solution!),
+        exercise.tests,
+        exercise.properties
+      );
+
+      expect(resultado.error, 'a solução não deveria lançar erro').toBeUndefined();
+
+      const falhas = resultado.testResults.filter((t) => !t.passed).map((t) => t.message);
+      expect(falhas, 'a solução deveria passar em tudo').toEqual([]);
+    }
+  );
+
+  it.each(fillBlankExercises.map(({ exercise }) => [exercise.id, exercise] as const))(
+    '%s: com as lacunas vazias NÃO passa',
+    (_id, exercise) => {
+      const vazio = exercise.blanks.map(() => '');
+      const resultado = runProgram(
+        preencher(exercise.template, vazio),
+        exercise.tests,
+        exercise.properties
+      );
+
+      const todosPassaram =
+        resultado.testResults.length > 0 && resultado.testResults.every((t) => t.passed);
+
+      expect(todosPassaram, 'o exercício passa sem o aluno preencher nada').toBe(false);
+    }
+  );
+
+  it.each(fillBlankExercises.map(({ exercise }) => [exercise.id, exercise] as const))(
+    '%s: a dica não entrega a resposta',
+    (_id, exercise) => {
+      // Uma dica que contém a resposta literal transforma o exercício em cópia.
+      for (const dica of exercise.hints) {
+        for (const resposta of exercise.solution ?? []) {
+          if (resposta.length < 3) continue;
+          expect(
+            dica.includes(resposta),
+            `a dica "${dica}" contém a resposta "${resposta}"`
+          ).toBe(false);
+        }
+      }
+    }
+  );
 });
 
 describe('exercícios de código', () => {

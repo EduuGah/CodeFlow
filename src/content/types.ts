@@ -107,6 +107,34 @@ export interface CodeExercise extends ExerciseBase {
   solution?: string;
 }
 
+/**
+ * Preenche as partes que carregam a ideia, com a estrutura já dada.
+ *
+ * Ocupa o degrau entre a múltipla escolha e o exercício de código: o aluno
+ * entende o que precisa acontecer mas ainda não monta a estrutura sozinho.
+ *
+ * A correção roda os testes contra o código preenchido, e não compara texto com
+ * um gabarito. Comparar recusaria `n * 2` porque o gabarito dizia `2 * n`, e
+ * ensinaria a adivinhar o que o professor quer.
+ */
+export interface FillBlankExercise extends ExerciseBase {
+  type: 'fill-blank';
+  /** Código com as lacunas marcadas: `{{1}}`, `{{2}}`… numeradas a partir de 1. */
+  template: string;
+  /** Uma entrada por lacuna, na ordem da numeração. */
+  blanks: Array<{
+    /** Texto de apoio dentro do campo vazio. Nunca a resposta. */
+    placeholder?: string;
+    /** Largura sugerida em caracteres, para o campo não desalinhar o código. */
+    size?: number;
+  }>;
+  tests: TestCase[];
+  properties?: ExerciseProperty[];
+  /** Por que a resposta funciona. Aparece depois de acertar. */
+  explanation: string;
+  solution?: string[];
+}
+
 /** Escolhe entre alternativas. */
 export interface MultipleChoiceExercise extends ExerciseBase {
   type: 'multiple-choice';
@@ -128,7 +156,11 @@ export interface PredictOutputExercise extends ExerciseBase {
  * erro, arraste e solte…) é estender esta união — nenhuma página precisa saber
  * de todos os tipos, só dos que renderiza (§315).
  */
-export type Exercise = CodeExercise | MultipleChoiceExercise | PredictOutputExercise;
+export type Exercise =
+  | CodeExercise
+  | FillBlankExercise
+  | MultipleChoiceExercise
+  | PredictOutputExercise;
 
 /** Blocos que compõem uma aula. Nem toda aula usa todos (§316). */
 export type LessonBlock =

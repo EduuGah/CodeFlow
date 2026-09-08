@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { problemasDoMolde } from '../client/lib/fill-blank';
+
 /**
  * Validação de conteúdo (§295). Roda uma vez, no carregamento, e falha alto em
  * desenvolvimento: um exercício sem teste ou uma trilha apontando para uma aula
@@ -56,6 +58,38 @@ export const exerciseSchema = z.discriminatedUnion('type', [
     properties: z.array(propertySchema).optional(),
     solution: z.string().optional(),
   }),
+  z
+    .object({
+      ...exerciseBase,
+      type: z.literal('fill-blank'),
+      template: z.string().min(1),
+      blanks: z
+        .array(z.object({ placeholder: z.string().optional(), size: z.number().int().positive().optional() }))
+        .min(1, 'exercício de lacuna precisa de ao menos uma lacuna'),
+      tests: z.array(testCaseSchema).min(1, 'exercício de lacuna precisa de ao menos um teste'),
+      properties: z.array(propertySchema).optional(),
+      explanation: z.string().min(1),
+      solution: z.array(z.string()).optional(),
+    })
+    // `superRefine` porque a mensagem depende do valor: dizer qual lacuna está
+    // faltando é a diferença entre uma pista e um "molde inválido".
+    .superRefine((ex, ctx) => {
+      // Um molde com {{1}} e {{3}} deixa a segunda lacuna sem campo na tela, e o
+      // aluno vê um exercício que não tem como resolver.
+      for (const problema of problemasDoMolde(ex.template, ex.blanks.length)) {
+        ctx.addIssue({ code: 'custom', message: problema, path: ['template'] });
+      }
+
+      // Sem uma resposta por lacuna, o CI não consegue provar que o exercício é
+      // resolvível.
+      if (ex.solution && ex.solution.length !== ex.blanks.length) {
+        ctx.addIssue({
+          code: 'custom',
+          message: `a solução tem ${ex.solution.length} respostas para ${ex.blanks.length} lacunas`,
+          path: ['solution'],
+        });
+      }
+    }),
   z
     .object({
       ...exerciseBase,
