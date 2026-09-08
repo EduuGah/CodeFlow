@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
 import confetti from 'canvas-confetti';
 
@@ -33,6 +33,11 @@ import {
  *
  * O avanço nunca é travado. Quem quiser pular um exercício e voltar depois
  * pode — bloquear seria transformar dificuldade em parede.
+ *
+ * Trocar de passo move o foco para o conteúdo. Sem isso o botão "Continuar"
+ * fica no rodapé com o foco parado nele enquanto a tela toda mudou acima: quem
+ * navega por teclado ou leitor de tela não tem como saber o que apareceu, e a
+ * rolagem ainda estaria no meio do passo anterior.
  */
 export function Lesson() {
   const { id } = useParams();
@@ -42,6 +47,10 @@ export function Lesson() {
   const steps = useMemo(() => (lesson ? buildLessonSteps(lesson) : []), [lesson]);
 
   const [indice, setIndice] = useState(0);
+  const conteudoRef = useRef<HTMLElement>(null);
+  // O primeiro passo não move o foco: roubar o foco de quem acabou de chegar na
+  // página é pior do que deixá-lo no começo do documento.
+  const montado = useRef(false);
   const [resolvidos, setResolvidos] = useState<Set<string>>(new Set());
   const [completedLessons, setCompletedLessons] = useState<string[]>([]);
 
@@ -50,6 +59,18 @@ export function Lesson() {
     setIndice(0);
     setResolvidos(new Set());
   }, [id]);
+
+  useEffect(() => {
+    if (!montado.current) {
+      montado.current = true;
+      return;
+    }
+
+    conteudoRef.current?.focus();
+    // O passo novo começa do começo. Sem isto, sair de um passo longo de leitura
+    // deixa o passo seguinte já rolado até o meio.
+    window.scrollTo({ top: 0 });
+  }, [indice]);
 
   useEffect(() => {
     let ativo = true;
@@ -139,7 +160,16 @@ export function Lesson() {
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-6">
+      {/* `tabIndex={-1}` torna o conteúdo alvo de foco por script sem entrar na
+          ordem de tabulação. O anel fica suprimido porque um contorno em volta de
+          toda a área de conteúdo lê como falha de renderização, não como pista:
+          o indicador que orienta é o dos controles dentro dela. */}
+      <main
+        ref={conteudoRef}
+        tabIndex={-1}
+        aria-label={`Passo ${indice + 1} de ${steps.length}`}
+        className="mx-auto w-full max-w-2xl flex-1 px-4 py-6 focus-visible:outline-none"
+      >
         {indice === 0 && (
           <p className="mb-5 flex items-start gap-2 rounded-lg bg-brand-50 p-3 text-sm leading-relaxed text-brand-700">
             <IconTarget size={17} className="mt-0.5 shrink-0" />

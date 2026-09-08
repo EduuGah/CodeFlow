@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { IconCheckCircle, IconCloseCircle } from '../ui/Icon';
 import type { MultipleChoiceExercise } from '../../../content/types';
 import { Button } from '../ui/Button';
 import { MarkdownReader } from '../ui/MarkdownReader';
 import { HintPanel } from './HintPanel';
 import { useRecordAttempt } from '../../hooks/useRecordAttempt';
+import { useFocusRescue } from '../../hooks/useFocusRescue';
 
 /**
  * Exercício de múltipla escolha.
@@ -28,6 +29,11 @@ export function MultipleChoice({
 
   const registrar = useRecordAttempt();
   const acertou = selecionada === exercise.correctIndex;
+
+  // Acertar remove o botão de verificar; o retorno assume o lugar dele na ordem
+  // de tabulação para o foco não cair no corpo do documento.
+  const retornoRef = useRef<HTMLDivElement>(null);
+  useFocusRescue(retornoRef, enviada && acertou);
 
   const verificar = () => {
     setEnviada(true);
@@ -104,7 +110,9 @@ export function MultipleChoice({
 
       {enviada && (
         <div
+          ref={retornoRef}
           role="status"
+          tabIndex={-1}
           className={`mt-4 rounded-lg border p-3 ${
             acertou ? 'border-success-200 bg-success-50' : 'border-energy-200 bg-energy-50'
           }`}

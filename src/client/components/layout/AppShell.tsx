@@ -25,6 +25,11 @@ import { StudentDataProvider } from '../../contexts/StudentDataContext';
  *
  * Todo item aponta para uma tela que existe. Um destino vazio seria o mesmo
  * problema do botão que não faz nada.
+ *
+ * A ordem no DOM não é a mesma nas duas formas, e isso é intencional. No celular
+ * a barra vem **depois** do conteúdo, então quem usa teclado chega ao conteúdo de
+ * primeira. No desktop a lateral vem antes, por causa do layout — daí o link de
+ * pulo, que evita repassar quatro itens de menu em cada tela.
  */
 
 interface Destino {
@@ -98,6 +103,15 @@ export function AppShell() {
   return (
     <StudentDataProvider>
       <div className="min-h-screen bg-canvas">
+        {/* Invisível até receber foco: só quem navega por teclado precisa dele, e
+            para essa pessoa ele precisa aparecer de verdade. */}
+        <a
+          href="#conteudo"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-ink focus:px-4 focus:py-2.5 focus:text-sm focus:font-bold focus:text-white"
+        >
+          Pular para o conteúdo
+        </a>
+
         {/* Lateral: só a partir de md, onde há espaço horizontal sobrando. */}
         <aside className="fixed inset-y-0 left-0 hidden w-60 flex-col border-r border-line bg-surface p-4 md:flex">
           <div className="mb-6 flex items-center gap-2.5 px-2 pt-2">
@@ -117,7 +131,11 @@ export function AppShell() {
         {/* pb-24 no mobile reserva a altura da barra inferior, para o conteúdo
             final não ficar escondido atrás dela. */}
         <div className="md:pl-60">
-          <main className="mx-auto w-full max-w-3xl px-4 pb-24 pt-4 sm:px-6 md:pb-10 md:pt-8">
+          <main
+            id="conteudo"
+            tabIndex={-1}
+            className="mx-auto w-full max-w-3xl px-4 pb-24 pt-4 focus-visible:outline-none sm:px-6 md:pb-10 md:pt-8"
+          >
             <Outlet />
           </main>
         </div>

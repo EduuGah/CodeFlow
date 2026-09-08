@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import Editor from '@monaco-editor/react';
 import confetti from 'canvas-confetti';
@@ -36,6 +36,16 @@ import {
  *
  * As abas existem só no celular: no desktop os dois painéis ficam sempre
  * visíveis, e o estado da aba é ignorado pelo CSS.
+ *
+ * As abas seguem o padrão ARIA por inteiro, e não só pelo `role`. Anunciar "aba,
+ * 1 de 2" e depois ignorar as setas é pior do que não anunciar nada: o leitor de
+ * tela ensina uma interação que a página não tem. Então só a aba ativa entra na
+ * ordem de tabulação, e as setas movem entre elas.
+ *
+ * No desktop os dois painéis continuam com `role="tabpanel"` embora a lista de
+ * abas esteja oculta — lá eles são lidos como duas regiões nomeadas, que é o
+ * comportamento desejado. Trocar o `role` por largura exigiria repetir o
+ * breakpoint em JavaScript, e duas fontes para a mesma medida divergem.
  */
 
 type Aba = 'enunciado' | 'codigo';
@@ -137,6 +147,21 @@ export function ProjectWorkspace() {
     { id: 'codigo', label: 'Código', Icone: IconPlay },
   ];
 
+  const abaRefs = useRef(new Map<Aba, HTMLButtonElement>());
+
+  /** Setas trocam de aba e levam o foco junto, como manda o padrão. */
+  const navegarAbas = (evento: KeyboardEvent) => {
+    const passo = evento.key === 'ArrowRight' ? 1 : evento.key === 'ArrowLeft' ? -1 : 0;
+    if (passo === 0) return;
+
+    evento.preventDefault();
+    const atual = abas.findIndex((a) => a.id === aba);
+    const proxima = abas[(atual + passo + abas.length) % abas.length].id;
+
+    setAba(proxima);
+    abaRefs.current.get(proxima)?.focus();
+  };
+
   return (
     <div className="flex min-h-screen flex-col bg-canvas">
       <header className="sticky top-0 z-30 border-b border-line bg-surface">
@@ -164,13 +189,26 @@ export function ProjectWorkspace() {
         </div>
 
         {/* Abas só no celular: no desktop os dois painéis ficam lado a lado. */}
-        <div className="flex border-t border-line md:hidden" role="tablist">
+        <div
+          className="flex border-t border-line md:hidden"
+          role="tablist"
+          aria-label="Painéis do projeto"
+          onKeyDown={navegarAbas}
+        >
           {abas.map(({ id: abaId, label, Icone }) => (
             <button
               key={abaId}
+              ref={(el) => {
+                if (el) abaRefs.current.set(abaId, el);
+              }}
+              id={`aba-${abaId}`}
               type="button"
               role="tab"
               aria-selected={aba === abaId}
+              aria-controls={`painel-${abaId}`}
+              // Uma parada de Tab para o conjunto, não uma por aba: dentro do
+              // grupo quem navega é a seta.
+              tabIndex={aba === abaId ? 0 : -1}
               onClick={() => setAba(abaId)}
               className={`flex flex-1 items-center justify-center gap-2 border-b-2 py-3 text-sm font-semibold transition-colors ${
                 aba === abaId
@@ -188,6 +226,9 @@ export function ProjectWorkspace() {
       <div className="flex flex-1 flex-col md:flex-row">
         {/* Enunciado e critérios */}
         <section
+          id="painel-enunciado"
+          role="tabpanel"
+          aria-labelledby="aba-enunciado"
           className={`flex-1 overflow-y-auto border-line px-4 py-5 md:block md:w-5/12 md:shrink-0 md:border-r ${
             aba === 'enunciado' ? 'block' : 'hidden'
           }`}
@@ -220,6 +261,9 @@ export function ProjectWorkspace() {
 
         {/* Editor e console */}
         <section
+          id="painel-codigo"
+          role="tabpanel"
+          aria-labelledby="aba-codigo"
           className={`flex flex-1 flex-col md:flex ${aba === 'codigo' ? 'flex' : 'hidden'}`}
         >
           <div className="min-h-[320px] flex-1 md:min-h-0">

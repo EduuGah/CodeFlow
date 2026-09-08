@@ -41,4 +41,9 @@ if (typeof window !== 'undefined') {
       disconnect() {}
     };
   }
+
+  // O jsdom não tem layout, então `scrollTo` lança "Not implemented" e polui o
+  // stderr do CI. Ruído constante ensina a ignorar o stderr, que é onde os
+  // problemas de verdade aparecem.
+  window.scrollTo = vi.fn() as unknown as typeof window.scrollTo;
 }

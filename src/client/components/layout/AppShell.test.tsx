@@ -1,4 +1,5 @@
 import { render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -122,5 +123,59 @@ describe('conteúdo da aba', () => {
   ])('%s renderiza a tela correspondente', (rota, texto) => {
     abrir(rota);
     expect(screen.getByText(texto)).toBeInTheDocument();
+  });
+});
+
+describe('navegação por teclado', () => {
+  it('o link de pulo é a primeira parada de Tab', async () => {
+    const user = userEvent.setup();
+    abrir('/app');
+
+    await user.tab();
+    expect(document.activeElement).toHaveAccessibleName('Pular para o conteúdo');
+  });
+
+  it('o link de pulo aponta para um elemento que existe', () => {
+    const { container } = abrir('/app');
+
+    const pulo = screen.getByRole('link', { name: 'Pular para o conteúdo' });
+    const destino = pulo.getAttribute('href')!;
+    expect(destino.startsWith('#')).toBe(true);
+
+    // Um link de pulo apontando para o vazio é pior que nenhum: parece
+    // acessibilidade e não leva a lugar algum.
+    expect(container.ownerDocument.querySelector(destino)).toBe(screen.getByRole('main'));
+  });
+
+  it('o destino do pulo aceita foco', () => {
+    abrir('/app');
+
+    // Sem `tabindex="-1"`, saltar para a âncora rola a página mas deixa o foco
+    // atrás, no menu — e a tabulação seguinte volta para os itens de navegação.
+    expect(screen.getByRole('main')).toHaveAttribute('tabindex', '-1');
+  });
+
+  it('o conteúdo não vira uma parada extra de Tab', async () => {
+    const user = userEvent.setup();
+    abrir('/app');
+
+    for (let i = 0; i < 12; i++) {
+      await user.tab();
+      expect(document.activeElement).not.toBe(screen.getByRole('main'));
+    }
+  });
+
+  it('não há armadilha: a tabulação percorre a navegação inteira e sai', async () => {
+    const user = userEvent.setup();
+    abrir('/app');
+
+    const vistos = new Set<Element>();
+    for (let i = 0; i < 12; i++) {
+      await user.tab();
+      if (document.activeElement) vistos.add(document.activeElement);
+    }
+
+    // Link de pulo + os destinos de cada barra, todos alcançados.
+    expect(vistos.size).toBeGreaterThanOrEqual(1 + ROTAS_REAIS.length);
   });
 });
