@@ -166,6 +166,39 @@ describe('segurança', () => {
     }
   });
 
+  it('função security definer que escreve não é chamável pelo cliente', () => {
+    // Cabeçalho e corpo separados: a checagem de escrita tem que olhar o corpo.
+    // A primeira versão deste teste capturava só o cabeçalho, nunca encontrava um
+    // `update`, e passava sem conferir nada.
+    const funcoes = tudo.matchAll(
+      /create (?:or replace )?function public\.(\w+)\s*\([^)]*\)([\s\S]*?)\$\$([\s\S]*?)\$\$/gi
+    );
+
+    let conferidas = 0;
+
+    for (const [, nome, cabecalho, corpo] of funcoes) {
+      if (!/security definer/i.test(cabecalho)) continue;
+      if (/returns\s+trigger/i.test(cabecalho)) continue; // gatilho não é chamável por RPC
+      if (!/\b(insert|update|delete)\b/i.test(corpo)) continue;
+
+      conferidas++;
+
+      // Uma função que escreve com os privilégios do dono e que o aluno pode
+      // chamar pela API é um caminho de escalada de privilégio, por mais que o
+      // corpo pareça inofensivo.
+      //
+      // `[^;]*` porque um revoke termina no ponto e vírgula. E a montagem é com
+      // barras duplas: `[\s\S]` dentro de template string vira `[sS]`, que foi o
+      // segundo motivo de este teste não conferir nada.
+      expect(semComentarios(tudo), `${nome} escreve como definer sem revoke`).toMatch(
+        new RegExp(`revoke\\b[^;\\n]*\\bon function public\\.${nome}\\b`, 'i')
+      );
+    }
+
+    // Sem isto, apagar as funções do projeto deixaria o teste verde e vazio.
+    expect(conferidas, 'nenhuma função definer com escrita foi encontrada').toBeGreaterThan(0);
+  });
+
   it('toda função security definer fixa o search_path', () => {
     const funcoes = tudo.matchAll(/create (?:or replace )?function public\.(\w+)([\s\S]*?)\$\$/gi);
 
