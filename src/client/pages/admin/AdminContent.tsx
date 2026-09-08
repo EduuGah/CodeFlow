@@ -85,6 +85,13 @@ export function AdminContent() {
         <p className="mt-1 text-sm leading-relaxed text-ink-soft">
           Saúde do catálogo e como os alunos estão reagindo a ele.
         </p>
+
+        <Link
+          to="/admin/novo-exercicio"
+          className="mt-4 inline-flex items-center gap-2 rounded-lg bg-ink px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-brand-900"
+        >
+          Criar exercício
+        </Link>
       </header>
 
       <section className="mb-10">

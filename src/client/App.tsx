@@ -14,6 +14,7 @@ import { Tracks } from './pages/app/Tracks';
 import { Practice } from './pages/app/Practice';
 import { Profile } from './pages/app/Profile';
 import { AdminContent } from './pages/admin/AdminContent';
+import { AdminNewExercise } from './pages/admin/AdminNewExercise';
 
 /**
  * Rotas.
@@ -56,6 +57,14 @@ function App() {
         element={
           <AdminRoute>
             <AdminContent />
+          </AdminRoute>
+        }
+      />
+      <Route
+        path="/admin/novo-exercicio"
+        element={
+          <AdminRoute>
+            <AdminNewExercise />
           </AdminRoute>
         }
       />
