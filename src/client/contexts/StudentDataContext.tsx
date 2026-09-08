@@ -5,7 +5,7 @@ import { useAuth } from './AuthContext';
 import { fetchAttempts, fetchFlashcardReviews, fetchProgress } from '../lib/progress';
 import { conceptsNeedingReview, masteryByConcept, overallStats, type Attempt, type ConceptMastery } from '../lib/mastery';
 import { computeAchievements, computeXp, levelFromXp } from '../lib/gamification';
-import { dueCount, type FlashcardReview } from '../lib/review';
+import { countCards, dueCount, type FlashcardReview } from '../lib/review';
 import { currentStreak, daysSinceLastStudy, lastActivity, unsolvedExerciseIds, type ResumePoint } from '../lib/study';
 
 /**
@@ -44,6 +44,13 @@ interface StudentData {
   totalExercises: number;
   /** Cartões vencidos hoje. */
   dueCards: number;
+  /**
+   * Separação entre reforço e material novo.
+   *
+   * `dueCards` junta os dois, e chamar tudo de "vencido" é falso para quem
+   * acabou de chegar — vira uma dívida que a pessoa não contraiu.
+   */
+  cards: { vencidos: number; novos: number; total: number };
 
   xp: ReturnType<typeof computeXp>;
   level: ReturnType<typeof levelFromXp>;
@@ -123,6 +130,7 @@ export function StudentDataProvider({ children }: { children: React.ReactNode })
       pendingExercises: unsolvedExerciseIds(todosExercicios, attempts),
       totalExercises: todosExercicios.length,
       dueCards: dueCount(listFlashcards(), reviews),
+      cards: countCards(listFlashcards(), reviews),
       xp,
       level: levelFromXp(xp.total),
       achievements: computeAchievements(entradaDeJogo),

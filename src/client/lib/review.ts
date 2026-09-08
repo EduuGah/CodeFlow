@@ -134,6 +134,25 @@ export function buildReviewSession(
     });
 }
 
+/**
+ * Separa o que venceu do que nunca foi visto.
+ *
+ * A contagem única misturava os dois, e a tela chamava tudo de "vencido". Para
+ * quem acabou de chegar isso é falso e soa como cobrança: 22 cartões vencidos no
+ * primeiro acesso é uma dívida que a pessoa não contraiu. São coisas diferentes —
+ * um é reforço de algo que já se viu, o outro é material novo.
+ */
+export function countCards(
+  cards: Flashcard[],
+  reviews: FlashcardReview[],
+  hoje: Date = new Date()
+): { vencidos: number; novos: number; total: number } {
+  const sessao = buildReviewSession(cards, reviews, [], hoje);
+  const novos = sessao.filter(({ state }) => state.dueOn === null).length;
+
+  return { vencidos: sessao.length - novos, novos, total: sessao.length };
+}
+
 /** Quantos cartões estão disponíveis para revisar hoje. */
 export function dueCount(
   cards: Flashcard[],

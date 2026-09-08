@@ -197,6 +197,8 @@ test('o cabeçalho fixo não cobre o conteúdo ao rolar', async ({ logado: page 
     };
   });
 
-  expect(sobreposicao.cabecalhoNoTopo).toBe(0);
-  expect(sobreposicao.rodapeEncostado).toBe(0);
+  // Tolerância de 1px: a medida vem de subtração de floats arredondada, e a
+  // exigência é "a barra está encostada", não um inteiro exato.
+  expect(Math.abs(sobreposicao.cabecalhoNoTopo)).toBeLessThanOrEqual(1);
+  expect(Math.abs(sobreposicao.rodapeEncostado)).toBeLessThanOrEqual(1);
 });

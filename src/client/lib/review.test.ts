@@ -5,6 +5,7 @@ import {
   buildReviewSession,
   cardState,
   describeNextInterval,
+  countCards,
   dueCount,
   INTERVALOS_EM_DIAS,
   type FlashcardReview,
@@ -176,5 +177,40 @@ describe('descrição do próximo intervalo', () => {
       revisao('fc-1', 'facil', '2026-02-01'),
     ]);
     expect(describeNextInterval(maduro, 'facil')).toContain('meses');
+  });
+});
+
+describe('vencido não é o mesmo que novo', () => {
+  const cartoes = [card('c1', ['variaveis']), card('c2', ['loops']), card('c3', ['funcoes'])];
+
+  it('quem nunca revisou não tem nada vencido', () => {
+    // 22 cartões "vencidos" no primeiro acesso é uma dívida que a pessoa não
+    // contraiu — e foi o que a tela inicial dizia.
+    const contagem = countCards(cartoes, []);
+
+    expect(contagem.vencidos).toBe(0);
+    expect(contagem.novos).toBe(3);
+    expect(contagem.total).toBe(3);
+  });
+
+  it('cartão revisado e vencido conta como vencido', () => {
+    const dia = new Date('2025-03-10T15:00:00');
+    const revisoes = [revisao('c1', 'facil', '2025-03-01')];
+
+    const contagem = countCards(cartoes, revisoes, dia);
+
+    expect(contagem.vencidos).toBe(1);
+    expect(contagem.novos).toBe(2);
+  });
+
+  it('cartão revisado e ainda no prazo não conta em nenhum dos dois', () => {
+    const dia = new Date('2025-03-02T15:00:00');
+    const revisoes = [revisao('c1', 'facil', '2025-03-01')];
+
+    const contagem = countCards(cartoes, revisoes, dia);
+
+    expect(contagem.vencidos).toBe(0);
+    expect(contagem.novos).toBe(2);
+    expect(contagem.total).toBe(2);
   });
 });
