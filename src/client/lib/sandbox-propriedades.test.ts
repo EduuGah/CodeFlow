@@ -28,24 +28,24 @@ function somarAte(n) {
 }`;
 
 describe('o chute deixa de funcionar', () => {
-  it('quem resolve de verdade passa', () => {
-    const r = runProgram(SOLUCAO, [], [somaAte]);
+  it('quem resolve de verdade passa', async () => {
+    const r = await runProgram(SOLUCAO, [], [somaAte]);
 
     expect(r.error).toBeUndefined();
     expect(r.testResults[0].passed).toBe(true);
     expect(r.testResults[0].message).toContain('50 casos');
   });
 
-  it('quem decora o caso fixo é reprovado', () => {
+  it('quem decora o caso fixo é reprovado', async () => {
     // Passaria num teste `somarAte(4) === 10`. É exatamente o buraco que a
     // propriedade fecha.
     const chute = 'function somarAte(n) { return n === 4 ? 10 : 0; }';
-    const r = runProgram(chute, [], [somaAte]);
+    const r = await runProgram(chute, [], [somaAte]);
 
     expect(r.testResults[0].passed).toBe(false);
   });
 
-  it('uma implementação diferente da referência passa igual', () => {
+  it('uma implementação diferente da referência passa igual', async () => {
     // A propriedade descreve o resultado, não o caminho.
     const comFormula = 'function somarAte(n) { return (n * (n + 1)) / 2; }';
     const comReduce = `
@@ -55,24 +55,24 @@ describe('o chute deixa de funcionar', () => {
       }`;
 
     for (const solucao of [comFormula, comReduce]) {
-      expect(runProgram(solucao, [], [somaAte]).testResults[0].passed).toBe(true);
+      expect((await runProgram(solucao, [], [somaAte])).testResults[0].passed).toBe(true);
     }
   });
 });
 
 describe('o mesmo exercício sorteia sempre os mesmos casos', () => {
-  it('duas execuções dão o mesmo resultado', () => {
+  it('duas execuções dão o mesmo resultado', async () => {
     // Sem determinismo, um exercício passaria hoje e falharia amanhã, e o CI
     // viraria loteria.
     const quaseCerto = 'function somarAte(n) { return n === 0 ? 1 : (n * (n + 1)) / 2; }';
 
-    const primeira = runProgram(quaseCerto, [], [somaAte]).testResults[0];
-    const segunda = runProgram(quaseCerto, [], [somaAte]).testResults[0];
+    const primeira = (await runProgram(quaseCerto, [], [somaAte])).testResults[0];
+    const segunda = (await runProgram(quaseCerto, [], [somaAte])).testResults[0];
 
     expect(primeira).toEqual(segunda);
   });
 
-  it('propriedades com descrições diferentes sorteiam sequências diferentes', () => {
+  it('propriedades com descrições diferentes sorteiam sequências diferentes', async () => {
     const registrar: SandboxProperty = {
       description: 'primeira',
       generate: 'return { n: Math.floor(rnd() * 1000) };',
@@ -82,8 +82,8 @@ describe('o mesmo exercício sorteia sempre os mesmos casos', () => {
     const outra = { ...registrar, description: 'segunda' };
     const codigo = 'var vistos = [];';
 
-    const a = runProgram(`${codigo}\nvar marca = "a";`, [], [registrar]);
-    const b = runProgram(`${codigo}\nvar marca = "b";`, [], [outra]);
+    const a = await runProgram(`${codigo}\nvar marca = "a";`, [], [registrar]);
+    const b = await runProgram(`${codigo}\nvar marca = "b";`, [], [outra]);
 
     // Ambas passam; o que importa é que a semente vem do texto da descrição.
     expect(a.testResults[0].passed).toBe(true);
@@ -92,18 +92,18 @@ describe('o mesmo exercício sorteia sempre os mesmos casos', () => {
 });
 
 describe('a falha aponta o caso mais simples que quebra', () => {
-  it('encolhe até o caso extremo em vez de mostrar o sorteado', () => {
+  it('encolhe até o caso extremo em vez de mostrar o sorteado', async () => {
     // Erra só quando n = 0. O sorteio provavelmente acha isso com algum número
     // grande primeiro; o encolhimento tem que chegar em 0.
     const erraNoZero = 'function somarAte(n) { return n === 0 ? 99 : (n * (n + 1)) / 2; }';
-    const r = runProgram(erraNoZero, [], [somaAte]);
+    const r = await runProgram(erraNoZero, [], [somaAte]);
 
     expect(r.testResults[0].passed).toBe(false);
     // "falhou com {"n":0}" — o caso extremo, não um sorteio sem significado.
     expect(r.testResults[0].message).toContain('"n":0');
   });
 
-  it('encolhe listas até o menor tamanho que ainda falha', () => {
+  it('encolhe listas até o menor tamanho que ainda falha', async () => {
     const somaLista: SandboxProperty = {
       description: 'somar([...]) devolve a soma dos itens',
       generate: `
@@ -120,7 +120,7 @@ describe('a falha aponta o caso mais simples que quebra', () => {
 
     // Quebra em qualquer lista não vazia: o menor contraexemplo tem um item.
     const quebrado = 'function somar(lista) { return lista.length === 0 ? 0 : -1; }';
-    const r = runProgram(quebrado, [], [somaLista]);
+    const r = await runProgram(quebrado, [], [somaLista]);
 
     expect(r.testResults[0].passed).toBe(false);
 
@@ -128,7 +128,7 @@ describe('a falha aponta o caso mais simples que quebra', () => {
     expect(caso.lista).toHaveLength(1);
   });
 
-  it('sonda os limites antes de sortear', () => {
+  it('sonda os limites antes de sortear', async () => {
     // Sem as sondas, o zero dependeria de sorte: em 50 sorteios de 0 a 99 ele
     // sai em menos da metade das execuções. E é exatamente o caso que o aluno
     // esquece de tratar.
@@ -138,16 +138,16 @@ describe('a falha aponta o caso mais simples que quebra', () => {
       check: 'if (caso.n === 0) throw new Error("achou o zero");',
     };
 
-    const r = runProgram('// nada', [], [registrados]);
+    const r = await runProgram('// nada', [], [registrados]);
 
     // O primeiro caso já é o extremo inferior.
     expect(r.testResults[0].passed).toBe(false);
     expect(r.testResults[0].message).toContain('"n":0');
   });
 
-  it('não trava quando tudo falha, inclusive o caso mais simples', () => {
+  it('não trava quando tudo falha, inclusive o caso mais simples', async () => {
     const sempreErra = 'function somarAte() { return NaN; }';
-    const r = runProgram(sempreErra, [], [somaAte]);
+    const r = await runProgram(sempreErra, [], [somaAte]);
 
     expect(r.testResults[0].passed).toBe(false);
     expect(r.testResults[0].message).toContain('falhou com');
@@ -155,28 +155,28 @@ describe('a falha aponta o caso mais simples que quebra', () => {
 });
 
 describe('erro do autor não vira aprovação silenciosa', () => {
-  it('gerador que lança reprova, em vez de passar sem verificar nada', () => {
+  it('gerador que lança reprova, em vez de passar sem verificar nada', async () => {
     const geradorQuebrado: SandboxProperty = {
       ...somaAte,
       generate: 'throw new Error("gerador com defeito");',
     };
 
-    const r = runProgram(SOLUCAO, [], [geradorQuebrado]);
+    const r = await runProgram(SOLUCAO, [], [geradorQuebrado]);
 
     // O pior resultado possível seria verde: um exercício que não testa nada.
     expect(r.testResults[0].passed).toBe(false);
     expect(r.testResults[0].message).toContain('gerador com defeito');
   });
 
-  it('função que o aluno não declarou reprova com nome do erro', () => {
-    const r = runProgram('// vazio', [], [somaAte]);
+  it('função que o aluno não declarou reprova com nome do erro', async () => {
+    const r = await runProgram('// vazio', [], [somaAte]);
     expect(r.testResults[0].passed).toBe(false);
   });
 });
 
 describe('convivência com os testes de caso', () => {
-  it('casos e propriedades aparecem juntos, na ordem certa', () => {
-    const r = runProgram(
+  it('casos e propriedades aparecem juntos, na ordem certa', async () => {
+    const r = await runProgram(
       SOLUCAO,
       [{ description: 'somarAte(4) devolve 10', assertion: 'if (somarAte(4) !== 10) throw new Error("x");' }],
       [somaAte]
@@ -188,25 +188,25 @@ describe('convivência com os testes de caso', () => {
     expect(r.testResults[1].message).toContain('50 casos');
   });
 
-  it('exercício sem propriedade não carrega os auxiliares', () => {
+  it('exercício sem propriedade não carrega os auxiliares', async () => {
     // Não é micro-otimização: o programa montado é o que o aluno depura quando
     // algo dá errado, e carregar sorteio e encolhimento num exercício que não os
     // usa só atrapalha.
-    const r = runProgram('var x = 1;', [{ description: 'ok', assertion: '' }]);
+    const r = await runProgram('var x = 1;', [{ description: 'ok', assertion: '' }]);
     expect(r.testResults[0].passed).toBe(true);
   });
 
-  it('o número de casos é limitado', () => {
+  it('o número de casos é limitado', async () => {
     const exagerado: SandboxProperty = { ...somaAte, runs: 100000 };
-    const r = runProgram(SOLUCAO, [], [exagerado]);
+    const r = await runProgram(SOLUCAO, [], [exagerado]);
 
     // O worker tem 3 segundos; cem mil execuções do código do aluno não cabem.
     expect(r.testResults[0].message).toContain('200 casos');
   });
 
-  it('o console do aluno continua capturado durante as propriedades', () => {
+  it('o console do aluno continua capturado durante as propriedades', async () => {
     const comLog = `${SOLUCAO}\nconsole.log('oi');`;
-    const r = runProgram(comLog, [], [somaAte]);
+    const r = await runProgram(comLog, [], [somaAte]);
 
     expect(r.logs).toContain('oi');
   });

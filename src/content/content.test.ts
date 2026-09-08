@@ -39,20 +39,54 @@ const fillBlankExercises = allExercises.filter(
     item.exercise.type === 'fill-blank'
 );
 
-it('o catálogo não está vazio', () => {
+it('o catálogo não está vazio', async () => {
   expect(allLessons.length).toBeGreaterThan(0);
   expect(codeExercises.length).toBeGreaterThan(0);
+});
+
+describe('armadilha do assíncrono', () => {
+  const todasAsAssercoes = allExercises.flatMap(({ exercise }) => {
+    if (exercise.type !== 'code' && exercise.type !== 'fill-blank') return [];
+
+    return [
+      ...exercise.tests.map((t) => ({ id: exercise.id, texto: t.assertion, onde: t.description })),
+      ...(exercise.properties ?? []).map((p) => ({
+        id: exercise.id,
+        texto: p.check,
+        onde: p.description,
+      })),
+    ];
+  });
+
+  it('nenhuma asserção usa .then() sem esperar o resultado', () => {
+    const suspeitas = todasAsAssercoes.filter(({ texto }) => {
+      const usaThen = /\.then\s*\(/.test(texto);
+      if (!usaThen) return false;
+
+      // `await algo.then(...)` e `return algo.then(...)` são seguros; o problema
+      // é a chamada solta.
+      return !/(await|return)\s+[^;]*\.then\s*\(/.test(texto);
+    });
+
+    // Uma promise não esperada reporta sucesso antes de resolver: o aluno vê
+    // "correto" para uma resposta errada. É o pior defeito possível num
+    // exercício, porque é silencioso e verde.
+    expect(
+      suspeitas.map((s) => `${s.id} — ${s.onde}`),
+      'asserção com .then() sem await: passaria antes de a promise resolver'
+    ).toEqual([]);
+  });
 });
 
 describe('exercícios de lacuna', () => {
   it.each(fillBlankExercises.map(({ exercise }) => [exercise.id, exercise] as const))(
     '%s: a solução declarada preenche e passa',
-    (_id, exercise) => {
+    async (_id, exercise) => {
       // Sem solução declarada não há como provar que o exercício é resolvível —
       // e um molde impossível só apareceria para o aluno.
       expect(exercise.solution, 'exercício de lacuna precisa declarar uma solução').toBeDefined();
 
-      const resultado = runProgram(
+      const resultado = await runProgram(
         preencher(exercise.template, exercise.solution!),
         exercise.tests,
         exercise.properties
@@ -67,9 +101,9 @@ describe('exercícios de lacuna', () => {
 
   it.each(fillBlankExercises.map(({ exercise }) => [exercise.id, exercise] as const))(
     '%s: com as lacunas vazias NÃO passa',
-    (_id, exercise) => {
+    async (_id, exercise) => {
       const vazio = exercise.blanks.map(() => '');
-      const resultado = runProgram(
+      const resultado = await runProgram(
         preencher(exercise.template, vazio),
         exercise.tests,
         exercise.properties
@@ -84,7 +118,7 @@ describe('exercícios de lacuna', () => {
 
   it.each(fillBlankExercises.map(({ exercise }) => [exercise.id, exercise] as const))(
     '%s: a dica não entrega a resposta',
-    (_id, exercise) => {
+    async (_id, exercise) => {
       // Uma dica que contém a resposta literal transforma o exercício em cópia.
       for (const dica of exercise.hints) {
         for (const resposta of exercise.solution ?? []) {
@@ -102,11 +136,11 @@ describe('exercícios de lacuna', () => {
 describe('exercícios de código', () => {
   it.each(codeExercises.map(({ lesson, exercise }) => [exercise.id, lesson.id, exercise] as const))(
     '%s: a solução de referência passa em todos os testes',
-    (_id, _lessonId, exercise) => {
+    async (_id, _lessonId, exercise) => {
       // Sem solução declarada, não há como garantir que o exercício é resolvível.
       expect(exercise.solution, 'exercício de código precisa declarar uma solução').toBeDefined();
 
-      const resultado = runProgram(`${exercise.initialCode}\n${exercise.solution}`, exercise.tests);
+      const resultado = await runProgram(`${exercise.initialCode}\n${exercise.solution}`, exercise.tests);
 
       expect(resultado.error, 'a solução não deveria lançar erro').toBeUndefined();
 
@@ -118,8 +152,8 @@ describe('exercícios de código', () => {
 
   it.each(codeExercises.map(({ exercise }) => [exercise.id, exercise] as const))(
     '%s: o código inicial NÃO passa (o exercício exige trabalho do aluno)',
-    (_id, exercise) => {
-      const resultado = runProgram(exercise.initialCode, exercise.tests, exercise.properties);
+    async (_id, exercise) => {
+      const resultado = await runProgram(exercise.initialCode, exercise.tests, exercise.properties);
       const todosPassaram =
         resultado.testResults.length > 0 && resultado.testResults.every((t) => t.passed);
 
@@ -131,11 +165,11 @@ describe('exercícios de código', () => {
 
   it.each(comPropriedades.map(({ exercise }) => [exercise.id, exercise] as const))(
     '%s: cada propriedade reprova o código inicial',
-    (_id, exercise) => {
+    async (_id, exercise) => {
       // Uma propriedade que passa com o esqueleto não está verificando nada — e
       // seria pior que a ausência dela, porque parece cobertura.
       for (const propriedade of exercise.properties!) {
-        const resultado = runProgram(exercise.initialCode, [], [propriedade]);
+        const resultado = await runProgram(exercise.initialCode, [], [propriedade]);
         const passou = resultado.testResults[0]?.passed === true;
 
         expect(passou, `a propriedade "${propriedade.description}" passa sem o aluno escrever nada`).toBe(
@@ -147,8 +181,8 @@ describe('exercícios de código', () => {
 
   it.each(codeExercises.map(({ exercise }) => [exercise.id, exercise] as const))(
     '%s: toda mensagem de falha é escrita para o aluno',
-    (_id, exercise) => {
-      const resultado = runProgram(exercise.initialCode, exercise.tests, exercise.properties);
+    async (_id, exercise) => {
+      const resultado = await runProgram(exercise.initialCode, exercise.tests, exercise.properties);
 
       for (const teste of resultado.testResults) {
         if (teste.passed) continue;
@@ -169,10 +203,10 @@ describe('exercícios de previsão de saída', () => {
 
   it.each(previsoes.map(({ exercise }) => [exercise.id, exercise] as const))(
     '%s: a saída declarada confere com a execução real',
-    (_id, exercise) => {
+    async (_id, exercise) => {
       if (exercise.type !== 'predict-output') throw new Error('filtro inconsistente');
 
-      const resultado = runProgram(exercise.code, []);
+      const resultado = await runProgram(exercise.code, []);
 
       expect(resultado.error, 'o código do enunciado não deveria lançar erro').toBeUndefined();
       // Declarar uma saída errada aqui ensinaria algo falso ao aluno.
@@ -186,7 +220,7 @@ describe('exercícios de múltipla escolha', () => {
 
   it.each(multiplas.map(({ exercise }) => [exercise.id, exercise] as const))(
     '%s: a alternativa correta existe na lista',
-    (_id, exercise) => {
+    async (_id, exercise) => {
       if (exercise.type !== 'multiple-choice') throw new Error('filtro inconsistente');
 
       // correctIndex fora da lista tornaria a resposta certa `undefined`:
@@ -198,7 +232,7 @@ describe('exercícios de múltipla escolha', () => {
 });
 
 describe('estrutura do catálogo', () => {
-  it('ids de aula, exercício, projeto e flashcard são únicos', () => {
+  it('ids de aula, exercício, projeto e flashcard são únicos', async () => {
     const coletar = (ids: string[]) => ids.filter((id, i) => ids.indexOf(id) !== i);
 
     expect(coletar(allLessons.map((l) => l.id))).toEqual([]);
@@ -207,12 +241,12 @@ describe('estrutura do catálogo', () => {
     expect(coletar(listFlashcards().map((f) => f.id))).toEqual([]);
   });
 
-  it('toda aula tem pelo menos um exercício', () => {
+  it('toda aula tem pelo menos um exercício', async () => {
     const semExercicio = allLessons.filter((l) => getExercises(l).length === 0).map((l) => l.id);
     expect(semExercicio).toEqual([]);
   });
 
-  it('toda aula pertence à trilha que a lista', () => {
+  it('toda aula pertence à trilha que a lista', async () => {
     for (const track of listTracks()) {
       for (const lesson of getLessonsOfTrack(track.id)) {
         expect(lesson.trackId).toBe(track.id);
@@ -220,7 +254,7 @@ describe('estrutura do catálogo', () => {
     }
   });
 
-  it('as dicas vão do geral ao específico, sem repetir', () => {
+  it('as dicas vão do geral ao específico, sem repetir', async () => {
     for (const { exercise } of allExercises) {
       const unicas = new Set(exercise.hints);
       expect(unicas.size, `dicas repetidas em ${exercise.id}`).toBe(exercise.hints.length);
@@ -232,25 +266,25 @@ describe('progressão da trilha', () => {
   const track = listTracks()[0];
   const lessons = getLessonsOfTrack(track.id);
 
-  it('sem nada concluído, a próxima aula é a primeira', () => {
+  it('sem nada concluído, a próxima aula é a primeira', async () => {
     expect(getNextLesson(track.id, [])?.id).toBe(lessons[0].id);
   });
 
-  it('a próxima aula pula as já concluídas', () => {
+  it('a próxima aula pula as já concluídas', async () => {
     expect(getNextLesson(track.id, [lessons[0].id])?.id).toBe(lessons[1].id);
   });
 
-  it('com a trilha inteira concluída, não aponta de volta para o início', () => {
+  it('com a trilha inteira concluída, não aponta de volta para o início', async () => {
     const todas = lessons.map((l) => l.id);
     expect(getNextLesson(track.id, todas)?.id).toBe(lessons[lessons.length - 1].id);
   });
 
-  it('o percentual acompanha as aulas concluídas', () => {
+  it('o percentual acompanha as aulas concluídas', async () => {
     expect(getTrackProgress(track.id, []).percentage).toBe(0);
     expect(getTrackProgress(track.id, lessons.map((l) => l.id)).percentage).toBe(100);
   });
 
-  it('aulas concluídas de outra trilha não contam no percentual', () => {
+  it('aulas concluídas de outra trilha não contam no percentual', async () => {
     const outra = listTracks()[1];
     if (!outra) return;
 
@@ -264,13 +298,13 @@ describe('projetos', () => {
 
   it.each(projetos.map((p) => [p.id, p] as const))(
     '%s: a solução de referência fecha todos os checkpoints',
-    (_id, project) => {
+    async (_id, project) => {
       // Sem isso, eu poderia publicar um critério de aceitação impossível de
       // satisfazer — e o aluno tentaria para sempre sem nunca conseguir entregar.
       expect(project.referenceSolution, 'projeto precisa de solução de referência').toBeDefined();
 
       for (const checkpoint of project.checkpoints) {
-        const resultado = runProgram(
+        const resultado = await runProgram(
           `${project.initialCode}
 ${project.referenceSolution}`,
           checkpoint.tests
@@ -286,18 +320,25 @@ ${project.referenceSolution}`,
 
   it.each(projetos.map((p) => [p.id, p] as const))(
     '%s: o código inicial NÃO fecha todos os checkpoints',
-    (_id, project) => {
-      const todosFecham = project.checkpoints.every((checkpoint) => {
-        const r = runProgram(project.initialCode, checkpoint.tests);
-        return r.testResults.length > 0 && r.testResults.every((t) => t.passed);
-      });
+    async (_id, project) => {
+      // Laço, e não `every`: uma função assíncrona dentro de `every` devolveria
+      // uma promessa — que é sempre verdadeira, e o teste passaria sempre.
+      let todosFecham = true;
+      for (const checkpoint of project.checkpoints) {
+        const r = await runProgram(project.initialCode, checkpoint.tests);
+        const fechou = r.testResults.length > 0 && r.testResults.every((t) => t.passed);
+        if (!fechou) {
+          todosFecham = false;
+          break;
+        }
+      }
 
       // Um projeto que já vem pronto daria o troféu sem trabalho nenhum.
       expect(todosFecham, 'o projeto está completo antes de o aluno escrever algo').toBe(false);
     }
   );
 
-  it('ids de checkpoint são únicos dentro de cada projeto', () => {
+  it('ids de checkpoint são únicos dentro de cada projeto', async () => {
     for (const project of projetos) {
       const ids = project.checkpoints.map((c) => c.id);
       expect(new Set(ids).size, `checkpoints repetidos em ${project.id}`).toBe(ids.length);

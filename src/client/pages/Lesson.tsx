@@ -167,7 +167,7 @@ export function Lesson() {
         ref={conteudoRef}
         tabIndex={-1}
         aria-label={`Passo ${indice + 1} de ${steps.length}`}
-        className="mx-auto w-full max-w-2xl flex-1 px-4 py-6 focus-visible:outline-none"
+        className="mx-auto w-full max-w-2xl flex-1 px-4 pb-24 pt-6 focus-visible:outline-none"
       >
         {indice === 0 && (
           <p className="mb-5 flex items-start gap-2 rounded-lg bg-brand-50 p-3 text-sm leading-relaxed text-brand-700">

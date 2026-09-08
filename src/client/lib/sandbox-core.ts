@@ -126,9 +126,9 @@ function __cfFormatar(valor) {
 }
 
 /** Devolve a mensagem de erro, ou null quando a propriedade vale para o caso. */
-function __cfFalha(caso, verificar) {
+async function __cfFalha(caso, verificar) {
   try {
-    verificar(caso);
+    await verificar(caso);
     return null;
   } catch (err) {
     var msg = err && err.message ? err.message : String(err);
@@ -174,7 +174,7 @@ function __cfCopia(objeto) {
  * Falhar com n = 0 ensina muito mais do que falhar com n = 73: o aluno vê o caso
  * extremo que ele não tratou, em vez de um número sorteado sem significado.
  */
-function __cfEncolher(caso, verificar, orcamento) {
+async function __cfEncolher(caso, verificar, orcamento) {
   var atual = caso;
   var ehObjeto = atual !== null && typeof atual === 'object' && !Array.isArray(atual);
   var melhorou = true;
@@ -192,7 +192,7 @@ function __cfEncolher(caso, verificar, orcamento) {
           tentativa[chave] = opcoes[i];
           orcamento.restante--;
 
-          if (__cfFalha(tentativa, verificar)) {
+          if (await __cfFalha(tentativa, verificar)) {
             atual = tentativa;
             melhorou = true;
             break;
@@ -203,7 +203,7 @@ function __cfEncolher(caso, verificar, orcamento) {
       var diretas = __cfCandidatos(atual);
       for (var j = 0; j < diretas.length && orcamento.restante > 0; j++) {
         orcamento.restante--;
-        if (__cfFalha(diretas[j], verificar)) {
+        if (await __cfFalha(diretas[j], verificar)) {
           atual = diretas[j];
           melhorou = true;
           break;
@@ -216,10 +216,17 @@ function __cfEncolher(caso, verificar, orcamento) {
 }
 `;
 
-/** Um caso de teste vira uma função que devolve passou/falhou. */
+/**
+ * Um caso de teste vira uma função assíncrona que devolve passou/falhou.
+ *
+ * Assíncrona por necessidade, não por elegância. Sem isso, `await` na asserção é
+ * erro de sintaxe — e uma asserção escrita com `.then()` reportava sucesso antes
+ * de a promise resolver, dizendo ao aluno que a resposta errada estava certa.
+ * Um exercício que mente é pior do que um exercício que falta.
+ */
 function expressaoDeTeste(test: SandboxTest): string {
   return `
-        (function () {
+        (async function () {
           try {
             ${test.assertion}
             return { passed: true, message: ${JSON.stringify(test.description)} };
@@ -238,7 +245,7 @@ function expressaoDePropriedade(propriedade: SandboxProperty): string {
   const descricao = JSON.stringify(propriedade.description);
 
   return `
-        (function () {
+        (async function () {
           var descricao = ${descricao};
           var aleatorio = __cfRnd(__cfSemente(descricao));
 
@@ -251,19 +258,19 @@ function expressaoDePropriedade(propriedade: SandboxProperty): string {
           var sondas = [__cfConstante(0), __cfConstante(0.9999999), __cfConstante(0.5)];
           var rnd = aleatorio;
 
-          function gerar() { ${propriedade.generate} }
-          function verificar(caso) { ${propriedade.check} }
+          async function gerar() { ${propriedade.generate} }
+          async function verificar(caso) { ${propriedade.check} }
 
           try {
             for (var i = 0; i < ${runs}; i++) {
               rnd = i < sondas.length ? sondas[i] : aleatorio;
-              var caso = gerar();
-              var erro = __cfFalha(caso, verificar);
+              var caso = await gerar();
+              var erro = await __cfFalha(caso, verificar);
               if (!erro) continue;
 
               var orcamento = { restante: ${PROPERTY_SHRINK_MAX} };
-              var simples = __cfEncolher(caso, verificar, orcamento);
-              var mensagem = __cfFalha(simples, verificar) || erro;
+              var simples = await __cfEncolher(caso, verificar, orcamento);
+              var mensagem = (await __cfFalha(simples, verificar)) || erro;
 
               return {
                 passed: false,
@@ -303,21 +310,23 @@ export function buildProgram(
   return `"use strict";
 ${code}
 ;${auxiliares}
-;return [${expressoes.join(',')}];`;
+;return Promise.all([${expressoes.join(',')}]);`;
 }
 
 /**
  * Executa o código do aluno e roda os testes contra ele.
  *
- * Bloqueia até terminar: um laço infinito só é interrompido por quem chama
- * (no navegador, encerrando o worker). Nunca lança — erro de sintaxe ou de
- * execução volta no campo `error`.
+ * Devolve uma promessa porque o código do aluno pode ser assíncrono, e uma
+ * asserção que não é esperada reporta sucesso antes de a promise resolver.
+ *
+ * Um laço infinito só é interrompido por quem chama (no navegador, encerrando o
+ * worker). Nunca lança — erro de sintaxe ou de execução volta no campo `error`.
  */
-export function runProgram(
+export async function runProgram(
   code: string,
   tests: SandboxTest[],
   properties: SandboxProperty[] = []
-): SandboxRunResult {
+): Promise<SandboxRunResult> {
   const logs: string[] = [];
   let truncated = false;
 
@@ -348,7 +357,7 @@ export function runProgram(
 
   try {
     const program = new Function(buildProgram(code, tests, properties));
-    const testResults = program() as SandboxTestResult[];
+    const testResults = (await program()) as SandboxTestResult[];
     return { logs, testResults };
   } catch (error) {
     // Erro de sintaxe (na construção) ou de execução do código do aluno.

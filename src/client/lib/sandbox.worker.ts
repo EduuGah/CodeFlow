@@ -64,9 +64,9 @@ function lockDownGlobals(): void {
   }
 }
 
-self.onmessage = (event: MessageEvent<WorkerRequest>) => {
+self.onmessage = async (event: MessageEvent<WorkerRequest>) => {
   const { code, tests, properties } = event.data;
 
   lockDownGlobals();
-  self.postMessage(runProgram(code, tests, properties));
+  self.postMessage(await runProgram(code, tests, properties));
 };

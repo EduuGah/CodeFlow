@@ -39,31 +39,31 @@ function rascunho(over: Partial<ExerciseDraft> = {}): ExerciseDraft {
 }
 
 describe('validação usa o schema real do conteúdo', () => {
-  it('rascunho completo é aceito', () => {
+  it('rascunho completo é aceito', async () => {
     expect(validateDraft(rascunho())).toEqual([]);
   });
 
-  it('id fora do padrão é recusado', () => {
+  it('id fora do padrão é recusado', async () => {
     const problemas = validateDraft(rascunho({ id: 'Exercício 1' }));
     expect(problemas.some((p) => p.path === 'id')).toBe(true);
   });
 
-  it('exercício sem teste é recusado', () => {
+  it('exercício sem teste é recusado', async () => {
     // Mesma regra do schema: teste nenhum daria feedback errado ao aluno.
     const problemas = validateDraft(rascunho({ tests: [] }));
     expect(problemas.some((p) => p.path.startsWith('tests'))).toBe(true);
   });
 
-  it('exercício sem conceito é recusado', () => {
+  it('exercício sem conceito é recusado', async () => {
     const problemas = validateDraft(rascunho({ concepts: [] }));
     expect(problemas.some((p) => p.path.startsWith('concepts'))).toBe(true);
   });
 
-  it('o rascunho vazio aponta o que falta em vez de passar', () => {
+  it('o rascunho vazio aponta o que falta em vez de passar', async () => {
     expect(validateDraft(emptyDraft()).length).toBeGreaterThan(0);
   });
 
-  it('dica em branco não conta como dica', () => {
+  it('dica em branco não conta como dica', async () => {
     // O formulário começa com um campo vazio; ele não deve virar uma dica ''.
     const problemas = validateDraft(rascunho({ hints: ['', '  '] }));
     expect(problemas.some((p) => p.path.startsWith('hints'))).toBe(false);
@@ -71,20 +71,20 @@ describe('validação usa o schema real do conteúdo', () => {
 });
 
 describe('escape para template string', () => {
-  it('escapa a crase, que fecharia a string', () => {
+  it('escapa a crase, que fecharia a string', async () => {
     expect(escapeTemplate('use `let`')).toBe('use \\`let\\`');
   });
 
-  it('escapa a interpolação, que o TypeScript tentaria avaliar', () => {
+  it('escapa a interpolação, que o TypeScript tentaria avaliar', async () => {
     expect(escapeTemplate('${perigoso}')).toBe('\\${perigoso}');
   });
 
-  it('escapa a barra invertida antes das demais', () => {
+  it('escapa a barra invertida antes das demais', async () => {
     // Se a barra fosse escapada por último, ela escaparia o escape.
     expect(escapeTemplate('\\n')).toBe('\\\\n');
   });
 
-  it('deixa texto comum intacto', () => {
+  it('deixa texto comum intacto', async () => {
     expect(escapeTemplate("const x = 'a';")).toBe("const x = 'a';");
   });
 });
@@ -104,21 +104,21 @@ describe('ida e volta: o módulo gerado produz o exercício correto', () => {
     };
   }
 
-  it('gera um bloco de exercício válido segundo o schema', () => {
+  it('gera um bloco de exercício válido segundo o schema', async () => {
     const bloco = avaliar(toTypeScript(rascunho()));
 
     expect(bloco.kind).toBe('exercise');
     expect(exerciseSchema.safeParse(bloco.exercise).success).toBe(true);
   });
 
-  it('preserva o código exatamente, quebras de linha inclusive', () => {
+  it('preserva o código exatamente, quebras de linha inclusive', async () => {
     const draft = rascunho();
     const bloco = avaliar(toTypeScript(draft)) as { exercise: { initialCode: string } };
 
     expect(bloco.exercise.initialCode).toBe(draft.initialCode);
   });
 
-  it('sobrevive a código com crase, cifrão e barra invertida', () => {
+  it('sobrevive a código com crase, cifrão e barra invertida', async () => {
     const draft = rascunho({
       initialCode: 'const s = `olá ${nome}`;\nconst r = /\\d+/;',
       solution: 'const s = `olá ${nome}`;',
@@ -132,7 +132,7 @@ describe('ida e volta: o módulo gerado produz o exercício correto', () => {
     expect(bloco.exercise.solution).toBe(draft.solution);
   });
 
-  it('preserva aspas dos dois tipos nas asserções', () => {
+  it('preserva aspas dos dois tipos nas asserções', async () => {
     const draft = rascunho({
       tests: [
         {
@@ -150,7 +150,7 @@ describe('ida e volta: o módulo gerado produz o exercício correto', () => {
     expect(bloco.exercise.tests[0].assertion).toBe(draft.tests[0].assertion);
   });
 
-  it('marca teste oculto e omite a marca nos demais', () => {
+  it('marca teste oculto e omite a marca nos demais', async () => {
     const draft = rascunho({
       tests: [
         { description: 'visível', assertion: 'if (false) throw new Error("x");', hidden: false },
@@ -166,7 +166,7 @@ describe('ida e volta: o módulo gerado produz o exercício correto', () => {
     expect(bloco.exercise.tests[1].hidden).toBe(true);
   });
 
-  it('o exercício gerado funciona no sandbox de verdade', () => {
+  it('o exercício gerado funciona no sandbox de verdade', async () => {
     const draft = rascunho();
     const bloco = avaliar(toTypeScript(draft)) as {
       exercise: {
@@ -179,11 +179,11 @@ describe('ida e volta: o módulo gerado produz o exercício correto', () => {
     const { initialCode, solution, tests } = bloco.exercise;
 
     // As duas checagens que o CI faz com o conteúdo publicado.
-    const comSolucao = runProgram(`${initialCode}\n${solution}`, tests);
+    const comSolucao = await runProgram(`${initialCode}\n${solution}`, tests);
     expect(comSolucao.error).toBeUndefined();
     expect(comSolucao.testResults.every((t) => t.passed)).toBe(true);
 
-    const semNada = runProgram(initialCode, tests);
+    const semNada = await runProgram(initialCode, tests);
     expect(semNada.testResults.every((t) => t.passed)).toBe(false);
   });
 });
