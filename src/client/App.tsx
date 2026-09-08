@@ -6,6 +6,7 @@ import { AuthCallback } from './pages/AuthCallback';
 import { Lesson } from './pages/Lesson';
 import { Review } from './pages/Review';
 import { ProjectWorkspace } from './pages/ProjectWorkspace';
+import { NotFound } from './pages/NotFound';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { AdminRoute } from './components/AdminRoute';
 import { AppShell } from './components/layout/AppShell';
@@ -97,7 +98,10 @@ function App() {
       />
 
       {/* Qualquer outra rota volta para o início em vez de tela em branco. */}
-      <Route path="*" element={<Navigate to="/" replace />} />
+      {/* Endereço desconhecido explica o que houve. Redirecionar em silêncio
+          para a página de marketing fazia um aluno logado achar que tinha sido
+          deslogado — e o `replace` ainda apagava a URL errada do histórico. */}
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }

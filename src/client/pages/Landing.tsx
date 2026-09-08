@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 
 import { getLessonsOfTrack, listProjects, listTracks } from '../../content';
 import { IconArrowRight, IconLogo } from '../components/ui/Icon';
+import { useDocumentTitle } from '../hooks/useDocumentTitle';
 
 /**
  * Página pública.
@@ -10,6 +11,9 @@ import { IconArrowRight, IconLogo } from '../components/ui/Icon';
  * contados do catálogo real, então não podem envelhecer nem mentir.
  */
 export function Landing() {
+  // Sem chamada aqui, voltar do aplicativo para a apresentação deixaria o título
+  // da tela anterior na aba.
+  useDocumentTitle();
   const trilhas = listTracks();
   const aulas = trilhas.reduce((n, t) => n + getLessonsOfTrack(t.id).length, 0);
   const projetos = listProjects().length;
