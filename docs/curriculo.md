@@ -1,88 +1,128 @@
 # Currículo: até a base de um dev júnior
 
-Roadmap de conteúdo. A versão navegável está publicada como artifact; **este
-arquivo é a fonte canônica** e deve ser atualizado no mesmo commit que conclui um
-bloco.
+Roadmap de conteúdo **e** de plataforma. A versão navegável está publicada como
+artifact; este arquivo é a fonte canônica e deve ser atualizado no mesmo commit
+que conclui uma fase.
+
+| | Hoje | Previsto |
+| --- | --- | --- |
+| Aulas | 13 | 135 |
+| Exercícios | 25 | ~700 |
+| Tipos de exercício | 3 | 11 |
+| Motores de execução | 1 | 7 |
 
 ## A restrição que ordena tudo
 
 O código do aluno roda num Web Worker descartável, com 3s de limite e **sem
-acesso ao DOM**. Isso é ótimo para lógica pura — um laço infinito não congela a
-tela — e é exatamente por isso que ele não serve para DOM, HTML, CSS ou React:
-não existe página para manipular lá dentro.
+acesso ao DOM**. Ótimo para lógica pura — um laço infinito não congela a tela — e
+por isso mesmo inútil para DOM, HTML, CSS ou React: não existe página lá dentro.
 
-Cada linguagem ou ambiente novo exige um executor próprio. Os blocos abaixo estão
-na ordem em que os motores se destravam, do mais barato para o mais caro. Um
-motor destrava vários blocos; construir na ordem errada significa pagar duas
-vezes.
+Cada ambiente novo exige um executor próprio, e um executor destrava vários
+blocos de uma vez. As fases estão na ordem em que os motores se pagam, do mais
+barato para o mais caro. Construir na ordem errada é pagar duas vezes.
 
-## Blocos
+## Aceitar soluções diversas
 
-| # | Bloco | Motor necessário | Aulas | Estado |
-| --- | --- | --- | --- | --- |
-| 00 | Fundamentos e lógica | worker atual | 13 | **pronto** |
-| 01 | JavaScript que resolve problema real | nenhum | ~7 | |
-| 02 | A página: HTML, CSS e DOM | 1 — iframe isolado | ~9 | |
-| 03 | UI e UX na prática | 1 (reaproveita) | ~6 | |
-| 04 | TypeScript | 2 — transpilador em memória | ~7 | |
-| 05 | React | 1 + 2 + runtime do React | ~10 | |
-| 06 | Como a web funciona | nenhum | ~6 | |
-| 07 | Qualidade e otimização | nenhum | ~7 | |
-| — | Dados: SQL e modelagem | 4 — sql.js (~1,5 MB) | ~8 | ramo independente |
-| — | Python | 5 — Pyodide (~10 MB) | ~8 | ramo independente |
+**O que já funciona.** Exercício de código é corrigido por asserções sobre o
+comportamento, nunca sobre o texto escrito. Quem resolve com `for`, `reduce` ou
+recursão passa igual.
 
-Total previsto: **81 aulas**, das quais 13 existem.
+**O que falha.** As asserções são casos fixos (`somar(2, 3) !== 5`). Deixa passar
+quem chuta o caso específico e recompensa decorar o teste.
 
-## Ordem sugerida
+Quatro mudanças, em ordem de impacto:
 
-`01 → 02 → 03 → 04 → 05 → SQL e Python`
+1. **Testes por propriedade** — sorteia dezenas de entradas e compara com uma
+   regra, em vez de conferir três casos escolhidos a dedo. Acaba com o chute.
+2. **Múltiplas saídas válidas** — o exercício declara o conjunto do aceitável.
+3. **Reconhecer a abordagem** — o retorno comenta qual caminho o aluno tomou e o
+   que ele troca. Não é nota.
+4. **Restrição opcional** — o mesmo exercício, sem usar `for`. Segundo desafio
+   sobre um problema já entendido.
 
-Os blocos 06 e 07 não exigem motor e encaixam em qualquer buraco — servem para
-intercalar enquanto um motor está sendo construído.
+## Tipos de exercício
 
-## Detalhe por bloco
+Existem: escrever o código, múltipla escolha, prever a saída.
 
-**01 · JavaScript que resolve problema real** — escopo e closures, callbacks,
-promises, async/await, erros em código assíncrono, JSON, módulos.
-O aluno entende código que espera. Maior ganho por esforço: nenhuma engenharia.
+A construir: completar a lacuna, encontrar o bug, ordenar os passos, refatorar,
+escrever o teste, consertar a tela, consulta ao banco, construir do zero.
 
-**02 · A página** — HTML semântico, caixas e espaçamento, flexbox, grid,
-responsivo, selecionar elementos, mudar o DOM, eventos, formulários.
-O exercício deixa de ser "qual o retorno" e passa a ser "clique e a lista aparece".
+Cada exercício em três níveis de apoio: **guiado** (esqueleto quase pronto),
+**livre** (enunciado e testes) e **desafio** (caso extremo ou restrição, sempre
+opcional).
 
-**03 · UI e UX** — hierarquia visual, tipografia, cor e contraste, estados
-(vazio/carregando/erro), acessibilidade por teclado, escrever a interface.
-O exercício é consertar uma tela ruim e defender a mudança.
+## Fases
 
-**04 · TypeScript** — por que tipar, primitivos e inferência, objetos e
-interfaces, união e narrowing, funções tipadas, genéricos, tipos utilitários.
-Depois de assíncrono de propósito: tipar promise sem entender promise é decorar
-sintaxe.
+### Fase 0 — Fundamentos e lógica · PRONTO
+13 aulas, 25 exercícios, 7 projetos. Motor: Web Worker sem DOM.
 
-**05 · React** — componentes e props, estado, listas e chaves, formulários
-controlados, efeitos, buscar dados, composição, hooks próprios, rotas, projeto.
-Só faz sentido depois de DOM e TypeScript: React é resposta a problemas que só
-quem passou por eles sente.
+### Fase 1 — Aprofundar o que já roda · 18 aulas
+Motor: **nenhum novo**.
 
-**06 · Como a web funciona** — cliente e servidor, HTTP, REST, autenticação,
-CORS, segurança básica. Separa quem consome uma API de quem depura quando ela
-falha.
+- **JavaScript real** (10): escopo e closures, callbacks, promises, async/await,
+  erros assíncronos, JSON, módulos, imutabilidade, datas, expressões regulares.
+- **Como a web funciona** (8): cliente e servidor, HTTP, cabeçalhos, REST,
+  autenticação, tokens, CORS, segurança básica.
 
-**07 · Qualidade e otimização** — ler o erro, depurar com método, custo de um
-algoritmo, escrever testes, performance no navegador, Git, pull request.
-O que costuma faltar em quem aprendeu sozinho.
+Plataforma: testes por propriedade e os seis tipos de exercício que rodam no
+worker atual; publicar de verdade; servir o editor do próprio domínio.
 
-**SQL e modelagem** — tabelas e tipos, SELECT/WHERE, ordenar, JOIN, agregação,
-modelar um domínio, normalização, índices. O motor roda o banco inteiro no
-navegador, então o exercício tem dados de verdade.
+### Fase 2 — A página · 26 aulas
+Motor **1: executor em iframe isolado**. Destrava três blocos, sem download extra.
 
-**Python** — sintaxe e indentação, listas e dicionários, funções, compreensões,
-arquivos, módulos, exceções, projeto. Por último não por importar menos: o motor
-pesa mais que todo o resto do aplicativo somado.
+- **HTML e CSS** (10): semântica, caixa, flexbox, grid, responsivo, tipografia,
+  cores, pseudo-classes, transições, CSS moderno.
+- **DOM e eventos** (8): selecionar, criar e remover, classes, eventos,
+  delegação, formulários, armazenamento local, buscar dados e desenhar.
+- **UI e UX** (8): hierarquia, tipografia legível, cor e contraste, estados,
+  acessibilidade por teclado, formulários, escrever a interface, polegar.
+
+Plataforma: exercício julgado pela tela renderizada; mapa de tópicos e busca.
+
+### Fase 3 — Tipos e componentes · 24 aulas
+Motores **2 (transpilador)** e **3 (React no iframe)**.
+
+- **TypeScript** (10): por que tipar, inferência, interfaces, narrowing, funções,
+  genéricos, utilitários, tipar API, erros do compilador, quando não tipar.
+- **React** (14): componentes, estado, listas, formulários, efeitos, buscar
+  dados, estados de erro, composição, contexto, hooks próprios, rotas,
+  re-render, testar componente, projeto.
+
+Plataforma: tutor com IA; painel do aluno.
+
+### Fase 4 — Back-end e dados · 20 aulas
+Motores **4 (servidor simulado)** e **5 (sql.js, ~1,5 MB)**.
+
+- **Node e back-end** (10): Node fora do navegador, pacotes, servidor HTTP,
+  rotas, corpo da requisição, middleware, erros e status, autenticação, variáveis
+  de ambiente, projeto de API.
+- **SQL e modelagem** (10): tabelas, SELECT/WHERE, ordenar, JOIN, agregação,
+  subconsultas, escrita, modelar domínio, normalização, índices.
+
+Plataforma: exercício julgado pelo conjunto de linhas devolvido.
+
+### Fase 5 — Profissionalização · 19 aulas
+Motor: **nenhum novo**. Encaixa em qualquer buraco entre as outras fases.
+
+- **Testes e qualidade** (8), **Git e equipe** (6), **Terminal e ferramentas** (5).
+
+### Fase 6 — Python · 10 aulas
+Motor **6: Pyodide, ~10 MB**. Por último pelo peso, não pela importância.
+
+### Fase 7 — Projeto final · 5 aulas, 3 capstones
+Front-end, API, banco, testes e publicação. O aluno sai com algo que dá para
+mostrar numa entrevista.
+
+Plataforma: fechar as pontas do CodeFlow — desempenho do pacote, revisão num
+telefone real, passagem final de acessibilidade.
 
 ## Sobre tamanho
 
-As 13 aulas de hoje levaram um bom tempo para ficar no padrão do projeto — cada
-exercício com dica, solução de referência e testes que o CI prova que passam. As
-68 restantes são muitas vezes esse trabalho. O roadmap serve para escolher a
-ordem, não para prometer prazo.
+As 13 aulas de hoje levaram bastante tempo para ficar no padrão do projeto. As
+122 restantes são muitas vezes esse trabalho, e os ~675 exercícios novos são a
+maior parte dele. Por isso a unidade é a fase: cada uma termina numa versão do
+produto que dá para usar. O roadmap escolhe a ordem; não promete prazo.
+
+A Fase 1 é o melhor primeiro passo por um motivo concreto: é a única que não
+precisa de motor nenhum, e é onde estão os testes por propriedade — que mudam a
+qualidade de todos os exercícios que vierem depois.
