@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, Flame } from 'lucide-react';
+import { IconArrowRight, IconStreak } from '../ui/Icon';
 import type { Lesson } from '../../../content/types';
 import { getLesson } from '../../../content';
 import type { ResumePoint } from '../../lib/study';
@@ -47,20 +47,20 @@ export function ResumeCard({ resume, nextLesson, streak, daysAway }: ResumeCardP
   }
 
   return (
-    <div className="rounded-2xl border border-zinc-200 bg-white p-6">
+    <div className="rounded-2xl border border-line bg-surface p-6">
       <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
-          <h2 className="text-lg font-semibold text-zinc-900">{titulo}</h2>
-          <p className="mt-1 text-sm leading-relaxed text-zinc-500">{apoio}</p>
+          <h2 className="text-lg font-semibold text-ink">{titulo}</h2>
+          <p className="mt-1 text-sm leading-relaxed text-ink-faint">{apoio}</p>
         </div>
 
         {/* Sequência só aparece quando existe: exibir "0 dias" seria cobrança. */}
         {streak > 0 && (
           <span
-            className="flex flex-shrink-0 items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1 text-sm font-semibold text-amber-800"
+            className="flex flex-shrink-0 items-center gap-1.5 rounded-full bg-energy-50 px-3 py-1 text-sm font-semibold text-energy-700"
             title="Dias seguidos com pelo menos um exercício"
           >
-            <Flame size={15} className="text-amber-500" />
+            <IconStreak size={15} className="text-energy-500" />
             {streak} {streak === 1 ? 'dia seguido' : 'dias seguidos'}
           </span>
         )}
@@ -69,7 +69,7 @@ export function ResumeCard({ resume, nextLesson, streak, daysAway }: ResumeCardP
       <Link to={`/lesson/${destino.id}`}>
         <Button className="gap-2">
           {primeiraVez ? 'Começar aula' : 'Retomar'}
-          <ArrowRight size={16} />
+          <IconArrowRight size={16} />
         </Button>
       </Link>
     </div>

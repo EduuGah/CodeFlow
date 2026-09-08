@@ -14,10 +14,10 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         className={cn(
           "inline-flex items-center justify-center font-medium transition-colors disabled:pointer-events-none disabled:opacity-50",
           {
-            'bg-zinc-900 text-white hover:bg-zinc-800 shadow-sm': variant === 'primary',
-            'bg-zinc-100 text-zinc-900 hover:bg-zinc-200': variant === 'secondary',
-            'border border-zinc-200 hover:bg-zinc-100 text-zinc-900': variant === 'outline',
-            'hover:bg-zinc-100 text-zinc-700': variant === 'ghost',
+            'bg-ink text-white hover:bg-brand-900': variant === 'primary',
+            'bg-sunken text-ink hover:bg-line': variant === 'secondary',
+            'border border-line hover:bg-sunken text-ink': variant === 'outline',
+            'hover:bg-sunken text-ink-soft': variant === 'ghost',
             'h-8 px-3 text-sm rounded-md': size === 'sm',
             'h-10 px-4 py-2 rounded-md': size === 'md',
             'h-12 px-8 text-lg rounded-lg': size === 'lg',

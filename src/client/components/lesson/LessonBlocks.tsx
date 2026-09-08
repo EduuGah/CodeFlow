@@ -18,11 +18,11 @@ export function LessonBlocks({ blocks, lessonId }: { blocks: LessonBlock[]; less
           case 'example':
             return (
               <figure key={index} className="space-y-2">
-                <pre className="overflow-x-auto rounded-lg bg-zinc-900 p-4 text-sm leading-relaxed">
-                  <code className="font-mono text-zinc-100">{block.code}</code>
+                <pre className="overflow-x-auto rounded-lg bg-ink p-4 text-sm leading-relaxed">
+                  <code className="font-mono text-white/90">{block.code}</code>
                 </pre>
                 {block.caption && (
-                  <figcaption className="text-xs leading-relaxed text-zinc-500">
+                  <figcaption className="text-xs leading-relaxed text-ink-faint">
                     {block.caption}
                   </figcaption>
                 )}
@@ -33,9 +33,9 @@ export function LessonBlocks({ blocks, lessonId }: { blocks: LessonBlock[]; less
             return (
               <aside
                 key={index}
-                className="rounded-lg border-l-2 border-zinc-300 bg-zinc-50 py-3 pl-4 pr-3"
+                className="rounded-lg border-l-2 border-line-strong bg-canvas py-3 pl-4 pr-3"
               >
-                <h2 className="mb-1 text-xs font-semibold uppercase tracking-wider text-zinc-500">
+                <h2 className="mb-1 text-xs font-semibold uppercase tracking-wider text-ink-faint">
                   Em resumo
                 </h2>
                 <MarkdownReader content={block.markdown} className="prose-p:my-0" />

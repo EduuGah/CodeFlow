@@ -1,6 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, CalendarCheck, CheckCircle2, Loader2 } from 'lucide-react';
+import {
+  IconCalendarCheck,
+  IconCheckCircle,
+  IconClose,
+  IconSpinner,
+} from '../components/ui/Icon';
 
 import { listConcepts, listFlashcards } from '../../content';
 import { useAuth } from '../contexts/AuthContext';
@@ -32,9 +37,9 @@ import { EmptyState } from '../components/ui/States';
  */
 
 const AVALIACOES: Array<{ rating: ReviewRating; label: string; classe: string }> = [
-  { rating: 'dificil', label: 'Difícil', classe: 'text-red-700 hover:border-red-200 hover:bg-red-50' },
-  { rating: 'medio', label: 'Médio', classe: 'text-amber-700 hover:border-amber-200 hover:bg-amber-50' },
-  { rating: 'facil', label: 'Fácil', classe: 'text-emerald-700 hover:border-emerald-200 hover:bg-emerald-50' },
+  { rating: 'dificil', label: 'Difícil', classe: 'text-danger-700 hover:border-danger-200 hover:bg-danger-50' },
+  { rating: 'medio', label: 'Médio', classe: 'text-energy-700 hover:border-energy-200 hover:bg-energy-50' },
+  { rating: 'facil', label: 'Fácil', classe: 'text-success-700 hover:border-success-200 hover:bg-success-50' },
 ];
 
 export function Review() {
@@ -79,8 +84,8 @@ export function Review() {
 
   if (sessao === null) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-zinc-50">
-        <Loader2 className="h-8 w-8 animate-spin text-zinc-400" />
+      <div className="flex min-h-screen items-center justify-center bg-canvas">
+        <IconSpinner size={32} className="animate-spin text-ink-faint" />
       </div>
     );
   }
@@ -95,22 +100,21 @@ export function Review() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-zinc-50">
-      <header className="flex h-14 items-center justify-between border-b border-zinc-200 bg-white px-4">
+    <div className="flex min-h-screen flex-col bg-canvas">
+      <header className="flex h-14 items-center justify-between border-b border-line bg-surface px-4">
         <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="px-2 text-zinc-500"
-            onClick={() => navigate('/app')}
+          <Link
+            to="/app/praticar"
+            aria-label="Sair da revisão"
+            className="-ml-2 flex h-9 w-9 items-center justify-center rounded-lg text-ink-soft transition-colors hover:bg-sunken hover:text-ink"
           >
-            <ArrowLeft size={18} />
-          </Button>
-          <span className="text-sm font-semibold text-zinc-900">Sessão de Revisão</span>
+            <IconClose size={20} />
+          </Link>
+          <span className="text-sm font-bold text-ink">Sessão de revisão</span>
         </div>
 
-        <span className="text-sm font-medium text-zinc-500">
-          {sessao.length === 0 || terminou ? 'Concluído' : `${indice + 1} / ${sessao.length}`}
+        <span className="label-mono text-ink-faint">
+          {sessao.length === 0 || terminou ? 'Concluído' : `${indice + 1} de ${sessao.length}`}
         </span>
       </header>
 
@@ -118,7 +122,7 @@ export function Review() {
         {sessao.length === 0 ? (
           <EmptyState
             className="max-w-md"
-            icon={<CalendarCheck size={28} />}
+            icon={<IconCalendarCheck size={28} />}
             title="Nada para revisar hoje"
             description="Todos os cartões já foram revisados e ainda não venceram. Voltar antes da hora atrapalha mais do que ajuda — o intervalo existe para o esquecimento começar a agir."
             action={
@@ -129,12 +133,12 @@ export function Review() {
           />
         ) : terminou ? (
           <div className="max-w-md space-y-6 text-center">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
-              <CheckCircle2 size={32} />
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-success-50 text-success-600">
+              <IconCheckCircle size={32} />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-zinc-900">Revisão concluída</h2>
-              <p className="mt-2 text-zinc-500">
+              <h2 className="text-2xl font-bold text-ink">Revisão concluída</h2>
+              <p className="mt-2 text-ink-faint">
                 {sessao.length} {sessao.length === 1 ? 'cartão revisado' : 'cartões revisados'}. Cada
                 um volta numa data diferente, conforme o quanto você lembrou dele.
               </p>
@@ -155,42 +159,42 @@ export function Review() {
                   setVirado((v) => !v);
                 }
               }}
-              className="flex min-h-[300px] cursor-pointer flex-col items-center justify-center rounded-2xl border border-zinc-200 bg-white p-10 text-center transition-colors hover:border-zinc-300"
+              className="flex min-h-[300px] cursor-pointer flex-col items-center justify-center rounded-2xl border border-line bg-surface p-10 text-center transition-colors hover:border-line-strong"
             >
               {!virado ? (
                 <div className="space-y-4">
                   <div className="flex items-center justify-center gap-2">
-                    <span className="text-xs font-bold uppercase tracking-wider text-zinc-400">
+                    <span className="text-xs font-bold uppercase tracking-wider text-ink-faint">
                       Conceito
                     </span>
                     {/* O aluno merece saber por que este cartão veio primeiro. */}
                     {atual.priority && <Badge tone="caution">Você vem errando isto</Badge>}
                   </div>
-                  <h2 className="text-2xl font-medium leading-tight text-zinc-900 md:text-3xl">
+                  <h2 className="text-2xl font-medium leading-tight text-ink md:text-3xl">
                     {atual.card.front}
                   </h2>
-                  <p className="pt-6 text-sm text-zinc-400">Clique no card para revelar a resposta</p>
+                  <p className="pt-6 text-sm text-ink-faint">Clique no card para revelar a resposta</p>
                 </div>
               ) : (
                 <div className="space-y-4">
-                  <span className="text-xs font-bold uppercase tracking-wider text-emerald-500">
+                  <span className="text-xs font-bold uppercase tracking-wider text-success-600">
                     Resposta
                   </span>
-                  <p className="text-xl leading-relaxed text-zinc-700 md:text-2xl">
+                  <p className="text-xl leading-relaxed text-ink-soft md:text-2xl">
                     {atual.card.back}
                   </p>
-                  <p className="pt-4 text-sm text-zinc-400">Clique de novo para rever a pergunta</p>
+                  <p className="pt-4 text-sm text-ink-faint">Clique de novo para rever a pergunta</p>
                 </div>
               )}
             </div>
 
             {virado && (
               <div className="flex flex-col gap-3">
-                <p className="mb-1 text-center text-sm font-medium text-zinc-500">
+                <p className="mb-1 text-center text-sm font-medium text-ink-faint">
                   Como foi para lembrar disso?
                 </p>
 
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-3 gap-2 sm:gap-4">
                   {AVALIACOES.map(({ rating, label, classe }) => (
                     <Button
                       key={rating}
@@ -200,7 +204,7 @@ export function Review() {
                     >
                       <span>{label}</span>
                       {/* Consequência à vista: a resposta muda quando o cartão volta. */}
-                      <span className="text-xs font-normal text-zinc-400">
+                      <span className="text-xs font-normal text-ink-faint">
                         {describeNextInterval(atual.state, rating)}
                       </span>
                     </Button>

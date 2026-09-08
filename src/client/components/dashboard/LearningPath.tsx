@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Check, Info } from 'lucide-react';
+import { IconCheck, IconInfo } from '../ui/Icon';
 import type { PathNode } from '../../lib/path';
 import { Badge } from '../ui/Badge';
 
@@ -28,9 +28,9 @@ function formatarData(iso: string): string {
 }
 
 const estilosDoMarco: Record<PathNode['state'], string> = {
-  concluida: 'border-emerald-500 bg-emerald-500 text-white',
-  atual: 'border-zinc-900 bg-zinc-900 text-white ring-4 ring-zinc-900/10',
-  proxima: 'border-zinc-300 bg-white text-zinc-400',
+  concluida: 'border-success-600 bg-success-600 text-white',
+  atual: 'border-ink bg-ink text-white ring-4 ring-ink/10',
+  proxima: 'border-line-strong bg-surface text-ink-faint',
 };
 
 export function LearningPath({ nodes }: { nodes: PathNode[] }) {
@@ -50,7 +50,7 @@ export function LearningPath({ nodes }: { nodes: PathNode[] }) {
               <span
                 aria-hidden
                 className={`absolute left-[15px] top-8 -bottom-0 w-0.5 ${
-                  state === 'concluida' ? 'bg-emerald-500' : 'bg-zinc-200'
+                  state === 'concluida' ? 'bg-success-600' : 'bg-line'
                 }`}
               />
             )}
@@ -58,12 +58,12 @@ export function LearningPath({ nodes }: { nodes: PathNode[] }) {
             <span
               className={`relative flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border-2 text-xs font-bold ${estilosDoMarco[state]}`}
             >
-              {state === 'concluida' ? <Check size={16} strokeWidth={3} /> : node.position}
+              {state === 'concluida' ? <IconCheck size={16} strokeWidth={3} /> : node.position}
             </span>
 
             <div className="min-w-0 flex-1 pt-0.5">
               {/* A data vem antes do título, como numa linha do tempo de verdade. */}
-              <p className="mb-0.5 flex flex-wrap items-center gap-2 text-xs text-zinc-400">
+              <p className="mb-0.5 flex flex-wrap items-center gap-2 text-xs text-ink-faint">
                 {node.completedAt ? (
                   <span>Concluída em {formatarData(node.completedAt)}</span>
                 ) : state === 'atual' ? (
@@ -78,18 +78,18 @@ export function LearningPath({ nodes }: { nodes: PathNode[] }) {
                 className="group block rounded-lg py-0.5 transition-colors"
               >
                 <h3
-                  className={`font-semibold group-hover:text-zinc-950 ${
-                    state === 'proxima' ? 'text-zinc-500' : 'text-zinc-900'
+                  className={`font-semibold group-hover:text-ink ${
+                    state === 'proxima' ? 'text-ink-faint' : 'text-ink'
                   }`}
                 >
                   {lesson.title}
                 </h3>
-                <p className="mt-0.5 text-sm leading-relaxed text-zinc-500">{lesson.objective}</p>
+                <p className="mt-0.5 text-sm leading-relaxed text-ink-faint">{lesson.objective}</p>
               </Link>
 
               {temAviso && (
-                <p className="mt-2 flex items-start gap-1.5 rounded-lg bg-amber-50 px-3 py-2 text-xs leading-relaxed text-amber-900">
-                  <Info size={13} className="mt-0.5 flex-shrink-0 text-amber-600" />
+                <p className="mt-2 flex items-start gap-1.5 rounded-lg bg-energy-50 px-3 py-2 text-xs leading-relaxed text-energy-700">
+                  <IconInfo size={13} className="mt-0.5 flex-shrink-0 text-energy-700" />
                   <span>
                     Supõe{' '}
                     <strong className="font-semibold">

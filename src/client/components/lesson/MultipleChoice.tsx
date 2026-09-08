@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CheckCircle2, XCircle } from 'lucide-react';
+import { IconCheckCircle, IconCloseCircle } from '../ui/Icon';
 import type { MultipleChoiceExercise } from '../../../content/types';
 import { Button } from '../ui/Button';
 import { MarkdownReader } from '../ui/MarkdownReader';
@@ -45,8 +45,8 @@ export function MultipleChoice({
   };
 
   return (
-    <section className="rounded-lg border border-zinc-200 bg-white p-4">
-      <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-zinc-500">
+    <section className="rounded-lg border border-line bg-surface p-4">
+      <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-ink-faint">
         Exercício
       </h3>
 
@@ -63,10 +63,10 @@ export function MultipleChoice({
           const revelarErrada = enviada && escolhida && !acertou;
 
           // Estado por texto e ícone, não apenas por cor (acessibilidade).
-          let estilo = 'border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50';
-          if (revelarCerta) estilo = 'border-emerald-300 bg-emerald-50';
-          else if (revelarErrada) estilo = 'border-red-300 bg-red-50';
-          else if (escolhida) estilo = 'border-zinc-900 bg-zinc-50';
+          let estilo = 'border-line hover:border-line-strong hover:bg-canvas';
+          if (revelarCerta) estilo = 'border-success-200 bg-success-50';
+          else if (revelarErrada) estilo = 'border-danger-200 bg-danger-50';
+          else if (escolhida) estilo = 'border-ink bg-canvas';
 
           return (
             <label
@@ -83,9 +83,9 @@ export function MultipleChoice({
                   setEnviada(false);
                 }}
               />
-              <span className="flex-1 text-zinc-800">{opcao}</span>
-              {revelarCerta && <CheckCircle2 size={16} className="mt-0.5 text-emerald-600" />}
-              {revelarErrada && <XCircle size={16} className="mt-0.5 text-red-500" />}
+              <span className="flex-1 text-ink">{opcao}</span>
+              {revelarCerta && <IconCheckCircle size={16} className="mt-0.5 text-success-600" />}
+              {revelarErrada && <IconCloseCircle size={16} className="mt-0.5 text-danger-500" />}
             </label>
           );
         })}
@@ -106,15 +106,15 @@ export function MultipleChoice({
         <div
           role="status"
           className={`mt-4 rounded-lg border p-3 ${
-            acertou ? 'border-emerald-200 bg-emerald-50' : 'border-amber-200 bg-amber-50'
+            acertou ? 'border-success-200 bg-success-50' : 'border-energy-200 bg-energy-50'
           }`}
         >
           <p
             className={`mb-1 flex items-center gap-1.5 text-sm font-semibold ${
-              acertou ? 'text-emerald-800' : 'text-amber-900'
+              acertou ? 'text-success-700' : 'text-energy-700'
             }`}
           >
-            {acertou ? <CheckCircle2 size={15} /> : <XCircle size={15} />}
+            {acertou ? <IconCheckCircle size={15} /> : <IconCloseCircle size={15} />}
             {acertou ? 'Correto' : 'Ainda não é essa — veja o porquê'}
           </p>
           <MarkdownReader

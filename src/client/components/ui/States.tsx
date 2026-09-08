@@ -1,5 +1,5 @@
 import React from 'react';
-import { AlertCircle, RefreshCw } from 'lucide-react';
+import { IconAlert, IconRetry } from './Icon';
 import { Button } from './Button';
 import { cn } from '../../lib/utils';
 
@@ -26,16 +26,16 @@ export function EmptyState({ title, description, action, icon, className }: Empt
   return (
     <div
       className={cn(
-        'flex flex-col items-center justify-center rounded-xl border border-dashed border-zinc-300 bg-white px-6 py-10 text-center',
+        'flex flex-col items-center justify-center rounded-xl border border-dashed border-line-strong bg-surface px-6 py-10 text-center',
         className
       )}
     >
-      {icon && <div className="mb-3 text-zinc-400">{icon}</div>}
+      {icon && <div className="mb-3 text-ink-faint">{icon}</div>}
 
-      <p className="font-medium text-zinc-900">{title}</p>
+      <p className="font-medium text-ink">{title}</p>
 
       {description && (
-        <p className="mt-1 max-w-sm text-sm leading-relaxed text-zinc-500">{description}</p>
+        <p className="mt-1 max-w-sm text-sm leading-relaxed text-ink-faint">{description}</p>
       )}
 
       {action && <div className="mt-5">{action}</div>}
@@ -63,34 +63,34 @@ export function ErrorState({
   return (
     <div
       role="alert"
-      className={cn('rounded-xl border border-red-200 bg-red-50 p-5', className)}
+      className={cn('rounded-xl border border-danger-200 bg-danger-50 p-5', className)}
     >
       <div className="flex items-start gap-3">
-        <AlertCircle size={18} className="mt-0.5 flex-shrink-0 text-red-500" />
+        <IconAlert size={18} className="mt-0.5 flex-shrink-0 text-danger-500" />
 
         <div className="min-w-0 flex-1">
-          <p className="font-medium text-red-900">{title}</p>
-          <p className="mt-1 text-sm leading-relaxed text-red-800">{message}</p>
+          <p className="font-medium text-danger-700">{title}</p>
+          <p className="mt-1 text-sm leading-relaxed text-danger-700">{message}</p>
 
           {onRetry && (
             <Button
               variant="outline"
               size="sm"
               onClick={onRetry}
-              className="mt-4 gap-2 border-red-200 bg-white text-red-800 hover:bg-red-100"
+              className="mt-4 gap-2 border-danger-200 bg-surface text-danger-700 hover:bg-danger-50"
             >
-              <RefreshCw size={14} />
+              <IconRetry size={14} />
               Tentar novamente
             </Button>
           )}
 
           {details && (
             <details className="mt-3">
-              <summary className="cursor-pointer text-xs text-red-700/80 hover:text-red-900">
+              <summary className="cursor-pointer text-xs text-danger-700/80 hover:text-danger-700">
                 Detalhes técnicos
               </summary>
-              <pre className="mt-2 overflow-x-auto rounded border border-red-200 bg-white p-2 text-xs">
-                <code className="font-mono text-red-900">{details}</code>
+              <pre className="mt-2 overflow-x-auto rounded border border-danger-200 bg-surface p-2 text-xs">
+                <code className="font-mono text-danger-700">{details}</code>
               </pre>
             </details>
           )}

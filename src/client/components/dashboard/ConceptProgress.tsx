@@ -31,18 +31,18 @@ export function ConceptProgress({ mastery }: { mastery: ConceptMastery[] }) {
   }
 
   return (
-    <ul className="divide-y divide-zinc-200 overflow-hidden rounded-xl border border-zinc-200 bg-white">
+    <ul className="divide-y divide-line overflow-hidden rounded-xl border border-line bg-surface">
       {comHistorico.map((m) => {
         const conceito = getConcept(m.conceptId);
 
         return (
           <li key={m.conceptId} className="flex flex-wrap items-center gap-x-4 gap-y-2 px-5 py-3">
             <span className="min-w-0 flex-1">
-              <span className="block font-medium text-zinc-900">
+              <span className="block font-medium text-ink">
                 {conceito?.title ?? m.conceptId}
               </span>
               {/* A evidência, não só o veredito. */}
-              <span className="block text-sm text-zinc-500">
+              <span className="block text-sm text-ink-faint">
                 {m.correctAttempts} de {m.attempts}{' '}
                 {m.attempts === 1 ? 'tentativa' : 'tentativas'} · {m.exercisesSolved}{' '}
                 {m.exercisesSolved === 1 ? 'exercício resolvido' : 'exercícios resolvidos'}

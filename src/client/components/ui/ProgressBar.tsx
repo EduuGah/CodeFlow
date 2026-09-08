@@ -23,8 +23,8 @@ export function ProgressBar({ value, max = 100, label, showCount, className }: P
   return (
     <div className={className}>
       <div className="mb-1.5 flex items-baseline justify-between gap-3">
-        <span className="text-sm font-medium text-zinc-700">{label}</span>
-        <span className="text-xs tabular-nums text-zinc-500">
+        <span className="text-sm font-medium text-ink-soft">{label}</span>
+        <span className="text-xs tabular-nums text-ink-faint">
           {showCount ? `${limitado} de ${max}` : `${percentual}%`}
         </span>
       </div>
@@ -35,12 +35,12 @@ export function ProgressBar({ value, max = 100, label, showCount, className }: P
         aria-valuemin={0}
         aria-valuemax={max}
         aria-label={label}
-        className="h-2 w-full overflow-hidden rounded-full bg-zinc-200"
+        className="h-2 w-full overflow-hidden rounded-full bg-line"
       >
         <div
           className={cn(
             'h-full rounded-full transition-[width] duration-500',
-            percentual === 100 ? 'bg-emerald-600' : 'bg-zinc-900'
+            percentual === 100 ? 'bg-success-600' : 'bg-ink'
           )}
           style={{ width: `${percentual}%` }}
         />

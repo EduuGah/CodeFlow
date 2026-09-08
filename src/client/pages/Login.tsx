@@ -1,5 +1,5 @@
 import { Navigate } from 'react-router-dom';
-import { AlertCircle, Code2, Loader2 } from 'lucide-react';
+import { IconAlert, IconLogo, IconSpinner } from '../components/ui/Icon';
 import { Button } from '../components/ui/Button';
 import { useAuth } from '../contexts/AuthContext';
 import { useState } from 'react';
@@ -10,8 +10,8 @@ export function Login() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-zinc-50">
-        <Loader2 className="w-8 h-8 text-brand-500 animate-spin" />
+      <div className="min-h-screen flex items-center justify-center bg-canvas">
+        <IconSpinner size={32} className="animate-spin text-brand-500" />
       </div>
     );
   }
@@ -34,19 +34,19 @@ export function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-50 flex flex-col items-center justify-center p-4">
+    <div className="min-h-screen bg-canvas flex flex-col items-center justify-center p-4">
       <div className="w-full max-w-sm space-y-8">
         <div className="flex flex-col items-center text-center space-y-2">
-          <div className="w-12 h-12 bg-zinc-900 rounded-xl flex items-center justify-center mb-2 shadow-sm">
-            <Code2 size={24} className="text-white" />
+          <div className="w-12 h-12 bg-ink rounded-xl flex items-center justify-center mb-2 shadow-sm">
+            <IconLogo size={24} className="text-white" />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-zinc-900">Acesse o CodeFlow</h1>
-          <p className="text-sm text-zinc-500">
+          <h1 className="text-2xl font-bold tracking-tight text-ink">Acesse o CodeFlow</h1>
+          <p className="text-sm text-ink-faint">
             Continue sua jornada de aprendizado
           </p>
         </div>
 
-        <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-zinc-200">
+        <div className="bg-surface p-6 sm:p-8 rounded-2xl shadow-sm border border-line">
           <Button 
             className="w-full gap-2" 
             variant="outline" 
@@ -54,7 +54,7 @@ export function Login() {
             disabled={isLoggingIn || !isConfigured}
           >
             {isLoggingIn ? (
-              <Loader2 size={18} className="animate-spin" />
+              <IconSpinner size={18} className="animate-spin" />
             ) : (
               <svg viewBox="0 0 24 24" className="w-5 h-5" aria-hidden="true">
                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
@@ -69,15 +69,15 @@ export function Login() {
           {authError && (
             <div
               role="alert"
-              className="mt-4 flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-left"
+              className="mt-4 flex items-start gap-2 rounded-lg border border-danger-200 bg-danger-50 p-3 text-left"
             >
-              <AlertCircle size={16} className="mt-0.5 flex-shrink-0 text-red-500" />
-              <p className="text-xs leading-relaxed text-red-700">{authError}</p>
+              <IconAlert size={16} className="mt-0.5 flex-shrink-0 text-danger-500" />
+              <p className="text-xs leading-relaxed text-danger-700">{authError}</p>
             </div>
           )}
 
           <div className="mt-6 flex items-center justify-center">
-            <span className="text-xs text-zinc-400 text-center">
+            <span className="text-xs text-ink-faint text-center">
               Ao entrar, você concorda com nossos termos de serviço.
             </span>
           </div>

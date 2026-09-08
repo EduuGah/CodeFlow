@@ -1,65 +1,87 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
 import Editor from '@monaco-editor/react';
-import { Play, ArrowLeft, Send, CheckCircle2, ListChecks } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
-import { fetchProgress, markProjectCompleted } from '../lib/progress';
-import { useAuth } from '../contexts/AuthContext';
-import { Button } from '../components/ui/Button';
-import { Badge } from '../components/ui/Badge';
-import { MarkdownReader } from '../components/ui/MarkdownReader';
-import { CheckpointList, type CheckpointResult } from '../components/project/CheckpointList';
 import { getProject, listProjects } from '../../content';
 import { LANGUAGE_LABELS } from '../../content/types';
-import { executeCode, ExecutionResult } from '../lib/sandbox';
+import { useAuth } from '../contexts/AuthContext';
+import { fetchProgress, markProjectCompleted } from '../lib/progress';
+import { executeCode, type ExecutionResult } from '../lib/sandbox';
+import { CheckpointList, type CheckpointResult } from '../components/project/CheckpointList';
+import { MarkdownReader } from '../components/ui/MarkdownReader';
+import { Badge } from '../components/ui/Badge';
+import {
+  IconCheckCircle,
+  IconChecklist,
+  IconClose,
+  IconLesson,
+  IconPlay,
+  IconSend,
+  IconSpinner,
+} from '../components/ui/Icon';
+
+/**
+ * Workspace de projeto.
+ *
+ * O layout anterior era um split-screen de altura fixa — enunciado à esquerda,
+ * editor à direita —, o mesmo problema que a aula tinha. No celular sobravam
+ * poucos centímetros para cada painel.
+ *
+ * A solução aqui é diferente da aula, porque o problema é diferente. Num projeto
+ * o aluno escreve código consultando o enunciado o tempo todo; empilhar tudo
+ * numa coluna obrigaria a rolar de um lado ao outro a cada dúvida. Então no
+ * celular são abas, e no desktop as duas colunas voltam, porque lá há espaço
+ * para ver enunciado e código ao mesmo tempo.
+ *
+ * As abas existem só no celular: no desktop os dois painéis ficam sempre
+ * visíveis, e o estado da aba é ignorado pelo CSS.
+ */
+
+type Aba = 'enunciado' | 'codigo';
 
 export function ProjectWorkspace() {
   const { id } = useParams();
-  const navigate = useNavigate();
   const { user } = useAuth();
-  
+
   const project = (id ? getProject(id) : undefined) ?? listProjects()[0];
-  
+
+  const [aba, setAba] = useState<Aba>('enunciado');
   const [code, setCode] = useState(project.initialCode);
   const [isRunning, setIsRunning] = useState(false);
   const [result, setResult] = useState<ExecutionResult | null>(null);
   const [isCompleted, setIsCompleted] = useState(false);
 
-  // Verificação dos critérios de aceitação.
   const [checkResults, setCheckResults] = useState<Map<string, CheckpointResult>>(new Map());
   const [isVerifying, setIsVerifying] = useState(false);
 
   const verificado = checkResults.size > 0;
-  const todosFechados =
-    verificado && project.checkpoints.every((c) => checkResults.get(c.id)?.passed);
+  const fechados = project.checkpoints.filter((c) => checkResults.get(c.id)?.passed).length;
+  const todosFechados = verificado && fechados === project.checkpoints.length;
 
-  // Check if already completed
   useEffect(() => {
-    let active = true;
+    let ativo = true;
 
-    async function checkStatus() {
+    async function conferirStatus() {
       if (!user) return;
 
-      const progress = await fetchProgress(user.id);
-      if (active && progress.completedProjects.includes(project.id)) {
-        setIsCompleted(true);
-      }
+      const progresso = await fetchProgress(user.id);
+      if (ativo && progresso.completedProjects.includes(project.id)) setIsCompleted(true);
     }
 
-    checkStatus();
+    conferirStatus();
     return () => {
-      active = false;
+      ativo = false;
     };
   }, [user, project.id]);
 
-  const handleRunCode = async () => {
+  const executar = async () => {
     setIsRunning(true);
     setResult(null);
 
-    // Projetos não têm testes rígidos no MVP: executamos e mostramos o console.
-    const execResult = await executeCode(code);
-    setResult(execResult);
+    // Execução livre: mostra o console sem julgar critério.
+    const execucao = await executeCode(code);
+    setResult(execucao);
     setIsRunning(false);
   };
 
@@ -69,7 +91,7 @@ export function ProjectWorkspace() {
    * Um worker por checkpoint: assim um laço infinito num critério não impede os
    * outros de serem avaliados, e o aluno vê o quadro completo.
    */
-  const handleVerify = async () => {
+  const verificar = async () => {
     setIsVerifying(true);
     setResult(null);
 
@@ -89,14 +111,14 @@ export function ProjectWorkspace() {
     setIsVerifying(false);
   };
 
-  const handleSubmitProject = async () => {
+  const submeter = async () => {
     if (isCompleted) return;
 
     confetti({
-      particleCount: 200,
-      spread: 90,
+      particleCount: 160,
+      spread: 80,
       origin: { y: 0.5 },
-      colors: ['#0ea5e9', '#38bdf8', '#0284c7']
+      colors: ['#2b8078', '#d99422', '#2f8f4e'],
     });
 
     setIsCompleted(true);
@@ -104,95 +126,80 @@ export function ProjectWorkspace() {
     if (user) {
       try {
         await markProjectCompleted(user.id, project.id);
-      } catch (error) {
-        console.error('Falha ao salvar conclusão do projeto:', error);
+      } catch (erro) {
+        console.error('Falha ao salvar conclusão do projeto:', erro);
       }
     }
   };
 
+  const abas: Array<{ id: Aba; label: string; Icone: typeof IconLesson }> = [
+    { id: 'enunciado', label: 'Enunciado', Icone: IconLesson },
+    { id: 'codigo', label: 'Código', Icone: IconPlay },
+  ];
+
   return (
-    <div className="h-screen flex flex-col bg-zinc-50 overflow-hidden">
-      {/* Top Navigation */}
-      <header className="h-14 border-b border-zinc-200 bg-white flex items-center justify-between px-4 flex-shrink-0">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="sm" className="px-2 text-zinc-500" onClick={() => navigate('/app')}>
-            <ArrowLeft size={18} />
-          </Button>
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-bold px-2 py-1 bg-blue-100 text-blue-700 rounded uppercase tracking-wider">Projeto</span>
-            <span className="text-sm font-semibold text-zinc-900">{project.title}</span>
-            <Badge className="hidden bg-transparent ring-1 ring-inset ring-zinc-200 sm:inline-flex">
-              {LANGUAGE_LABELS[project.language]}
-            </Badge>
+    <div className="flex min-h-screen flex-col bg-canvas">
+      <header className="sticky top-0 z-30 border-b border-line bg-surface">
+        <div className="flex items-center gap-3 px-4 py-3">
+          <Link
+            to="/app/trilhas"
+            aria-label="Sair do projeto"
+            className="-ml-2 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-ink-soft transition-colors hover:bg-sunken hover:text-ink"
+          >
+            <IconClose size={20} />
+          </Link>
+
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-bold text-ink">{project.title}</p>
+            <p className="label-mono text-ink-faint">
+              Projeto · {LANGUAGE_LABELS[project.language]}
+            </p>
           </div>
-        </div>
-        
-        <div className="flex items-center gap-2">
+
           {isCompleted && (
-            <Badge tone="success" icon={<CheckCircle2 size={14} />} className="mr-2">
+            <Badge tone="success" icon={<IconCheckCircle size={13} />}>
               Entregue
             </Badge>
           )}
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="gap-2" 
-            onClick={handleRunCode}
-            disabled={isRunning}
-          >
-            <Play size={16} className={isRunning ? "animate-pulse text-zinc-400" : "text-zinc-700"} />
-            {isRunning ? 'Rodando...' : 'Rodar Código'}
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className="gap-2"
-            onClick={handleVerify}
-            disabled={isVerifying}
-          >
-            <ListChecks size={16} className="text-zinc-700" />
-            {isVerifying ? 'Verificando...' : 'Verificar critérios'}
-          </Button>
-          <Button
-            variant="primary"
-            size="sm"
-            className="gap-2"
-            onClick={handleSubmitProject}
-            // Entregar sem os critérios fechados tornaria o selo "Entregue"
-            // uma mentira — era exatamente o que acontecia antes.
-            disabled={isCompleted || !todosFechados}
-            title={
-              isCompleted
-                ? 'Projeto já entregue'
-                : todosFechados
-                  ? 'Todos os critérios foram atendidos'
-                  : 'Feche todos os critérios antes de entregar'
-            }
-          >
-            <Send size={16} />
-            {isCompleted ? 'Projeto entregue' : 'Submeter Projeto'}
-          </Button>
+        </div>
+
+        {/* Abas só no celular: no desktop os dois painéis ficam lado a lado. */}
+        <div className="flex border-t border-line md:hidden" role="tablist">
+          {abas.map(({ id: abaId, label, Icone }) => (
+            <button
+              key={abaId}
+              type="button"
+              role="tab"
+              aria-selected={aba === abaId}
+              onClick={() => setAba(abaId)}
+              className={`flex flex-1 items-center justify-center gap-2 border-b-2 py-3 text-sm font-semibold transition-colors ${
+                aba === abaId
+                  ? 'border-brand-600 text-brand-700'
+                  : 'border-transparent text-ink-faint'
+              }`}
+            >
+              <Icone size={17} />
+              {label}
+            </button>
+          ))}
         </div>
       </header>
 
-      {/* Main Workspace */}
-      <div className="flex-1 flex flex-col md:flex-row min-h-0">
-        
-        {/* Left Side: Specifications */}
-        <div className="w-full md:w-5/12 lg:w-1/3 flex-shrink-0 border-b md:border-b-0 md:border-r border-zinc-200 bg-white overflow-y-auto flex flex-col">
-          <div className="p-6 md:p-8 flex-1">
-            <MarkdownReader content={project.brief} />
-          </div>
+      <div className="flex flex-1 flex-col md:flex-row">
+        {/* Enunciado e critérios */}
+        <section
+          className={`flex-1 overflow-y-auto border-line px-4 py-5 md:block md:w-5/12 md:shrink-0 md:border-r ${
+            aba === 'enunciado' ? 'block' : 'hidden'
+          }`}
+        >
+          <MarkdownReader content={project.brief} />
 
-          <div className="border-t border-zinc-100 bg-zinc-50/50 p-6">
+          <div className="mt-8 rounded-xl border border-line bg-surface p-4">
             <div className="mb-3 flex items-baseline justify-between gap-2">
-              <h2 className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
-                Critérios de aceitação
-              </h2>
+              <h2 className="label-mono text-ink-faint">Critérios de aceitação</h2>
               {verificado && (
-                <span className="text-xs text-zinc-500">
-                  {project.checkpoints.filter((c) => checkResults.get(c.id)?.passed).length} de{' '}
-                  {project.checkpoints.length}
+                <span className="label-mono text-ink-faint">
+                  {fechados} de {project.checkpoints.length}
                 </span>
               )}
             </div>
@@ -204,71 +211,127 @@ export function ProjectWorkspace() {
             />
 
             {!verificado && !isVerifying && (
-              <p className="mt-4 text-xs leading-relaxed text-zinc-500">
-                Clique em <strong className="font-semibold">Verificar critérios</strong> para
-                conferir quais já estão atendidos. Você pode verificar quantas vezes quiser.
+              <p className="mt-4 text-xs leading-relaxed text-ink-faint">
+                Verifique quantas vezes quiser. Cada critério mostra o que ainda falta.
               </p>
             )}
           </div>
-        </div>
+        </section>
 
-        {/* Right Side: Code Editor & Console */}
-        <div className="flex-1 flex flex-col min-w-0">
-          <div className="flex-1 relative">
+        {/* Editor e console */}
+        <section
+          className={`flex flex-1 flex-col md:flex ${aba === 'codigo' ? 'flex' : 'hidden'}`}
+        >
+          <div className="min-h-[320px] flex-1 md:min-h-0">
             <Editor
               height="100%"
               language={project.language}
-              theme="light"
+              theme="vs-dark"
               value={code}
-              onChange={(value) => setCode(value || '')}
+              onChange={(valor) => setCode(valor ?? '')}
               options={{
                 minimap: { enabled: false },
-                // Mesmo motivo do editor da aula: sem isto o Monaco mede o
-                // contêiner só ao montar e pode ficar travado num tamanho errado.
+                // Sem isto o Monaco mede o contêiner só ao montar, e pode ficar
+                // travado num tamanho errado ao trocar de aba.
                 automaticLayout: true,
-                fontSize: 15,
+                fontSize: 14,
                 fontFamily: "'JetBrains Mono', monospace",
-                lineHeight: 24,
-                padding: { top: 24 },
+                lineHeight: 22,
+                padding: { top: 16, bottom: 16 },
                 scrollBeyondLastLine: false,
                 smoothScrolling: true,
-                cursorBlinking: "smooth",
-                scrollbar: {
-                  verticalScrollbarSize: 8,
-                  horizontalScrollbarSize: 8,
-                }
+                lineNumbersMinChars: 3,
+                scrollbar: { alwaysConsumeMouseWheel: false },
               }}
             />
           </div>
 
-          {/* Console Area */}
-          <div className="h-64 border-t border-zinc-200 bg-white flex flex-col">
-            <div className="h-10 border-b border-zinc-100 flex items-center px-4 bg-zinc-50 flex-shrink-0">
-              <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500">Terminal (Console)</span>
-            </div>
-            <div className="flex-1 overflow-auto p-4 bg-[#1e1e1e] text-zinc-300 font-mono text-sm">
-              {!result ? (
-                <div className="text-zinc-500 italic">Clique em "Rodar Código" para ver as saídas aqui...</div>
-              ) : (
-                <div className="space-y-1">
-                  {result.logs.length === 0 ? (
-                    <div className="text-zinc-500 italic">Nenhum log gerado.</div>
-                  ) : (
-                    result.logs.map((log, i) => (
-                      <div key={i} className="whitespace-pre-wrap">{log}</div>
-                    ))
-                  )}
-                  {result.error && (
-                    <div className="text-red-400 mt-4 whitespace-pre-wrap">Erro de Execução: {result.error}</div>
-                  )}
-                </div>
-              )}
-            </div>
+          <div className="h-48 shrink-0 overflow-y-auto border-t border-line bg-terminal p-4">
+            <p className="label-mono mb-2 text-white/40">Console</p>
+
+            {!result && !isRunning && (
+              <p className="text-sm text-white/40">
+                Rode o código para ver a saída aqui.
+              </p>
+            )}
+
+            {isRunning && <p className="text-sm text-white/60">Executando…</p>}
+
+            {result && (
+              <div className="space-y-2 font-mono text-sm">
+                {result.logs.length === 0 && !result.error && (
+                  <p className="text-white/40">Nenhuma saída no console.</p>
+                )}
+
+                {result.logs.map((linha, i) => (
+                  <p key={i} className="whitespace-pre-wrap text-white/90">
+                    {linha}
+                  </p>
+                ))}
+
+                {result.error && (
+                  <p
+                    className={`whitespace-pre-wrap ${
+                      result.timedOut ? 'text-energy-200' : 'text-danger-200'
+                    }`}
+                  >
+                    {result.error}
+                  </p>
+                )}
+              </div>
+            )}
           </div>
-        </div>
+        </section>
       </div>
-      
-      {/* Tutor IA Flutuante */}
+
+      {/* Ações fixas embaixo: no celular precisam estar no polegar, e no desktop
+          ficam ancoradas em vez de perdidas no fim de uma coluna que rola. */}
+      <footer className="sticky bottom-0 border-t border-line bg-surface pb-[env(safe-area-inset-bottom)]">
+        <div className="flex items-center gap-2 px-4 py-3">
+          <button
+            type="button"
+            onClick={executar}
+            disabled={isRunning || isVerifying}
+            className="flex h-12 items-center justify-center gap-2 rounded-lg border border-line px-4 font-semibold text-ink transition-colors hover:bg-sunken disabled:opacity-50"
+          >
+            {isRunning ? <IconSpinner size={18} className="animate-spin" /> : <IconPlay size={18} />}
+            <span className="hidden sm:inline">Rodar</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={verificar}
+            disabled={isVerifying || isRunning}
+            className="flex h-12 flex-1 items-center justify-center gap-2 rounded-lg border border-line px-4 font-semibold text-ink transition-colors hover:bg-sunken disabled:opacity-50"
+          >
+            {isVerifying ? (
+              <IconSpinner size={18} className="animate-spin" />
+            ) : (
+              <IconChecklist size={18} />
+            )}
+            {isVerifying ? 'Verificando…' : 'Verificar critérios'}
+          </button>
+
+          <button
+            type="button"
+            onClick={submeter}
+            // Entregar sem os critérios fechados tornaria o selo "Entregue" uma
+            // afirmação sem lastro — era exatamente o que acontecia antes.
+            disabled={isCompleted || !todosFechados}
+            title={
+              isCompleted
+                ? 'Projeto já entregue'
+                : todosFechados
+                  ? 'Todos os critérios foram atendidos'
+                  : 'Feche todos os critérios antes de entregar'
+            }
+            className="flex h-12 items-center justify-center gap-2 rounded-lg bg-ink px-4 font-bold text-white transition-colors hover:bg-brand-900 disabled:opacity-40"
+          >
+            <IconSend size={18} />
+            <span className="hidden sm:inline">{isCompleted ? 'Entregue' : 'Entregar'}</span>
+          </button>
+        </div>
+      </footer>
     </div>
   );
 }

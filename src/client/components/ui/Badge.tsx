@@ -17,10 +17,10 @@ export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
 }
 
 const tones: Record<BadgeTone, string> = {
-  neutral: 'bg-zinc-100 text-zinc-700',
-  success: 'bg-emerald-50 text-emerald-700',
-  caution: 'bg-amber-50 text-amber-800',
-  danger: 'bg-red-50 text-red-700',
+  neutral: 'bg-sunken text-ink-soft',
+  success: 'bg-success-50 text-success-700',
+  caution: 'bg-energy-50 text-energy-700',
+  danger: 'bg-danger-50 text-danger-700',
 };
 
 export function Badge({ tone = 'neutral', icon, className, children, ...props }: BadgeProps) {

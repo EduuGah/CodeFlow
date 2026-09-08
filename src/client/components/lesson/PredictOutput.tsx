@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CheckCircle2, Loader2, XCircle } from 'lucide-react';
+import { IconCheckCircle, IconCloseCircle, IconSpinner } from '../ui/Icon';
 import type { PredictOutputExercise } from '../../../content/types';
 import { executeCode } from '../../lib/sandbox';
 import { Button } from '../ui/Button';
@@ -64,8 +64,8 @@ export function PredictOutput({
   };
 
   return (
-    <section className="rounded-lg border border-zinc-200 bg-white p-4">
-      <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-zinc-500">
+    <section className="rounded-lg border border-line bg-surface p-4">
+      <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-ink-faint">
         Preveja antes de executar
       </h3>
 
@@ -73,12 +73,12 @@ export function PredictOutput({
         <MarkdownReader content={exercise.prompt} />
       </div>
 
-      <pre className="mb-4 overflow-x-auto rounded-lg bg-zinc-900 p-4 text-sm leading-relaxed">
-        <code className="font-mono text-zinc-100">{exercise.code}</code>
+      <pre className="mb-4 overflow-x-auto rounded-lg bg-ink p-4 text-sm leading-relaxed">
+        <code className="font-mono text-white/90">{exercise.code}</code>
       </pre>
 
       <label className="block">
-        <span className="mb-1 block text-sm font-medium text-zinc-700">
+        <span className="mb-1 block text-sm font-medium text-ink-soft">
           O que você acha que será impresso?
         </span>
         <textarea
@@ -90,7 +90,7 @@ export function PredictOutput({
           rows={3}
           spellCheck={false}
           placeholder="Uma linha para cada saída"
-          className="w-full rounded-lg border border-zinc-200 bg-zinc-50 p-3 font-mono text-sm text-zinc-800 outline-none transition-colors focus:border-zinc-400 focus:bg-white"
+          className="w-full rounded-lg border border-line bg-canvas p-3 font-mono text-sm text-ink outline-none transition-colors focus:border-line-strong focus:bg-surface"
         />
       </label>
 
@@ -100,7 +100,7 @@ export function PredictOutput({
         disabled={previsao.trim() === '' || executando}
         onClick={verificar}
       >
-        {executando && <Loader2 size={15} className="animate-spin" />}
+        {executando && <IconSpinner size={15} className="animate-spin" />}
         {saidaReal === null ? 'Executar e comparar' : 'Comparar de novo'}
       </Button>
 
@@ -109,38 +109,38 @@ export function PredictOutput({
           <div
             role="status"
             className={`flex items-center gap-1.5 text-sm font-semibold ${
-              acertou ? 'text-emerald-700' : 'text-amber-800'
+              acertou ? 'text-success-700' : 'text-energy-700'
             }`}
           >
-            {acertou ? <CheckCircle2 size={15} /> : <XCircle size={15} />}
+            {acertou ? <IconCheckCircle size={15} /> : <IconCloseCircle size={15} />}
             {acertou ? 'Sua previsão bateu com a execução' : 'Diferente do que você esperava'}
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
-              <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-zinc-400">
+              <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-ink-faint">
                 Sua previsão
               </p>
-              <pre className="overflow-x-auto rounded-lg border border-zinc-200 bg-zinc-50 p-3 text-sm">
-                <code className="font-mono text-zinc-700">{previsao.trim() || '(vazio)'}</code>
+              <pre className="overflow-x-auto rounded-lg border border-line bg-canvas p-3 text-sm">
+                <code className="font-mono text-ink-soft">{previsao.trim() || '(vazio)'}</code>
               </pre>
             </div>
             <div>
-              <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-zinc-400">
+              <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-ink-faint">
                 Resultado real
               </p>
               <pre
                 className={`overflow-x-auto rounded-lg border p-3 text-sm ${
-                  acertou ? 'border-emerald-200 bg-emerald-50' : 'border-amber-200 bg-amber-50'
+                  acertou ? 'border-success-200 bg-success-50' : 'border-energy-200 bg-energy-50'
                 }`}
               >
-                <code className="font-mono text-zinc-800">{saidaReal || '(nenhuma saída)'}</code>
+                <code className="font-mono text-ink">{saidaReal || '(nenhuma saída)'}</code>
               </pre>
             </div>
           </div>
 
-          <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-3">
-            <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-zinc-500">
+          <div className="rounded-lg border border-line bg-canvas p-3">
+            <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-ink-faint">
               Por quê
             </p>
             <MarkdownReader

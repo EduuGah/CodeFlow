@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
-import { AlertCircle, Loader2 } from 'lucide-react';
+import { IconAlert, IconSpinner } from '../components/ui/Icon';
 import { useAuth } from '../contexts/AuthContext';
 
 /** Segurança contra ficar girando para sempre se a sessão nunca chegar. */
@@ -54,18 +54,18 @@ export function AuthCallback() {
 
   if (failure) {
     return (
-      <div className="min-h-screen bg-zinc-50 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-canvas flex items-center justify-center p-4">
         <div className="w-full max-w-sm space-y-6 text-center">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-50">
-            <AlertCircle size={24} className="text-red-500" />
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-danger-50">
+            <IconAlert size={24} className="text-danger-500" />
           </div>
           <div className="space-y-2">
-            <h1 className="text-lg font-semibold text-zinc-900">Não foi possível concluir o login</h1>
-            <p className="text-sm leading-relaxed text-zinc-500">{failure}</p>
+            <h1 className="text-lg font-semibold text-ink">Não foi possível concluir o login</h1>
+            <p className="text-sm leading-relaxed text-ink-faint">{failure}</p>
           </div>
           <Link
             to="/login"
-            className="inline-block rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800"
+            className="inline-block rounded-lg bg-ink px-4 py-2 text-sm font-medium text-white hover:bg-brand-900"
           >
             Voltar para o login
           </Link>
@@ -75,9 +75,9 @@ export function AuthCallback() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 flex flex-col items-center justify-center gap-3">
-      <Loader2 className="h-8 w-8 animate-spin text-zinc-400" />
-      <p className="text-sm text-zinc-500">Concluindo seu login…</p>
+    <div className="min-h-screen bg-canvas flex flex-col items-center justify-center gap-3">
+      <IconSpinner className="h-8 w-8 animate-spin text-ink-faint" />
+      <p className="text-sm text-ink-faint">Concluindo seu login…</p>
     </div>
   );
 }
