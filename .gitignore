@@ -11,3 +11,6 @@ dist/
 test-results/
 playwright-report/
 blob-report/
+
+# Capturas de tela geradas para revisão
+painel-*.png

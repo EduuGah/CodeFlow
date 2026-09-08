@@ -6,7 +6,14 @@ import { fetchAttempts, fetchFlashcardReviews, fetchProgress } from '../lib/prog
 import { conceptsNeedingReview, masteryByConcept, overallStats, type Attempt, type ConceptMastery } from '../lib/mastery';
 import { computeAchievements, computeXp, levelFromXp } from '../lib/gamification';
 import { countCards, dueCount, type FlashcardReview } from '../lib/review';
-import { currentStreak, daysSinceLastStudy, lastActivity, unsolvedExerciseIds, type ResumePoint } from '../lib/study';
+import {
+  abandonedExerciseIds,
+  currentStreak,
+  daysSinceLastStudy,
+  lastActivity,
+  unsolvedExerciseIds,
+  type ResumePoint,
+} from '../lib/study';
 
 /**
  * Dados do aluno, buscados uma vez e compartilhados pelas abas.
@@ -41,6 +48,8 @@ interface StudentData {
 
   /** Exercícios ainda não resolvidos, e o total publicado. */
   pendingExercises: string[];
+  /** Tentados e nunca resolvidos. É o que "em aberto" quer dizer para o aluno. */
+  abandonedExercises: string[];
   totalExercises: number;
   /** Cartões vencidos hoje. */
   dueCards: number;
@@ -128,6 +137,7 @@ export function StudentDataProvider({ children }: { children: React.ReactNode })
       daysAway: daysSinceLastStudy(attempts),
       resume: lastActivity(attempts),
       pendingExercises: unsolvedExerciseIds(todosExercicios, attempts),
+      abandonedExercises: abandonedExerciseIds(attempts),
       totalExercises: todosExercicios.length,
       dueCards: dueCount(listFlashcards(), reviews),
       cards: countCards(listFlashcards(), reviews),

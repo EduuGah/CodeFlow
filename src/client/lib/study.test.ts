@@ -1,7 +1,13 @@
 import { describe, expect, it } from 'vitest';
 
 import type { Attempt } from './mastery';
-import { currentStreak, daysSinceLastStudy, lastActivity, unsolvedExerciseIds } from './study';
+import {
+  abandonedExerciseIds,
+  currentStreak,
+  daysSinceLastStudy,
+  lastActivity,
+  unsolvedExerciseIds,
+} from './study';
 
 /**
  * Datas são a origem clássica de erro de um dia. Estes testes fixam um "hoje"
@@ -132,5 +138,31 @@ describe('exercícios pendentes', () => {
 
   it('preserva a ordem do catálogo', () => {
     expect(unsolvedExerciseIds(todos, [])).toEqual(['ex-a', 'ex-b', 'ex-c']);
+  });
+});
+
+describe('em aberto é o que se tentou e deixou', () => {
+  it('não conta exercício que o aluno nunca abriu', () => {
+    // Um aluno na terceira aula via "26 exercícios em aberto", contando o
+    // catálogo inteiro. Isso transforma o que existe pela frente em dívida.
+    expect(abandonedExerciseIds([])).toEqual([]);
+  });
+
+  it('conta o tentado e nunca resolvido', () => {
+    const historico = [
+      em('2026-03-01', '10:00', { exerciseId: 'ex-a', correct: false }),
+      em('2026-03-01', '10:05', { exerciseId: 'ex-b', correct: true }),
+      em('2026-03-01', '10:10', { exerciseId: 'ex-c', correct: false }),
+    ];
+
+    expect(abandonedExerciseIds(historico).sort()).toEqual(['ex-a', 'ex-c']);
+  });
+
+  it('errar antes de acertar não deixa o exercício em aberto', () => {
+    const historico = [
+      em('2026-03-01', '10:00', { exerciseId: 'ex-a', correct: false }),
+      em('2026-03-01', '10:05', { exerciseId: 'ex-a', correct: true }),
+    ];
+    expect(abandonedExerciseIds(historico)).toEqual([]);
   });
 });

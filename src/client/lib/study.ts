@@ -105,3 +105,21 @@ export function unsolvedExerciseIds(allExerciseIds: string[], attempts: Attempt[
   const resolvidos = new Set(attempts.filter((a) => a.correct).map((a) => a.exerciseId));
   return allExerciseIds.filter((id) => !resolvidos.has(id));
 }
+
+/**
+ * Exercícios que o aluno tentou e deixou para trás.
+ *
+ * Diferente de `unsolvedExerciseIds`, que devolve tudo que ainda não foi
+ * resolvido — inclusive exercícios de aulas que a pessoa nem abriu. Mostrar esse
+ * número na tela inicial transforma o catálogo inteiro em dívida: um aluno na
+ * terceira aula via "26 exercícios em aberto", contando material que ele não
+ * tinha como ter feito.
+ *
+ * Aqui a conta é estreita e acionável: tentou ao menos uma vez, nunca acertou.
+ */
+export function abandonedExerciseIds(attempts: Attempt[]): string[] {
+  const tentados = new Set(attempts.map((a) => a.exerciseId));
+  const resolvidos = new Set(attempts.filter((a) => a.correct).map((a) => a.exerciseId));
+
+  return [...tentados].filter((id) => !resolvidos.has(id));
+}

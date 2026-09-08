@@ -8,6 +8,7 @@ import { PathPreview } from '../../components/dashboard/PathPreview';
 import {
   IconArrowRight,
   IconCheck,
+  IconLesson,
   IconPractice,
   IconReview,
   IconStreak,
@@ -51,7 +52,7 @@ export function Home() {
     daysAway,
     cards,
     conceptsToReview,
-    pendingExercises,
+    abandonedExercises,
   } = useStudentData();
 
   const primeiroNome =
@@ -97,18 +98,20 @@ export function Home() {
         .map((c) => c.conceptId)
         .join(', '),
     },
-    pendingExercises.length > 0 && {
+    abandonedExercises.length > 0 && {
       chave: 'pendentes',
       para: '/app/praticar',
       Icone: IconPractice,
-      tom: 'brand' as const,
-      titulo: 'Exercícios em aberto',
-      detalhe: `${pendingExercises.length} ainda sem solução aceita`,
+      tom: 'energy' as const,
+      titulo: 'Exercícios que você deixou para trás',
+      detalhe: `${abandonedExercises.length} ${
+        abandonedExercises.length === 1 ? 'tentado e não resolvido' : 'tentados e não resolvidos'
+      }`,
     },
     cards.novos > 0 && {
       chave: 'novos',
       para: '/app/praticar',
-      Icone: IconPractice,
+      Icone: IconLesson,
       tom: 'brand' as const,
       titulo: 'Cartões que você ainda não viu',
       detalhe: `${cards.novos} ${cards.novos === 1 ? 'cartão novo' : 'cartões novos'}`,
