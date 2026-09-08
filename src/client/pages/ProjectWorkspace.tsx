@@ -163,7 +163,7 @@ export function ProjectWorkspace() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-canvas">
+    <div className="rolagem-com-barras flex min-h-screen flex-col bg-canvas">
       <header className="sticky top-0 z-30 border-b border-line bg-surface">
         <div className="flex items-center gap-3 px-4 py-3">
           <Link

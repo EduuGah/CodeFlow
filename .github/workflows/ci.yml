@@ -38,3 +38,39 @@ jobs:
 
       - name: Build de produção
         run: npm run build
+
+  e2e:
+    name: Navegador de verdade
+    runs-on: ubuntu-latest
+    # Depois da verificação: se os tipos ou os testes de unidade já quebraram,
+    # baixar um navegador para descobrir de novo é desperdício.
+    needs: verificar
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependências
+        run: npm ci
+
+      # Só o Chromium. Os outros navegadores dobrariam o tempo do job para cobrir
+      # motores que este produto ainda não prometeu suportar.
+      - name: Instalar o Chromium
+        run: npx playwright install --with-deps chromium
+
+      # Cobre o que o jsdom não alcança: layout, CSS, foco de verdade, o Web
+      # Worker do sandbox e o editor de código carregando.
+      - name: Rodar E2E
+        run: npm run test:e2e
+
+      - name: Guardar o relatório quando falhar
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7

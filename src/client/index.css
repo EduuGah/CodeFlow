@@ -125,4 +125,21 @@
   .label-mono {
     @apply font-mono text-[11px] font-medium uppercase tracking-[0.12em];
   }
+
+  /**
+   * Páginas com cabeçalho e rodapé fixos.
+   *
+   * O navegador rola um elemento focado até a borda da janela e não sabe que há
+   * barras fixas por cima dela. Medido na aula: tabular até um bloco de código
+   * rolável — que o Chrome torna focável de propósito, para poder rolá-lo com as
+   * setas — o deixava 73px atrás do rodapé, exatamente a altura dele. A pessoa
+   * focava algo que não conseguia ver.
+   *
+   * As margens são maiores que as barras (66px e 73px) para sobrar respiro.
+   */
+  .rolagem-com-barras
+    :is(a, button, input, textarea, select, summary, pre, [tabindex], [contenteditable]) {
+    scroll-margin-top: 4.5rem;
+    scroll-margin-bottom: 5.5rem;
+  }
 }

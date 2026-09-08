@@ -122,7 +122,7 @@ export function Lesson() {
   const voltar = () => setIndice((i) => Math.max(i - 1, 0));
 
   return (
-    <div className="flex min-h-screen flex-col bg-canvas">
+    <div className="rolagem-com-barras flex min-h-screen flex-col bg-canvas">
       {/* Cabeçalho fixo: a barra de progresso precisa ficar visível durante a
           rolagem, porque é ela que responde "quanto falta". */}
       <header className="sticky top-0 z-30 border-b border-line bg-surface">
