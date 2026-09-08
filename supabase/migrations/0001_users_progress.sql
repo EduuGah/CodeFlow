@@ -72,3 +72,20 @@ drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute function public.handle_new_user();
+
+-- Preenche quem já entrou antes desta migração existir.
+--
+-- O gatilho acima só dispara em INSERT: quem criou conta antes dele ficaria com
+-- login funcionando e nenhum perfil em `public.users` — e o sintoma é confuso,
+-- porque a pessoa entra normalmente e o progresso simplesmente não salva.
+--
+-- `on conflict do nothing` deixa a migração idempotente: rodar de novo não
+-- sobrescreve nome ou avatar que o aluno já tenha.
+insert into public.users (id, email, name, avatar_url)
+select
+  au.id,
+  au.email,
+  au.raw_user_meta_data ->> 'full_name',
+  au.raw_user_meta_data ->> 'avatar_url'
+from auth.users au
+on conflict (id) do nothing;
