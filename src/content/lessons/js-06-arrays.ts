@@ -103,6 +103,28 @@ console.log(maiorNota([7, 9, 4])); // esperado: 9
             hidden: true,
           },
         ],
+        properties: [
+          {
+            description: 'o resultado está na lista e nenhum item é maior que ele',
+            generate: `
+              const n = Math.floor(rnd() * 12) + 1;
+              const notas = [];
+              for (let i = 0; i < n; i++) notas.push(Math.round(rnd() * 100) / 10);
+              return { notas };
+            `,
+            check: `
+              const r = maiorNota(caso.notas);
+              if (!caso.notas.includes(r)) {
+                throw new Error("maiorNota devolveu " + r + ", que não está na lista " + JSON.stringify(caso.notas) + ".");
+              }
+              for (const nota of caso.notas) {
+                if (nota > r) {
+                  throw new Error("maiorNota devolveu " + r + ", mas " + nota + " é maior e também está na lista.");
+                }
+              }
+            `,
+          },
+        ],
         solution: `function maiorNota(notas) {
   let maior = notas[0];
   for (let i = 1; i < notas.length; i++) {

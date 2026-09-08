@@ -55,10 +55,10 @@ test('resolver o exercício conclui a aula e grava o progresso', async ({ logado
 
   await page.getByRole('button', { name: 'Executar código' }).click();
 
-  // Cada teste do exercício vira um item; o Web Worker é o de verdade.
+  // Cada teste e cada propriedade viram um item; o Web Worker é o de verdade.
   const itens = page.locator('ul li');
   await expect(itens.first()).toBeVisible({ timeout: 20_000 });
-  await expect(itens).toHaveCount(exercicio.tests.length);
+  await expect(itens).toHaveCount(exercicio.tests.length + (exercicio.properties?.length ?? 0));
 
   // A dica sai de cena quando o exercício é resolvido — consequência observável
   // de `passouTudo`, e sinal de que a execução foi lida como acerto.

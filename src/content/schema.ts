@@ -25,6 +25,18 @@ const testCaseSchema = z.object({
   hidden: z.boolean().optional(),
 });
 
+/**
+ * O gerador e a verificação são corpos de função, não expressões: precisam de
+ * `return` e de `throw`. Um campo vazio produziria uma propriedade que passa sem
+ * verificar nada — o pior defeito possível num exercício, porque é verde.
+ */
+const propertySchema = z.object({
+  description: z.string().min(1),
+  generate: z.string().min(1, 'a propriedade precisa de um gerador de casos'),
+  check: z.string().min(1, 'a propriedade precisa verificar alguma coisa'),
+  runs: z.number().int().positive().max(200).optional(),
+});
+
 const exerciseBase = {
   id: idSchema,
   prompt: z.string().min(1),
@@ -41,6 +53,7 @@ export const exerciseSchema = z.discriminatedUnion('type', [
     initialCode: z.string(),
     // Exercício de código sem teste daria feedback errado ao aluno (§ "testes pedagógicos").
     tests: z.array(testCaseSchema).min(1, 'exercício de código precisa de ao menos um teste'),
+    properties: z.array(propertySchema).optional(),
     solution: z.string().optional(),
   }),
   z

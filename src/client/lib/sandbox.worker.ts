@@ -1,6 +1,11 @@
 /// <reference lib="webworker" />
 
-import { runProgram, type SandboxTest, type SandboxRunResult } from './sandbox-core';
+import {
+  runProgram,
+  type SandboxProperty,
+  type SandboxRunResult,
+  type SandboxTest,
+} from './sandbox-core';
 
 /**
  * Worker de execução de código do aluno.
@@ -18,11 +23,12 @@ import { runProgram, type SandboxTest, type SandboxRunResult } from './sandbox-c
  * código que o aluno executa.
  */
 
-export type { SandboxTest };
+export type { SandboxProperty, SandboxTest };
 
 export interface WorkerRequest {
   code: string;
   tests: SandboxTest[];
+  properties?: SandboxProperty[];
 }
 
 export type WorkerResponse = SandboxRunResult;
@@ -59,8 +65,8 @@ function lockDownGlobals(): void {
 }
 
 self.onmessage = (event: MessageEvent<WorkerRequest>) => {
-  const { code, tests } = event.data;
+  const { code, tests, properties } = event.data;
 
   lockDownGlobals();
-  self.postMessage(runProgram(code, tests));
+  self.postMessage(runProgram(code, tests, properties));
 };

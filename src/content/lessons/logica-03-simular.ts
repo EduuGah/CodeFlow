@@ -124,6 +124,28 @@ if (r !== "b a") throw new Error("inverter(\\"a b\\") deveria devolver \\"b a\\"
             hidden: true,
           },
         ],
+        properties: [
+          {
+            description: 'inverter duas vezes devolve o texto original',
+            generate: `
+              const letras = "abcdefg 123";
+              const n = Math.floor(rnd() * 15);
+              let texto = "";
+              for (let i = 0; i < n; i++) texto += letras[Math.floor(rnd() * letras.length)];
+              return { texto };
+            `,
+            check: `
+              const umaVez = inverter(caso.texto);
+              const duasVezes = inverter(umaVez);
+              if (duasVezes !== caso.texto) {
+                throw new Error("inverter(inverter(" + JSON.stringify(caso.texto) + ")) deveria voltar ao original, mas deu " + JSON.stringify(duasVezes) + ".");
+              }
+              if (umaVez.length !== caso.texto.length) {
+                throw new Error("o texto invertido tem " + umaVez.length + " caracteres, o original tem " + caso.texto.length + ".");
+              }
+            `,
+          },
+        ],
         solution: `function inverter(texto) {
   let saida = "";
   for (let i = texto.length - 1; i >= 0; i--) {

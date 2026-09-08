@@ -132,6 +132,28 @@ if (entrada.length !== 2) throw new Error("O array original foi modificado. filt
             hidden: true,
           },
         ],
+        properties: [
+          {
+            description: 'devolve exatamente os nomes de quem tirou 7 ou mais, na mesma ordem',
+            generate: `
+              const n = Math.floor(rnd() * 10);
+              const alunos = [];
+              for (let i = 0; i < n; i++) {
+                alunos.push({ nome: "aluno" + i, nota: Math.round(rnd() * 100) / 10 });
+              }
+              return { alunos };
+            `,
+            check: `
+              const r = nomesAprovados(caso.alunos);
+              const esperado = caso.alunos.filter(a => a.nota >= 7).map(a => a.nome);
+
+              if (!Array.isArray(r)) throw new Error("nomesAprovados deveria devolver uma lista.");
+              if (r.length !== esperado.length || r.some((nome, i) => nome !== esperado[i])) {
+                throw new Error("com " + JSON.stringify(caso.alunos) + " esperava " + JSON.stringify(esperado) + ", veio " + JSON.stringify(r) + ".");
+              }
+            `,
+          },
+        ],
         solution: `function nomesAprovados(alunos) {
   return alunos.filter(a => a.nota >= 7).map(a => a.nome);
 }`,

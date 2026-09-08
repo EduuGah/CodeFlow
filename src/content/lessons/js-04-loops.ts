@@ -108,6 +108,19 @@ console.log(somarAte(4)); // esperado: 10
             hidden: true,
           },
         ],
+        properties: [
+          {
+            description: 'somarAte(n) vale n × (n+1) / 2 para qualquer n',
+            generate: `return { n: Math.floor(rnd() * 300) };`,
+            check: `
+              const esperado = (caso.n * (caso.n + 1)) / 2;
+              const obtido = somarAte(caso.n);
+              if (obtido !== esperado) {
+                throw new Error("somarAte(" + caso.n + ") deveria devolver " + esperado + ", mas devolveu " + obtido + ".");
+              }
+            `,
+          },
+        ],
         solution: `function somarAte(n) {
   let total = 0;
   for (let i = 1; i <= n; i++) {

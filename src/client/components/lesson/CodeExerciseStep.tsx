@@ -58,7 +58,7 @@ export function CodeExerciseStep({
     setRodando(true);
     setResultado(null);
 
-    const execucao = await executeCode(code, exercise.tests);
+    const execucao = await executeCode(code, exercise.tests, exercise.properties);
     setResultado(execucao);
     setRodando(false);
 

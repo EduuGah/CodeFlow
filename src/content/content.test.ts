@@ -58,7 +58,7 @@ describe('exercícios de código', () => {
   it.each(codeExercises.map(({ exercise }) => [exercise.id, exercise] as const))(
     '%s: o código inicial NÃO passa (o exercício exige trabalho do aluno)',
     (_id, exercise) => {
-      const resultado = runProgram(exercise.initialCode, exercise.tests);
+      const resultado = runProgram(exercise.initialCode, exercise.tests, exercise.properties);
       const todosPassaram =
         resultado.testResults.length > 0 && resultado.testResults.every((t) => t.passed);
 
@@ -66,10 +66,28 @@ describe('exercícios de código', () => {
     }
   );
 
+  const comPropriedades = codeExercises.filter(({ exercise }) => exercise.properties?.length);
+
+  it.each(comPropriedades.map(({ exercise }) => [exercise.id, exercise] as const))(
+    '%s: cada propriedade reprova o código inicial',
+    (_id, exercise) => {
+      // Uma propriedade que passa com o esqueleto não está verificando nada — e
+      // seria pior que a ausência dela, porque parece cobertura.
+      for (const propriedade of exercise.properties!) {
+        const resultado = runProgram(exercise.initialCode, [], [propriedade]);
+        const passou = resultado.testResults[0]?.passed === true;
+
+        expect(passou, `a propriedade "${propriedade.description}" passa sem o aluno escrever nada`).toBe(
+          false
+        );
+      }
+    }
+  );
+
   it.each(codeExercises.map(({ exercise }) => [exercise.id, exercise] as const))(
     '%s: toda mensagem de falha é escrita para o aluno',
     (_id, exercise) => {
-      const resultado = runProgram(exercise.initialCode, exercise.tests);
+      const resultado = runProgram(exercise.initialCode, exercise.tests, exercise.properties);
 
       for (const teste of resultado.testResults) {
         if (teste.passed) continue;

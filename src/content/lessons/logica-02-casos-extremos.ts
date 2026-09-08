@@ -132,6 +132,32 @@ if (r !== 0) throw new Error("Sem nenhum número válido o resultado deveria ser
             hidden: true,
           },
         ],
+        properties: [
+          {
+            description: 'ignora o que não é número e nunca devolve NaN',
+            generate: `
+              const n = Math.floor(rnd() * 8);
+              const lixo = [null, undefined, "abc", NaN, Infinity, {}];
+              const numeros = [];
+              for (let i = 0; i < n; i++) {
+                numeros.push(rnd() < 0.4 ? lixo[Math.floor(rnd() * lixo.length)] : Math.round(rnd() * 200) / 10);
+              }
+              return { numeros };
+            `,
+            check: `
+              const r = mediaSegura(caso.numeros);
+              if (typeof r !== "number" || !Number.isFinite(r)) {
+                throw new Error("com " + JSON.stringify(caso.numeros) + " devolveu " + r + ". Nunca devolva NaN nem Infinity.");
+              }
+
+              const validos = caso.numeros.filter(n => Number.isFinite(n));
+              const esperado = validos.length === 0 ? 0 : validos.reduce((a, b) => a + b, 0) / validos.length;
+              if (Math.abs(r - esperado) > 1e-9) {
+                throw new Error("com " + JSON.stringify(caso.numeros) + " esperava " + esperado + ", veio " + r + ".");
+              }
+            `,
+          },
+        ],
         solution: `function mediaSegura(numeros) {
   const validos = numeros.filter(n => Number.isFinite(n));
   if (validos.length === 0) return 0;

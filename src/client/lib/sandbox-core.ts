@@ -16,6 +16,30 @@ export interface SandboxTest {
   assertion: string;
 }
 
+/**
+ * Uma propriedade: uma regra que vale para qualquer entrada, verificada contra
+ * dezenas de casos sorteados.
+ *
+ * Existe porque o teste de caso fixo tem um buraco que só aparece do lado do
+ * aluno. `somar(2, 3) !== 5` é passável com `if (a === 2 && b === 3) return 5` —
+ * o exercício recompensa decorar o teste em vez de resolver o problema, que é o
+ * oposto do que a plataforma existe para fazer.
+ *
+ * O sorteio é determinístico: a semente vem do texto da descrição, então o mesmo
+ * exercício sempre gera os mesmos casos. Sem isso um exercício passaria hoje e
+ * falharia amanhã, e o CI viraria loteria.
+ */
+export interface SandboxProperty {
+  /** O que a propriedade afirma, em uma frase. */
+  description: string;
+  /** Corpo de função que devolve um caso. Tem `rnd()` disponível — sorteio em [0, 1). */
+  generate: string;
+  /** Corpo de função que recebe `caso` e lança quando a propriedade não vale. */
+  check: string;
+  /** Quantos casos sortear. Padrão 50. */
+  runs?: number;
+}
+
 export interface SandboxTestResult {
   passed: boolean;
   message: string;
@@ -32,6 +56,18 @@ export const MAX_LOGS = 500;
 /** Teto por linha, para um único console.log gigante não travar a renderização. */
 export const MAX_LOG_LENGTH = 2000;
 
+/** Casos sorteados por propriedade, quando o autor não diz outro número. */
+export const PROPERTY_RUNS_PADRAO = 50;
+/** Teto de casos: o worker tem 3 segundos, e cada caso roda o código do aluno. */
+export const PROPERTY_RUNS_MAX = 200;
+/**
+ * Teto de tentativas de simplificação depois de uma falha.
+ *
+ * Encolher é útil mas não é o objetivo: gastar o orçamento inteiro procurando o
+ * caso mínimo perfeito arrisca estourar o tempo e o aluno não ver falha nenhuma.
+ */
+export const PROPERTY_SHRINK_MAX = 60;
+
 function formatArg(arg: unknown): string {
   if (typeof arg === 'string') return arg;
   if (arg instanceof Error) return `${arg.name}: ${arg.message}`;
@@ -45,16 +81,144 @@ function formatArg(arg: unknown): string {
 }
 
 /**
- * Monta um único corpo de função com o código do aluno seguido dos testes.
+ * Auxiliares injetados no programa quando há propriedades a verificar.
  *
- * Os testes ficam em funções aninhadas dentro do mesmo escopo, então enxergam as
- * variáveis e funções que o aluno declarou — sem precisar saber os nomes de
- * antemão.
+ * Ficam em JavaScript de string, e não em TypeScript aqui em cima, porque
+ * precisam rodar no mesmo escopo que o código do aluno — é isso que permite às
+ * propriedades chamarem funções que o aluno acabou de declarar, sem saber os
+ * nomes de antemão.
+ *
+ * O prefixo `__cf` existe para não colidir com nada que o aluno escreva.
  */
-export function buildProgram(code: string, tests: SandboxTest[]): string {
-  const testExpressions = tests
-    .map(
-      (test) => `
+const AUXILIARES = `
+function __cfSemente(texto) {
+  var h = 2166136261;
+  for (var i = 0; i < texto.length; i++) {
+    h ^= texto.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+
+/** Fonte que devolve sempre o mesmo valor, para sondar os limites do gerador. */
+function __cfConstante(valor) {
+  return function () { return valor; };
+}
+
+function __cfRnd(semente) {
+  var a = semente >>> 0;
+  return function () {
+    a = (a + 0x6D2B79F5) | 0;
+    var t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function __cfFormatar(valor) {
+  try {
+    var texto = JSON.stringify(valor);
+    if (texto === undefined) return String(valor);
+    return texto.length > 200 ? texto.slice(0, 200) + '…' : texto;
+  } catch (e) {
+    return String(valor);
+  }
+}
+
+/** Devolve a mensagem de erro, ou null quando a propriedade vale para o caso. */
+function __cfFalha(caso, verificar) {
+  try {
+    verificar(caso);
+    return null;
+  } catch (err) {
+    var msg = err && err.message ? err.message : String(err);
+    return msg || 'a propriedade não valeu';
+  }
+}
+
+/** Versões mais simples de um valor, da mais simples para a menos. */
+function __cfCandidatos(valor) {
+  if (typeof valor === 'number' && isFinite(valor)) {
+    var opcoes = [0, Math.trunc(valor / 2), valor > 0 ? valor - 1 : valor + 1];
+    return opcoes.filter(function (n) {
+      return Math.abs(n) < Math.abs(valor);
+    });
+  }
+
+  if (typeof valor === 'string') {
+    if (valor.length === 0) return [];
+    return ['', valor.slice(0, Math.floor(valor.length / 2)), valor.slice(0, valor.length - 1)];
+  }
+
+  if (Array.isArray(valor)) {
+    if (valor.length === 0) return [];
+    return [[], valor.slice(0, Math.floor(valor.length / 2)), valor.slice(0, valor.length - 1)];
+  }
+
+  if (typeof valor === 'boolean') return valor ? [false] : [];
+  return [];
+}
+
+function __cfCopia(objeto) {
+  if (Array.isArray(objeto)) return objeto.slice();
+  var novo = {};
+  for (var k in objeto) {
+    if (Object.prototype.hasOwnProperty.call(objeto, k)) novo[k] = objeto[k];
+  }
+  return novo;
+}
+
+/**
+ * Procura um caso mais simples que ainda falhe.
+ *
+ * Falhar com n = 0 ensina muito mais do que falhar com n = 73: o aluno vê o caso
+ * extremo que ele não tratou, em vez de um número sorteado sem significado.
+ */
+function __cfEncolher(caso, verificar, orcamento) {
+  var atual = caso;
+  var ehObjeto = atual !== null && typeof atual === 'object' && !Array.isArray(atual);
+  var melhorou = true;
+
+  while (melhorou && orcamento.restante > 0) {
+    melhorou = false;
+
+    if (ehObjeto) {
+      for (var chave in atual) {
+        if (!Object.prototype.hasOwnProperty.call(atual, chave)) continue;
+
+        var opcoes = __cfCandidatos(atual[chave]);
+        for (var i = 0; i < opcoes.length && orcamento.restante > 0; i++) {
+          var tentativa = __cfCopia(atual);
+          tentativa[chave] = opcoes[i];
+          orcamento.restante--;
+
+          if (__cfFalha(tentativa, verificar)) {
+            atual = tentativa;
+            melhorou = true;
+            break;
+          }
+        }
+      }
+    } else {
+      var diretas = __cfCandidatos(atual);
+      for (var j = 0; j < diretas.length && orcamento.restante > 0; j++) {
+        orcamento.restante--;
+        if (__cfFalha(diretas[j], verificar)) {
+          atual = diretas[j];
+          melhorou = true;
+          break;
+        }
+      }
+    }
+  }
+
+  return atual;
+}
+`;
+
+/** Um caso de teste vira uma função que devolve passou/falhou. */
+function expressaoDeTeste(test: SandboxTest): string {
+  return `
         (function () {
           try {
             ${test.assertion}
@@ -62,13 +226,84 @@ export function buildProgram(code: string, tests: SandboxTest[]): string {
           } catch (err) {
             return { passed: false, message: err && err.message ? err.message : String(err) };
           }
-        })()`
-    )
-    .join(',');
+        })()`;
+}
+
+/** Uma propriedade vira um laço sobre casos sorteados, com simplificação na falha. */
+function expressaoDePropriedade(propriedade: SandboxProperty): string {
+  const runs = Math.min(
+    PROPERTY_RUNS_MAX,
+    Math.max(1, Math.trunc(propriedade.runs ?? PROPERTY_RUNS_PADRAO))
+  );
+  const descricao = JSON.stringify(propriedade.description);
+
+  return `
+        (function () {
+          var descricao = ${descricao};
+          var aleatorio = __cfRnd(__cfSemente(descricao));
+
+          // As sondas rodam antes do sorteio. Um gerador uniforme quase nunca
+          // acerta o caso extremo — em 50 sorteios de 0 a 99, o zero sai em
+          // menos da metade das execuções, e é justamente o caso que o aluno
+          // esqueceu. Forçando a fonte aos limites, o gerador produz o extremo
+          // da forma que ele mesmo montou, seja número, tamanho de lista ou
+          // escolha entre ramos.
+          var sondas = [__cfConstante(0), __cfConstante(0.9999999), __cfConstante(0.5)];
+          var rnd = aleatorio;
+
+          function gerar() { ${propriedade.generate} }
+          function verificar(caso) { ${propriedade.check} }
+
+          try {
+            for (var i = 0; i < ${runs}; i++) {
+              rnd = i < sondas.length ? sondas[i] : aleatorio;
+              var caso = gerar();
+              var erro = __cfFalha(caso, verificar);
+              if (!erro) continue;
+
+              var orcamento = { restante: ${PROPERTY_SHRINK_MAX} };
+              var simples = __cfEncolher(caso, verificar, orcamento);
+              var mensagem = __cfFalha(simples, verificar) || erro;
+
+              return {
+                passed: false,
+                message: descricao + ' — falhou com ' + __cfFormatar(simples) + ': ' + mensagem
+              };
+            }
+
+            return { passed: true, message: descricao + ' (${runs} casos)' };
+          } catch (err) {
+            return {
+              passed: false,
+              message: descricao + ' — ' + (err && err.message ? err.message : String(err))
+            };
+          }
+        })()`;
+}
+
+/**
+ * Monta um único corpo de função com o código do aluno seguido dos testes.
+ *
+ * Os testes ficam em funções aninhadas dentro do mesmo escopo, então enxergam as
+ * variáveis e funções que o aluno declarou — sem precisar saber os nomes de
+ * antemão. As propriedades vêm depois dos casos: quando as duas falham, o caso
+ * fixo costuma ser a mensagem mais fácil de entender primeiro.
+ */
+export function buildProgram(
+  code: string,
+  tests: SandboxTest[],
+  properties: SandboxProperty[] = []
+): string {
+  const expressoes = [...tests.map(expressaoDeTeste), ...properties.map(expressaoDePropriedade)];
+
+  // Os auxiliares só entram quando são usados: um programa de exercício simples
+  // não precisa carregar o sorteio nem o encolhimento.
+  const auxiliares = properties.length > 0 ? AUXILIARES : '';
 
   return `"use strict";
 ${code}
-;return [${testExpressions}];`;
+;${auxiliares}
+;return [${expressoes.join(',')}];`;
 }
 
 /**
@@ -78,7 +313,11 @@ ${code}
  * (no navegador, encerrando o worker). Nunca lança — erro de sintaxe ou de
  * execução volta no campo `error`.
  */
-export function runProgram(code: string, tests: SandboxTest[]): SandboxRunResult {
+export function runProgram(
+  code: string,
+  tests: SandboxTest[],
+  properties: SandboxProperty[] = []
+): SandboxRunResult {
   const logs: string[] = [];
   let truncated = false;
 
@@ -108,7 +347,7 @@ export function runProgram(code: string, tests: SandboxTest[]): SandboxRunResult
   console.error = capture;
 
   try {
-    const program = new Function(buildProgram(code, tests));
+    const program = new Function(buildProgram(code, tests, properties));
     const testResults = program() as SandboxTestResult[];
     return { logs, testResults };
   } catch (error) {

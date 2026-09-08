@@ -71,11 +71,38 @@ interface ExerciseBase {
   tags: string[];
 }
 
+/**
+ * Uma regra que vale para qualquer entrada, verificada contra casos sorteados.
+ *
+ * Um teste de caso fixo diz "somar(2, 3) devolve 5", e é passável escrevendo
+ * `if (a === 2 && b === 3) return 5`. Uma propriedade diz "somar(a, b) é sempre
+ * a + b" e sorteia as entradas: a única forma de passar é resolver o problema, e
+ * qualquer implementação que resolva serve.
+ */
+export interface ExerciseProperty {
+  /** O que a propriedade afirma, em uma frase. */
+  description: string;
+  /** Corpo de função que devolve um caso. Tem `rnd()` — sorteio em [0, 1). */
+  generate: string;
+  /** Corpo de função que recebe `caso` e lança quando a regra não vale. */
+  check: string;
+  /** Quantos casos sortear. Padrão 50, teto 200. */
+  runs?: number;
+}
+
 /** Escreve código e passa nos testes. */
 export interface CodeExercise extends ExerciseBase {
   type: 'code';
   initialCode: string;
   tests: TestCase[];
+  /**
+   * Regras verificadas contra entradas sorteadas, além dos casos fixos.
+   *
+   * Os dois convivem de propósito: o caso fixo é a mensagem que o aluno entende
+   * primeiro ("somarAte(4) devolve 10"), e a propriedade é o que impede de passar
+   * decorando esse caso.
+   */
+  properties?: ExerciseProperty[];
   /** Solução de referência, para comparação depois do envio (§31). */
   solution?: string;
 }
