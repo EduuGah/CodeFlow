@@ -23,6 +23,8 @@ export const ALUNO = {
 
 /** Estado do banco durante um teste. Cada teste começa com o seu. */
 export interface BancoFalso {
+  /** O papel do aluno. Trocar para 'admin' exercita a área de administração. */
+  role: 'student' | 'admin';
   completed_lessons: string[];
   completed_projects: string[];
   /** Escritas registradas, para o teste conferir que o progresso foi salvo. */
@@ -128,6 +130,10 @@ async function dublarSupabase(page: Page, banco: BancoFalso) {
       if (metodo === 'GET') {
         return json([
           {
+            id: ALUNO.id,
+            email: ALUNO.email,
+            name: ALUNO.nome,
+            role: banco.role,
             completed_lessons: banco.completed_lessons,
             completed_projects: banco.completed_projects,
           },
@@ -168,7 +174,7 @@ async function dublarSupabase(page: Page, banco: BancoFalso) {
 
 export const test = base.extend<{ banco: BancoFalso; logado: Page }>({
   banco: async ({}, use) => {
-    await use({ completed_lessons: [], completed_projects: [], escritas: [] });
+    await use({ role: 'student', completed_lessons: [], completed_projects: [], escritas: [] });
   },
 
   logado: async ({ page, banco }, use) => {

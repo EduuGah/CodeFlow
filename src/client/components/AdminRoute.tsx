@@ -1,8 +1,7 @@
-import { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 
 import { useAuth } from '../contexts/AuthContext';
-import { fetchUserRole, type UserRole } from '../lib/progress';
+import { useUserRole } from '../hooks/useUserRole';
 import { IconSpinner } from './ui/Icon';
 
 /**
@@ -17,27 +16,10 @@ import { IconSpinner } from './ui/Icon';
  * início por um instante e trazê-lo de volta seria pior que esperar.
  */
 export function AdminRoute({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth();
-  const [papel, setPapel] = useState<UserRole | null>(null);
+  const { user } = useAuth();
+  const { papel, carregando } = useUserRole();
 
-  useEffect(() => {
-    let ativo = true;
-
-    if (!user) {
-      setPapel(null);
-      return;
-    }
-
-    fetchUserRole(user.id).then((p) => {
-      if (ativo) setPapel(p);
-    });
-
-    return () => {
-      ativo = false;
-    };
-  }, [user]);
-
-  if (loading || (user && papel === null)) {
+  if (carregando) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-canvas">
         <IconSpinner size={32} className="animate-spin text-ink-faint" />

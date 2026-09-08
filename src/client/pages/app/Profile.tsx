@@ -1,14 +1,17 @@
+import { Link } from 'react-router-dom';
+
 import { getConcept } from '../../../content';
 import { useAuth } from '../../contexts/AuthContext';
 import { useStudentData } from '../../contexts/StudentDataContext';
 import { MASTERY_LABELS, type ConceptMastery } from '../../lib/mastery';
-import { IconCheck, IconExit, IconStreak } from '../../components/ui/Icon';
+import { IconArrowRight, IconCheck, IconExit, IconStreak } from '../../components/ui/Icon';
 import { Badge, type BadgeTone } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { ProgressBar } from '../../components/ui/ProgressBar';
 import { Carregando, Skeleton } from '../../components/ui/Skeleton';
 import { EmptyState } from '../../components/ui/States';
 import { useDocumentTitle } from '../../hooks/useDocumentTitle';
+import { useUserRole } from '../../hooks/useUserRole';
 
 /**
  * Perfil e evolução.
@@ -31,6 +34,7 @@ const tonePorNivel: Record<ConceptMastery['level'], BadgeTone> = {
 export function Profile() {
   useDocumentTitle('Perfil');
   const { user, logout } = useAuth();
+  const { papel } = useUserRole();
   const { loading, level, xp, achievements, mastery, stats, streak, completedLessons } =
     useStudentData();
 
@@ -73,7 +77,32 @@ export function Profile() {
             Nível {level.level} · {level.title}
           </p>
         </div>
+
+        {/* Sair morava no fim da página, depois de toda a lista de conceitos.
+            Sair da conta não é o passo final de uma leitura: é uma ação que se
+            procura, e procurar rolando é o que fazia parecer que não existia. */}
+        <Button variant="outline" size="sm" onClick={logout} className="h-11 shrink-0 gap-1.5 px-4">
+          <IconExit size={16} />
+          Sair
+        </Button>
       </header>
+
+      {/* A área de administração não tinha entrada nenhuma na interface: só
+          existia para quem digitasse a URL. */}
+      {papel === 'admin' && (
+        <Link
+          to="/admin"
+          className="flex items-center justify-between gap-3 rounded-xl border border-line bg-surface p-4 transition-colors hover:bg-sunken"
+        >
+          <span>
+            <span className="block font-bold text-ink">Administração</span>
+            <span className="block text-sm leading-relaxed text-ink-soft">
+              Saúde do catálogo e como os alunos estão reagindo a ele.
+            </span>
+          </span>
+          <IconArrowRight size={18} className="shrink-0 text-ink-faint" />
+        </Link>
+      )}
 
       <section className="rounded-xl border border-line bg-surface p-5">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
@@ -178,11 +207,6 @@ export function Profile() {
           {stats.exercisesSolved}{' '}
           {stats.exercisesSolved === 1 ? 'exercício resolvido' : 'exercícios resolvidos'}
         </p>
-
-        <Button variant="outline" onClick={logout} className="gap-2">
-          <IconExit size={17} />
-          Sair da conta
-        </Button>
       </section>
     </div>
   );
