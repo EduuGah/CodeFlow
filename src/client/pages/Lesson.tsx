@@ -116,7 +116,9 @@ export function Lesson() {
 
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-bold text-ink">{lesson.title}</p>
-            <p className="label-mono text-ink-faint">
+            {/* O próprio contador é a região viva: duplicá-lo num span oculto
+                faria o leitor de tela anunciar a mesma informação duas vezes. */}
+            <p className="label-mono text-ink-faint" aria-live="polite">
               Passo {indice + 1} de {steps.length} · {LANGUAGE_LABELS[lesson.language]}
             </p>
           </div>
@@ -220,12 +222,6 @@ export function Lesson() {
           )}
         </div>
       </footer>
-
-      {/* Navegar para outra aula sem sair da tela: o React reaproveita o
-          componente, então o efeito de reset acima é o que garante o recomeço. */}
-      <span className="sr-only" aria-live="polite">
-        Passo {indice + 1} de {steps.length}
-      </span>
     </div>
   );
 }
