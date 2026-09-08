@@ -44,6 +44,35 @@ it('o catálogo não está vazio', async () => {
   expect(codeExercises.length).toBeGreaterThan(0);
 });
 
+describe('markdown chega limpo ao aluno', () => {
+  const CRASE = String.fromCharCode(96);
+  const BARRA = String.fromCharCode(92);
+
+  const textos = allLessons.flatMap((lesson) =>
+    lesson.blocks
+      .filter((b): b is Extract<typeof b, { markdown: string }> => 'markdown' in b)
+      .map((b) => ({ id: lesson.id, texto: b.markdown }))
+  );
+
+  it('nenhuma barra invertida sobrou antes de crase', () => {
+    // Escrever `\\`` no fonte em vez de `\`` produz uma barra invertida na
+    // string, e o aluno vê o caractere no lugar da formatação de código. Passa
+    // pelo typecheck e pelos testes de execução: só aparece na tela.
+    const ruins = textos.filter(({ texto }) => texto.includes(BARRA + CRASE));
+
+    expect(ruins.map((r) => r.id)).toEqual([]);
+  });
+
+  it('nenhum bloco de código ficou aberto', () => {
+    for (const { id, texto } of textos) {
+      const cercas = (texto.match(/^~~~/gm) ?? []).length;
+      // Cerca ímpar significa bloco não fechado: daí em diante a aula inteira
+      // vira código na tela.
+      expect(cercas % 2, `${id}: bloco de código sem fechar`).toBe(0);
+    }
+  });
+});
+
 describe('armadilha do assíncrono', () => {
   const todasAsAssercoes = allExercises.flatMap(({ exercise }) => {
     if (exercise.type !== 'code' && exercise.type !== 'fill-blank') return [];

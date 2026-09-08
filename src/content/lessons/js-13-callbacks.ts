@@ -30,7 +30,7 @@ setTimeout(function () {
 console.log('segundo');
 ~~~
 
-A saída é \\\`primeiro\\\`, \\\`segundo\\\`, \\\`terceiro\\\` — mesmo com o atraso zerado. O \\\`setTimeout\\\` não pausa nada: ele deixa a função na fila e o programa continua. O que estava agendado só roda quando o código atual termina.
+A saída é \`primeiro\`, \`segundo\`, \`terceiro\` — mesmo com o atraso zerado. O \`setTimeout\` não pausa nada: ele deixa a função na fila e o programa continua. O que estava agendado só roda quando o código atual termina.
 
 Não é lentidão. É a diferença entre **agendar** e **executar**.
 `.trim(),
@@ -153,7 +153,7 @@ buscarPreco('café', function (erro, preco) {
 });
 ~~~
 
-O \\\`return\\\` depois de tratar o erro é essencial. Sem ele, o código continua e tenta usar um \\\`preco\\\` que não existe.
+O \`return\` depois de tratar o erro é essencial. Sem ele, o código continua e tenta usar um \`preco\` que não existe.
 
 Essa forma funciona, mas encadear várias tarefas assim produz o famoso aninhamento em escada — callback dentro de callback dentro de callback. É exatamente o problema que a próxima aula resolve.
 `.trim(),
@@ -250,7 +250,7 @@ verificarIdade(20, function (erro, podeEntrar) {
     },
     {
       kind: 'summary',
-      markdown: `O JavaScript **agenda** em vez de esperar: o programa segue, e o que foi agendado roda depois que o código atual termina. Por isso atraso zero não significa "agora". Quem precisa do resultado de uma tarefa demorada usa um **callback** — e tudo que depende desse resultado acontece dentro dele, nunca fora. A convenção erro-primeiro reserva o primeiro argumento para a falha, e o \\\`return\\\` depois de tratá-la evita seguir com um valor que não existe.`,
+      markdown: `O JavaScript **agenda** em vez de esperar: o programa segue, e o que foi agendado roda depois que o código atual termina. Por isso atraso zero não significa "agora". Quem precisa do resultado de uma tarefa demorada usa um **callback** — e tudo que depende desse resultado acontece dentro dele, nunca fora. A convenção erro-primeiro reserva o primeiro argumento para a falha, e o \`return\` depois de tratá-la evita seguir com um valor que não existe.`,
     },
   ],
 };
