@@ -223,6 +223,9 @@ export function ProjectWorkspace() {
               onChange={(value) => setCode(value || '')}
               options={{
                 minimap: { enabled: false },
+                // Mesmo motivo do editor da aula: sem isto o Monaco mede o
+                // contêiner só ao montar e pode ficar travado num tamanho errado.
+                automaticLayout: true,
                 fontSize: 15,
                 fontFamily: "'JetBrains Mono', monospace",
                 lineHeight: 24,
