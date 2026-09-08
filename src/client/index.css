@@ -37,6 +37,10 @@
   --color-sunken: #efede8;
   --color-line: #e3e0d9;
   --color-line-strong: #cfcabf;
+  /* Borda de campo e controle. Mais escura que as divisorias de proposito: a
+     WCAG exige 3:1 para o contorno que identifica um controle, enquanto uma
+     linha entre itens de lista e decoracao e nao precisa disso. */
+  --color-control: #948d7e;
 
   /* Texto. O tom mais escuro puxa levemente para o verde-azulado, então casa
      com a marca em vez de brigar com ela. */
@@ -64,7 +68,7 @@
      o mesmo do acerto, o aluno não saberia se um botão é um estado. */
   --color-success-50: #edf7ef;
   --color-success-200: #b9e0c2;
-  --color-success-600: #2f8f4e;
+  --color-success-600: #2a8145;
   --color-success-700: #226b3b;
 
   /* Erro. Reservado a falha real de código ou de sistema — nunca a uma resposta
