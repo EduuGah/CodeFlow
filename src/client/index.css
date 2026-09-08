@@ -3,84 +3,100 @@
 @plugin "@tailwindcss/typography";
 
 /**
- * Tokens do CodeFlow.
+ * Identidade visual do CodeFlow.
  *
- * A regra que organiza esta paleta: cor carrega significado, não decoração.
- * O neutro sustenta a interface inteira; cada acento existe porque o aluno
- * precisa distinguir um estado do outro em meio a texto e código. Nada aqui é
- * escolhido por moda — ver docs/design-system.md para o raciocínio de cada um.
+ * A regra que organiza tudo continua sendo: cor carrega significado, não
+ * decoração. O que muda nesta versão é a base.
+ *
+ * Antes a interface era zinc sobre branco puro — legível, mas sem identidade:
+ * lia como Tailwind sem tema. Agora a superfície é uma pedra levemente quente,
+ * que reduz o contraste agressivo do branco em sessões longas de leitura e dá
+ * um fundo com temperatura para o conteúdo se apoiar.
+ *
+ * A cor da marca é um **teal profundo**. Ferramentas de programação quase
+ * sempre puxam para o azul de SaaS; o teal fica no campo técnico sem ser mais
+ * um deles, e tem contraste suficiente para carregar ação primária. O **âmbar**
+ * é a cor de energia — sequência, progresso, dica —, e é quente o bastante para
+ * equilibrar o teal sem competir.
+ *
+ * A personalidade "programação" vem do uso deliberado da monoespaçada em
+ * rótulos, contadores e metadados. Não de enfeite de terminal na interface.
  */
 @theme {
-  /* Plus Jakarta Sans: humanista geométrica, boa em texto corrido longo e com
-     números distintos, que importa numa plataforma cheia de índices e valores.
-     JetBrains Mono para código: zero cortado e ligaduras desligadas. */
+  /* Plus Jakarta Sans: humanista geométrica, confortável em leitura longa e com
+     algarismos bem diferenciados, o que importa numa plataforma cheia de
+     índices e contagens. JetBrains Mono para código e para os rótulos
+     estruturais — é ela que dá o sotaque do produto. */
   --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 
-  /* Superfícies. Referenciam a escala zinc pelo nome correto do Tailwind v4
-     (--color-zinc-*); a versão anterior apontava para --zinc-*, que não existe,
-     e deixava ring-offset-background sem valor. */
-  --color-background: var(--color-zinc-50);
+  /* Superfícies. `canvas` é o fundo da aplicação; `surface` é o que se apoia
+     sobre ele. Nenhum dos dois é branco puro. */
+  --color-canvas: #f7f6f3;
   --color-surface: #ffffff;
-  --color-foreground: var(--color-zinc-900);
-  --color-muted: var(--color-zinc-500);
-  --color-line: var(--color-zinc-200);
+  --color-sunken: #efede8;
+  --color-line: #e3e0d9;
+  --color-line-strong: #cfcabf;
 
-  /* Ação primária. Neutro escuro em vez de azul de SaaS: a cor fica reservada
-     para o que comunica estado, e o botão principal se destaca por contraste. */
-  --color-primary-50: #f4f4f5;
-  --color-primary-100: #e4e4e7;
-  --color-primary-500: #52525b;
-  --color-primary-600: #3f3f46;
-  --color-primary-700: #27272a;
-  --color-primary-900: #18181b;
+  /* Texto. O tom mais escuro puxa levemente para o verde-azulado, então casa
+     com a marca em vez de brigar com ela. */
+  --color-ink: #1c2523;
+  --color-ink-soft: #55605d;
+  --color-ink-faint: #8a938f;
 
-  /* Sucesso — teste passou, aula concluída, projeto entregue. */
-  --color-success-50: #ecfdf5;
-  --color-success-200: #a7f3d0;
-  --color-success-600: #059669;
-  --color-success-700: #047857;
-  --color-success-900: #064e3b;
+  /* Marca — teal profundo. Ação primária, foco, elementos ativos. */
+  --color-brand-50: #eef6f5;
+  --color-brand-100: #d3e8e5;
+  --color-brand-200: #a7d1cc;
+  --color-brand-400: #3f9b91;
+  --color-brand-500: #2b8078;
+  --color-brand-600: #1f6660;
+  --color-brand-700: #17514c;
+  --color-brand-900: #0d302d;
 
-  /* Atenção — dica revelada e "ainda não é essa". Deliberadamente não é
-     vermelho: errar durante o aprendizado não é falha, é etapa. */
-  --color-caution-50: #fffbeb;
-  --color-caution-200: #fde68a;
-  --color-caution-500: #f59e0b;
-  --color-caution-800: #92400e;
-  --color-caution-900: #78350f;
+  /* Energia — âmbar. Sequência, conquista, dica. Nunca erro. */
+  --color-energy-50: #fdf5e7;
+  --color-energy-200: #f6dcab;
+  --color-energy-500: #d99422;
+  --color-energy-700: #96620f;
 
-  /* Erro — apenas falha real: sintaxe inválida, execução quebrada, login negado. */
-  --color-danger-50: #fef2f2;
-  --color-danger-200: #fecaca;
-  --color-danger-500: #ef4444;
-  --color-danger-700: #b91c1c;
+  /* Sucesso. Distinto da marca de propósito: se o verde da ação primária fosse
+     o mesmo do acerto, o aluno não saberia se um botão é um estado. */
+  --color-success-50: #edf7ef;
+  --color-success-200: #b9e0c2;
+  --color-success-600: #2f8f4e;
+  --color-success-700: #226b3b;
 
-  /* Tutor IA. Único acento não semântico, e existe para o aluno distinguir à
-     primeira vista o que é a plataforma do que é a IA falando. */
-  --color-tutor-600: #4f46e5;
-  --color-tutor-700: #4338ca;
+  /* Erro. Reservado a falha real de código ou de sistema — nunca a uma resposta
+     errada de exercício, que é etapa do aprendizado e usa âmbar. */
+  --color-danger-50: #fdf1ef;
+  --color-danger-200: #f4c4bb;
+  --color-danger-500: #c8503c;
+  --color-danger-700: #9a3928;
 
-  /* Editor e terminal: fundo escuro fixo, independente do resto da interface. */
-  --color-editor: #1e1e1e;
-  --color-terminal: #09090b;
+  /* Editor e terminal: superfície escura fixa, independente do resto. A troca de
+     superfície é o que sinaliza "aqui você executa". */
+  --color-editor: #17211f;
+  --color-terminal: #101816;
 
-  /* Raios contidos. Nada de pílula sem contexto (§2 do doc de design). */
+  /* Raios contidos. Sem formato de pílula sem contexto. */
   --radius-sm: 0.25rem;
-  --radius-md: 0.375rem;
-  --radius-lg: 0.5rem;
-  --radius-xl: 0.75rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
 }
 
 @layer base {
   body {
-    @apply bg-zinc-50 text-zinc-900 antialiased font-sans selection:bg-zinc-200 selection:text-zinc-900;
+    @apply bg-canvas text-ink antialiased font-sans;
+    @apply selection:bg-brand-100 selection:text-brand-900;
   }
 
-  /* Foco visível e consistente em tudo que recebe teclado. O anel só aparece na
-     navegação por teclado, então não polui o clique de mouse. */
+  /* Foco visível e consistente em tudo que recebe teclado. Só na navegação por
+     teclado, então o clique de mouse não fica poluído. */
   :focus-visible {
-    @apply outline-none ring-2 ring-zinc-900 ring-offset-2 ring-offset-white;
+    @apply outline-none ring-2 ring-brand-500 ring-offset-2;
+    --tw-ring-offset-color: var(--color-canvas);
   }
 
   /* Respeita quem pediu menos movimento no sistema operacional. */
@@ -93,5 +109,16 @@
       transition-duration: 0.01ms !important;
       scroll-behavior: auto !important;
     }
+  }
+}
+
+@layer components {
+  /**
+   * Rótulo estrutural: maiúsculas, monoespaçada, entrelinha aberta.
+   * É a assinatura tipográfica do produto — usada em cabeçalhos de seção,
+   * contadores de etapa e metadados, nunca em texto corrido.
+   */
+  .label-mono {
+    @apply font-mono text-[11px] font-medium uppercase tracking-[0.12em];
   }
 }
