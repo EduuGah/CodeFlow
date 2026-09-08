@@ -7,11 +7,13 @@ import { Lesson } from './pages/Lesson';
 import { Review } from './pages/Review';
 import { ProjectWorkspace } from './pages/ProjectWorkspace';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { AdminRoute } from './components/AdminRoute';
 import { AppShell } from './components/layout/AppShell';
 import { Home } from './pages/app/Home';
 import { Tracks } from './pages/app/Tracks';
 import { Practice } from './pages/app/Practice';
 import { Profile } from './pages/app/Profile';
+import { AdminContent } from './pages/admin/AdminContent';
 
 /**
  * Rotas.
@@ -46,6 +48,17 @@ function App() {
         <Route path="praticar" element={<Practice />} />
         <Route path="perfil" element={<Profile />} />
       </Route>
+
+      {/* Administração fora do AppShell: não é uma aba do aluno, e a barra de
+          navegação dele não faz sentido aqui. */}
+      <Route
+        path="/admin"
+        element={
+          <AdminRoute>
+            <AdminContent />
+          </AdminRoute>
+        }
+      />
 
       <Route path="/dashboard/*" element={<Navigate to="/app" replace />} />
 

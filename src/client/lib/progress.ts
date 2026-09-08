@@ -1,6 +1,7 @@
 import { supabase } from './supabase';
 import type { Attempt } from './mastery';
 import type { FlashcardReview, ReviewRating } from './review';
+import type { ExercisePerformance } from './admin';
 
 export interface UserProgress {
   completedLessons: string[];
@@ -165,5 +166,61 @@ export async function fetchFlashcardReviews(userId: string): Promise<FlashcardRe
     flashcardId: row.flashcard_id,
     rating: row.rating as ReviewRating,
     createdAt: row.created_at,
+  }));
+}
+
+// ------------------------------------------------------------ papel
+
+export type UserRole = 'student' | 'admin';
+
+/**
+ * Papel do usuário.
+ *
+ * Falha fechada: qualquer erro devolve 'student'. Uma leitura que falha e
+ * concede admin por engano é bem pior do que uma que nega acesso a quem tem
+ * direito — o segundo caso o usuário reporta, o primeiro ninguém percebe.
+ *
+ * Isto não substitui o RLS: a autorização de verdade acontece no banco, e esta
+ * consulta serve apenas para a interface não oferecer um caminho que o servidor
+ * vai recusar.
+ */
+export async function fetchUserRole(userId: string): Promise<UserRole> {
+  if (!supabase) return 'student';
+
+  const { data, error } = await supabase
+    .from('users')
+    .select('role')
+    .eq('id', userId)
+    .maybeSingle();
+
+  if (error) {
+    console.error('Falha ao buscar o papel do usuário:', error.message);
+    return 'student';
+  }
+
+  return data?.role === 'admin' ? 'admin' : 'student';
+}
+
+/** Desempenho agregado por exercício. Só devolve dados para quem o RLS permite. */
+export async function fetchExercisePerformance(): Promise<ExercisePerformance[]> {
+  if (!supabase) return [];
+
+  const { data, error } = await supabase.from('exercise_performance').select('*');
+
+  if (error) {
+    console.error('Falha ao buscar desempenho por exercício:', error.message);
+    return [];
+  }
+
+  return (data ?? []).map((row) => ({
+    exerciseId: row.exercise_id,
+    lessonId: row.lesson_id,
+    attempts: row.attempts ?? 0,
+    correctAttempts: row.correct_attempts ?? 0,
+    students: row.students ?? 0,
+    studentsSolved: row.students_solved ?? 0,
+    accuracyPercent: row.accuracy_percent === null ? null : Number(row.accuracy_percent),
+    avgHintsUsed: Number(row.avg_hints_used ?? 0),
+    attemptsPerStudent: Number(row.attempts_per_student ?? 0),
   }));
 }
