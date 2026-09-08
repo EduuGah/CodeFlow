@@ -4,8 +4,9 @@ import { getDefaultTrack, getLesson, getNextLesson } from '../../../content';
 import { useAuth } from '../../contexts/AuthContext';
 import { useStudentData } from '../../contexts/StudentDataContext';
 import { IconArrowRight, IconReview, IconStreak, IconTarget } from '../../components/ui/Icon';
-import { Skeleton } from '../../components/ui/Skeleton';
+import { Carregando, Skeleton } from '../../components/ui/Skeleton';
 import { ErrorState } from '../../components/ui/States';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 
 /**
  * Tela inicial.
@@ -21,6 +22,7 @@ import { ErrorState } from '../../components/ui/States';
  * aparece quando há algo de fato pendente, e some quando não há.
  */
 export function Home() {
+  useDocumentTitle('Início');
   const { user } = useAuth();
   const {
     loading,
@@ -78,7 +80,9 @@ export function Home() {
 
       {/* O card primário: uma ação, sem concorrência visual. */}
       {loading ? (
-        <Skeleton className="h-56 w-full rounded-xl" />
+        <Carregando o="sua próxima aula">
+          <Skeleton className="h-56 w-full rounded-xl" />
+        </Carregando>
       ) : destino ? (
         <section className="overflow-hidden rounded-xl border border-line bg-surface">
           <div className="bg-brand-600 px-5 py-4 text-white sm:px-6">

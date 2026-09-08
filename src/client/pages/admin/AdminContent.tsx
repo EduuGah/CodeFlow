@@ -12,8 +12,9 @@ import {
 } from '../../lib/admin';
 import { IconArrowLeft, IconInfo } from '../../components/ui/Icon';
 import { Badge, type BadgeTone } from '../../components/ui/Badge';
-import { Skeleton } from '../../components/ui/Skeleton';
+import { Carregando, Skeleton } from '../../components/ui/Skeleton';
 import { EmptyState } from '../../components/ui/States';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 
 /**
  * Administração de conteúdo.
@@ -43,6 +44,7 @@ const rotuloDoSinal: Record<ExerciseDiagnosis['signal'], string> = {
 };
 
 export function AdminContent() {
+  useDocumentTitle('Administração');
   const [desempenho, setDesempenho] = useState<ExercisePerformance[] | null>(null);
 
   useEffect(() => {
@@ -142,10 +144,12 @@ export function AdminContent() {
         </p>
 
         {desempenho === null ? (
-          <div className="space-y-2">
-            <Skeleton className="h-20 w-full rounded-xl" />
-            <Skeleton className="h-20 w-full rounded-xl" />
-          </div>
+          <Carregando o="o desempenho">
+            <div className="space-y-2">
+              <Skeleton className="h-20 w-full rounded-xl" />
+              <Skeleton className="h-20 w-full rounded-xl" />
+            </div>
+          </Carregando>
         ) : diagnosticos.length === 0 ? (
           <EmptyState
             title="Nenhuma tentativa registrada ainda"

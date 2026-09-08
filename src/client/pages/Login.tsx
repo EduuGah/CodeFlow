@@ -3,8 +3,10 @@ import { IconAlert, IconLogo, IconSpinner } from '../components/ui/Icon';
 import { Button } from '../components/ui/Button';
 import { useAuth } from '../contexts/AuthContext';
 import { useState } from 'react';
+import { useDocumentTitle } from '../hooks/useDocumentTitle';
 
 export function Login() {
+  useDocumentTitle('Entrar');
   const { user, signInWithGoogle, loading, authError, isConfigured } = useAuth();
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 

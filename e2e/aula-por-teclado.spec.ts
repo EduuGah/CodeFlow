@@ -1,4 +1,4 @@
-import { expect, test } from './fixtures';
+import { esperarConteudo, expect, test } from './fixtures';
 
 /**
  * A aula percorrida por teclado num navegador de verdade.
@@ -50,7 +50,7 @@ test('o pulo leva o foco ao conteúdo, não só a rolagem', async ({ logado: pag
 
 test('nenhum elemento focado fica escondido atrás das barras fixas', async ({ logado: page }) => {
   await page.goto(`/lesson/${AULA}`);
-  await page.getByRole('main').waitFor();
+  await esperarConteudo(page);
 
   const problemas: string[] = [];
 
@@ -123,7 +123,7 @@ test('nenhum elemento focado fica escondido atrás das barras fixas', async ({ l
 
 test('o elemento focado tem indicador visível', async ({ logado: page }) => {
   await page.goto(`/lesson/${AULA}`);
-  await page.getByRole('main').waitFor();
+  await esperarConteudo(page);
 
   const semAnel: string[] = [];
 
@@ -183,7 +183,7 @@ test('a aula inteira se percorre sem mouse', async ({ logado: page }) => {
 
 test('o cabeçalho fixo não cobre o conteúdo ao rolar', async ({ logado: page }) => {
   await page.goto(`/lesson/${AULA}`);
-  await page.getByRole('main').waitFor();
+  await esperarConteudo(page);
 
   await page.mouse.wheel(0, 400);
 

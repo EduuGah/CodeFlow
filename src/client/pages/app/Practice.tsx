@@ -6,8 +6,9 @@ import { MASTERY_LABELS } from '../../lib/mastery';
 import { IconArrowRight, IconCalendarCheck, IconPractice, IconReview } from '../../components/ui/Icon';
 import { Badge } from '../../components/ui/Badge';
 import { ProgressBar } from '../../components/ui/ProgressBar';
-import { Skeleton } from '../../components/ui/Skeleton';
+import { Carregando, Skeleton } from '../../components/ui/Skeleton';
 import { EmptyState } from '../../components/ui/States';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 
 /**
  * Praticar.
@@ -21,15 +22,18 @@ import { EmptyState } from '../../components/ui/States';
  * pendentes, que é informação, não urgência.
  */
 export function Practice() {
+  useDocumentTitle('Praticar');
   const { loading, dueCards, conceptsToReview, pendingExercises, totalExercises, stats } =
     useStudentData();
 
   if (loading) {
     return (
-      <div className="space-y-4">
-        <Skeleton className="h-32 w-full rounded-xl" />
-        <Skeleton className="h-48 w-full rounded-xl" />
-      </div>
+      <Carregando o="a prática">
+        <div className="space-y-4">
+          <Skeleton className="h-32 w-full rounded-xl" />
+          <Skeleton className="h-48 w-full rounded-xl" />
+        </div>
+      </Carregando>
     );
   }
 

@@ -21,6 +21,16 @@ export type Difficulty = 'iniciante' | 'intermediario' | 'avancado';
  */
 export type LanguageId = 'javascript' | 'typescript' | 'python' | 'sql';
 
+/**
+ * Os ids de dificuldade são sem acento por serem identificadores; o que o aluno
+ * lê não é. Sem este mapa a tela mostrava "intermediario" e "avancado".
+ */
+export const DIFFICULTY_LABELS: Record<Difficulty, string> = {
+  iniciante: 'iniciante',
+  intermediario: 'intermediário',
+  avancado: 'avançado',
+};
+
 export const LANGUAGE_LABELS: Record<LanguageId, string> = {
   javascript: 'JavaScript',
   typescript: 'TypeScript',

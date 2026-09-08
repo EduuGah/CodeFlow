@@ -24,6 +24,7 @@ import {
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { EmptyState } from '../components/ui/States';
+import { useDocumentTitle } from '../hooks/useDocumentTitle';
 
 /**
  * Sessão de revisão com repetição espaçada (§200).
@@ -43,6 +44,7 @@ const AVALIACOES: Array<{ rating: ReviewRating; label: string; classe: string }>
 ];
 
 export function Review() {
+  useDocumentTitle('Revisão');
   const navigate = useNavigate();
   const { user } = useAuth();
 

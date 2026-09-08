@@ -188,6 +188,18 @@ export const test = base.extend<{ banco: BancoFalso; logado: Page }>({
 });
 
 /**
+ * Espera a tela sair do estado de carregamento.
+ *
+ * `main` existir não basta: as telas mostram esqueletos enquanto buscam o
+ * progresso do aluno. Um teste que lê a página nesse instante encontra caixas
+ * cinzas, não acha nada errado, e passa — que é o pior modo de falha.
+ */
+export async function esperarConteudo(page: Page): Promise<void> {
+  await page.getByRole('main').waitFor();
+  await page.locator('[data-carregando]').waitFor({ state: 'detached', timeout: 15_000 });
+}
+
+/**
  * Avança pelos passos de uma aula até o editor de código estar pronto para uso.
  *
  * O passo se reconhece pelo botão "Executar código", que renderiza junto com ele.

@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import { listConcepts } from '../../../content';
+import { DIFFICULTY_LABELS } from '../../../content/types';
 import { executeCode } from '../../lib/sandbox';
 import {
   emptyDraft,
@@ -17,6 +18,7 @@ import {
   IconSpinner,
 } from '../../components/ui/Icon';
 import { Badge } from '../../components/ui/Badge';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 
 /**
  * Autoria de exercício de código.
@@ -45,6 +47,7 @@ const campo =
 const campoMono = `${campo} font-mono`;
 
 export function AdminNewExercise() {
+  useDocumentTitle('Novo exercício');
   const [draft, setDraft] = useState<ExerciseDraft>(emptyDraft);
   const [checagem, setChecagem] = useState<Checagem | null>(null);
   const [testando, setTestando] = useState(false);
@@ -125,9 +128,13 @@ export function AdminNewExercise() {
               value={draft.difficulty}
               onChange={(e) => atualizar({ difficulty: e.target.value as ExerciseDraft['difficulty'] })}
             >
-              <option value="iniciante">iniciante</option>
-              <option value="intermediario">intermediário</option>
-              <option value="avancado">avançado</option>
+              {/* Do mesmo mapa que a tela do aluno usa: uma dificuldade nova
+                  aparece aqui sem ninguém precisar lembrar deste arquivo. */}
+              {Object.entries(DIFFICULTY_LABELS).map(([id, rotulo]) => (
+                <option key={id} value={id}>
+                  {rotulo}
+                </option>
+              ))}
             </select>
           </label>
         </div>

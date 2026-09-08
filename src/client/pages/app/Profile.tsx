@@ -6,8 +6,9 @@ import { IconCheck, IconExit, IconStreak } from '../../components/ui/Icon';
 import { Badge, type BadgeTone } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { ProgressBar } from '../../components/ui/ProgressBar';
-import { Skeleton } from '../../components/ui/Skeleton';
+import { Carregando, Skeleton } from '../../components/ui/Skeleton';
 import { EmptyState } from '../../components/ui/States';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 
 /**
  * Perfil e evolução.
@@ -28,6 +29,7 @@ const tonePorNivel: Record<ConceptMastery['level'], BadgeTone> = {
 };
 
 export function Profile() {
+  useDocumentTitle('Perfil');
   const { user, logout } = useAuth();
   const { loading, level, xp, achievements, mastery, stats, streak, completedLessons } =
     useStudentData();
@@ -39,10 +41,12 @@ export function Profile() {
 
   if (loading) {
     return (
-      <div className="space-y-4">
-        <Skeleton className="h-24 w-full rounded-xl" />
-        <Skeleton className="h-40 w-full rounded-xl" />
-      </div>
+      <Carregando o="seu perfil">
+        <div className="space-y-4">
+          <Skeleton className="h-24 w-full rounded-xl" />
+          <Skeleton className="h-40 w-full rounded-xl" />
+        </div>
+      </Carregando>
     );
   }
 

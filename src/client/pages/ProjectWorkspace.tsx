@@ -9,6 +9,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { fetchProgress, markProjectCompleted } from '../lib/progress';
 import { executeCode, type ExecutionResult } from '../lib/sandbox';
 import { CheckpointList, type CheckpointResult } from '../components/project/CheckpointList';
+import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { MarkdownReader } from '../components/ui/MarkdownReader';
 import { Badge } from '../components/ui/Badge';
 import {
@@ -55,6 +56,8 @@ export function ProjectWorkspace() {
   const { user } = useAuth();
 
   const project = (id ? getProject(id) : undefined) ?? listProjects()[0];
+
+  useDocumentTitle(project.title);
 
   const [aba, setAba] = useState<Aba>('enunciado');
   const [code, setCode] = useState(project.initialCode);

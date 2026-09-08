@@ -1,15 +1,16 @@
 import { Link } from 'react-router-dom';
 
 import { getLessonsOfTrack, listConcepts, listProjects, listTracks } from '../../../content';
-import { LANGUAGE_LABELS } from '../../../content/types';
+import { DIFFICULTY_LABELS, LANGUAGE_LABELS } from '../../../content/types';
 import { useStudentData } from '../../contexts/StudentDataContext';
 import { buildPath, summarizePath } from '../../lib/path';
 import { LearningPath } from '../../components/dashboard/LearningPath';
 import { TrackBanner } from '../../components/dashboard/TrackBanner';
 import { IconArrowRight, IconAward, IconProject } from '../../components/ui/Icon';
 import { ProgressBar } from '../../components/ui/ProgressBar';
-import { Skeleton } from '../../components/ui/Skeleton';
+import { Carregando, Skeleton } from '../../components/ui/Skeleton';
 import { EmptyState } from '../../components/ui/States';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 
 /**
  * Trilhas e projetos.
@@ -20,6 +21,7 @@ import { EmptyState } from '../../components/ui/States';
  * agora".
  */
 export function Tracks() {
+  useDocumentTitle('Trilhas');
   const { loading, completedLessons, completedProjects, mastery, attempts } = useStudentData();
 
   const conceitos = listConcepts();
@@ -27,15 +29,26 @@ export function Tracks() {
 
   if (loading) {
     return (
-      <div className="space-y-4">
-        <Skeleton className="h-28 w-full rounded-xl" />
-        <Skeleton className="h-64 w-full rounded-xl" />
-      </div>
+      <Carregando o="as trilhas">
+        <div className="space-y-4">
+          <Skeleton className="h-28 w-full rounded-xl" />
+          <Skeleton className="h-64 w-full rounded-xl" />
+        </div>
+      </Carregando>
     );
   }
 
   return (
     <div className="space-y-10">
+      {/* Era a única tela do app sem título de primeiro nível. Quem navega por
+          cabeçalhos não tinha onde ancorar ao chegar. */}
+      <div>
+        <h1 className="text-2xl font-extrabold tracking-tight text-ink">Trilhas</h1>
+        <p className="mt-1 text-sm leading-relaxed text-ink-soft">
+          Cada trilha é uma sequência; os projetos aplicam o que ela ensinou.
+        </p>
+      </div>
+
       {listTracks().map((trilha) => {
         const caminho = buildPath(
           getLessonsOfTrack(trilha.id),
@@ -100,7 +113,7 @@ export function Tracks() {
                       <span className="flex flex-wrap items-baseline gap-x-2">
                         <span className="font-bold text-ink">{projeto.title}</span>
                         <span className="label-mono text-ink-faint">
-                          {projeto.difficulty} · {LANGUAGE_LABELS[projeto.language]}
+                          {DIFFICULTY_LABELS[projeto.difficulty]} · {LANGUAGE_LABELS[projeto.language]}
                         </span>
                       </span>
                       <span className="mt-0.5 block text-sm leading-relaxed text-ink-soft">

@@ -7,6 +7,7 @@ import { LANGUAGE_LABELS } from '../../content/types';
 import { useAuth } from '../contexts/AuthContext';
 import { fetchProgress, markLessonCompleted } from '../lib/progress';
 import { buildLessonSteps } from '../lib/lesson-steps';
+import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { CodeExerciseStep } from '../components/lesson/CodeExerciseStep';
 import { LessonBlocks } from '../components/lesson/LessonBlocks';
 import { MultipleChoice } from '../components/lesson/MultipleChoice';
@@ -45,6 +46,8 @@ export function Lesson() {
 
   const lesson = id ? getLesson(id) : undefined;
   const steps = useMemo(() => (lesson ? buildLessonSteps(lesson) : []), [lesson]);
+
+  useDocumentTitle(lesson?.title);
 
   const [indice, setIndice] = useState(0);
   const conteudoRef = useRef<HTMLElement>(null);

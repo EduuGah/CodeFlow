@@ -1,4 +1,4 @@
-import { expect, irAteOEditor, test } from './fixtures';
+import { esperarConteudo, expect, irAteOEditor, test } from './fixtures';
 
 /**
  * O que só se vê num navegador com largura de celular.
@@ -15,7 +15,7 @@ test.describe('celular', () => {
   test('nada estoura a largura da tela', async ({ logado: page }) => {
     for (const rota of ['/app', '/app/trilhas', '/app/praticar', '/app/perfil']) {
       await page.goto(rota);
-      await page.getByRole('main').waitFor();
+      await esperarConteudo(page);
 
       const estouros = await page.evaluate(() => {
         const largura = document.documentElement.clientWidth;
@@ -42,7 +42,7 @@ test.describe('celular', () => {
 
   test('a barra inferior não esconde o fim do conteúdo', async ({ logado: page }) => {
     await page.goto('/app/trilhas');
-    await page.getByRole('main').waitFor();
+    await esperarConteudo(page);
 
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
 
@@ -77,7 +77,7 @@ test.describe('celular', () => {
 
   test('o editor de código se dimensiona na tela do celular', async ({ logado: page }) => {
     await page.goto('/lesson/lesson-js-4');
-    await page.getByRole('main').waitFor();
+    await esperarConteudo(page);
 
     await irAteOEditor(page);
 
@@ -95,7 +95,7 @@ test.describe('celular', () => {
 
   test('os alvos de toque têm tamanho de dedo', async ({ logado: page }) => {
     await page.goto('/app');
-    await page.getByRole('main').waitFor();
+    await esperarConteudo(page);
 
     const pequenos = await page.evaluate(() => {
       const fora: string[] = [];
