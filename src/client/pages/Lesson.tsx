@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
-import confetti from 'canvas-confetti';
 
 import { getLesson, getNextLesson } from '../../content';
 import { LANGUAGE_LABELS } from '../../content/types';
 import { useAuth } from '../contexts/AuthContext';
 import { fetchProgress, markLessonCompleted } from '../lib/progress';
 import { buildLessonSteps } from '../lib/lesson-steps';
+import { celebrar } from '../lib/celebrar';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { CodeExerciseStep } from '../components/lesson/CodeExerciseStep';
 import { LessonBlocks } from '../components/lesson/LessonBlocks';
@@ -98,12 +98,7 @@ export function Lesson() {
   const proximaAula = getNextLesson(lesson.trackId, [...completedLessons, lesson.id]);
 
   const concluir = async () => {
-    confetti({
-      particleCount: 120,
-      spread: 70,
-      origin: { y: 0.6 },
-      colors: ['#2b8078', '#d99422', '#2f8f4e'],
-    });
+    celebrar('aula');
 
     setCompletedLessons((ids) => (ids.includes(lesson.id) ? ids : [...ids, lesson.id]));
 

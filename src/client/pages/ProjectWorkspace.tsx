@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import Editor from '@monaco-editor/react';
-import confetti from 'canvas-confetti';
 
 import { getProject, listProjects } from '../../content';
 import { LANGUAGE_LABELS } from '../../content/types';
@@ -10,6 +9,7 @@ import { fetchProgress, markProjectCompleted } from '../lib/progress';
 import { executeCode, type ExecutionResult } from '../lib/sandbox';
 import { CheckpointList, type CheckpointResult } from '../components/project/CheckpointList';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
+import { celebrar } from '../lib/celebrar';
 import { MarkdownReader } from '../components/ui/MarkdownReader';
 import { Badge } from '../components/ui/Badge';
 import {
@@ -127,12 +127,7 @@ export function ProjectWorkspace() {
   const submeter = async () => {
     if (isCompleted) return;
 
-    confetti({
-      particleCount: 160,
-      spread: 80,
-      origin: { y: 0.5 },
-      colors: ['#2b8078', '#d99422', '#2f8f4e'],
-    });
+    celebrar('projeto');
 
     setIsCompleted(true);
 
