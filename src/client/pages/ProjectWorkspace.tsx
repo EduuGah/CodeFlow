@@ -115,7 +115,7 @@ export function ProjectWorkspace() {
       {/* Top Navigation */}
       <header className="h-14 border-b border-zinc-200 bg-white flex items-center justify-between px-4 flex-shrink-0">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="sm" className="px-2 text-zinc-500" onClick={() => navigate('/dashboard')}>
+          <Button variant="ghost" size="sm" className="px-2 text-zinc-500" onClick={() => navigate('/app')}>
             <ArrowLeft size={18} />
           </Button>
           <div className="flex items-center gap-2">

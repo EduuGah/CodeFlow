@@ -17,7 +17,7 @@ export function Login() {
   }
 
   if (user) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/app" replace />;
   }
 
   // Não navegamos manualmente após o login: signInWithOAuth redireciona a aba para

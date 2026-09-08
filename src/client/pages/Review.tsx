@@ -102,7 +102,7 @@ export function Review() {
             variant="ghost"
             size="sm"
             className="px-2 text-zinc-500"
-            onClick={() => navigate('/dashboard')}
+            onClick={() => navigate('/app')}
           >
             <ArrowLeft size={18} />
           </Button>
@@ -122,7 +122,7 @@ export function Review() {
             title="Nada para revisar hoje"
             description="Todos os cartões já foram revisados e ainda não venceram. Voltar antes da hora atrapalha mais do que ajuda — o intervalo existe para o esquecimento começar a agir."
             action={
-              <Link to="/dashboard">
+              <Link to="/app">
                 <Button size="sm">Voltar ao painel</Button>
               </Link>
             }
@@ -139,7 +139,7 @@ export function Review() {
                 um volta numa data diferente, conforme o quanto você lembrou dele.
               </p>
             </div>
-            <Button size="lg" className="w-full" onClick={() => navigate('/dashboard')}>
+            <Button size="lg" className="w-full" onClick={() => navigate('/app')}>
               Voltar ao Painel
             </Button>
           </div>

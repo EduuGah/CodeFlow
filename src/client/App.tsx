@@ -1,95 +1,81 @@
-import { Routes, Route, Link } from 'react-router-dom';
-import { Code2, ArrowRight } from 'lucide-react';
-import { Button } from './components/ui/Button';
+import { Routes, Route, Navigate } from 'react-router-dom';
+
+import { Landing } from './pages/Landing';
 import { Login } from './pages/Login';
 import { AuthCallback } from './pages/AuthCallback';
-import { Dashboard } from './pages/Dashboard';
 import { Lesson } from './pages/Lesson';
 import { Review } from './pages/Review';
 import { ProjectWorkspace } from './pages/ProjectWorkspace';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { AppShell } from './components/layout/AppShell';
+import { Home } from './pages/app/Home';
+import { Tracks } from './pages/app/Tracks';
+import { Practice } from './pages/app/Practice';
+import { Profile } from './pages/app/Profile';
 
-function Landing() {
-  return (
-    <div className="min-h-screen bg-zinc-50 flex flex-col">
-      <header className="h-16 border-b border-zinc-200 bg-white flex items-center justify-between px-6">
-        <div className="flex items-center gap-2 text-zinc-900 font-semibold tracking-tight">
-          <Code2 size={24} className="text-zinc-900" />
-          <span>CodeFlow</span>
-        </div>
-        <nav className="flex items-center gap-4">
-          <Link to="/login">
-            <Button variant="ghost" size="sm">Entrar</Button>
-          </Link>
-          <Link to="/login">
-            <Button variant="primary" size="sm">Começar</Button>
-          </Link>
-        </nav>
-      </header>
-
-      <main className="flex-1 flex flex-col items-center justify-center p-6 text-center">
-        <div className="max-w-2xl space-y-8">
-          <div className="space-y-4">
-            <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-zinc-900">
-              Aprenda a programar resolvendo problemas.
-            </h1>
-            <p className="text-lg text-zinc-500 max-w-xl mx-auto leading-relaxed">
-              Uma plataforma interativa focada em prática real. Sem memorização, sem atalhos. Construa projetos, entenda seus erros e escreva código de verdade.
-            </p>
-          </div>
-          
-          <div className="flex items-center justify-center gap-4">
-            <Link to="/login">
-              <Button size="lg" className="gap-2">
-                Começar agora
-                <ArrowRight size={18} />
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </main>
-    </div>
-  );
-}
-
+/**
+ * Rotas.
+ *
+ * Duas famílias, por um motivo de experiência:
+ *
+ * - `/app/*` vive dentro do AppShell, com navegação sempre visível. São as telas
+ *   de orientação: onde estou, o que existe, o que praticar.
+ * - `/lesson`, `/project` e `/review` ocupam a tela inteira, sem navegação. São
+ *   telas de foco — durante um exercício, uma barra de abas só oferece saída.
+ *
+ * `/dashboard` continua respondendo, redirecionando para `/app`: era a rota
+ * anterior, e links salvos não devem quebrar.
+ */
 function App() {
   return (
     <Routes>
       <Route path="/" element={<Landing />} />
       <Route path="/login" element={<Login />} />
       <Route path="/auth/callback" element={<AuthCallback />} />
-      <Route 
-        path="/dashboard/*" 
+
+      <Route
+        path="/app"
         element={
           <ProtectedRoute>
-            <Dashboard />
+            <AppShell />
           </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/lesson/:id" 
+        }
+      >
+        <Route index element={<Home />} />
+        <Route path="trilhas" element={<Tracks />} />
+        <Route path="praticar" element={<Practice />} />
+        <Route path="perfil" element={<Profile />} />
+      </Route>
+
+      <Route path="/dashboard/*" element={<Navigate to="/app" replace />} />
+
+      <Route
+        path="/lesson/:id"
         element={
           <ProtectedRoute>
             <Lesson />
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/review" 
+      <Route
+        path="/review"
         element={
           <ProtectedRoute>
             <Review />
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/project/:id" 
+      <Route
+        path="/project/:id"
         element={
           <ProtectedRoute>
             <ProjectWorkspace />
           </ProtectedRoute>
-        } 
+        }
       />
+
+      {/* Qualquer outra rota volta para o início em vez de tela em branco. */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }

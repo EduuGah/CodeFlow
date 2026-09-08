@@ -44,7 +44,7 @@ export function AuthCallback() {
   }, [providerError]);
 
   if (user) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/app" replace />;
   }
 
   const failure =

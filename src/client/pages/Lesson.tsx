@@ -59,7 +59,7 @@ export function Lesson() {
 
   // Id inexistente ou aula ainda em rascunho: volta ao painel em vez de quebrar.
   if (!lesson || !exercise) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/app" replace />;
   }
 
   const hints = exercise.hints;
@@ -124,7 +124,7 @@ export function Lesson() {
       {/* Top Navigation */}
       <header className="h-14 flex-shrink-0 border-b border-zinc-200 bg-white flex items-center justify-between px-4">
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard')} className="px-2">
+          <Button variant="ghost" size="sm" onClick={() => navigate('/app')} className="px-2">
             <ArrowLeft size={18} />
           </Button>
           <span className="font-medium text-zinc-900">{lesson.title}</span>
@@ -272,7 +272,7 @@ export function Lesson() {
                             size="sm"
                             variant="outline"
                             className="border-emerald-900/60 bg-transparent text-emerald-300 hover:bg-emerald-900/30"
-                            onClick={() => navigate('/dashboard')}
+                            onClick={() => navigate('/app')}
                           >
                             Voltar ao painel
                           </Button>
