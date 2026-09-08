@@ -9,6 +9,8 @@ export default defineConfig({
     environment: 'node',
     environmentMatchGlobs: [['**/*.test.tsx', 'jsdom']],
     setupFiles: ['./src/test-setup.ts'],
-    include: ['src/**/*.test.ts', 'src/**/*.test.tsx'],
+    // As migrações também são testadas: uma view citando coluna inexistente só
+    // aparece quando alguém cola o arquivo no SQL Editor, no meio da configuração.
+    include: ['src/**/*.test.ts', 'src/**/*.test.tsx', 'supabase/**/*.test.ts'],
   },
 });

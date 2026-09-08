@@ -40,8 +40,13 @@ select
   coalesce(r.reviews, 0) as flashcard_reviews,
   coalesce(r.cards_reviewed, 0) as flashcards_seen,
 
-  u.created_at,
-  u.last_login_at
+  u.created_at
+
+-- Não existe `last_login_at` aqui de propósito. Ela exigiria uma escrita a cada
+-- login, e `last_attempt_at` acima responde melhor à pergunta que interessa:
+-- entrar e não fazer nada não é atividade. O Supabase já guarda o último acesso
+-- em `auth.users.last_sign_in_at`, mas juntar essa tabela quebraria a view para
+-- o aluno, que não tem permissão de ler o schema `auth`.
 
 from public.users u
 
