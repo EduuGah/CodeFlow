@@ -8,6 +8,10 @@ O usuário forneceu instruções críticas de Design, Produto, Engenharia e Proc
 
 **Sempre que você for iniciar uma nova fase, tomar decisões arquiteturais, propor design de telas ou implementar lógicas pedagógicas, VOCÊ DEVE OBRIGATORIAMENTE:**
 
+0. **Ler `docs/CONTEXTO.md` primeiro.** É o estado real do projeto: o que existe,
+   o que falta, as decisões que não devem ser desfeitas e as armadilhas já pagas.
+   Ele é atualizado no mesmo commit que muda o que descreve.
+
 1. Ler os arquivos na pasta `/docs/context/`:
    - `01-product-vision.md`
    - `02-design-ux-guidelines.md`

@@ -6,10 +6,13 @@ que conclui uma fase.
 
 | | Hoje | Previsto |
 | --- | --- | --- |
-| Aulas | 13 | 135 |
-| Exercícios | 25 | ~700 |
-| Tipos de exercício | 3 | 11 |
+| Aulas | 20 | 135 |
+| Exercícios | 47 | ~700 |
+| Tipos de exercício | 4 | 11 |
 | Motores de execução | 1 | 7 |
+
+_Atualizado em 2026-09-09. Este arquivo é atualizado no mesmo commit que conclui
+um item._
 
 ## A restrição que ordena tudo
 
@@ -54,18 +57,48 @@ opcional).
 ## Fases
 
 ### Fase 0 — Fundamentos e lógica · PRONTO
-13 aulas, 25 exercícios, 7 projetos. Motor: Web Worker sem DOM.
+13 aulas, 7 projetos. Motor: Web Worker sem DOM.
 
-### Fase 1 — Aprofundar o que já roda · 18 aulas
+### Fase 1 — Aprofundar o que já roda · 18 aulas · EM ANDAMENTO
 Motor: **nenhum novo**.
 
-- **JavaScript real** (10): escopo e closures, callbacks, promises, async/await,
-  erros assíncronos, JSON, módulos, imutabilidade, datas, expressões regulares.
-- **Como a web funciona** (8): cliente e servidor, HTTP, cabeçalhos, REST,
-  autenticação, tokens, CORS, segurança básica.
+**JavaScript real — 7 de 10**
 
-Plataforma: testes por propriedade e os seis tipos de exercício que rodam no
-worker atual; publicar de verdade; servir o editor do próprio domínio.
+| Aula | Estado |
+| --- | --- |
+| Escopo | feita |
+| Closures | feita |
+| Callbacks | feita |
+| Promises | feita |
+| async e await | feita |
+| Falhas assíncronas | feita |
+| JSON | feita |
+| Imutabilidade | — |
+| Datas e fuso | — |
+| Expressões regulares | — |
+
+Módulos saiu do bloco: `import`/`export` é erro de sintaxe no sandbox, porque
+`new Function` não aceita módulos. Volta quando houver um executor que entenda,
+ou entra como aula conceitual.
+
+**Como a web funciona — 0 de 8**: cliente e servidor, HTTP, cabeçalhos, REST,
+autenticação, tokens, CORS, segurança básica.
+
+**Plataforma**
+
+| Item | Estado |
+| --- | --- |
+| Testes por propriedade | feito |
+| Exercício de lacuna | feito |
+| Encontrar o bug, ordenar passos, refatorar, escrever o teste | — |
+| Publicar de verdade | — |
+| Servir o editor do próprio domínio | — |
+
+Duas correções que a Fase 1 exigiu e que não estavam previstas: o sandbox era
+síncrono, e uma asserção assíncrona reportava sucesso antes de a promise resolver
+— qualquer exercício de assíncrono diria ao aluno que a resposta errada estava
+certa. E não havia prazo por teste, então um exercício de callback travava para
+sempre quando o aluno esquecia de chamar o callback.
 
 ### Fase 2 — A página · 26 aulas
 Motor **1: executor em iframe isolado**. Destrava três blocos, sem download extra.
