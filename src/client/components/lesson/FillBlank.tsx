@@ -1,12 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
 
 import type { FillBlankExercise } from '../../../content/types';
+import type { ExerciseState, OnExerciseState } from '../../lib/exercise-state';
 import { dividirMolde, estaCompleto, preencher } from '../../lib/fill-blank';
 import { executeCode, type ExecutionResult } from '../../lib/sandbox';
 import { useRecordAttempt } from '../../hooks/useRecordAttempt';
 import { useFocusRescue } from '../../hooks/useFocusRescue';
-import { IconCheck, IconClose, IconPlay, IconSpinner } from '../ui/Icon';
+import { useReportarEstado } from '../../hooks/useReportarEstado';
+import { IconCheck, IconClose, IconPlay } from '../ui/Icon';
 import { MarkdownReader } from '../ui/MarkdownReader';
+import { ExerciseAction, ExerciseFeedback } from './ExerciseAction';
 import { HintPanel } from './HintPanel';
 
 /**
@@ -26,16 +29,19 @@ import { HintPanel } from './HintPanel';
 export function FillBlank({
   exercise,
   lessonId,
-  onSolved,
+  onEstado,
 }: {
   exercise: FillBlankExercise;
   lessonId: string;
-  onSolved?: () => void;
+  /** Avisa a aula em que ponto o exercício está. */
+  onEstado?: OnExerciseState;
 }) {
   const [respostas, setRespostas] = useState<string[]>(() => exercise.blanks.map(() => ''));
   const [rodando, setRodando] = useState(false);
   const [resultado, setResultado] = useState<ExecutionResult | null>(null);
   const [dicasAbertas, setDicasAbertas] = useState(0);
+  /** As respostas exatas já registradas, para não gravar a mesma tentativa duas vezes. */
+  const [ultimaRegistrada, setUltimaRegistrada] = useState<string | null>(null);
 
   const registrar = useRecordAttempt();
   const segmentos = dividirMolde(exercise.template);
@@ -45,6 +51,18 @@ export function FillBlank({
     resultado !== null &&
     resultado.testResults.length > 0 &&
     resultado.testResults.every((t) => t.passed);
+
+  const estado: ExerciseState = rodando
+    ? 'verificando'
+    : resultado === null
+      ? respostas.every((r) => r.trim() === '')
+        ? 'inicial'
+        : 'respondendo'
+      : passouTudo
+        ? 'acertou'
+        : 'errou';
+
+  useReportarEstado(estado, onEstado);
 
   // Acertar tira o botão de verificar; o retorno assume o lugar dele na ordem de
   // tabulação para o foco não cair no corpo do documento.
@@ -56,6 +74,7 @@ export function FillBlank({
   useEffect(() => {
     setRespostas(exercise.blanks.map(() => ''));
     setResultado(null);
+    setUltimaRegistrada(null);
     setDicasAbertas(0);
   }, [exercise.id, exercise.blanks]);
 
@@ -69,6 +88,7 @@ export function FillBlank({
   const verificar = async () => {
     setRodando(true);
 
+    const enviado = JSON.stringify(respostas);
     const execucao = await executeCode(
       preencher(exercise.template, respostas),
       exercise.tests,
@@ -81,16 +101,20 @@ export function FillBlank({
     const acertou =
       execucao.testResults.length > 0 && execucao.testResults.every((t) => t.passed);
 
-    registrar({
-      exerciseId: exercise.id,
-      lessonId,
-      concepts: exercise.concepts,
-      correct: acertou,
-      hintsUsed: dicasAbertas,
-    });
-
-    if (acertou) onSolved?.();
+    // Verificar de novo sem mudar nada não é uma tentativa nova.
+    if (enviado !== ultimaRegistrada) {
+      setUltimaRegistrada(enviado);
+      registrar({
+        exerciseId: exercise.id,
+        lessonId,
+        concepts: exercise.concepts,
+        correct: acertou,
+        hintsUsed: dicasAbertas,
+      });
+    }
   };
+
+  const falhas = resultado?.testResults.filter((t) => !t.passed) ?? [];
 
   return (
     <div className="space-y-4">
@@ -102,7 +126,7 @@ export function FillBlank({
       {/* O código com os campos embutidos. Superfície escura, como o editor: é a
           troca de superfície que sinaliza "aqui você escreve". */}
       <div className="overflow-x-auto rounded-xl bg-editor p-4 sm:p-5">
-        <pre className="font-mono text-sm leading-[1.9] text-white/90">
+        <pre className="font-mono text-sm leading-[2.4] text-white/90">
           <code>
             {segmentos.map((segmento, i) =>
               segmento.tipo === 'texto' ? (
@@ -120,13 +144,11 @@ export function FillBlank({
                   autoCapitalize="off"
                   // O campo cresce com o texto para a indentação não desmontar
                   // enquanto o aluno digita.
-                  size={
-                    Math.max(
-                      exercise.blanks[segmento.indice]?.size ?? 4,
-                      (respostas[segmento.indice] ?? '').length + 1
-                    )
-                  }
-                  className="mx-0.5 rounded border-b-2 border-energy-500 bg-white/10 px-1.5 py-0.5 font-mono text-sm text-white placeholder:text-white/35 focus:border-energy-200 focus:bg-white/20 focus:outline-none"
+                  size={Math.max(
+                    exercise.blanks[segmento.indice]?.size ?? 4,
+                    (respostas[segmento.indice] ?? '').length + 1
+                  )}
+                  className="mx-0.5 min-h-9 rounded border-b-2 border-energy-500 bg-white/10 px-1.5 py-1.5 font-mono text-sm text-white placeholder:text-white/35 focus:border-energy-200 focus:bg-white/20 focus:outline-none"
                 />
               )
             )}
@@ -135,19 +157,41 @@ export function FillBlank({
       </div>
 
       {!passouTudo && (
-        <button
-          type="button"
-          onClick={verificar}
-          disabled={rodando || !completo}
-          className="flex w-full items-center justify-center gap-2 rounded-lg bg-ink px-5 py-3.5 font-bold text-white transition-colors hover:bg-brand-900 active:translate-y-px disabled:opacity-50"
-        >
-          {rodando ? <IconSpinner size={18} className="animate-spin" /> : <IconPlay size={18} />}
+        <ExerciseAction onClick={verificar} disabled={rodando || !completo} carregando={rodando}>
+          {!rodando && <IconPlay size={18} />}
           {rodando ? 'Verificando…' : completo ? 'Verificar' : 'Preencha todas as lacunas'}
-        </button>
+        </ExerciseAction>
       )}
 
       {resultado && (
-        <div ref={retornoRef} tabIndex={-1} role="status" className="space-y-3">
+        <div className="space-y-3">
+          {resultado.testResults.length > 0 && (
+            <ExerciseFeedback
+              estado={passouTudo ? 'acertou' : 'errou'}
+              titulo={
+                passouTudo
+                  ? 'Resposta correta'
+                  : `${falhas.length} de ${resultado.testResults.length} ${
+                      resultado.testResults.length === 1 ? 'teste falhou' : 'testes falharam'
+                    }`
+              }
+              refDoBloco={retornoRef}
+            >
+              {/* A explicação vem depois de acertar: entregá-la antes tiraria o
+                  raciocínio que o exercício existe para provocar. */}
+              {passouTudo ? (
+                <MarkdownReader
+                  content={exercise.explanation}
+                  className="prose-p:my-0 prose-p:text-sm prose-p:leading-relaxed"
+                />
+              ) : (
+                <p className="text-sm leading-relaxed text-ink-soft">
+                  Cada linha abaixo diz o que era esperado. Ajuste as lacunas e verifique de novo.
+                </p>
+              )}
+            </ExerciseFeedback>
+          )}
+
           {resultado.error && (
             <p className="rounded-lg border border-danger-200 bg-danger-50 p-4 font-mono text-sm leading-relaxed text-danger-700">
               {resultado.error}
@@ -172,17 +216,6 @@ export function FillBlank({
                 </li>
               ))}
             </ul>
-          )}
-
-          {/* A explicação vem depois de acertar: entregá-la antes tiraria o
-              raciocínio que o exercício existe para provocar. */}
-          {passouTudo && (
-            <div className="rounded-lg border border-success-200 bg-success-50 p-4">
-              <MarkdownReader
-                content={exercise.explanation}
-                className="prose-p:my-0 prose-p:text-sm prose-p:leading-relaxed"
-              />
-            </div>
           )}
         </div>
       )}

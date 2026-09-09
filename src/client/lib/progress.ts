@@ -105,6 +105,39 @@ export async function recordAttempt(userId: string, attempt: AttemptInput): Prom
   if (error) console.error('Falha ao registrar tentativa:', error.message);
 }
 
+/**
+ * Exercícios de uma aula que o aluno já resolveu alguma vez.
+ *
+ * A aula precisa disto para não recomeçar do zero a cada visita. Sem ele, quem
+ * resolvesse quatro de cinco exercícios, saísse e voltasse para terminar o
+ * quinto nunca veria a aula ser concluída — o estado dos outros quatro tinha
+ * morrido junto com a página.
+ *
+ * Consulta estreita de propósito: só esta aula, só o que passou. Buscar o
+ * histórico inteiro para responder a isto seria pagar o catálogo todo por uma
+ * pergunta de cinco linhas.
+ */
+export async function fetchSolvedExercises(
+  userId: string,
+  lessonId: string
+): Promise<string[]> {
+  if (!supabase) return [];
+
+  const { data, error } = await supabase
+    .from('exercise_attempts')
+    .select('exercise_id')
+    .eq('user_id', userId)
+    .eq('lesson_id', lessonId)
+    .eq('correct', true);
+
+  if (error) {
+    console.error('Falha ao buscar exercícios resolvidos:', error.message);
+    return [];
+  }
+
+  return [...new Set((data ?? []).map((row) => row.exercise_id as string))];
+}
+
 /** Histórico de tentativas do aluno, do mais antigo para o mais recente. */
 export async function fetchAttempts(userId: string): Promise<Attempt[]> {
   if (!supabase) return [];

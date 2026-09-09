@@ -1,11 +1,17 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
 
-import { getLesson, getNextLesson } from '../../content';
+import { getLesson, getLessonAfter } from '../../content';
 import { LANGUAGE_LABELS } from '../../content/types';
 import { useAuth } from '../contexts/AuthContext';
-import { fetchProgress, markLessonCompleted } from '../lib/progress';
+import { fetchProgress, fetchSolvedExercises, markLessonCompleted } from '../lib/progress';
 import { buildLessonSteps } from '../lib/lesson-steps';
+import {
+  estaResolvido,
+  pendentes,
+  rotuloDeAvanco,
+  type ExerciseState,
+} from '../lib/exercise-state';
 import { celebrar } from '../lib/celebrar';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { CodeExerciseStep } from '../components/lesson/CodeExerciseStep';
@@ -17,6 +23,7 @@ import { MarkdownReader } from '../components/ui/MarkdownReader';
 import {
   IconArrowLeft,
   IconArrowRight,
+  IconCheck,
   IconCheckCircle,
   IconClose,
   IconTarget,
@@ -36,6 +43,17 @@ import {
  * O avanço nunca é travado. Quem quiser pular um exercício e voltar depois
  * pode — bloquear seria transformar dificuldade em parede.
  *
+ * ## O estado das atividades
+ *
+ * A aula não adivinha se um exercício foi resolvido: cada componente reporta o
+ * próprio estado por `onEstado`, e o mapa abaixo é a única fonte de verdade.
+ *
+ * Antes eram duas coisas frouxas — uma prop `onSolved` que só dois dos quatro
+ * tipos recebiam, e uma conclusão de aula disparada pelo **primeiro** exercício
+ * resolvido. O efeito na tela era o aluno acertar uma múltipla escolha e o
+ * rodapé continuar oferecendo "Pular por ora", ou resolver um exercício de nove
+ * passos e ver o confete de aula concluída ali mesmo.
+ *
  * Trocar de passo move o foco para o conteúdo. Sem isso o botão "Continuar"
  * fica no rodapé com o foco parado nele enquanto a tela toda mudou acima: quem
  * navega por teclado ou leitor de tela não tem como saber o que apareceu, e a
@@ -48,6 +66,11 @@ export function Lesson() {
   const lesson = id ? getLesson(id) : undefined;
   const steps = useMemo(() => (lesson ? buildLessonSteps(lesson) : []), [lesson]);
 
+  const exerciseIds = useMemo(
+    () => steps.flatMap((p) => (p.kind === 'exercise' ? [p.exercise.id] : [])),
+    [steps]
+  );
+
   useDocumentTitle(lesson?.title);
 
   const [indice, setIndice] = useState(0);
@@ -55,14 +78,28 @@ export function Lesson() {
   // O primeiro passo não move o foco: roubar o foco de quem acabou de chegar na
   // página é pior do que deixá-lo no começo do documento.
   const montado = useRef(false);
-  const [resolvidos, setResolvidos] = useState<Set<string>>(new Set());
+  const [estados, setEstados] = useState<Map<string, ExerciseState>>(new Map());
   const [completedLessons, setCompletedLessons] = useState<string[]>([]);
 
-  // Trocar de aula reaproveita o componente: sem isto o passo atual persistiria.
-  useEffect(() => {
+  /**
+   * Trocar de aula reaproveita o componente, então o passo atual precisa voltar
+   * para o começo. Isto acontece **durante o render**, não num efeito.
+   *
+   * Num efeito, era tela branca: `/lesson/a` → `/lesson/b` troca o parâmetro e
+   * renderiza a aula nova imediatamente, enquanto `indice` ainda guarda o passo
+   * da aula anterior. Quem terminava a aula 1 (nove passos) e ia para a 2 (oito)
+   * caía em `steps[8]`, que é `undefined`, e a página inteira quebrava em
+   * `passo.kind`. O aluno via branco e só recuperava recarregando.
+   *
+   * O padrão do React para isto é ajustar o estado no render: o React descarta
+   * a saída e refaz o render na hora, antes de pintar.
+   */
+  const [aulaRenderizada, setAulaRenderizada] = useState(id);
+  if (aulaRenderizada !== id) {
+    setAulaRenderizada(id);
     setIndice(0);
-    setResolvidos(new Set());
-  }, [id]);
+    setEstados(new Map());
+  }
 
   useEffect(() => {
     if (!montado.current) {
@@ -76,49 +113,115 @@ export function Lesson() {
     window.scrollTo({ top: 0 });
   }, [indice]);
 
+  const userId = user?.id;
+  const lessonId = lesson?.id;
+
+  /*
+   * As dependências são os identificadores, não os objetos.
+   *
+   * `useAuth()` devolve um objeto de contexto novo a cada render; depender dele
+   * fazia este efeito rodar sempre, e cada volta produzia um array novo em
+   * `setCompletedLessons` — estado novo, render novo, efeito de novo. Laço.
+   * Pelo mesmo motivo os dois `setState` abaixo devolvem o valor anterior
+   * quando nada mudou.
+   */
   useEffect(() => {
     let ativo = true;
-    if (!user) return;
+    if (!userId || !lessonId) return;
 
-    fetchProgress(user.id).then((p) => {
-      if (ativo) setCompletedLessons(p.completedLessons);
+    // A lista do servidor entra **somada** ao que já está na tela. Sobrescrever
+    // apagava uma conclusão feita enquanto esta leitura estava no ar.
+    fetchProgress(userId).then((p) => {
+      if (!ativo) return;
+
+      setCompletedLessons((atuais) => {
+        const novos = p.completedLessons.filter((id) => !atuais.includes(id));
+        return novos.length === 0 ? atuais : [...atuais, ...novos];
+      });
+    });
+
+    // O que o aluno já resolveu nesta aula em visitas anteriores. Sem isto ele
+    // teria que refazer tudo numa sessão só para a aula fechar.
+    fetchSolvedExercises(userId, lessonId).then((resolvidos) => {
+      if (!ativo) return;
+
+      setEstados((atual) => {
+        const novos = resolvidos.filter((id) => !atual.has(id));
+        if (novos.length === 0) return atual;
+
+        const proximo = new Map(atual);
+        for (const exerciseId of novos) proximo.set(exerciseId, 'acertou');
+        return proximo;
+      });
     });
 
     return () => {
       ativo = false;
     };
-  }, [user]);
+  }, [userId, lessonId]);
+
+  /**
+   * Guarda o estado reportado por um exercício.
+   *
+   * Devolver o mesmo mapa quando nada mudou faz o React descartar o render: sem
+   * isso, um componente que reporta o mesmo estado a cada render entraria em
+   * laço.
+   */
+  const registrarEstado = useCallback((exerciseId: string, estado: ExerciseState) => {
+    setEstados((atual) => {
+      if (atual.get(exerciseId) === estado) return atual;
+      return new Map(atual).set(exerciseId, estado);
+    });
+  }, []);
+
+  const jaConcluida = lesson ? completedLessons.includes(lesson.id) : false;
+  const faltando = pendentes(exerciseIds, estados);
+  const tudoResolvido = exerciseIds.length > 0 && faltando.length === 0;
+
+  /**
+   * Conclusão da aula: todos os exercícios resolvidos.
+   *
+   * Antes bastava o primeiro. A aula ficava marcada como feita com um quinto do
+   * trabalho entregue, e a maior recompensa do produto — o confete — caía no
+   * meio do caminho, deixando o fim da aula sem nada.
+   */
+  useEffect(() => {
+    if (!lessonId || !tudoResolvido || jaConcluida) return;
+
+    celebrar('aula');
+    setCompletedLessons((ids) => (ids.includes(lessonId) ? ids : [...ids, lessonId]));
+
+    // Visitante sem sessão conclui a aula na tela; só não gera histórico.
+    if (!userId) return;
+
+    markLessonCompleted(userId, lessonId).catch((erro) => {
+      console.error('Falha ao salvar progresso da aula:', erro);
+    });
+  }, [lessonId, tudoResolvido, jaConcluida, userId]);
 
   if (!lesson || steps.length === 0) {
     return <Navigate to="/app" replace />;
   }
 
-  const passo = steps[indice];
-  const ultimo = indice === steps.length - 1;
-  const jaConcluida = completedLessons.includes(lesson.id);
-  const proximaAula = getNextLesson(lesson.trackId, [...completedLessons, lesson.id]);
+  // Trava de segurança: nenhum índice fora da faixa pode virar tela branca no
+  // meio de uma aula. O ajuste no render já resolve a troca de aula; isto cobre
+  // qualquer caminho que ainda venha a errar a conta.
+  const posicao = Math.min(Math.max(indice, 0), steps.length - 1);
+  const passo = steps[posicao];
+  const ultimo = posicao === steps.length - 1;
+  const proximaAula = getLessonAfter(lesson.id);
 
-  const concluir = async () => {
-    celebrar('aula');
-
-    setCompletedLessons((ids) => (ids.includes(lesson.id) ? ids : [...ids, lesson.id]));
-
-    if (user) {
-      try {
-        await markLessonCompleted(user.id, lesson.id);
-      } catch (erro) {
-        console.error('Falha ao salvar progresso da aula:', erro);
-      }
-    }
-  };
-
-  const marcarResolvido = (exerciseId: string) => {
-    setResolvidos((atual) => new Set(atual).add(exerciseId));
-    if (!jaConcluida) void concluir();
-  };
+  const estadoDoPasso = passo.kind === 'exercise' ? estados.get(passo.exercise.id) : undefined;
+  const resolvido = estaResolvido(estadoDoPasso);
 
   const avancar = () => setIndice((i) => Math.min(i + 1, steps.length - 1));
   const voltar = () => setIndice((i) => Math.max(i - 1, 0));
+
+  /** Leva ao primeiro exercício que ficou para trás. */
+  const irParaPendente = () => {
+    const alvo = steps.findIndex((p) => p.kind === 'exercise' && p.exercise.id === faltando[0]);
+    if (alvo !== -1) setIndice(alvo);
+  };
 
   return (
     <div className="rolagem-com-barras flex min-h-screen flex-col bg-canvas">
@@ -129,7 +232,7 @@ export function Lesson() {
           <Link
             to="/app"
             aria-label="Sair da aula"
-            className="-ml-2 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-ink-soft transition-colors hover:bg-sunken hover:text-ink"
+            className="-ml-2 flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-ink-soft transition-colors hover:bg-sunken hover:text-ink"
           >
             <IconClose size={20} />
           </Link>
@@ -139,14 +242,27 @@ export function Lesson() {
             {/* O próprio contador é a região viva: duplicá-lo num span oculto
                 faria o leitor de tela anunciar a mesma informação duas vezes. */}
             <p className="label-mono text-ink-faint" aria-live="polite">
-              Passo {indice + 1} de {steps.length} · {LANGUAGE_LABELS[lesson.language]}
+              Passo {posicao + 1} de {steps.length} · {LANGUAGE_LABELS[lesson.language]}
             </p>
           </div>
+
+          {/* Quantos exercícios já fecharam. É a resposta a "quanto falta para
+              esta aula contar", que a barra de passos sozinha não dá — oito
+              passos de leitura e um exercício não são oito nonos de aprendizado. */}
+          {exerciseIds.length > 0 && (
+            <p
+              className="label-mono shrink-0 text-ink-faint"
+              aria-label={`${exerciseIds.length - faltando.length} de ${exerciseIds.length} exercícios resolvidos`}
+            >
+              <IconCheck size={13} className="mr-1 inline align-[-1px]" />
+              {exerciseIds.length - faltando.length}/{exerciseIds.length}
+            </p>
+          )}
         </div>
 
         <div
           role="progressbar"
-          aria-valuenow={indice + 1}
+          aria-valuenow={posicao + 1}
           aria-valuemin={1}
           aria-valuemax={steps.length}
           aria-label="Progresso da aula"
@@ -154,7 +270,7 @@ export function Lesson() {
         >
           <div
             className="h-full bg-brand-500 transition-[width] duration-300"
-            style={{ width: `${((indice + 1) / steps.length) * 100}%` }}
+            style={{ width: `${((posicao + 1) / steps.length) * 100}%` }}
           />
         </div>
       </header>
@@ -166,10 +282,10 @@ export function Lesson() {
       <main
         ref={conteudoRef}
         tabIndex={-1}
-        aria-label={`Passo ${indice + 1} de ${steps.length}`}
+        aria-label={`Passo ${posicao + 1} de ${steps.length}`}
         className="mx-auto w-full max-w-2xl flex-1 px-4 pb-24 pt-6 focus-visible:outline-none"
       >
-        {indice === 0 && (
+        {posicao === 0 && (
           <p className="mb-5 flex items-start gap-2 rounded-lg bg-brand-50 p-3 text-sm leading-relaxed text-brand-700">
             <IconTarget size={17} className="mt-0.5 shrink-0" />
             {lesson.objective}
@@ -185,17 +301,44 @@ export function Lesson() {
               <MarkdownReader content={passo.markdown} />
             </div>
 
-            <div className="rounded-xl border border-success-200 bg-success-50 p-5 text-center">
-              <span className="mx-auto mb-2 flex h-11 w-11 items-center justify-center rounded-full bg-success-600 text-white">
-                <IconCheckCircle size={24} />
-              </span>
-              <p className="font-bold text-success-700">Aula concluída</p>
-              <p className="mt-1 text-sm leading-relaxed text-ink-soft">
-                {proximaAula && proximaAula.id !== lesson.id
-                  ? 'Seu progresso foi salvo. A próxima aula continua daqui.'
-                  : 'Você chegou ao fim desta trilha.'}
-              </p>
-            </div>
+            {/* O fecho diz o que de fato aconteceu. A versão anterior afirmava
+                "Aula concluída — seu progresso foi salvo" para todo mundo,
+                inclusive para quem tinha pulado todos os exercícios e não tinha
+                salvo nada. */}
+            {tudoResolvido || jaConcluida ? (
+              <div className="rounded-xl border border-success-200 bg-success-50 p-5 text-center">
+                <span className="mx-auto mb-2 flex h-11 w-11 items-center justify-center rounded-full bg-success-600 text-white">
+                  <IconCheckCircle size={24} />
+                </span>
+                <p className="font-bold text-success-700">Aula concluída</p>
+                <p className="mt-1 text-sm leading-relaxed text-ink-soft">
+                  {proximaAula
+                    ? 'Seu progresso foi salvo. A próxima aula continua daqui.'
+                    : 'Você chegou ao fim desta trilha.'}
+                </p>
+              </div>
+            ) : (
+              <div className="rounded-xl border border-energy-200 bg-energy-50 p-5">
+                <p className="font-bold text-energy-700">
+                  {faltando.length === 1
+                    ? 'Falta 1 exercício para fechar esta aula'
+                    : `Faltam ${faltando.length} exercícios para fechar esta aula`}
+                </p>
+                <p className="mt-1 text-sm leading-relaxed text-ink-soft">
+                  Você leu a aula até o fim — isso já vale. Mas ela só entra no seu progresso
+                  quando os exercícios estiverem resolvidos, porque é neles que o conceito sai
+                  do texto e vira coisa que você sabe fazer.
+                </p>
+                <button
+                  type="button"
+                  onClick={irParaPendente}
+                  className="mt-4 flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-ink px-5 font-bold text-white transition-colors hover:bg-brand-900 active:translate-y-px"
+                >
+                  Voltar ao exercício que ficou
+                  <IconArrowRight size={18} />
+                </button>
+              </div>
+            )}
           </div>
         )}
 
@@ -204,7 +347,7 @@ export function Lesson() {
             exercise={passo.exercise}
             lessonId={lesson.id}
             language={lesson.language}
-            onSolved={() => marcarResolvido(passo.exercise.id)}
+            onEstado={(estado) => registrarEstado(passo.exercise.id, estado)}
           />
         )}
 
@@ -212,16 +355,24 @@ export function Lesson() {
           <FillBlank
             exercise={passo.exercise}
             lessonId={lesson.id}
-            onSolved={() => marcarResolvido(passo.exercise.id)}
+            onEstado={(estado) => registrarEstado(passo.exercise.id, estado)}
           />
         )}
 
         {passo.kind === 'exercise' && passo.exercise.type === 'multiple-choice' && (
-          <MultipleChoice exercise={passo.exercise} lessonId={lesson.id} />
+          <MultipleChoice
+            exercise={passo.exercise}
+            lessonId={lesson.id}
+            onEstado={(estado) => registrarEstado(passo.exercise.id, estado)}
+          />
         )}
 
         {passo.kind === 'exercise' && passo.exercise.type === 'predict-output' && (
-          <PredictOutput exercise={passo.exercise} lessonId={lesson.id} />
+          <PredictOutput
+            exercise={passo.exercise}
+            lessonId={lesson.id}
+            onEstado={(estado) => registrarEstado(passo.exercise.id, estado)}
+          />
         )}
       </main>
 
@@ -232,7 +383,7 @@ export function Lesson() {
           <button
             type="button"
             onClick={voltar}
-            disabled={indice === 0}
+            disabled={posicao === 0}
             className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border border-line text-ink-soft transition-colors hover:bg-sunken disabled:opacity-40 disabled:hover:bg-transparent"
             aria-label="Passo anterior"
           >
@@ -241,19 +392,23 @@ export function Lesson() {
 
           {ultimo ? (
             <Link
-              to={proximaAula && proximaAula.id !== lesson.id ? `/lesson/${proximaAula.id}` : '/app'}
+              to={proximaAula ? `/lesson/${proximaAula.id}` : '/app'}
               className="flex h-12 flex-1 items-center justify-center gap-2 rounded-lg bg-ink font-bold text-white transition-colors hover:bg-brand-900"
             >
-              {proximaAula && proximaAula.id !== lesson.id ? 'Próxima aula' : 'Voltar ao início'}
+              {proximaAula ? 'Próxima aula' : 'Voltar ao início'}
               <IconArrowRight size={18} />
             </Link>
           ) : (
             <button
               type="button"
               onClick={avancar}
-              className="flex h-12 flex-1 items-center justify-center gap-2 rounded-lg bg-ink font-bold text-white transition-colors hover:bg-brand-900 active:translate-y-px"
+              /* Resolvido muda a cor do botão: é a confirmação periférica de que
+                 o passo fechou, visível sem ler o rótulo. */
+              className={`flex h-12 flex-1 items-center justify-center gap-2 rounded-lg font-bold text-white transition-colors active:translate-y-px ${
+                resolvido ? 'bg-success-600 hover:bg-success-700' : 'bg-ink hover:bg-brand-900'
+              }`}
             >
-              {passo.kind === 'exercise' && !resolvidos.has(passo.id) ? 'Pular por ora' : 'Continuar'}
+              {passo.kind === 'exercise' ? rotuloDeAvanco(estadoDoPasso) : 'Continuar'}
               <IconArrowRight size={18} />
             </button>
           )}

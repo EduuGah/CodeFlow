@@ -2,10 +2,13 @@ import { useEffect, useState } from 'react';
 import Editor from '@monaco-editor/react';
 
 import type { CodeExercise, LanguageId } from '../../../content/types';
+import type { ExerciseState, OnExerciseState } from '../../lib/exercise-state';
 import { executeCode, type ExecutionResult } from '../../lib/sandbox';
 import { useRecordAttempt } from '../../hooks/useRecordAttempt';
-import { IconCheck, IconClose, IconPlay, IconSpinner } from '../ui/Icon';
+import { useReportarEstado } from '../../hooks/useReportarEstado';
+import { IconCheck, IconClose, IconPlay } from '../ui/Icon';
 import { MarkdownReader } from '../ui/MarkdownReader';
+import { ExerciseAction, ExerciseFeedback } from './ExerciseAction';
 import { HintPanel } from './HintPanel';
 
 /**
@@ -24,20 +27,29 @@ interface CodeExerciseStepProps {
   exercise: CodeExercise;
   lessonId: string;
   language: LanguageId;
-  /** Chamado quando todos os testes passam, para a aula liberar o avanço. */
-  onSolved: () => void;
+  /** Avisa a aula em que ponto o exercício está. */
+  onEstado?: OnExerciseState;
 }
 
 export function CodeExerciseStep({
   exercise,
   lessonId,
   language,
-  onSolved,
+  onEstado,
 }: CodeExerciseStepProps) {
   const [code, setCode] = useState(exercise.initialCode);
   const [rodando, setRodando] = useState(false);
   const [resultado, setResultado] = useState<ExecutionResult | null>(null);
   const [dicasAbertas, setDicasAbertas] = useState(0);
+  const [verSolucao, setVerSolucao] = useState(false);
+  /**
+   * O código exato que gerou o resultado na tela.
+   *
+   * Sem isto, editar depois de passar deixaria o rodapé da aula dizendo
+   * "Continuar" para um código que ninguém verificou — o painel continuaria
+   * verde enquanto o editor já contém outra coisa.
+   */
+  const [codigoVerificado, setCodigoVerificado] = useState<string | null>(null);
 
   const registrar = useRecordAttempt();
 
@@ -46,7 +58,9 @@ export function CodeExerciseStep({
   useEffect(() => {
     setCode(exercise.initialCode);
     setResultado(null);
+    setCodigoVerificado(null);
     setDicasAbertas(0);
+    setVerSolucao(false);
   }, [exercise.id, exercise.initialCode]);
 
   const passouTudo =
@@ -54,27 +68,50 @@ export function CodeExerciseStep({
     resultado.testResults.length > 0 &&
     resultado.testResults.every((t) => t.passed);
 
+  const desatualizado = resultado !== null && code !== codigoVerificado;
+
+  const estado: ExerciseState = rodando
+    ? 'verificando'
+    : resultado === null
+      ? code.trim() === exercise.initialCode.trim()
+        ? 'inicial'
+        : 'respondendo'
+      : desatualizado
+        ? 'respondendo'
+        : passouTudo
+          ? 'acertou'
+          : 'errou';
+
+  useReportarEstado(estado, onEstado);
+
   const executar = async () => {
     setRodando(true);
     setResultado(null);
 
-    const execucao = await executeCode(code, exercise.tests, exercise.properties);
+    const enviado = code;
+    const execucao = await executeCode(enviado, exercise.tests, exercise.properties);
     setResultado(execucao);
+    setCodigoVerificado(enviado);
     setRodando(false);
 
     const acertou =
       execucao.testResults.length > 0 && execucao.testResults.every((t) => t.passed);
 
-    registrar({
-      exerciseId: exercise.id,
-      lessonId,
-      concepts: exercise.concepts,
-      correct: acertou,
-      hintsUsed: dicasAbertas,
-    });
-
-    if (acertou) onSolved();
+    // Rodar de novo o mesmo código não é uma tentativa nova. Sem esta guarda,
+    // clicar três vezes gravava três erros e derrubava a taxa de acerto do
+    // aluno sem ele ter feito nada diferente.
+    if (enviado !== codigoVerificado) {
+      registrar({
+        exerciseId: exercise.id,
+        lessonId,
+        concepts: exercise.concepts,
+        correct: acertou,
+        hintsUsed: dicasAbertas,
+      });
+    }
   };
+
+  const falhas = resultado?.testResults.filter((t) => !t.passed) ?? [];
 
   return (
     <div className="space-y-4">
@@ -85,7 +122,11 @@ export function CodeExerciseStep({
 
       {/* Altura fixa e generosa: o editor precisa de espaço previsível, e rolar
           dentro dele é melhor do que espremê-lo contra a janela. */}
-      <div className="overflow-hidden rounded-xl border border-line">
+      <div
+        className={`overflow-hidden rounded-xl border transition-colors ${
+          estado === 'acertou' ? 'border-success-200' : 'border-line'
+        }`}
+      >
         <Editor
           height="280px"
           language={language}
@@ -111,18 +152,41 @@ export function CodeExerciseStep({
         />
       </div>
 
-      <button
-        type="button"
-        onClick={executar}
-        disabled={rodando}
-        className="flex w-full items-center justify-center gap-2 rounded-lg bg-ink px-5 py-3.5 font-bold text-white transition-colors hover:bg-brand-900 active:translate-y-px disabled:opacity-60"
-      >
-        {rodando ? <IconSpinner size={18} className="animate-spin" /> : <IconPlay size={18} />}
-        {rodando ? 'Executando…' : 'Executar código'}
-      </button>
+      <ExerciseAction onClick={executar} disabled={rodando} carregando={rodando}>
+        {!rodando && <IconPlay size={18} />}
+        {rodando ? 'Executando…' : resultado === null ? 'Executar código' : 'Executar de novo'}
+      </ExerciseAction>
+
+      {desatualizado && (
+        <p className="rounded-lg border border-line bg-sunken px-4 py-3 text-sm leading-relaxed text-ink-soft">
+          O código mudou depois desta execução. Rode de novo para conferir a versão atual.
+        </p>
+      )}
 
       {resultado && (
         <div className="space-y-3">
+          {/* O veredito vem antes das evidências: a primeira pergunta é sempre
+              "eu acertei?", e antes o aluno tinha que deduzir isso de uma lista
+              de linhas verdes. */}
+          {!desatualizado && resultado.testResults.length > 0 && (
+            <ExerciseFeedback
+              estado={passouTudo ? 'acertou' : 'errou'}
+              titulo={
+                passouTudo
+                  ? 'Todos os testes passaram'
+                  : `${falhas.length} de ${resultado.testResults.length} ${
+                      resultado.testResults.length === 1 ? 'teste falhou' : 'testes falharam'
+                    }`
+              }
+            >
+              <p className="text-sm leading-relaxed text-ink-soft">
+                {passouTudo
+                  ? 'Sua solução vale para todos os casos verificados, e não só para o exemplo do enunciado.'
+                  : 'Cada linha abaixo diz o que era esperado. Comece pela primeira que falhou.'}
+              </p>
+            </ExerciseFeedback>
+          )}
+
           {/* Tempo esgotado não é erro do aluno: é laço sem fim, e merece tom próprio. */}
           {resultado.timedOut ? (
             <p className="rounded-lg border border-energy-200 bg-energy-50 p-4 text-sm leading-relaxed text-energy-700">
@@ -163,6 +227,33 @@ export function CodeExerciseStep({
                 </li>
               ))}
             </ul>
+          )}
+
+          {/* A solução de referência só depois de resolver: comparar abordagens
+              ensina, e entregá-la antes tiraria o exercício. */}
+          {passouTudo && !desatualizado && exercise.solution && (
+            <div className="rounded-lg border border-line bg-surface p-4">
+              {verSolucao ? (
+                <>
+                  <p className="label-mono mb-2 text-ink-faint">Uma solução de referência</p>
+                  <pre className="overflow-x-auto rounded-lg bg-editor p-4 text-sm leading-relaxed">
+                    <code className="font-mono text-white/90">{exercise.solution}</code>
+                  </pre>
+                  <p className="mt-2 text-sm leading-relaxed text-ink-soft">
+                    Não é a única resposta certa — os testes aceitam qualquer código que resolva o
+                    problema. Serve para comparar caminhos.
+                  </p>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setVerSolucao(true)}
+                  className="min-h-11 w-full rounded-lg text-sm font-semibold text-brand-600 transition-colors hover:bg-brand-50"
+                >
+                  Comparar com uma solução de referência
+                </button>
+              )}
+            </div>
           )}
         </div>
       )}

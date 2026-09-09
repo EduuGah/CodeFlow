@@ -110,7 +110,7 @@ describe('resposta certa', () => {
     await user.click(screen.getByRole('radio', { name: 'Cinco' }));
     await user.click(verificar());
 
-    expect(screen.getByText('Correto')).toBeInTheDocument();
+    expect(screen.getByText('Resposta correta')).toBeInTheDocument();
     expect(screen.getByText(EXERCICIO.explanation)).toBeInTheDocument();
   });
 

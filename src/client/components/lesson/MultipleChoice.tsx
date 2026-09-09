@@ -1,11 +1,13 @@
 import { useRef, useState } from 'react';
 import { IconCheckCircle, IconCloseCircle } from '../ui/Icon';
 import type { MultipleChoiceExercise } from '../../../content/types';
-import { Button } from '../ui/Button';
+import type { ExerciseState, OnExerciseState } from '../../lib/exercise-state';
 import { MarkdownReader } from '../ui/MarkdownReader';
+import { ExerciseAction, ExerciseFeedback } from './ExerciseAction';
 import { HintPanel } from './HintPanel';
 import { useRecordAttempt } from '../../hooks/useRecordAttempt';
 import { useFocusRescue } from '../../hooks/useFocusRescue';
+import { useReportarEstado } from '../../hooks/useReportarEstado';
 
 /**
  * Exercício de múltipla escolha.
@@ -16,9 +18,13 @@ import { useFocusRescue } from '../../hooks/useFocusRescue';
 export function MultipleChoice({
   exercise,
   lessonId,
+  onEstado,
 }: {
   exercise: MultipleChoiceExercise;
   lessonId: string;
+  /** Avisa a aula em que ponto o exercício está. Sem isto o rodapé da aula
+      continuaria oferecendo "pular" a quem acabou de acertar. */
+  onEstado?: OnExerciseState;
 }) {
   const [selecionada, setSelecionada] = useState<number | null>(null);
   const [enviada, setEnviada] = useState(false);
@@ -29,6 +35,16 @@ export function MultipleChoice({
 
   const registrar = useRecordAttempt();
   const acertou = selecionada === exercise.correctIndex;
+
+  const estado: ExerciseState = enviada
+    ? acertou
+      ? 'acertou'
+      : 'errou'
+    : selecionada === null
+      ? 'inicial'
+      : 'respondendo';
+
+  useReportarEstado(estado, onEstado);
 
   // Acertar remove o botão de verificar; o retorno assume o lugar dele na ordem
   // de tabulação para o foco não cair no corpo do documento.
@@ -51,10 +67,8 @@ export function MultipleChoice({
   };
 
   return (
-    <section className="rounded-lg border border-line bg-surface p-4">
-      <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-ink-faint">
-        Exercício
-      </h3>
+    <section className="rounded-xl border border-line bg-surface p-4 sm:p-5">
+      <h2 className="label-mono mb-3 text-brand-600">Escolha a alternativa</h2>
 
       <div className="mb-4">
         <MarkdownReader content={exercise.prompt} />
@@ -71,18 +85,20 @@ export function MultipleChoice({
           // Estado por texto e ícone, não apenas por cor (acessibilidade).
           let estilo = 'border-line hover:border-line-strong hover:bg-canvas';
           if (revelarCerta) estilo = 'border-success-200 bg-success-50';
-          else if (revelarErrada) estilo = 'border-danger-200 bg-danger-50';
+          else if (revelarErrada) estilo = 'border-energy-200 bg-energy-50';
           else if (escolhida) estilo = 'border-ink bg-canvas';
 
           return (
             <label
               key={i}
-              className={`flex cursor-pointer items-start gap-3 rounded-lg border p-3 text-sm transition-colors ${estilo}`}
+              // `min-h-11` mantém o alvo de toque acima do mínimo mesmo quando a
+              // alternativa cabe em uma linha curta.
+              className={`flex min-h-11 cursor-pointer items-start gap-3 rounded-lg border p-3 text-sm transition-colors ${estilo}`}
             >
               <input
                 type="radio"
                 name={exercise.id}
-                className="mt-0.5 accent-zinc-900"
+                className="mt-0.5 h-4 w-4 shrink-0 accent-brand-600"
                 checked={escolhida}
                 onChange={() => {
                   setSelecionada(i);
@@ -98,37 +114,23 @@ export function MultipleChoice({
       </fieldset>
 
       {!(enviada && acertou) && (
-        <Button
-          size="sm"
-          className="mt-4 w-full"
-          disabled={selecionada === null}
-          onClick={verificar}
-        >
+        <ExerciseAction className="mt-4" disabled={selecionada === null} onClick={verificar}>
           {enviada ? 'Verificar de novo' : 'Verificar resposta'}
-        </Button>
+        </ExerciseAction>
       )}
 
       {enviada && (
-        <div
-          ref={retornoRef}
-          role="status"
-          tabIndex={-1}
-          className={`mt-4 rounded-lg border p-3 ${
-            acertou ? 'border-success-200 bg-success-50' : 'border-energy-200 bg-energy-50'
-          }`}
-        >
-          <p
-            className={`mb-1 flex items-center gap-1.5 text-sm font-semibold ${
-              acertou ? 'text-success-700' : 'text-energy-700'
-            }`}
+        <div className="mt-4">
+          <ExerciseFeedback
+            estado={acertou ? 'acertou' : 'errou'}
+            titulo={acertou ? 'Resposta correta' : 'Ainda não é essa — veja o porquê'}
+            refDoBloco={retornoRef}
           >
-            {acertou ? <IconCheckCircle size={15} /> : <IconCloseCircle size={15} />}
-            {acertou ? 'Correto' : 'Ainda não é essa — veja o porquê'}
-          </p>
-          <MarkdownReader
-            content={exercise.explanation}
-            className="prose-p:my-0 prose-p:text-sm prose-p:leading-relaxed"
-          />
+            <MarkdownReader
+              content={exercise.explanation}
+              className="prose-p:my-0 prose-p:text-sm prose-p:leading-relaxed"
+            />
+          </ExerciseFeedback>
         </div>
       )}
 

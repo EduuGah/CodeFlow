@@ -59,7 +59,7 @@ describe('múltipla escolha pelo teclado', () => {
     expect(document.activeElement).toHaveAccessibleName('Verificar resposta');
     await user.keyboard('{Enter}');
 
-    expect(screen.getByRole('status')).toHaveTextContent('Correto');
+    expect(screen.getByRole('status')).toHaveTextContent('Resposta correta');
   });
 
   it('o foco não se perde quando o botão de verificar desaparece', async () => {

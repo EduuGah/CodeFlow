@@ -202,6 +202,27 @@ export function getNextLesson(trackId: string, completedLessonIds: string[]): Le
   );
 }
 
+/**
+ * A aula seguinte a esta, na ordem da trilha.
+ *
+ * Diferente de `getNextLesson`, que responde "por onde retomar" e devolve a
+ * primeira pendente. São perguntas diferentes, e usar uma pela outra tinha um
+ * efeito ruim no fim da aula: quem tivesse pulado a aula 3 e terminasse a 7
+ * recebia um botão "Próxima aula" que levava de volta para a 3.
+ *
+ * Devolve `undefined` no fim da trilha — quem chama decide o que oferecer.
+ */
+export function getLessonAfter(lessonId: string): Lesson | undefined {
+  const lesson = getLesson(lessonId);
+  if (!lesson) return undefined;
+
+  const lessonsOfTrack = getLessonsOfTrack(lesson.trackId);
+  const atual = lessonsOfTrack.findIndex((l) => l.id === lessonId);
+  if (atual === -1) return undefined;
+
+  return lessonsOfTrack[atual + 1];
+}
+
 export function getTrackProgress(trackId: string, completedLessonIds: string[]) {
   const lessonsOfTrack = getLessonsOfTrack(trackId);
   const completed = lessonsOfTrack.filter((l) => completedLessonIds.includes(l.id)).length;
