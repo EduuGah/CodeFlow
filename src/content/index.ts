@@ -35,6 +35,8 @@ import { lessonClosures } from './lessons/js-12-closures';
 import { lessonCallbacks } from './lessons/js-13-callbacks';
 import { lessonPromises } from './lessons/js-14-promises';
 import { lessonAsyncAwait } from './lessons/js-15-async-await';
+import { lessonErrosAsync } from './lessons/js-16-erros-async';
+import { lessonJson } from './lessons/js-17-json';
 import { lessonDecompor } from './lessons/logica-01-decompor';
 import { lessonCasosExtremos } from './lessons/logica-02-casos-extremos';
 import { lessonSimular } from './lessons/logica-03-simular';
@@ -67,6 +69,8 @@ const lessons: Lesson[] = [
   lessonCallbacks,
   lessonPromises,
   lessonAsyncAwait,
+  lessonErrosAsync,
+  lessonJson,
   lessonDecompor,
   lessonCasosExtremos,
   lessonSimular,
