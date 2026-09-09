@@ -6,8 +6,8 @@ que conclui uma fase.
 
 | | Hoje | Previsto |
 | --- | --- | --- |
-| Aulas | 20 | 135 |
-| Exercícios | 47 | ~700 |
+| Aulas | 21 | 135 |
+| Exercícios | 50 | ~700 |
 | Tipos de exercício | 4 | 11 |
 | Motores de execução | 1 | 7 |
 
@@ -62,7 +62,7 @@ opcional).
 ### Fase 1 — Aprofundar o que já roda · 18 aulas · EM ANDAMENTO
 Motor: **nenhum novo**.
 
-**JavaScript real — 7 de 10**
+**JavaScript real — 8 de 10**
 
 | Aula | Estado |
 | --- | --- |
@@ -73,7 +73,7 @@ Motor: **nenhum novo**.
 | async e await | feita |
 | Falhas assíncronas | feita |
 | JSON | feita |
-| Imutabilidade | — |
+| Imutabilidade | feita |
 | Datas e fuso | — |
 | Expressões regulares | — |
 

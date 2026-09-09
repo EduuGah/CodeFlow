@@ -32,14 +32,14 @@ Números lidos do catálogo, não de memória.
 
 | | |
 | --- | --- |
-| Trilhas | 2 — Fundamentos de JavaScript (17 aulas), Lógica (3) |
-| Aulas | 20, somando 360 minutos |
-| Exercícios | 47 — 20 de código, 15 de prever saída, 8 de lacuna, 4 de múltipla escolha |
-| Verificação | 109 casos fixos + 17 propriedades |
+| Trilhas | 2 — Fundamentos de JavaScript (18 aulas), Lógica (3) |
+| Aulas | 21, somando 380 minutos |
+| Exercícios | 50 — 21 de código, 16 de prever saída, 9 de lacuna, 4 de múltipla escolha |
+| Verificação | 118 casos fixos + 19 propriedades |
 | Projetos | 7, com 22 critérios de aceitação |
 | Conceitos | 21, com grafo de pré-requisitos |
 | Flashcards | 22 |
-| Testes | 460 de unidade + 110 de navegador |
+| Testes | 468 de unidade + 110 de navegador |
 | Pacote | 949 kB (276 kB comprimido) |
 
 ## 4. Decisões que não devem ser desfeitas sem motivo forte
@@ -106,7 +106,7 @@ docs/curriculo.md       Roadmap de conteúdo — fonte canônica
 
 ```bash
 npm run typecheck   # inclui e2e/ e playwright.config.ts
-npm test            # 460 testes
+npm test            # 468 testes
 npm run test:e2e    # 110 no navegador (antes: npx playwright install chromium)
 npm run build
 ```
@@ -177,8 +177,8 @@ por preferência de assunto.
 
 | Item | Estado |
 | --- | --- |
-| Bloco *JavaScript real* | **7 de 10** — escopo, closures, callbacks, promises, async/await, falhas assíncronas, JSON |
-| Faltam nesse bloco | imutabilidade, datas, expressões regulares (módulos está bloqueado) |
+| Bloco *JavaScript real* | **8 de 10** — escopo, closures, callbacks, promises, async/await, falhas assíncronas, JSON, imutabilidade |
+| Faltam nesse bloco | datas, expressões regulares (módulos está bloqueado) |
 | Bloco *Como a web funciona* | **0 de 8** — HTTP, REST, autenticação, CORS, segurança |
 | Testes por propriedade | **feito** |
 | Exercício de lacuna | **feito** |
