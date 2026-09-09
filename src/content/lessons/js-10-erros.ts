@@ -73,6 +73,62 @@ console.log(dados.usuario);  // undefined  <- a causa está aqui
     {
       kind: 'exercise',
       exercise: {
+        id: 'ex-js-10-ler-mensagem',
+        type: 'multiple-choice',
+        prompt:
+          "Seu programa parou com `TypeError: Cannot read properties of undefined (reading 'nome')`. O que isso diz?",
+        concepts: ['depuracao'],
+        difficulty: 'iniciante',
+        tags: ['javascript', 'erros'],
+        options: [
+          'A propriedade `nome` está com valor `undefined`',
+          'O valor de onde você tentou ler `nome` é que era `undefined`',
+          'A variável `nome` não foi declarada',
+          'O tipo de `nome` está errado',
+        ],
+        correctIndex: 1,
+        explanation:
+          'A mensagem descreve **quem não tinha a propriedade**, não a propriedade em si. Em `pedido.cliente.nome`, se o erro fala de `nome`, então `pedido.cliente` já era `undefined`. Procurar o defeito um passo antes do que a mensagem cita é o que resolve esse erro rápido.',
+        hints: [
+          '"Cannot read properties **of undefined**" — de quem a frase está falando?',
+          'Se `nome` estivesse undefined, ler seria possível. O problema é ler DE alguém que não existe.',
+        ],
+      },
+    },
+    {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-js-10-prever-finally',
+        type: 'predict-output',
+        prompt: 'O que este programa imprime, e em que ordem?',
+        concepts: ['depuracao'],
+        difficulty: 'intermediario',
+        tags: ['javascript', 'erros'],
+        code: `function tentar() {
+  try {
+    console.log('A');
+    throw new Error('falhou');
+  } catch (e) {
+    console.log('B');
+    return 'do catch';
+  } finally {
+    console.log('C');
+  }
+}
+
+console.log(tentar());`,
+        expectedOutput: 'A\nB\nC\ndo catch',
+        explanation:
+          'O `finally` roda **mesmo quando há `return` no `catch`** — o valor fica reservado, o `finally` executa, e só então a função devolve. É por isso que ele é o lugar certo para fechar o que precisa ser fechado, independentemente do desfecho.',
+        hints: [
+          'O `return` dentro do `catch` impede o `finally` de rodar?',
+          'Em que momento o valor do `return` chega a quem chamou?',
+        ],
+      },
+    },
+    {
+      kind: 'exercise',
+      exercise: {
         id: 'ex-js-10-corrigir',
         type: 'code',
         prompt: `A função abaixo deveria devolver o total do carrinho, mas quebra. **Encontre e corrija os dois problemas** sem reescrever tudo do zero.\n\nEla deve devolver 35 para o carrinho de exemplo, e 0 para um carrinho vazio.`,

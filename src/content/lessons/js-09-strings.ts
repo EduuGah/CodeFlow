@@ -69,6 +69,89 @@ console.log("[" + nome + "]");`,
     {
       kind: 'exercise',
       exercise: {
+        id: 'ex-js-9-prever-imutavel',
+        type: 'predict-output',
+        prompt: 'O que este programa imprime? Repare no que os métodos de texto devolvem.',
+        concepts: ['strings', 'imutabilidade'],
+        difficulty: 'intermediario',
+        tags: ['javascript', 'strings'],
+        code: `let nome = '  Ana  ';
+
+nome.trim();
+console.log('[' + nome + ']');
+
+nome = nome.trim();
+console.log('[' + nome + ']');`,
+        expectedOutput: '[  Ana  ]\n[Ana]',
+        explanation:
+          'Texto em JavaScript é **imutável**: nenhum método altera o original. `trim`, `toUpperCase` e `replace` devolvem um texto **novo** — se você não guardar o retorno, o trabalho é jogado fora. É o mesmo erro de chamar `array.map` sem usar o resultado.',
+        hints: [
+          'A primeira chamada a `trim` guarda o resultado em algum lugar?',
+          'Métodos de texto alteram o original, ou devolvem um novo?',
+        ],
+      },
+    },
+    {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-js-9-lacuna-normalizar',
+        type: 'fill-blank',
+        prompt:
+          'Complete para a comparação funcionar independentemente de espaços e de maiúsculas.',
+        concepts: ['strings'],
+        difficulty: 'iniciante',
+        tags: ['javascript', 'strings'],
+        template: `function mesmoTexto(a, b) {
+  return a.{{1}}().{{2}}() === b.{{1}}().{{2}}();
+}`,
+        blanks: [
+          { placeholder: 'tira espaços', size: 12 },
+          { placeholder: 'iguala caixa', size: 12 },
+        ],
+        tests: [
+          {
+            description: "'  Ana ' e 'ana' são o mesmo texto",
+            assertion: `if (!mesmoTexto('  Ana ', 'ana')) throw new Error("Deveria considerar iguais: espaços e maiúsculas não deveriam contar.");`,
+          },
+          {
+            description: "'Ana' e 'Bruno' são diferentes",
+            assertion: `if (mesmoTexto('Ana', 'Bruno')) throw new Error("Textos diferentes não podem ser considerados iguais.");`,
+          },
+          {
+            description: 'textos vazios são iguais',
+            assertion: `if (!mesmoTexto('   ', '')) throw new Error("Só espaços, depois de limpos, é texto vazio.");`,
+            hidden: true,
+          },
+        ],
+        properties: [
+          {
+            description: 'a comparação ignora espaços nas pontas e caixa',
+            generate: `
+              const base = ['ana', 'bruno', 'carla'][Math.floor(rnd() * 3)];
+              const enfeitar = (t) => (rnd() < 0.5 ? '  ' : '') + (rnd() < 0.5 ? t.toUpperCase() : t) + (rnd() < 0.5 ? ' ' : '');
+              return { a: enfeitar(base), b: enfeitar(rnd() < 0.7 ? base : 'outro') };
+            `,
+            check: `
+              const esperado = caso.a.trim().toLowerCase() === caso.b.trim().toLowerCase();
+              const obtido = mesmoTexto(caso.a, caso.b);
+              if (obtido !== esperado) {
+                throw new Error("comparando " + JSON.stringify(caso.a) + " com " + JSON.stringify(caso.b) + " esperava " + esperado + ", veio " + obtido + ".");
+              }
+            `,
+          },
+        ],
+        explanation:
+          'Comparar texto que veio de um formulário sem normalizar é uma fonte silenciosa de bug: `"Ana "` e `"ana"` são valores diferentes para o computador, mas a mesma coisa para quem digitou.',
+        hints: [
+          'Uma remove os espaços das pontas. A outra deixa tudo na mesma caixa.',
+          'As duas foram apresentadas no exemplo desta aula, e nenhuma recebe argumento.',
+        ],
+        solution: ['trim', 'toLowerCase'],
+      },
+    },
+    {
+      kind: 'exercise',
+      exercise: {
         id: 'ex-js-9-validar',
         type: 'code',
         prompt: `Crie \`normalizarEmail(entrada)\` que **retorna** o email limpo — sem espaços nas pontas e em minúsculas.\n\nSe a entrada não for um texto válido de email (precisa conter \`"@"\` e ter algo antes e depois dele), retorne \`null\`.`,
