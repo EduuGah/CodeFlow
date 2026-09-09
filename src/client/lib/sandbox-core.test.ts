@@ -49,6 +49,55 @@ describe('captura de saída', () => {
   });
 });
 
+/**
+ * Números que o JSON não sabe representar.
+ *
+ * `JSON.stringify(NaN)` devolve a string `"null"`, e o mesmo vale para os
+ * infinitos. Num sandbox de aprendizado isso é pior do que inútil: o aluno faz
+ * uma conta que dá `NaN`, lê `null` na tela, e passa a procurar por um valor
+ * ausente que nunca existiu. A aula sobre contagem tem um exercício cujo ponto
+ * é justamente ver o `NaN` aparecer.
+ */
+describe('valores que o JSON não representa', () => {
+  it('NaN aparece como NaN, não como null', async () => {
+    const r = await runProgram('console.log(undefined + 1);', []);
+    expect(r.logs).toEqual(['NaN']);
+  });
+
+  it('infinito aparece com sinal', async () => {
+    const r = await runProgram('console.log(1 / 0); console.log(-1 / 0);', []);
+    expect(r.logs).toEqual(['Infinity', '-Infinity']);
+  });
+
+  it('o zero negativo não perde o sinal', async () => {
+    expect((await runProgram('console.log(-0);', [])).logs).toEqual(['-0']);
+  });
+
+  it('dentro de um objeto também', async () => {
+    const r = await runProgram('console.log({ total: 0 / 0, limite: 1 / 0 });', []);
+    expect(r.logs).toEqual(['{"total":NaN,"limite":Infinity}']);
+  });
+
+  it('dentro de um array também', async () => {
+    expect((await runProgram('console.log([1, 0 / 0, 3]);', [])).logs).toEqual(['[1,NaN,3]']);
+  });
+
+  it('texto que por acaso pareça a marca interna continua intacto', async () => {
+    const r = await runProgram('console.log({ nota: "__cf_num__NaN" });', []);
+    expect(r.logs).toEqual(['{"nota":"__cf_num__NaN"}']);
+  });
+
+  it('undefined e null continuam distinguíveis', async () => {
+    const r = await runProgram('console.log(undefined); console.log(null);', []);
+    expect(r.logs).toEqual(['undefined', 'null']);
+  });
+
+  it('função aparece pelo nome, em vez de virar objeto vazio', async () => {
+    const r = await runProgram('function somar(a, b) { return a + b; } console.log(somar);', []);
+    expect(r.logs).toEqual(['[Function: somar]']);
+  });
+});
+
 describe('erros do código do aluno', () => {
   it('devolve o erro de sintaxe em vez de lançar', async () => {
     const r = await runProgram('let x = ;', []);

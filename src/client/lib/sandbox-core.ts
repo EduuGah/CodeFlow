@@ -165,12 +165,61 @@ function capturarRejeicoesSoltas(): () => void {
   return () => {};
 }
 
+/**
+ * Marca temporária para números que o JSON não representa.
+ *
+ * O valor sai de `JSON.stringify` como texto entre aspas, e a marca permite
+ * removê-las depois sem tocar em nada mais.
+ *
+ * É sorteada a cada chamada de propósito. Com uma marca fixa, um aluno que
+ * imprimisse a string `"__cf_num__NaN"` — de brincadeira ou por acaso — veria
+ * as próprias aspas sumirem. O teste que cobre isso reprovou a primeira versão.
+ */
+function novaMarca(): string {
+  return `__cf${Math.random().toString(36).slice(2)}__`;
+}
+
+/**
+ * Representação de número que um aluno reconhece.
+ *
+ * `JSON.stringify` devolve `"null"` para `NaN` e para os infinitos, e apaga o
+ * sinal do zero negativo. Num ambiente de aprendizado isso é pior que inútil:
+ * o aluno imprime o resultado de uma conta que deu `NaN`, lê `null` na tela e
+ * vai procurar por um valor ausente que não existe. Foi exatamente o que a
+ * aula sobre contagem expôs — o padrão sem ponto de partida produz `NaN`, e a
+ * saída dizia `null`.
+ */
+function numeroLegivel(n: number): string {
+  if (Number.isNaN(n)) return 'NaN';
+  if (n === Infinity) return 'Infinity';
+  if (n === -Infinity) return '-Infinity';
+  if (Object.is(n, -0)) return '-0';
+  return String(n);
+}
+
 function formatArg(arg: unknown): string {
   if (typeof arg === 'string') return arg;
   if (arg instanceof Error) return `${arg.name}: ${arg.message}`;
+  if (typeof arg === 'number') return numeroLegivel(arg);
+  if (typeof arg === 'bigint') return `${arg}n`;
+  if (typeof arg === 'function') return `[Function: ${arg.name || 'anônima'}]`;
+
+  const marca = novaMarca();
 
   try {
-    return JSON.stringify(arg) ?? String(arg);
+    const texto = JSON.stringify(arg, (_chave, valor) =>
+      typeof valor === 'number' && (!Number.isFinite(valor) || Object.is(valor, -0))
+        ? marca + numeroLegivel(valor)
+        : valor
+    );
+
+    if (texto === undefined) return String(arg);
+
+    // Tira as aspas em volta dos números marcados, para `{"total":NaN}` em vez
+    // de `{"total":"…NaN"}`. A expressão é montada com concatenação porque este
+    // arquivo também gera código como texto, e barra invertida em template
+    // literal vira outra coisa no caminho.
+    return texto.replace(new RegExp('"' + marca + '([^"]*)"', 'g'), '$1');
   } catch {
     // Referência circular, por exemplo.
     return String(arg);
@@ -213,9 +262,18 @@ function __cfRnd(semente) {
 }
 
 function __cfFormatar(valor) {
+  // Mesmo motivo do formatArg: JSON.stringify troca NaN e infinitos por null,
+  // e o caso que reprovou a propriedade tem que aparecer como ele é.
+  if (typeof valor === 'number') return String(valor);
+
+  var marca = '__cf' + Math.random().toString(36).slice(2) + '__';
+
   try {
-    var texto = JSON.stringify(valor);
+    var texto = JSON.stringify(valor, function (chave, v) {
+      return typeof v === 'number' && !isFinite(v) ? marca + String(v) : v;
+    });
     if (texto === undefined) return String(valor);
+    texto = texto.replace(new RegExp('"' + marca + '([^"]*)"', 'g'), '$1');
     return texto.length > 200 ? texto.slice(0, 200) + '…' : texto;
   } catch (e) {
     return String(valor);
