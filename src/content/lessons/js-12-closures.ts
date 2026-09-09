@@ -9,7 +9,7 @@ export const lessonClosures: Lesson = {
     'Criar uma função que guarda estado próprio entre chamadas, e explicar por que o valor sobrevive.',
   concepts: ['closures', 'escopo', 'funcoes'],
   status: 'published',
-  estimatedMinutes: 18,
+  estimatedMinutes: 28,
   blocks: [
     {
       kind: 'prose',
@@ -96,6 +96,72 @@ console.log(carrinhoB());`,
       },
     },
     {
+      kind: 'prose',
+      markdown: `
+## A armadilha que fez o \`let\` existir
+
+Este é o bug de closure mais famoso da história do JavaScript, e ele explica por que \`var\` foi aposentada.
+
+~~~javascript
+const funcoes = [];
+
+for (var i = 0; i < 3; i++) {
+  funcoes.push(function () {
+    return i;
+  });
+}
+
+console.log(funcoes[0]());   // 3
+console.log(funcoes[1]());   // 3
+console.log(funcoes[2]());   // 3
+~~~
+
+Três funções, todas devolvendo 3. A expectativa era 0, 1 e 2.
+
+O motivo cai direto do que você já sabe: **\`var\` ignora as chaves**, então existe **uma única** variável \`i\` na função inteira. As três closures não guardaram o valor de \`i\` — elas guardaram *a variável*. Quando são chamadas, o laço já acabou e essa variável vale 3.
+
+Trocar por \`let\` resolve, e a razão é bonita: \`let\` cria uma variável **nova a cada volta** do laço. Três voltas, três variáveis, três territórios diferentes — cada closure carrega o seu.
+
+~~~javascript
+for (let i = 0; i < 3; i++) { ... }
+// funcoes[0]() → 0, funcoes[1]() → 1, funcoes[2]() → 2
+~~~
+
+Guarde a frase: **closure captura a variável, não o valor.** Ela é a explicação dos dois lados deste exemplo.
+`.trim(),
+    },
+    {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-js-12-prever-var-loop',
+        type: 'predict-output',
+        prompt:
+          'Os dois laços são idênticos, menos pela palavra que declara o contador. O que cada linha imprime?',
+        concepts: ['closures', 'escopo', 'loops'],
+        difficulty: 'intermediario',
+        tags: ['javascript', 'closures'],
+        code: `const comVar = [];
+for (var i = 0; i < 3; i++) {
+  comVar.push(function () { return i; });
+}
+
+const comLet = [];
+for (let j = 0; j < 3; j++) {
+  comLet.push(function () { return j; });
+}
+
+console.log(comVar.map(function (f) { return f(); }));
+console.log(comLet.map(function (f) { return f(); }));`,
+        expectedOutput: '[3,3,3]\n[0,1,2]',
+        explanation:
+          '`var` cria **uma** variável para a função inteira, então as três closures apontam para a mesma — e quando elas são chamadas, o laço já terminou e ela vale 3. `let` cria uma variável nova a cada volta, então cada closure carrega a sua. A frase que resume os dois casos: closure captura a **variável**, não o valor que ela tinha no momento.',
+        hints: [
+          'Quantas variáveis `i` existem no primeiro laço? E quantas variáveis `j` no segundo?',
+          'As funções são chamadas depois que os laços terminaram. Quanto vale o contador nesse momento?',
+        ],
+      },
+    },
+    {
       kind: 'exercise',
       exercise: {
         id: 'ex-js-12-lacuna-fabrica',
@@ -141,6 +207,78 @@ console.log(carrinhoB());`,
           'Multiplique o parâmetro de dentro pelo parâmetro da fábrica.',
         ],
         solution: ['numero * fator'],
+      },
+    },
+    {
+      kind: 'prose',
+      markdown: `
+## Compartilhar, ou não
+
+Duas perguntas que parecem a mesma e não são.
+
+**Duas funções nascidas na mesma chamada compartilham o território.** É isso que permite devolver um conjunto de funções que operam sobre o mesmo estado privado:
+
+~~~javascript
+function criarConta() {
+  let saldo = 0;
+
+  return {
+    depositar: (v) => { saldo += v; },
+    ler: () => saldo,
+  };
+}
+~~~
+
+\`depositar\` e \`ler\` enxergam o **mesmo** \`saldo\`, porque nasceram na mesma chamada de \`criarConta\`.
+
+**Duas chamadas da mesma fábrica não compartilham nada.** Cada chamada roda a função de novo, e cada execução cria um território próprio:
+
+~~~javascript
+const minha = criarConta();
+const sua = criarConta();
+
+minha.depositar(100);
+console.log(sua.ler());     // 0 — territórios independentes
+~~~
+
+Essa combinação é o que faz closure servir de alternativa a objetos: estado que ninguém de fora alcança, e uma instância nova a cada chamada.
+`.trim(),
+    },
+    {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-js-12-prever-independencia',
+        type: 'predict-output',
+        prompt:
+          'Duas chamadas da mesma fábrica. O que cada `console.log` imprime?',
+        concepts: ['closures'],
+        difficulty: 'intermediario',
+        tags: ['javascript', 'closures'],
+        code: `function criarContador() {
+  let n = 0;
+
+  return {
+    somar: function () { n += 1; },
+    ler: function () { return n; },
+  };
+}
+
+const a = criarContador();
+const b = criarContador();
+
+a.somar();
+a.somar();
+b.somar();
+
+console.log(a.ler());
+console.log(b.ler());`,
+        expectedOutput: '2\n1',
+        explanation:
+          'Cada chamada de `criarContador` executa a função do zero e cria um `n` próprio, então `a` e `b` não se enxergam. Dentro de uma mesma chamada, porém, `somar` e `ler` nasceram juntas e compartilham o **mesmo** `n` — é por isso que `a.ler()` enxerga o que `a.somar()` fez. Territórios separados entre chamadas, território compartilhado dentro de uma.',
+        hints: [
+          'Quantas vezes a função `criarContador` foi executada? Cada execução cria quantos `n`?',
+          '`somar` e `ler` de `a` nasceram na mesma execução, ou em execuções diferentes?',
+        ],
       },
     },
     {
@@ -246,7 +384,7 @@ console.log(cofre.senha);            // esperado: undefined`,
     },
     {
       kind: 'summary',
-      markdown: `Um território não é apagado enquanto alguma função criada nele continuar viva. Esse par — função mais território — é a **closure**, e é o que permite guardar estado privado sem variável global. Cada chamada da fábrica cria um território novo: duas funções feitas pela mesma fábrica não compartilham nada.`,
+      markdown: `Um território não é apagado enquanto alguma função criada nele continuar viva. Esse par — função mais território — é a **closure**, e é o que permite guardar estado privado sem variável global. A frase que resolve as dúvidas: closure captura a **variável**, não o valor — foi por isso que três closures sobre uma \`var\` de laço devolviam todas o mesmo número, e é por isso que \`let\`, criando uma variável nova a cada volta, conserta. Funções nascidas na mesma chamada compartilham o território; chamadas diferentes da mesma fábrica não compartilham nada.`,
     },
   ],
 };

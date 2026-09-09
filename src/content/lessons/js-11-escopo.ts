@@ -9,7 +9,7 @@ export const lessonEscopo: Lesson = {
     'Prever onde uma variável existe e onde ela some, e usar isso para explicar erros que parecem mágica.',
   concepts: ['escopo', 'variaveis', 'funcoes'],
   status: 'published',
-  estimatedMinutes: 16,
+  estimatedMinutes: 26,
   blocks: [
     {
       kind: 'prose',
@@ -101,6 +101,70 @@ Você vai encontrar \`var\` em código antigo, e precisa reconhecê-la. Mas em c
 `.trim(),
     },
     {
+      kind: 'prose',
+      markdown: `
+## O nome existe antes da linha que o declara
+
+Aqui está uma coisa que parece mágica até você saber o motivo:
+
+~~~javascript
+console.log(saudar());   // "oi" — antes da declaração!
+
+function saudar() {
+  return 'oi';
+}
+~~~
+
+Antes de rodar qualquer linha, o JavaScript **percorre o território inteiro e anota os nomes que existem nele**. Esse passo se chama *hoisting* — "içar", como se as declarações fossem levantadas para o topo.
+
+Os três tipos de declaração se comportam diferente nesse passo:
+
+| Declaração | Antes da linha |
+|---|---|
+| \`function\` | já funciona por inteiro |
+| \`var\` | o nome existe, valendo \`undefined\` |
+| \`let\` e \`const\` | o nome existe, mas **usar dá erro** |
+
+O terceiro caso tem nome: **zona morta temporal**. O nome está reservado, e por isso você não recebe \`is not defined\` — recebe uma mensagem diferente:
+
+~~~javascript
+console.log(x);
+let x = 1;
+// ReferenceError: Cannot access 'x' before initialization
+~~~
+
+Essa distinção é útil na prática. \`is not defined\` significa "esse nome não existe em lugar nenhum" — provavelmente erro de digitação. \`Cannot access before initialization\` significa "o nome existe, mas você chegou cedo demais" — provavelmente a ordem das linhas.
+`.trim(),
+    },
+    {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-js-11-prever-hoisting',
+        type: 'predict-output',
+        prompt:
+          'O que este programa imprime? Repare que a função é chamada **antes** de aparecer no código.',
+        concepts: ['escopo', 'funcoes'],
+        difficulty: 'intermediario',
+        tags: ['javascript', 'escopo'],
+        code: `console.log(saudar());
+
+function saudar() {
+  return 'oi';
+}
+
+console.log(contador);
+var contador = 10;
+console.log(contador);`,
+        expectedOutput: 'oi\nundefined\n10',
+        explanation:
+          'Declarações de função sobem **inteiras**: `saudar` já está pronta antes da primeira linha rodar. Já `var` sobe só o nome, sem o valor — por isso a segunda linha imprime `undefined` em vez de dar erro, e só depois da atribuição o valor aparece. Com `let` ou `const` no lugar do `var`, a segunda linha lançaria `ReferenceError: Cannot access before initialization`, que é um comportamento melhor: erra alto em vez de entregar `undefined` calado.',
+        hints: [
+          'Antes de rodar, o JavaScript anota os nomes que existem no território. O que ele consegue anotar de uma `function`? E de uma `var`?',
+          'A segunda linha dá erro, ou imprime alguma coisa?',
+        ],
+      },
+    },
+    {
       kind: 'exercise',
       exercise: {
         id: 'ex-js-11-corrigir-vazamento',
@@ -158,6 +222,67 @@ Você vai encontrar \`var\` em código antigo, e precisa reconhecê-la. Mas em c
           'A segunda declara um nome que recebe um valor novo a cada volta e nunca é reatribuído dentro dela.',
         ],
         solution: ['let', 'const'],
+      },
+    },
+    {
+      kind: 'prose',
+      markdown: `
+## Sombra, e o vizinho que some
+
+Quando um território de dentro declara um nome que já existe fora, o de dentro **cobre** o de fora enquanto durar. Isso se chama sombreamento, e não é erro — é o que faz duas funções poderem usar \`total\` sem uma atrapalhar a outra.
+
+~~~javascript
+const usuario = 'Ana';
+
+function saudar() {
+  const usuario = 'visitante';   // faz sombra no de fora
+  return 'Olá, ' + usuario;      // "Olá, visitante"
+}
+
+console.log(saudar());
+console.log(usuario);            // "Ana" — intacto
+~~~
+
+Vira problema quando é sem querer: você acha que está mexendo na variável de fora e está criando outra. Se a intenção era alterar a de fora, **não declare de novo** — só atribua.
+
+## O oposto: a variável que vaza para todo mundo
+
+Atribuir sem declarar tem um efeito que surpreende:
+
+~~~javascript
+function configurar() {
+  total = 100;      // sem let, sem const
+}
+~~~
+
+Em código antigo, isso cria \`total\` no escopo **global** — visível para o programa inteiro, mesmo tendo nascido dentro de uma função. É a fonte clássica de "essa variável mudou sozinha".
+
+A boa notícia é que isso acabou. Dentro de um módulo — que é como todo código moderno roda —, a mesma linha lança \`ReferenceError: total is not defined\`. O comportamento antigo virou erro, e é assim que deveria ter sido desde o começo.
+`.trim(),
+    },
+    {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-js-11-sombra',
+        type: 'multiple-choice',
+        prompt:
+          'Você queria que a função alterasse o `total` de fora, mas ele continua valendo 0 depois da chamada:\n\n```javascript\nlet total = 0;\n\nfunction somar(valor) {\n  let total = total + valor;\n}\n\nsomar(10);\nconsole.log(total); // 0\n```\n\nQual é a correção?',
+        concepts: ['escopo', 'variaveis'],
+        difficulty: 'intermediario',
+        tags: ['javascript', 'escopo'],
+        options: [
+          'Trocar `let total` por `var total` dentro da função',
+          'Remover o `let` de dentro da função, deixando só `total = total + valor`',
+          'Declarar `total` como `const` fora da função',
+          'Passar `total` como segundo parâmetro da função',
+        ],
+        correctIndex: 1,
+        explanation:
+          'O `let` de dentro cria uma variável **nova**, que faz sombra na de fora — por isso a de fora nunca muda. Sem o `let`, a linha vira uma atribuição à variável que já existe no território de cima, que é o que se queria. Trocar por `var` não ajuda: continua sendo uma declaração nova, só que com regras piores. E `const` impediria qualquer alteração.\n\nNa prática, porém, uma função que mexe em variável de fora é difícil de testar e de prever. A quarta opção aponta para o desenho melhor: receber o valor e **retornar** o novo total, em vez de alterar algo de fora.',
+        hints: [
+          'A função declara um `total` próprio. Ela está alterando o de fora, ou criando outro?',
+          'O que acontece se você tirar a palavra `let` da linha de dentro?',
+        ],
       },
     },
     {
@@ -234,7 +359,7 @@ console.log(contarMaioresQue([1, 5, 9], 4)); // esperado: 2`,
     },
     {
       kind: 'summary',
-      markdown: `As chaves \`{}\` criam um território: o que nasce dentro morre ali. De dentro se enxerga fora, nunca o contrário. O que precisa sobreviver ao loop nasce **antes** dele — e essa é a explicação de metade dos acumuladores que devolvem \`NaN\`. Use \`const\` por padrão, \`let\` quando for reatribuir, e reconheça \`var\` sem escrevê-la.`,
+      markdown: `As chaves \`{}\` criam um território: o que nasce dentro morre ali. De dentro se enxerga fora, nunca o contrário. O que precisa sobreviver ao loop nasce **antes** dele — e essa é a explicação de metade dos acumuladores que devolvem \`NaN\`. Antes de rodar, o JavaScript anota os nomes do território: \`function\` sobe inteira, \`var\` sobe valendo \`undefined\`, e \`let\`/\`const\` sobem reservados — daí a mensagem \`Cannot access before initialization\`, que é diferente de \`is not defined\` e aponta para outro tipo de erro. Declarar de novo um nome que já existe fora cria sombra, e não altera o de fora. Use \`const\` por padrão, \`let\` quando for reatribuir, e reconheça \`var\` sem escrevê-la.`,
     },
   ],
 };
