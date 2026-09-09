@@ -157,6 +157,11 @@ Promise.resolve(2)
               const ehNumero = rnd() < 0.5;
               return { valor: ehNumero ? Math.floor(rnd() * 100) - 50 : 'texto' };
             `,
+            // Cada caso espera um temporizador de verdade. Cinquenta deles somam
+            // mais de um segundo, e o prazo por teste é de dois — o CI, mais lento
+            // que a máquina de quem escreve, estourava. O espaço de entrada aqui é
+            // pequeno, e as sondas de limite já cobrem os extremos.
+            runs: 12,
             check: `
               if (typeof caso.valor === 'number') {
                 const v = await dobrar(caso.valor);
@@ -260,6 +265,11 @@ precoTotal(['pao', 'leite']).then((t) => console.log(t)); // esperado: 16`,
               for (let i = 0; i < n; i++) produtos.push(nomes[Math.floor(rnd() * nomes.length)]);
               return { produtos };
             `,
+            // Cada caso espera um temporizador de verdade. Cinquenta deles somam
+            // mais de um segundo, e o prazo por teste é de dois — o CI, mais lento
+            // que a máquina de quem escreve, estourava. O espaço de entrada aqui é
+            // pequeno, e as sondas de limite já cobrem os extremos.
+            runs: 12,
             check: `
               const esperado = caso.produtos.reduce((s, p) => s + p.length * 2, 0);
               const obtido = await precoTotal(caso.produtos);

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { runProgram } from '../client/lib/sandbox-core';
+import { runProgram, TEST_TIMEOUT_MS } from '../client/lib/sandbox-core';
 import {
   getExercises,
   getLessonsOfTrack,
@@ -42,6 +42,35 @@ const fillBlankExercises = allExercises.filter(
 it('o catálogo não está vazio', async () => {
   expect(allLessons.length).toBeGreaterThan(0);
   expect(codeExercises.length).toBeGreaterThan(0);
+});
+
+describe('nenhum exercício chega perto do prazo', () => {
+  // O prazo por teste é de 2000ms. A máquina de quem escreve é mais rápida que o
+  // runner do CI, então um exercício que leva 1400ms aqui estoura lá — e foi
+  // exatamente o que aconteceu: sete commits seguidos com o CI vermelho enquanto
+  // a suíte local passava.
+  const TETO = TEST_TIMEOUT_MS / 4;
+
+  const comPropriedade = codeExercises.filter(({ exercise }) => exercise.properties?.length);
+
+  it.each(comPropriedade.map(({ exercise }) => [exercise.id, exercise] as const))(
+    '%s: as propriedades cabem com folga',
+    async (_id, exercise) => {
+      const inicio = Date.now();
+      await runProgram(
+        `${exercise.initialCode}
+${exercise.solution}`,
+        [],
+        exercise.properties
+      );
+      const gasto = Date.now() - inicio;
+
+      expect(
+        gasto,
+        `levou ${gasto}ms, e o prazo por teste é ${TEST_TIMEOUT_MS}ms. Uma propriedade que espera temporizador não precisa de 50 casos: reduza com o campo runs.`
+      ).toBeLessThan(TETO);
+    }
+  );
 });
 
 describe('markdown chega limpo ao aluno', () => {

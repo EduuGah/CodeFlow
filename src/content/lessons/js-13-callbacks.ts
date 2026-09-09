@@ -225,6 +225,11 @@ verificarIdade(20, function (erro, podeEntrar) {
           {
             description: 'a decisão bate com a idade para qualquer número',
             generate: `return { idade: Math.floor(rnd() * 40) };`,
+            // Cada caso espera um temporizador de verdade. Cinquenta deles somam
+            // mais de um segundo, e o prazo por teste é de dois — o CI, mais lento
+            // que a máquina de quem escreve, estourava. O espaço de entrada aqui é
+            // pequeno, e as sondas de limite já cobrem os extremos.
+            runs: 12,
             check: `
               const r = await new Promise((resolve) => verificarIdade(caso.idade, (erro, valor) => resolve({ erro, valor })));
               const esperado = caso.idade >= 18;
