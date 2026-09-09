@@ -24,7 +24,7 @@ Fase 7  Projeto final            ░░░░░░░░░░░░░░░�
 | | Hoje | Previsto | Feito |
 | --- | ---: | ---: | ---: |
 | Aulas | **23** | 135 | 17% |
-| Exercícios | **78** | ~700 | 11% |
+| Exercícios | **95** | ~700 | 14% |
 | Tipos de exercício | **4** | 11 | 36% |
 | Motores de execução | **1** | 7 | 14% |
 | Projetos | **7** | ~30 | 23% |
@@ -51,11 +51,17 @@ Aula 4  Loops                    ██████████  132 → 304 pal
 Aula 5  Funções                  ██████████  119 → 327 palavras, 3 → 5 exercícios
 Aula 6  Arrays                   ██████████  124 → 317 palavras, 2 → 4 exercícios
 Aula 7  Objetos                  ██████████  171 → 375 palavras, 2 → 4 exercícios
-Aula 8  map, filter e reduce     █████░░░░░  167 palavras, 2 → 4 exercícios
-Aula 9  Strings                  █████░░░░░  143 palavras, 2 → 4 exercícios
-Aula 10 Erros                    █████░░░░░  210 palavras, 2 → 4 exercícios
-Lógica 1 a 3                     ░░░░░░░░░░  ~180 palavras, 2 exercícios cada
+Aula 8  map, filter e reduce     ██████████  167 → 504 palavras, 2 → 6 exercícios
+Aula 9  Strings                  ██████████  143 → 688 palavras, 2 → 7 exercícios
+Aula 10 Erros                    ██████████  210 → 832 palavras, 2 → 7 exercícios
+Lógica 1 Decompor                ██████████  159 → 634 palavras, 2 → 5 exercícios
+Lógica 2 Casos extremos          ██████████  182 → 654 palavras, 2 → 5 exercícios
+Lógica 3 Simular                 ██████████  198 → 660 palavras, 2 → 5 exercícios
 ```
+
+**Bloco de fundamentos e de lógica: concluído.** As treze aulas da fase 0 estão
+no padrão novo. As aulas 11 a 20 nasceram melhores (292 a 435 palavras, 3
+exercícios cada) e entram numa próxima rodada.
 
 _Atualizado em 2026-09-09. Este bloco é atualizado sempre que um item muda de
 estado._

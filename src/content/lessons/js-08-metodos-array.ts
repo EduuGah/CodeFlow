@@ -8,7 +8,7 @@ export const lessonMetodosArray: Lesson = {
   objective: 'Substituir loops manuais por métodos que declaram a intenção do código.',
   concepts: ['arrays', 'funcoes', 'loops'],
   status: 'published',
-  estimatedMinutes: 22,
+  estimatedMinutes: 28,
   blocks: [
     {
       kind: 'prose',
@@ -96,6 +96,62 @@ console.log(precos);        // [10, 25, 40] — o original continua intacto`,
         hints: [
           'Quantos valores você quer no fim: muitos, ou um só?',
           'Cada método devolve uma coisa diferente. Qual devolve um valor único?',
+        ],
+      },
+    },
+    {
+      kind: 'prose',
+      markdown: `
+## Encadear é montar uma linha de montagem
+
+Como os três devolvem um array (ou um valor), a saída de um vira a entrada do outro. Dá para ler a expressão como uma frase:
+
+~~~javascript
+const totalDosCaros = precos
+  .filter((p) => p > 20)      // fique só com os caros
+  .map((p) => p * 0.9)        // aplique o desconto
+  .reduce((a, b) => a + b, 0); // some tudo
+~~~
+
+Cada etapa faz uma coisa e passa adiante. Comparado a um \`for\` com três \`if\` dentro, a diferença não é o tamanho — é que aqui dá para apagar uma linha e entender o que muda.
+
+O custo: cada etapa cria um array novo. Para dezenas ou centenas de itens isso é irrelevante. Para milhões, um \`for\` único passa a valer mais — mas essa é uma decisão a tomar quando o problema aparecer, com medição, não por precaução.
+
+## O erro que todo mundo comete com \`map\`
+
+~~~javascript
+[1, 2, 3].map((n) => n * 2);       // [2, 4, 6]
+[1, 2, 3].map((n) => { n * 2 });   // [undefined, undefined, undefined]
+~~~
+
+A diferença é só um par de chaves. Sem chaves, a seta **devolve** a expressão. Com chaves, ela abre um corpo de função comum — e um corpo sem \`return\` devolve \`undefined\`.
+
+O sintoma é sempre o mesmo: um array do tamanho certo, cheio de \`undefined\`. Quando vir isso, procure o \`return\` que falta.
+`.trim(),
+    },
+    {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-js-8-prever-armadilhas',
+        type: 'predict-output',
+        prompt: 'O que este programa imprime, nas três linhas? Duas delas são armadilhas clássicas.',
+        concepts: ['arrays', 'funcoes'],
+        difficulty: 'intermediario',
+        tags: ['javascript', 'arrays'],
+        code: `const numeros = [1, 2, 3];
+
+const dobrados = numeros.map((n) => { n * 2 });
+console.log(dobrados);
+
+const grandes = numeros.filter((n) => n > 10);
+console.log(grandes.length);
+console.log(grandes ? 'achei' : 'nada');`,
+        expectedOutput: "[undefined,undefined,undefined]\n0\nachei",
+        explanation:
+          'Duas armadilhas. A primeira: as chaves em `(n) => { n * 2 }` transformam a seta num corpo de função comum, e sem `return` cada item vira `undefined` — o array mantém o tamanho, mas perde o conteúdo. A segunda: `filter` **sempre** devolve um array, e um array vazio é um valor verdadeiro em JavaScript. Por isso a condição passa mesmo sem nenhum resultado. Para perguntar "achei algum?", compare `length` com zero, ou use `some`.',
+        hints: [
+          'Uma função com corpo entre chaves e sem `return` devolve o quê?',
+          'Um array vazio, `[]`, é verdadeiro ou falso numa condição?',
         ],
       },
     },
@@ -247,8 +303,61 @@ if (entrada.length !== 2) throw new Error("O array original foi modificado. filt
       },
     },
     {
+      kind: 'prose',
+      markdown: `
+## Os primos de \`filter\`
+
+Quando a pergunta não é "quais itens?" mas "existe algum?" ou "qual é o primeiro?", existem métodos mais diretos:
+
+| Pergunta | Método | Devolve |
+|---|---|---|
+| Qual é o primeiro que serve? | \`find\` | o **item**, ou \`undefined\` |
+| Em que posição ele está? | \`findIndex\` | o índice, ou \`-1\` |
+| Existe algum que sirva? | \`some\` | \`true\` / \`false\` |
+| Todos servem? | \`every\` | \`true\` / \`false\` |
+| Contém exatamente este valor? | \`includes\` | \`true\` / \`false\` |
+
+A diferença entre \`find\` e \`filter\` é a que mais causa bug. \`filter\` devolve **sempre** um array — e um array vazio é verdadeiro em JavaScript:
+
+~~~javascript
+if (usuarios.filter((u) => u.admin)) {   // sempre entra, mesmo sem admin nenhum
+  ...
+}
+~~~
+
+\`find\` devolve o item ou \`undefined\`, então a condição diz o que parece dizer. E \`some\` é a escolha quando você só quer o sim ou não — ele para no primeiro que serve, em vez de percorrer a lista inteira.
+
+Um detalhe de \`every\`: numa lista vazia ele devolve \`true\`. Faz sentido logicamente — não há nenhum item que desobedeça —, mas surpreende quem espera \`false\`. É mais um caso de borda para a lista da aula de casos extremos.
+`.trim(),
+    },
+    {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-js-8-find-ou-filter',
+        type: 'multiple-choice',
+        prompt:
+          'Você quer o primeiro usuário com email confirmado, e só quer agir se existir algum. Qual código está correto?',
+        concepts: ['arrays', 'condicoes'],
+        difficulty: 'intermediario',
+        tags: ['javascript', 'arrays'],
+        options: [
+          'if (usuarios.filter(u => u.confirmado)) { avisar(); }',
+          'const u = usuarios.find(x => x.confirmado); if (u) { avisar(u); }',
+          'if (usuarios.find(u => u.confirmado).nome) { avisar(); }',
+          'if (usuarios.some(u => u.confirmado)) { avisar(usuarios[0]); }',
+        ],
+        correctIndex: 1,
+        explanation:
+          '`find` devolve o item ou `undefined`, que é exatamente o que a condição precisa saber. A primeira opção nunca funciona: `filter` sempre devolve um array, e `[]` é verdadeiro — o `avisar()` roda mesmo sem nenhum usuário confirmado. A terceira quebra com `TypeError` quando ninguém está confirmado, porque tenta ler `.nome` de `undefined`. A quarta confirma que existe alguém, mas depois usa `usuarios[0]`, que pode ser justamente um não confirmado.',
+        hints: [
+          'O que `filter` devolve quando nada corresponde? Esse valor é verdadeiro ou falso numa condição?',
+          'Uma das opções lê uma propriedade de algo que pode não existir.',
+        ],
+      },
+    },
+    {
       kind: 'summary',
-      markdown: `\`map\` transforma, \`filter\` seleciona, \`reduce\` condensa. Escolher o método certo faz o código **anunciar a intenção** — e nenhum dos três altera o array original.`,
+      markdown: `\`map\` transforma, \`filter\` seleciona, \`reduce\` condensa. Escolher o método certo faz o código **anunciar a intenção** — e nenhum dos três altera o array original, então encadeá-los é seguro. Duas armadilhas para guardar: chaves no corpo da seta sem \`return\` produzem um array cheio de \`undefined\`, e \`filter\` devolve sempre um array — inclusive o vazio, que é verdadeiro numa condição. Quando a pergunta é "existe algum?", use \`some\`; quando é "qual é o primeiro?", use \`find\`.`,
     },
   ],
 };

@@ -33,13 +33,13 @@ Números lidos do catálogo, não de memória.
 | | |
 | --- | --- |
 | Trilhas | 2 — Fundamentos de JavaScript (20 aulas), Lógica (3) |
-| Aulas | 23, somando 438 minutos |
-| Exercícios | 78 — 23 de código, 27 de prever saída, 19 de lacuna, 9 de múltipla escolha |
-| Verificação | 165 casos fixos + 32 propriedades |
+| Aulas | 23, somando 478 minutos |
+| Exercícios | 95 — 27 de código, 31 de prever saída, 24 de lacuna, 13 de múltipla escolha |
+| Verificação | 211 casos fixos + 42 propriedades |
 | Projetos | 7, com 22 critérios de aceitação |
 | Conceitos | 21, com grafo de pré-requisitos |
 | Flashcards | 22 |
-| Testes | 549 de unidade + 122 de navegador |
+| Testes | 602 de unidade + 122 de navegador |
 | Pacote | 949 kB (276 kB comprimido) |
 
 ## 4. Decisões que não devem ser desfeitas sem motivo forte
@@ -106,7 +106,7 @@ docs/curriculo.md       Roadmap de conteúdo — fonte canônica
 
 ```bash
 npm run typecheck   # inclui e2e/ e playwright.config.ts
-npm test            # 549 testes
+npm test            # 602 testes
 npm run test:e2e    # 122 no navegador (antes: npx playwright install chromium)
 npm run build
 ```
@@ -163,6 +163,11 @@ Cada uma custou tempo. Não repita.
   falhas como `::error::` para que o motivo seja legível pela API pública.
 - **O Write herda a codificação do arquivo que substitui.** Um README em UTF-16
   produziu acentos corrompidos. Apague antes de reescrever.
+- **`JSON.stringify` mente sobre `NaN`, infinitos e `undefined`** — os dois
+  primeiros viram `null`, o terceiro some de dentro de objeto e vira `null`
+  dentro de array. Num sandbox de ensino isso manda o aluno procurar por um
+  valor nulo que ele nunca criou. `formatArg` trata esses casos; se for mexer
+  nela, os testes de "valores que o JSON não representa" descrevem o contrato.
 - **Resetar estado em `useEffect` quando a rota muda de parâmetro é tarde
   demais.** `/lesson/a` → `/lesson/b` não desmonta o componente: renderiza a aula
   nova com o índice da anterior, e `steps[indice]` vira `undefined`. Foi tela
@@ -218,8 +223,10 @@ por preferência de assunto.
 magras e foram melhorando com o tempo, o que fazia o iniciante encontrar as
 piores: a aula 1 tinha 77 palavras e um exercício. O padrão novo é 500 a 900
 palavras e cinco a seis exercícios em dificuldade crescente — múltipla escolha ou
-prever saída, depois lacuna, depois código do zero. Aulas 1 a 8 refeitas (a 8 só nos
-exercícios), 9 e 10 com exercícios novos; as de lógica ainda no formato antigo.
+prever saída, depois lacuna, depois código do zero. **Concluído para o bloco de
+fundamentos e o de lógica**: aulas 1 a 10 e as três de lógica estão no padrão
+novo, a mais curta delas com 304 palavras. O que resta são as aulas 11 a 20, que
+nasceram melhores (292 a 435 palavras, 3 exercícios cada) e ficam para depois.
 
 **Fases 2 a 7 — não iniciadas.** Cada uma depende de um motor: iframe isolado
 (DOM, CSS, UI), transpilador (TypeScript), React, servidor simulado (Node),

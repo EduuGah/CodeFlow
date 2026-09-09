@@ -206,12 +206,34 @@ function formatArg(arg: unknown): string {
 
   const marca = novaMarca();
 
+  /**
+   * O que o JSON apaga ou distorce, e que o aluno precisa ver.
+   *
+   * - `NaN` e os infinitos viram `null`;
+   * - `undefined` dentro de um array vira `null`, e some de dentro de objeto;
+   * - função vira `null` em array e some de objeto.
+   *
+   * O caso do `undefined` importa especialmente porque é o resultado do erro
+   * mais comum com `map`: esquecer o `return` no corpo com chaves produz
+   * `[undefined, undefined]`, e mostrar `[null, null]` mandaria o aluno
+   * procurar por valores nulos que ele nunca criou.
+   */
+  const legivel = (valor: unknown): string | undefined => {
+    if (typeof valor === 'number' && (!Number.isFinite(valor) || Object.is(valor, -0))) {
+      return numeroLegivel(valor);
+    }
+    if (valor === undefined) return 'undefined';
+    if (typeof valor === 'function') {
+      return `[Function: ${(valor as { name?: string }).name || 'anônima'}]`;
+    }
+    return undefined;
+  };
+
   try {
-    const texto = JSON.stringify(arg, (_chave, valor) =>
-      typeof valor === 'number' && (!Number.isFinite(valor) || Object.is(valor, -0))
-        ? marca + numeroLegivel(valor)
-        : valor
-    );
+    const texto = JSON.stringify(arg, (_chave, valor) => {
+      const especial = legivel(valor);
+      return especial === undefined ? valor : marca + especial;
+    });
 
     if (texto === undefined) return String(arg);
 

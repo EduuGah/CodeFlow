@@ -96,6 +96,33 @@ describe('valores que o JSON não representa', () => {
     const r = await runProgram('function somar(a, b) { return a + b; } console.log(somar);', []);
     expect(r.logs).toEqual(['[Function: somar]']);
   });
+
+  /**
+   * `[undefined]` virava `[null]`.
+   *
+   * É o resultado do erro mais comum com `map`: esquecer o `return` no corpo
+   * com chaves. Mostrar `null` mandava o aluno procurar por valores nulos que
+   * ele nunca criou.
+   */
+  it('undefined dentro de array não vira null', async () => {
+    const r = await runProgram('console.log([1, undefined, 3]);', []);
+    expect(r.logs).toEqual(['[1,undefined,3]']);
+  });
+
+  it('o map sem return mostra undefined, e não null', async () => {
+    const r = await runProgram('console.log([1, 2].map((n) => { n * 2 }));', []);
+    expect(r.logs).toEqual(['[undefined,undefined]']);
+  });
+
+  it('undefined dentro de objeto não some da saída', async () => {
+    const r = await runProgram('console.log({ a: 1, b: undefined });', []);
+    expect(r.logs).toEqual(['{"a":1,"b":undefined}']);
+  });
+
+  it('função dentro de array aparece pelo nome', async () => {
+    const r = await runProgram('function f() {} console.log([f]);', []);
+    expect(r.logs).toEqual(['[[Function: f]]']);
+  });
 });
 
 describe('erros do código do aluno', () => {
