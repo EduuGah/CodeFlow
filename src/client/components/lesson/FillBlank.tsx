@@ -148,7 +148,7 @@ export function FillBlank({
                     exercise.blanks[segmento.indice]?.size ?? 4,
                     (respostas[segmento.indice] ?? '').length + 1
                   )}
-                  className="mx-0.5 min-h-9 rounded border-b-2 border-energy-500 bg-white/10 px-1.5 py-1.5 font-mono text-sm text-white placeholder:text-white/35 focus:border-energy-200 focus:bg-white/20 focus:outline-none"
+                  className="mx-0.5 min-h-10 rounded border-b-2 border-energy-500 bg-white/10 px-2 py-2 font-mono text-sm text-white placeholder:text-white/35 focus:border-energy-200 focus:bg-white/20 focus:outline-none"
                 />
               )
             )}
@@ -163,10 +163,13 @@ export function FillBlank({
         </ExerciseAction>
       )}
 
+      {/* A região viva envolve veredito e evidências: quem usa leitor de tela
+          precisa da mensagem de cada teste, não só do placar. */}
       {resultado && (
-        <div className="space-y-3">
+        <div ref={retornoRef} tabIndex={-1} role="status" className="space-y-3">
           {resultado.testResults.length > 0 && (
             <ExerciseFeedback
+              anunciar={false}
               estado={passouTudo ? 'acertou' : 'errou'}
               titulo={
                 passouTudo
@@ -175,7 +178,6 @@ export function FillBlank({
                       resultado.testResults.length === 1 ? 'teste falhou' : 'testes falharam'
                     }`
               }
-              refDoBloco={retornoRef}
             >
               {/* A explicação vem depois de acertar: entregá-la antes tiraria o
                   raciocínio que o exercício existe para provocar. */}

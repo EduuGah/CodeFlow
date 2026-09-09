@@ -216,7 +216,9 @@ export async function irAteOEditor(page: Page): Promise<void> {
   const executar = page.getByRole('button', { name: 'Executar código' });
 
   for (let i = 0; i < 12 && !(await executar.count()); i++) {
-    const acao = page.getByRole('button', { name: /Continuar|Pular por ora/ });
+    const acao = page.getByRole('button', {
+      name: /Continuar assim mesmo|Continuar|Pular por ora/,
+    });
     if (!(await acao.count())) break;
     await acao.click();
   }
@@ -236,3 +238,68 @@ export async function irAteOEditor(page: Page): Promise<void> {
 }
 
 export { expect } from '@playwright/test';
+
+/**
+ * Aula curta com um exercício de cada extremo — múltipla escolha e código.
+ *
+ * Serve de alvo para tudo que depende de a aula ser **concluída**, e não só de
+ * um exercício ser resolvido. Duas coisas dependem disso: a comemoração e a
+ * gravação do progresso.
+ */
+export const AULA_CURTA = 'lesson-logica-1';
+
+/**
+ * Resolve todos os exercícios de uma aula, do jeito que um aluno resolveria.
+ *
+ * As respostas saem do próprio conteúdo: a alternativa certa vem de
+ * `correctIndex`, e o código vem da solução de referência — a mesma que o CI usa
+ * para provar que o exercício é resolvível.
+ */
+export async function concluirAula(page: Page, aulaId: string): Promise<void> {
+  const { getLesson } = await import('../src/content');
+  const { buildLessonSteps } = await import('../src/client/lib/lesson-steps');
+
+  const passos = buildLessonSteps(getLesson(aulaId)!);
+  await page.goto(`/lesson/${aulaId}`);
+
+  for (const passo of passos) {
+    if (passo.kind === 'exercise' && passo.exercise.type === 'multiple-choice') {
+      await page.getByRole('radio').nth(passo.exercise.correctIndex).check();
+      await page.getByRole('button', { name: 'Verificar resposta' }).click();
+      await page.getByText('Resposta correta').waitFor({ timeout: 10_000 });
+    }
+
+    if (passo.kind === 'exercise' && passo.exercise.type === 'code') {
+      if (!passo.exercise.solution) {
+        throw new Error(`${passo.exercise.id} não tem solução de referência`);
+      }
+
+      await page.locator('.monaco-editor').first().waitFor({ timeout: 40_000 });
+      await page.waitForFunction(
+        () => {
+          const m = (window as unknown as { monaco?: { editor: { getModels(): unknown[] } } })
+            .monaco;
+          return !!m && m.editor.getModels().length > 0;
+        },
+        undefined,
+        { timeout: 40_000 }
+      );
+
+      await page.evaluate((valor) => {
+        (
+          window as unknown as {
+            monaco: { editor: { getModels(): Array<{ setValue(v: string): void }> } };
+          }
+        ).monaco.editor.getModels()[0].setValue(valor);
+      }, `${passo.exercise.initialCode}\n${passo.exercise.solution}`);
+
+      await page.getByRole('button', { name: /Executar código|Executar de novo/ }).click();
+      await page.getByText('Todos os testes passaram').waitFor({ timeout: 40_000 });
+    }
+
+    const avancar = page.getByRole('button', {
+      name: /Continuar assim mesmo|Continuar|Pular por ora/,
+    });
+    if (await avancar.count()) await avancar.click();
+  }
+}

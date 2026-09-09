@@ -212,7 +212,7 @@ export function Home() {
 
             <Link
               to={`/lesson/${destino.id}`}
-              className="mt-5 flex w-full items-center justify-center gap-2 rounded-lg bg-ink px-5 py-3.5 font-bold text-white transition-colors hover:bg-brand-900 active:translate-y-px"
+              className="mt-5 flex w-full items-center justify-center gap-2 rounded-lg bg-brand-600 px-5 py-3.5 font-bold text-white transition-colors hover:bg-brand-700 active:translate-y-px"
             >
               {primeiraVez ? 'Começar a primeira aula' : 'Continuar aprendendo'}
               <IconArrowRight size={18} />
@@ -235,7 +235,7 @@ export function Home() {
           </p>
           <Link
             to="/app/trilhas"
-            className="mt-4 inline-flex items-center gap-2 rounded-lg bg-ink px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-brand-900"
+            className="mt-4 inline-flex items-center gap-2 rounded-lg bg-brand-600 px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-brand-700"
           >
             Ver projetos
             <IconArrowRight size={17} />

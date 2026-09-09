@@ -332,7 +332,7 @@ export function Lesson() {
                 <button
                   type="button"
                   onClick={irParaPendente}
-                  className="mt-4 flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-ink px-5 font-bold text-white transition-colors hover:bg-brand-900 active:translate-y-px"
+                  className="mt-4 flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-brand-600 px-5 font-bold text-white transition-colors hover:bg-brand-700 active:translate-y-px"
                 >
                   Voltar ao exercício que ficou
                   <IconArrowRight size={18} />
@@ -393,7 +393,7 @@ export function Lesson() {
           {ultimo ? (
             <Link
               to={proximaAula ? `/lesson/${proximaAula.id}` : '/app'}
-              className="flex h-12 flex-1 items-center justify-center gap-2 rounded-lg bg-ink font-bold text-white transition-colors hover:bg-brand-900"
+              className="flex h-12 flex-1 items-center justify-center gap-2 rounded-lg bg-brand-600 font-bold text-white transition-colors hover:bg-brand-700"
             >
               {proximaAula ? 'Próxima aula' : 'Voltar ao início'}
               <IconArrowRight size={18} />
@@ -402,12 +402,12 @@ export function Lesson() {
             <button
               type="button"
               onClick={avancar}
-              /* Resolvido muda a cor do botão: é a confirmação periférica de que
-                 o passo fechou, visível sem ler o rótulo. */
-              className={`flex h-12 flex-1 items-center justify-center gap-2 rounded-lg font-bold text-white transition-colors active:translate-y-px ${
-                resolvido ? 'bg-success-600 hover:bg-success-700' : 'bg-ink hover:bg-brand-900'
-              }`}
+              className="flex h-12 flex-1 items-center justify-center gap-2 rounded-lg bg-brand-600 font-bold text-white transition-colors hover:bg-brand-700 active:translate-y-px"
             >
+              {/* Um check antes do rótulo, e não um botão verde: verde já quer
+                  dizer "você acertou" no retorno do exercício, e repetir a cor
+                  num controle faria a mesma cor significar duas coisas. */}
+              {resolvido && <IconCheck size={17} />}
               {passo.kind === 'exercise' ? rotuloDeAvanco(estadoDoPasso) : 'Continuar'}
               <IconArrowRight size={18} />
             </button>

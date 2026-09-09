@@ -118,9 +118,11 @@ describe('texto atende AA (4.5:1)', () => {
 
 /** Branco sobre superfícies escuras — botões primários, banner, terminal. */
 const brancoSobreEscuro: Array<[string, string]> = [
-  ['botão primário', 'ink'],
+  // A ação primária é a marca, não o preto: era o teal quase não aparecer que
+  // fazia a interface ser lida como cinza.
+  ['ação primária', 'brand-600'],
+  ['ação primária sob o cursor', 'brand-700'],
   ['cabeçalho da trilha', 'ink'],
-  ['ação da marca', 'brand-600'],
   ['confirmação', 'success-600'],
   ['terminal', 'terminal'],
   ['editor', 'editor'],
@@ -176,6 +178,7 @@ describe('componentes de interface atendem 3:1', () => {
     ['borda de campo sobre superfície', 'control', 'surface'],
     ['borda de campo sobre o fundo da aplicação', 'control', 'canvas'],
     ['preenchimento da barra de progresso', 'ink', 'line'],
+    ['barra de progresso da aula', 'brand-500', 'sunken'],
   ];
 
   it.each(casos)('%s', (_nome, frente, fundo) => {

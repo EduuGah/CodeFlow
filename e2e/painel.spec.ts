@@ -61,7 +61,11 @@ test.describe('o que faço agora', () => {
     await expect(principal).toBeInViewport();
 
     // Um só botão com peso de ação primária: dois competiriam pela mesma decisão.
-    const destaques = await page.locator('main a.bg-ink, main button.bg-ink').count();
+    // A ação primária é preenchida com a cor da marca — antes era `bg-ink`, e
+    // trocar isso foi o que tirou o ar de cinza da interface.
+    const destaques = await page
+      .locator('main a.bg-brand-600, main button.bg-brand-600')
+      .count();
     expect(destaques).toBe(1);
   });
 

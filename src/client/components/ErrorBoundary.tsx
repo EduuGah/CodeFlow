@@ -60,7 +60,7 @@ export class ErrorBoundary extends React.Component<{ children: React.ReactNode }
               acabou de falhar, então a recuperação confiável é recarregar. */}
           <a
             href="/app"
-            className="mt-5 flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-ink font-bold text-white transition-colors hover:bg-brand-900"
+            className="mt-5 flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-brand-600 font-bold text-white transition-colors hover:bg-brand-700"
           >
             <IconArrowLeft size={18} />
             Voltar ao início

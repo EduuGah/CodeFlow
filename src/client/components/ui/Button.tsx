@@ -14,7 +14,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         className={cn(
           "inline-flex items-center justify-center font-medium transition-colors disabled:pointer-events-none disabled:opacity-50",
           {
-            'bg-ink text-white hover:bg-brand-900': variant === 'primary',
+            'bg-brand-600 text-white hover:bg-brand-700': variant === 'primary',
             'bg-sunken text-ink hover:bg-line': variant === 'secondary',
             'border border-line hover:bg-sunken text-ink': variant === 'outline',
             'hover:bg-sunken text-ink-soft': variant === 'ghost',

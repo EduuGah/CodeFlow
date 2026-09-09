@@ -33,13 +33,13 @@ Números lidos do catálogo, não de memória.
 | | |
 | --- | --- |
 | Trilhas | 2 — Fundamentos de JavaScript (20 aulas), Lógica (3) |
-| Aulas | 23, somando 422 minutos |
-| Exercícios | 74 — 24 de código, 26 de prever saída, 17 de lacuna, 7 de múltipla escolha |
-| Verificação | 135 casos fixos + 23 propriedades |
+| Aulas | 23, somando 438 minutos |
+| Exercícios | 78 — 23 de código, 27 de prever saída, 19 de lacuna, 9 de múltipla escolha |
+| Verificação | 165 casos fixos + 32 propriedades |
 | Projetos | 7, com 22 critérios de aceitação |
 | Conceitos | 21, com grafo de pré-requisitos |
 | Flashcards | 22 |
-| Testes | 521 de unidade + 110 de navegador |
+| Testes | 548 de unidade + 118 de navegador |
 | Pacote | 949 kB (276 kB comprimido) |
 
 ## 4. Decisões que não devem ser desfeitas sem motivo forte
@@ -106,8 +106,8 @@ docs/curriculo.md       Roadmap de conteúdo — fonte canônica
 
 ```bash
 npm run typecheck   # inclui e2e/ e playwright.config.ts
-npm test            # 521 testes
-npm run test:e2e    # 110 no navegador (antes: npx playwright install chromium)
+npm test            # 548 testes
+npm run test:e2e    # 118 no navegador (antes: npx playwright install chromium)
 npm run build
 ```
 
@@ -125,6 +125,12 @@ CI: tipos → testes → build, e o E2E num job separado depois.
 4. **Olhar a tela renderizada** antes de dizer que uma mudança de interface está
    pronta. Os testes provam comportamento; não julgam se um número faz sentido
    para quem lê.
+5. **Conferir a execução do CI de verdade**, e não só os testes locais. O CI já
+   ficou vermelho por sete commits enquanto eu dizia que estava verde.
+6. **Percorrer o fluxo do aluno no navegador**, do começo ao fim. A tela branca ao
+   trocar de aula e o botão "Pular por ora" depois de acertar viveram meses numa
+   base com mais de quinhentos testes: nenhum deles olhava para o que o aluno lê
+   depois de responder.
 
 ## 7. Armadilhas já pagas
 
@@ -157,6 +163,20 @@ Cada uma custou tempo. Não repita.
   falhas como `::error::` para que o motivo seja legível pela API pública.
 - **O Write herda a codificação do arquivo que substitui.** Um README em UTF-16
   produziu acentos corrompidos. Apague antes de reescrever.
+- **Resetar estado em `useEffect` quando a rota muda de parâmetro é tarde
+  demais.** `/lesson/a` → `/lesson/b` não desmonta o componente: renderiza a aula
+  nova com o índice da anterior, e `steps[indice]` vira `undefined`. Foi tela
+  branca em produção. Ajuste o estado **durante o render** (`if (idAtual !== id)
+  { setId(id); ... }`), que é o padrão do React para isso.
+- **`useAuth()` devolve um objeto de contexto novo a cada render.** Um efeito que
+  depende dele roda sempre; se o efeito produz array ou objeto novo em `setState`,
+  vira laço infinito. Dependa de `user?.id`, e faça o `setState` devolver o valor
+  anterior quando nada mudou.
+- **Uma prop opcional é um contrato que ninguém garante.** `onSolved` era opcional
+  e dois dos quatro tipos de exercício simplesmente não a recebiam — 36 dos 78
+  exercícios nunca conseguiam avisar que tinham sido resolvidos, e nenhum dos 521
+  testes viu. Quando quatro componentes respondem à mesma pergunta, o tipo
+  compartilhado (`ExerciseState`) vale mais que a prop.
 
 ## 8. O que falta
 
@@ -199,7 +219,7 @@ magras e foram melhorando com o tempo, o que fazia o iniciante encontrar as
 piores: a aula 1 tinha 77 palavras e um exercício. O padrão novo é 500 a 900
 palavras e cinco a seis exercícios em dificuldade crescente — múltipla escolha ou
 prever saída, depois lacuna, depois código do zero. Aulas 1 a 8 refeitas (a 8 só nos
-exercícios); 9, 10 e as de lógica ainda no formato antigo.
+exercícios), 9 e 10 com exercícios novos; as de lógica ainda no formato antigo.
 
 **Fases 2 a 7 — não iniciadas.** Cada uma depende de um motor: iframe isolado
 (DOM, CSS, UI), transpilador (TypeScript), React, servidor simulado (Node),

@@ -164,12 +164,13 @@ export function CodeExerciseStep({
       )}
 
       {resultado && (
-        <div className="space-y-3">
+        <div role="status" className="space-y-3">
           {/* O veredito vem antes das evidências: a primeira pergunta é sempre
               "eu acertei?", e antes o aluno tinha que deduzir isso de uma lista
               de linhas verdes. */}
           {!desatualizado && resultado.testResults.length > 0 && (
             <ExerciseFeedback
+              anunciar={false}
               estado={passouTudo ? 'acertou' : 'errou'}
               titulo={
                 passouTudo

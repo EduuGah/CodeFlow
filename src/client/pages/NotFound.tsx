@@ -41,7 +41,7 @@ export function NotFound() {
       {!loading && (
         <Link
           to={destino}
-          className="mt-6 inline-flex items-center gap-2 rounded-lg bg-ink px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-brand-900"
+          className="mt-6 inline-flex items-center gap-2 rounded-lg bg-brand-600 px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-brand-700"
         >
           {rotulo}
           <IconArrowRight size={17} />

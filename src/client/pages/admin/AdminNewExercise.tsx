@@ -328,7 +328,7 @@ export function AdminNewExercise() {
           type="button"
           onClick={testar}
           disabled={testando || !valido}
-          className="flex w-full items-center justify-center gap-2 rounded-lg bg-ink px-5 py-3 font-bold text-white transition-colors hover:bg-brand-900 disabled:opacity-50"
+          className="flex w-full items-center justify-center gap-2 rounded-lg bg-brand-600 px-5 py-3 font-bold text-white transition-colors hover:bg-brand-700 disabled:opacity-50"
         >
           {testando ? <IconSpinner size={18} className="animate-spin" /> : <IconPlay size={18} />}
           {testando ? 'Executando…' : 'Rodar as checagens do CI'}

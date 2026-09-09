@@ -163,7 +163,9 @@ test('a aula inteira se percorre sem mouse', async ({ logado: page }) => {
 
   // Avança até o fim usando só o teclado, tabulando até a ação principal.
   for (let passo = 1; passo < total; passo++) {
-    const acao = page.getByRole('button', { name: /Continuar|Pular por ora/ });
+    const acao = page.getByRole('button', {
+      name: /Continuar assim mesmo|Continuar|Pular por ora/,
+    });
     await acao.waitFor();
 
     for (let i = 0; i < 20 && !(await acao.evaluate((el) => el === document.activeElement)); i++) {
@@ -178,7 +180,9 @@ test('a aula inteira se percorre sem mouse', async ({ logado: page }) => {
     await expect(page.getByRole('main')).toBeFocused();
   }
 
-  await expect(page.getByText('Aula concluída')).toBeVisible();
+  // Percorrer sem responder chega ao resumo, e o resumo diz a verdade: a aula
+  // não foi concluída, porque nenhum exercício foi resolvido.
+  await expect(page.getByText(/Faltam? \d+ exercícios? para fechar esta aula/)).toBeVisible();
 });
 
 test('o cabeçalho fixo não cobre o conteúdo ao rolar', async ({ logado: page }) => {

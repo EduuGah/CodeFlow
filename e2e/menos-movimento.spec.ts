@@ -1,6 +1,4 @@
-import { esperarConteudo, expect, irAteOEditor, test } from './fixtures';
-import { getLesson } from '../src/content';
-import { buildLessonSteps } from '../src/client/lib/lesson-steps';
+import { AULA_CURTA, concluirAula, esperarConteudo, expect, test } from './fixtures';
 
 /**
  * Comemoração e a preferência por menos movimento.
@@ -10,20 +8,6 @@ import { buildLessonSteps } from '../src/client/lib/lesson-steps';
  * regra pode ser conferida de verdade: o Playwright emula a preferência do
  * sistema, coisa que nenhum teste de unidade faz.
  */
-
-const AULA = 'lesson-js-4';
-
-function solucao(): string {
-  for (const passo of buildLessonSteps(getLesson(AULA)!)) {
-    if (passo.kind === 'exercise' && passo.exercise.type === 'code' && passo.exercise.solution) {
-      return passo.exercise.solution;
-    }
-  }
-
-  // Solução de referência é o que o CI usa para provar que o exercício é
-  // resolvível; sem ela, este teste não teria como concluir a aula.
-  throw new Error(`${AULA} não tem exercício de código com solução de referência`);
-}
 
 /**
  * Conta os canvas do confete.
@@ -39,15 +23,16 @@ async function canvasDeConfete(page: import('@playwright/test').Page) {
   );
 }
 
+/**
+ * Conclui a aula inteira.
+ *
+ * A comemoração deixou de acontecer no primeiro exercício resolvido — soltar o
+ * confete de aula concluída no meio dela dava a maior recompensa do produto no
+ * momento errado, e deixava o fim da aula sem nada. Agora ela depende de todos
+ * os exercícios fecharem, então o teste precisa fechar todos.
+ */
 async function resolver(page: import('@playwright/test').Page) {
-  await page.goto(`/lesson/${AULA}`);
-  await irAteOEditor(page);
-  await page.evaluate((c) => {
-    (window as unknown as { monaco: { editor: { getModels(): Array<{ setValue(v: string): void }> } } })
-      .monaco.editor.getModels()[0].setValue(c);
-  }, solucao());
-  await page.getByRole('button', { name: 'Executar código' }).click();
-  await expect(page.getByRole('button', { name: /Precisa de uma dica/ })).toHaveCount(0);
+  await concluirAula(page, AULA_CURTA);
 }
 
 test.describe('sem restrição de movimento', () => {
@@ -69,7 +54,7 @@ test.describe('com menos movimento pedido', () => {
     await resolver(page);
 
     // A confirmação continua: o que some é a explosão, não a notícia.
-    await expect(page.getByRole('button', { name: /Continuar|Pular por ora/ })).toBeVisible();
+    await expect(page.getByText('Aula concluída')).toBeVisible();
     await page.waitForTimeout(2500);
 
     expect(await canvasDeConfete(page)).toBe(0);

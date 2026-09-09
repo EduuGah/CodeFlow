@@ -24,7 +24,7 @@ Fase 7  Projeto final            ░░░░░░░░░░░░░░░�
 | | Hoje | Previsto | Feito |
 | --- | ---: | ---: | ---: |
 | Aulas | **23** | 135 | 17% |
-| Exercícios | **74** | ~700 | 11% |
+| Exercícios | **78** | ~700 | 11% |
 | Tipos de exercício | **4** | 11 | 36% |
 | Motores de execução | **1** | 7 | 14% |
 | Projetos | **7** | ~30 | 23% |
@@ -52,13 +52,33 @@ Aula 5  Funções                  ██████████  119 → 327 p
 Aula 6  Arrays                   ██████████  124 → 317 palavras, 2 → 4 exercícios
 Aula 7  Objetos                  ██████████  171 → 375 palavras, 2 → 4 exercícios
 Aula 8  map, filter e reduce     █████░░░░░  167 palavras, 2 → 4 exercícios
-Aula 9  Strings                  ░░░░░░░░░░  143 palavras, 2 exercícios
-Aula 10 Erros                    ░░░░░░░░░░  210 palavras, 2 exercícios
+Aula 9  Strings                  █████░░░░░  143 palavras, 2 → 4 exercícios
+Aula 10 Erros                    █████░░░░░  210 palavras, 2 → 4 exercícios
 Lógica 1 a 3                     ░░░░░░░░░░  ~180 palavras, 2 exercícios cada
 ```
 
-_Atualizado em 2026-09-09, no mesmo commit que concluiu a última aula. Este bloco
-é atualizado sempre que um item muda de estado._
+_Atualizado em 2026-09-09. Este bloco é atualizado sempre que um item muda de
+estado._
+
+## Fluxo das atividades — refeito em 2026-09-09
+
+O conteúdo estava crescendo mais rápido que a mecânica que o entrega, e a
+mecânica tinha três defeitos que nenhum dos 521 testes de então pegava:
+
+- **múltipla escolha e prever-saída nunca avisavam que tinham sido resolvidas** —
+  36 dos 78 exercícios. O rodapé continuava oferecendo "Pular por ora" a quem
+  acabara de acertar;
+- **acertar um exercício concluía a aula inteira**, com confete no meio dela;
+- **o resumo afirmava "Aula concluída — seu progresso foi salvo"** mesmo para
+  quem tinha pulado tudo.
+
+E um quarto, achado testando: **passar de uma aula para a seguinte dava tela
+branca** sempre que a próxima era mais curta.
+
+Os quatro tipos passam a reportar um estado único — `inicial`, `respondendo`,
+`verificando`, `errou`, `acertou` — e a aula lê esse estado em vez de adivinhar.
+Conclusão agora exige todos os exercícios resolvidos, e o cabeçalho mostra o
+placar. Detalhes em `src/client/lib/exercise-state.ts`.
 
 ## A restrição que ordena tudo
 

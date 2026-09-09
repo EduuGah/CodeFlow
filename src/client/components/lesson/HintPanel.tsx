@@ -45,7 +45,7 @@ export function HintPanel({ hints, className = '', onRevealedChange }: HintPanel
       <Button
         variant="outline"
         aria-expanded={false}
-        className={`w-full gap-2 text-ink-soft ${className}`}
+        className={`min-h-11 w-full gap-2 text-ink-soft ${className}`}
         onClick={() => revelar(0)}
       >
         <IconHint size={16} className="text-energy-500" />
@@ -74,8 +74,7 @@ export function HintPanel({ hints, className = '', onRevealedChange }: HintPanel
       {!ultima && (
         <Button
           variant="ghost"
-          size="sm"
-          className="mt-3 w-full text-energy-700 hover:bg-energy-50 hover:text-energy-700"
+          className="mt-3 min-h-11 w-full text-energy-700 hover:bg-energy-50 hover:text-energy-700"
           onClick={() => revelar(indice + 1)}
         >
           Próxima dica

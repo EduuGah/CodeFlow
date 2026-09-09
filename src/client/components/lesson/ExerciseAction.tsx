@@ -22,7 +22,7 @@ export function ExerciseAction({
     <button
       type="button"
       {...props}
-      className={`flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-ink px-5 py-3.5 font-bold text-white transition-colors hover:bg-brand-900 active:translate-y-px disabled:opacity-50 disabled:hover:bg-ink ${className}`}
+      className={`flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-brand-600 px-5 py-3.5 font-bold text-white transition-colors hover:bg-brand-700 active:translate-y-px disabled:opacity-50 disabled:hover:bg-brand-600 ${className}`}
     >
       {carregando ? <IconSpinner size={18} className="animate-spin" /> : null}
       {children}
@@ -50,18 +50,29 @@ export function ExerciseFeedback({
   titulo,
   children,
   refDoBloco,
+  anunciar = true,
 }: {
   estado: Extract<ExerciseState, 'acertou' | 'errou'>;
   titulo?: string;
   children?: React.ReactNode;
   refDoBloco?: React.Ref<HTMLDivElement>;
+  /**
+   * Falso quando o bloco já vive dentro de uma região viva.
+   *
+   * Nos exercícios que rodam testes, a região precisa envolver **também** a
+   * lista de resultados: é nela que está a informação útil — "esperava 12, veio
+   * 7" — e um `role="status"` só no veredito faria o leitor de tela anunciar
+   * "dois testes falharam" e mais nada. Duas regiões aninhadas anunciariam o
+   * título duas vezes.
+   */
+  anunciar?: boolean;
 }) {
   const acertou = estado === 'acertou';
 
   return (
     <div
       ref={refDoBloco}
-      role="status"
+      role={anunciar ? 'status' : undefined}
       tabIndex={-1}
       className={`rounded-lg border p-4 focus-visible:outline-none ${
         acertou ? 'border-success-200 bg-success-50' : 'border-energy-200 bg-energy-50'

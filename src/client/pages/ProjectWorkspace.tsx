@@ -367,7 +367,7 @@ export function ProjectWorkspace() {
                   ? 'Todos os critérios foram atendidos'
                   : 'Feche todos os critérios antes de entregar'
             }
-            className="flex h-12 items-center justify-center gap-2 rounded-lg bg-ink px-4 font-bold text-white transition-colors hover:bg-brand-900 disabled:opacity-40"
+            className="flex h-12 items-center justify-center gap-2 rounded-lg bg-brand-600 px-4 font-bold text-white transition-colors hover:bg-brand-700 disabled:opacity-40"
           >
             <IconSend size={18} />
             <span className="hidden sm:inline">{isCompleted ? 'Entregue' : 'Entregar'}</span>

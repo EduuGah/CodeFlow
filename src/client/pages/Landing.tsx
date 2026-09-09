@@ -53,7 +53,7 @@ export function Landing() {
 
           <Link
             to="/login"
-            className="inline-flex items-center justify-center gap-2 rounded-lg bg-ink px-6 py-3.5 font-bold text-white transition-colors hover:bg-brand-900 active:translate-y-px"
+            className="inline-flex items-center justify-center gap-2 rounded-lg bg-brand-600 px-6 py-3.5 font-bold text-white transition-colors hover:bg-brand-700 active:translate-y-px"
           >
             Começar agora
             <IconArrowRight size={18} />

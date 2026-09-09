@@ -65,7 +65,7 @@ export function AuthCallback() {
           </div>
           <Link
             to="/login"
-            className="inline-block rounded-lg bg-ink px-4 py-2 text-sm font-medium text-white hover:bg-brand-900"
+            className="inline-block rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
           >
             Voltar para o login
           </Link>
