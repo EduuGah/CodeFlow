@@ -39,6 +39,7 @@ import { lessonErrosAsync } from './lessons/js-16-erros-async';
 import { lessonJson } from './lessons/js-17-json';
 import { lessonImutabilidade } from './lessons/js-18-imutabilidade';
 import { lessonDatas } from './lessons/js-19-datas';
+import { lessonRegex } from './lessons/js-20-regex';
 import { lessonDecompor } from './lessons/logica-01-decompor';
 import { lessonCasosExtremos } from './lessons/logica-02-casos-extremos';
 import { lessonSimular } from './lessons/logica-03-simular';
@@ -75,6 +76,7 @@ const lessons: Lesson[] = [
   lessonJson,
   lessonImutabilidade,
   lessonDatas,
+  lessonRegex,
   lessonDecompor,
   lessonCasosExtremos,
   lessonSimular,

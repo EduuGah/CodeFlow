@@ -28,5 +28,6 @@ export const trackJsFundamentos: Track = {
     'lesson-js-17',
     'lesson-js-18',
     'lesson-js-19',
+    'lesson-js-20',
   ],
 };

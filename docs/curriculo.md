@@ -4,15 +4,37 @@ Roadmap de conteúdo **e** de plataforma. A versão navegável está publicada c
 artifact; este arquivo é a fonte canônica e deve ser atualizado no mesmo commit
 que conclui uma fase.
 
-| | Hoje | Previsto |
-| --- | --- | --- |
-| Aulas | 22 | 135 |
-| Exercícios | 53 | ~700 |
-| Tipos de exercício | 4 | 11 |
-| Motores de execução | 1 | 7 |
+## Onde estamos
 
-_Atualizado em 2026-09-09. Este arquivo é atualizado no mesmo commit que conclui
-um item._
+**Fase 1 de 8 · Bloco de JavaScript: 10 de 10 aulas · Bloco da web: 0 de 8**
+
+```
+Fase 0  Fundamentos e lógica      ██████████████████████  13/13  pronto
+Fase 1  JavaScript real          ██████████████████████  10/10  pronto
+        Como a web funciona      ░░░░░░░░░░░░░░░░░░░░░░   0/8
+        Plataforma                █████░░░░░░░░░░░░░░░░░   2/7
+Fase 2  A página                 ░░░░░░░░░░░░░░░░░░░░░░   0/26
+Fase 3  Tipos e componentes      ░░░░░░░░░░░░░░░░░░░░░░   0/24
+Fase 4  Back-end e dados         ░░░░░░░░░░░░░░░░░░░░░░   0/20
+Fase 5  Profissionalização       ░░░░░░░░░░░░░░░░░░░░░░   0/19
+Fase 6  Python                   ░░░░░░░░░░░░░░░░░░░░░░   0/10
+Fase 7  Projeto final            ░░░░░░░░░░░░░░░░░░░░░░   0/5
+```
+
+| | Hoje | Previsto | Feito |
+| --- | ---: | ---: | ---: |
+| Aulas | **23** | 135 | 17% |
+| Exercícios | **56** | ~700 | 8% |
+| Tipos de exercício | **4** | 11 | 36% |
+| Motores de execução | **1** | 7 | 14% |
+| Projetos | **7** | ~30 | 23% |
+
+**Últimas aulas concluídas**, da mais recente para a mais antiga: expressões
+regulares, datas e fuso, imutabilidade, JSON, falhas assíncronas, async/await,
+promises, callbacks, closures, escopo.
+
+_Atualizado em 2026-09-09, no mesmo commit que concluiu a última aula. Este bloco
+é atualizado sempre que um item muda de estado._
 
 ## A restrição que ordena tudo
 
@@ -62,7 +84,7 @@ opcional).
 ### Fase 1 — Aprofundar o que já roda · 18 aulas · EM ANDAMENTO
 Motor: **nenhum novo**.
 
-**JavaScript real — 9 de 10**
+**JavaScript real — 10 de 10, concluído**
 
 | Aula | Estado |
 | --- | --- |
@@ -75,11 +97,12 @@ Motor: **nenhum novo**.
 | JSON | feita |
 | Imutabilidade | feita |
 | Datas e fuso | feita |
-| Expressões regulares | — |
+| Expressões regulares | feita |
 
 Módulos saiu do bloco: `import`/`export` é erro de sintaxe no sandbox, porque
 `new Function` não aceita módulos. Volta quando houver um executor que entenda,
-ou entra como aula conceitual.
+ou entra como aula conceitual. O lugar dele na contagem foi ocupado por escopo e
+closures, que a versão original tratava como uma aula só e na prática pediam duas.
 
 **Como a web funciona — 0 de 8**: cliente e servidor, HTTP, cabeçalhos, REST,
 autenticação, tokens, CORS, segurança básica.
