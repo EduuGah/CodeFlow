@@ -24,7 +24,7 @@ Fase 7  Projeto final            ░░░░░░░░░░░░░░░�
 | | Hoje | Previsto | Feito |
 | --- | ---: | ---: | ---: |
 | Aulas | **23** | 135 | 17% |
-| Exercícios | **56** | ~700 | 8% |
+| Exercícios | **62** | ~700 | 9% |
 | Tipos de exercício | **4** | 11 | 36% |
 | Motores de execução | **1** | 7 | 14% |
 | Projetos | **7** | ~30 | 23% |
@@ -32,6 +32,30 @@ Fase 7  Projeto final            ░░░░░░░░░░░░░░░�
 **Últimas aulas concluídas**, da mais recente para a mais antiga: expressões
 regulares, datas e fuso, imutabilidade, JSON, falhas assíncronas, async/await,
 promises, callbacks, closures, escopo.
+
+## Aprofundamento das aulas antigas
+
+As primeiras aulas nasceram magras e foram ficando melhores com o tempo — o que
+significa que o iniciante encontrava as piores. Medido: a aula 1 tinha 77
+palavras e **um** exercício para 12 minutos; a aula 20 tem 435 e três.
+
+O padrão novo é: 500 a 900 palavras, e cinco a seis exercícios em dificuldade
+crescente — múltipla escolha ou prever saída para verificar a compreensão, lacuna
+para dar a estrutura, e código do zero por último.
+
+```
+Aula 1  Variáveis                ██████████  77 → 508 palavras,  1 → 5 exercícios
+Aula 2  Tipos e operadores       ██████████  82 → 700 palavras,  2 → 5 exercícios
+Aula 3  Condições                ░░░░░░░░░░  135 palavras, 2 exercícios
+Aula 4  Loops                    ░░░░░░░░░░  132 palavras, 2 exercícios
+Aula 5  Funções                  ░░░░░░░░░░  119 palavras, 3 exercícios
+Aula 6  Arrays                   ░░░░░░░░░░  124 palavras, 2 exercícios
+Aula 7  Objetos                  ░░░░░░░░░░  171 palavras, 2 exercícios
+Aula 8  map, filter e reduce     ░░░░░░░░░░  167 palavras, 2 exercícios
+Aula 9  Strings                  ░░░░░░░░░░  143 palavras, 2 exercícios
+Aula 10 Erros                    ░░░░░░░░░░  210 palavras, 2 exercícios
+Lógica 1 a 3                     ░░░░░░░░░░  ~180 palavras, 2 exercícios cada
+```
 
 _Atualizado em 2026-09-09, no mesmo commit que concluiu a última aula. Este bloco
 é atualizado sempre que um item muda de estado._
