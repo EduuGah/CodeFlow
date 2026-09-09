@@ -9,7 +9,7 @@ export const lessonRegex: Lesson = {
     'Escrever padrões para validar e extrair texto, e reconhecer quando uma expressão regular é a ferramenta errada.',
   concepts: ['strings', 'casos-extremos', 'depuracao'],
   status: 'published',
-  estimatedMinutes: 22,
+  estimatedMinutes: 26,
   blocks: [
     {
       kind: 'prose',
@@ -175,6 +175,30 @@ O sintoma em produção é cruel: a validação funciona no primeiro item de uma
 
 Expressão regular é ótima para formato e péssima para estrutura aninhada. **Não** tente validar HTML, JSON ou e-mail com uma. O padrão oficial de e-mail tem centenas de caracteres e ainda erra — para e-mail, verifique se há um \`@\` com texto dos dois lados e mande a confirmação por mensagem, que é o único teste que vale.
 `.trim(),
+    },
+    {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-js-20-prever-lastindex',
+        type: 'predict-output',
+        prompt:
+          'A mesma expressão, o mesmo texto, três chamadas seguidas. O que sai?',
+        concepts: ['expressoes-regulares'],
+        difficulty: 'intermediario',
+        tags: ['javascript', 'regex'],
+        code: `const temNumero = /[0-9]/g;
+
+console.log(temNumero.test('a1'));
+console.log(temNumero.test('a1'));
+console.log(temNumero.test('a1'));`,
+        expectedOutput: 'true\nfalse\ntrue',
+        explanation:
+          'A marca `g` faz a expressão guardar um `lastIndex` — a posição onde parou. A primeira chamada acha o `1` na posição 1 e deixa `lastIndex` valendo 2. A segunda começa a procurar **da posição 2 em diante**, não acha nada, devolve `false` e zera o `lastIndex`. A terceira volta ao começo e acha de novo. É por isso que uma validação com `g` funciona no primeiro item de uma lista e falha no segundo, alternando: a expressão está guardando estado entre as chamadas.',
+        hints: [
+          'A expressão com `g` guarda alguma coisa entre uma chamada e a seguinte. O quê?',
+          'Depois de achar o `1` na posição 1, de onde a próxima busca começa?',
+        ],
+      },
     },
     {
       kind: 'exercise',

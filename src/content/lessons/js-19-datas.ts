@@ -9,7 +9,7 @@ export const lessonDatas: Lesson = {
     'Criar, comparar e formatar datas sem cair no erro de um dia causado por fuso horário.',
   concepts: ['datas', 'tipos-de-dados', 'casos-extremos'],
   status: 'published',
-  estimatedMinutes: 20,
+  estimatedMinutes: 28,
   blocks: [
     {
       kind: 'prose',
@@ -157,6 +157,72 @@ console.log(d.getFullYear());`,
     {
       kind: 'prose',
       markdown: `
+## Três jeitos de comparar, e só um responde a sua pergunta
+
+Comparar datas erra por um motivo simples: \`Date\` é um **objeto**, e comparar objetos com \`===\` compara identidade, não conteúdo.
+
+~~~javascript
+const a = new Date(2026, 2, 10);
+const b = new Date(2026, 2, 10);
+
+a === b;   // false — dois objetos diferentes
+~~~
+
+Duas datas iguais nunca são \`===\`. Então sobram duas perguntas, e elas têm respostas diferentes:
+
+**"É o mesmo instante?"** — compare os números:
+
+~~~javascript
+a.getTime() === b.getTime();   // true
+~~~
+
+Isso compara até o milissegundo. Perfeito para ordenar, e errado para quase todo resto — porque \`10/03 às 9h\` e \`10/03 às 21h\` são instantes diferentes.
+
+**"É o mesmo dia?"** — descarte a hora antes de comparar:
+
+~~~javascript
+function mesmoDia(x, y) {
+  return x.toDateString() === y.toDateString();
+}
+~~~
+
+Essa é a pergunta que os programas realmente fazem: "esse pedido é de hoje?", "o vencimento já passou?". E é a que mais dá errado, porque um \`getTime()\` respondendo "não" para duas datas do mesmo dia parece um bug do computador.
+
+Para \`<\` e \`>\` não há truque: eles funcionam direto, porque o JavaScript converte a data para número na comparação. \`a < b\` está certo; só \`===\` é que não.
+`.trim(),
+    },
+    {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-js-19-prever-comparar',
+        type: 'predict-output',
+        prompt: 'O que este programa imprime, nas quatro linhas?',
+        concepts: ['datas', 'objetos'],
+        difficulty: 'intermediario',
+        tags: ['javascript', 'datas'],
+        code: `const a = new Date(2026, 2, 10);
+const b = new Date(2026, 2, 10);
+
+console.log(a === b);
+console.log(a.getTime() === b.getTime());
+
+const manha = new Date(2026, 2, 10, 9);
+const noite = new Date(2026, 2, 10, 21);
+
+console.log(manha.getTime() === noite.getTime());
+console.log(manha.toDateString() === noite.toDateString());`,
+        expectedOutput: 'false\ntrue\nfalse\ntrue',
+        explanation:
+          'A primeira comparação é `false` porque `===` entre objetos pergunta se são **o mesmo objeto**, e são dois. `getTime()` devolve números, então a segunda compara conteúdo e dá `true`. A terceira mostra o limite dessa comparação: manhã e noite do mesmo dia são instantes diferentes, e é isso que ela responde. Quando a pergunta era "é o mesmo dia?", o que serve é descartar a hora antes de comparar — que é o que `toDateString` faz.',
+        hints: [
+          'O que `===` compara quando os dois lados são objetos?',
+          'Manhã e noite do mesmo dia: mesmo instante, ou mesmo dia?',
+        ],
+      },
+    },
+    {
+      kind: 'prose',
+      markdown: `
 ## Guardar e mostrar são coisas diferentes
 
 A regra que evita quase todo problema de fuso:
@@ -264,7 +330,7 @@ console.log(diasEntre(new Date(2026, 2, 15), new Date(2026, 2, 10))); // 5`,
     },
     {
       kind: 'summary',
-      markdown: `O mês vai de 0 a 11, e só o mês. \`getDate\` é o dia do mês, \`getDay\` é o dia da semana. Texto sem hora é lido como UTC e texto com hora é lido no fuso local — daí o erro de um dia que some quando o programador testa na máquina dele. A regra que evita quase tudo: guarde em UTC no formato ISO, mostre com \`toLocaleDateString\`, e para uma data sem hora transporte o texto \`"AAAA-MM-DD"\` montando as partes localmente na hora de usar.`,
+      markdown: `O mês vai de 0 a 11, e só o mês. \`getDate\` é o dia do mês, \`getDay\` é o dia da semana. Texto sem hora é lido como UTC e texto com hora é lido no fuso local — daí o erro de um dia que some quando o programador testa na máquina dele. A regra que evita quase tudo: guarde em UTC no formato ISO, mostre com \`toLocaleDateString\`, e para uma data sem hora transporte o texto \`"AAAA-MM-DD"\` montando as partes localmente na hora de usar. Para comparar, lembre que \`===\` entre datas é sempre falso: use \`getTime()\` quando a pergunta for sobre o instante, e descarte a hora quando ela for sobre o dia.`,
     },
   ],
 };

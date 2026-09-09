@@ -9,7 +9,7 @@ export const lessonErrosAsync: Lesson = {
     'Impedir que uma falha assíncrona desapareça em silêncio, e decidir entre desistir na primeira ou seguir com o resto.',
   concepts: ['promises', 'assincronia', 'depuracao'],
   status: 'published',
-  estimatedMinutes: 18,
+  estimatedMinutes: 28,
   blocks: [
     {
       kind: 'prose',
@@ -161,6 +161,64 @@ async function consultarComRegistro(id) {
     {
       kind: 'prose',
       markdown: `
+## Tentar de novo é uma decisão, não um reflexo
+
+Rede falha. Servidor reinicia. Um pacote se perde. Boa parte das falhas assíncronas é **passageira**: a mesma chamada, meio segundo depois, funciona.
+
+Repetir a chamada é a resposta certa para essas — e a resposta errada para todas as outras. Antes de repetir, duas perguntas:
+
+**A falha tem chance de mudar?** Um servidor indisponível vai voltar. Um pedido malformado vai continuar malformado por mais que você insista, e um \`TypeError\` no seu próprio código nunca conserta sozinho. Repetir esses casos só transforma um erro visível em três erros e um atraso.
+
+**Repetir é seguro?** Buscar dados duas vezes não faz mal. **Cobrar um cartão duas vezes faz.** Só repita automaticamente o que puder acontecer duas vezes sem consequência — ou o que o servidor saiba reconhecer como repetido.
+
+Quando a resposta às duas é sim, espere um pouco mais a cada tentativa:
+
+~~~javascript
+async function comRetentativa(tarefa, tentativas = 3) {
+  for (let i = 0; i < tentativas; i++) {
+    try {
+      return await tarefa();
+    } catch (erro) {
+      if (i === tentativas - 1) throw erro;   // a última falha sobe
+      await esperar(100 * 2 ** i);            // 100ms, 200ms, 400ms
+    }
+  }
+}
+~~~
+
+Dobrar a espera a cada volta tem nome — *backoff* — e existe por um motivo prático: se o servidor caiu porque estava sobrecarregado, mil clientes repetindo na mesma cadência derrubam ele de novo. Esperar cada vez mais espalha as tentativas.
+
+E repare na última linha do \`catch\`: depois de esgotar as tentativas, o erro **sobe**. Retentativa adia a falha; ela não faz a falha desaparecer.
+`.trim(),
+    },
+    {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-js-16-quando-retentar',
+        type: 'multiple-choice',
+        prompt:
+          'Sua chamada de rede falhou. Em qual destes casos faz sentido repetir automaticamente?',
+        concepts: ['assincronia', 'depuracao'],
+        difficulty: 'intermediario',
+        tags: ['javascript', 'assincronia'],
+        options: [
+          'Erro 400: o servidor respondeu que o pedido está malformado',
+          'Erro 503: o servidor respondeu que está temporariamente indisponível',
+          'Erro 401: o token de acesso expirou',
+          'TypeError: o código chamou `.filter` num valor `undefined`',
+        ],
+        correctIndex: 1,
+        explanation:
+          'Repetir só ajuda quando a falha é **passageira**, e o 503 diz exatamente isso: o servidor está fora agora e volta depois. As outras três não mudam com insistência. O 400 vai recusar o mesmo pedido para sempre — o defeito está no que foi enviado. O 401 precisa de uma ação diferente, renovar o token, e não de mais uma tentativa igual. E o `TypeError` é um bug no seu próprio código: repetir só o esconde. Além disso, antes de repetir qualquer coisa, confira se a operação pode acontecer duas vezes sem consequência: buscar, sim; cobrar, não.',
+        hints: [
+          'Qual dessas falhas tem chance de dar um resultado diferente daqui a meio segundo?',
+          'Duas delas exigem uma ação diferente, não uma tentativa igual.',
+        ],
+      },
+    },
+    {
+      kind: 'prose',
+      markdown: `
 ## Quando uma falha não pode derrubar o resto
 
 \`Promise.all\` desiste na primeira rejeição. Isso é o certo quando você precisa de tudo — mas errado quando uma falha isolada não deveria custar o restante.
@@ -277,7 +335,7 @@ precosDisponiveis(['pao', '', 'leite']).then(console.log); // esperado: [6, 10]`
     },
     {
       kind: 'summary',
-      markdown: `Uma promise sem destino é uma falha que some: ou você a espera dentro de um \`try\`, ou encadeia um \`.catch\`. O \`try/catch\` só captura o que ele **espera** — sem \`await\`, a rejeição acontece depois que o bloco já terminou. Um \`catch\` que devolve um valor de reserva esconde a diferença entre "o valor é zero" e "não consegui saber": trate o que você sabe tratar e deixe subir o resto. E escolher entre \`all\` e \`allSettled\` é decidir se uma falha isolada invalida o conjunto.`,
+      markdown: `Uma promise sem destino é uma falha que some: ou você a espera dentro de um \`try\`, ou encadeia um \`.catch\`. O \`try/catch\` só captura o que ele **espera** — sem \`await\`, a rejeição acontece depois que o bloco já terminou. Um \`catch\` que devolve um valor de reserva esconde a diferença entre "o valor é zero" e "não consegui saber": trate o que você sabe tratar e deixe subir o resto. Repetir a chamada só ajuda quando a falha é passageira e a operação pode acontecer duas vezes sem consequência — e mesmo assim a última falha precisa subir. E escolher entre \`all\` e \`allSettled\` é decidir se uma falha isolada invalida o conjunto.`,
     },
   ],
 };

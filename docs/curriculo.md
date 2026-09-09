@@ -24,7 +24,7 @@ Fase 7  Projeto final            ░░░░░░░░░░░░░░░�
 | | Hoje | Previsto | Feito |
 | --- | ---: | ---: | ---: |
 | Aulas | **23** | 135 | 17% |
-| Exercícios | **95** | ~700 | 14% |
+| Exercícios | **110** | ~700 | 16% |
 | Tipos de exercício | **4** | 11 | 36% |
 | Motores de execução | **1** | 7 | 14% |
 | Projetos | **7** | ~30 | 23% |
@@ -36,8 +36,9 @@ promises, callbacks, closures, escopo.
 ## Aprofundamento das aulas antigas
 
 As primeiras aulas nasceram magras e foram ficando melhores com o tempo — o que
-significa que o iniciante encontrava as piores. Medido: a aula 1 tinha 77
-palavras e **um** exercício para 12 minutos; a aula 20 tem 435 e três.
+significa que o iniciante encontrava as piores. Medido, antes desta rodada: a
+aula 1 tinha 77 palavras e **um** exercício para 12 minutos. Hoje a aula mais
+curta do catálogo tem 304 palavras, e a média está em 570.
 
 O padrão novo é: 500 a 900 palavras, e cinco a seis exercícios em dificuldade
 crescente — múltipla escolha ou prever saída para verificar a compreensão, lacuna
@@ -59,9 +60,22 @@ Lógica 2 Casos extremos          ██████████  182 → 654 pa
 Lógica 3 Simular                 ██████████  198 → 660 palavras, 2 → 5 exercícios
 ```
 
-**Bloco de fundamentos e de lógica: concluído.** As treze aulas da fase 0 estão
-no padrão novo. As aulas 11 a 20 nasceram melhores (292 a 435 palavras, 3
-exercícios cada) e entram numa próxima rodada.
+**Aprofundamento concluído para as 23 aulas publicadas.** Não há aula pendente.
+O bloco assíncrono — callbacks, promises e async/await — ficou entre 780 e 810
+palavras cada, porque é o assunto que mais custa e o que mais rende explicação.
+
+```
+Aula 11 Escopo                   ██████████  296 → 782 palavras, 3 → 5 exercícios
+Aula 12 Closures                 ██████████  292 → 671 palavras, 3 → 5 exercícios
+Aula 13 Callbacks                ██████████  327 → 782 palavras, 3 → 5 exercícios
+Aula 14 Promises                 ██████████  324 → 808 palavras, 3 → 5 exercícios
+Aula 15 async e await            ██████████  349 → 784 palavras, 3 → 5 exercícios
+Aula 16 Falhas assíncronas       ██████████  351 → 651 palavras, 3 → 4 exercícios
+Aula 17 JSON                     ██████████  329 → 534 palavras, 3 → 4 exercícios
+Aula 18 Imutabilidade            ██████████  314 → 553 palavras, 3 → 4 exercícios
+Aula 19 Datas                    ██████████  399 → 634 palavras, 3 → 4 exercícios
+Aula 20 Expressões regulares     ██████████  435 palavras, 3 → 4 exercícios
+```
 
 _Atualizado em 2026-09-09. Este bloco é atualizado sempre que um item muda de
 estado._

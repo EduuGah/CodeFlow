@@ -9,7 +9,7 @@ export const lessonImutabilidade: Lesson = {
     'Reconhecer quando duas variáveis apontam para o mesmo objeto, e criar cópias em vez de alterar o original.',
   concepts: ['imutabilidade', 'arrays', 'objetos'],
   status: 'published',
-  estimatedMinutes: 20,
+  estimatedMinutes: 28,
   blocks: [
     {
       kind: 'prose',
@@ -142,6 +142,69 @@ console.log(copia.itens);`,
           'São três pontos.',
         ],
         solution: ['...'],
+      },
+    },
+    {
+      kind: 'prose',
+      markdown: `
+## Combinar, ou impedir
+
+Copiar antes de mexer é uma **convenção**: funciona enquanto todo mundo lembrar. \`Object.freeze\` transforma a convenção em regra — o objeto passa a recusar alterações.
+
+~~~javascript
+const CONFIG = Object.freeze({ tema: 'claro', limite: 10 });
+
+CONFIG.tema = 'escuro';
+// TypeError: Cannot assign to read only property 'tema'
+~~~
+
+Um detalhe que confunde: **o barulho depende do modo**. Em código moderno, dentro de um módulo, a atribuição lança o erro acima. Em código antigo, fora de módulo, ela **falha em silêncio** — não altera nada e também não avisa, que é o pior dos dois mundos. Se você testar \`freeze\` num console e "não acontecer nada", é isso.
+
+E \`freeze\` tem o mesmo limite do espalhamento: **ele é raso.**
+
+~~~javascript
+const config = Object.freeze({ tema: 'claro', avancado: { limite: 10 } });
+
+config.avancado.limite = 999;   // passa sem reclamar
+~~~
+
+O objeto de fora está congelado; o de dentro não. Congelar em profundidade exige percorrer a estrutura e congelar cada nível.
+
+Na prática, \`freeze\` vale a pena para constantes de configuração — coisas que nascem prontas e nunca mudam. Para dados que fluem pelo programa, o hábito de copiar antes de mexer resolve melhor, porque não custa nada em tempo de execução.
+`.trim(),
+    },
+    {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-js-18-prever-freeze',
+        type: 'predict-output',
+        prompt:
+          'Este código roda dentro de um módulo. O que ele imprime, nas três linhas?',
+        concepts: ['imutabilidade', 'objetos'],
+        difficulty: 'intermediario',
+        tags: ['javascript', 'imutabilidade'],
+        code: `const config = Object.freeze({
+  tema: 'claro',
+  avancado: { limite: 10 },
+});
+
+try {
+  config.tema = 'escuro';
+} catch (e) {
+  console.log('recusou:', e.name);
+}
+
+config.avancado.limite = 999;
+
+console.log(config.tema);
+console.log(config.avancado.limite);`,
+        expectedOutput: 'recusou: TypeError\nclaro\n999',
+        explanation:
+          'O congelamento vale para as propriedades **do objeto de fora**: alterar `tema` é recusado, e dentro de um módulo essa recusa vira um `TypeError` — em código antigo, fora de módulo, ela seria silenciosa. Já `avancado` é outro objeto, e ele não foi congelado: a alteração passa sem nenhum aviso. `Object.freeze` é raso, exatamente como o espalhamento.',
+        hints: [
+          'O `freeze` congela as propriedades do objeto, ou tudo que está dentro delas?',
+          '`config.avancado` é o mesmo objeto que foi congelado, ou um objeto diferente?',
+        ],
       },
     },
     {
@@ -288,7 +351,7 @@ console.log(carrinho[1].quantidade); // esperado: 1 — o original não muda`,
     },
     {
       kind: 'summary',
-      markdown: `Atribuir um objeto copia o endereço, não o conteúdo: dois nomes, um objeto só. \`sort\`, \`push\`, \`reverse\` e \`splice\` alteram no lugar; \`map\`, \`filter\` e o espalhamento produzem valor novo. Copiar antes de mexer evita o bug cuja causa fica longe do sintoma — uma função que reordena a lista de quem a chamou. E o espalhamento copia **um nível**: o que estiver aninhado continua compartilhado até você copiá-lo também.`,
+      markdown: `Atribuir um objeto copia o endereço, não o conteúdo: dois nomes, um objeto só. \`sort\`, \`push\`, \`reverse\` e \`splice\` alteram no lugar; \`map\`, \`filter\` e o espalhamento produzem valor novo. Copiar antes de mexer evita o bug cuja causa fica longe do sintoma — uma função que reordena a lista de quem a chamou. E o espalhamento copia **um nível**: o que estiver aninhado continua compartilhado até você copiá-lo também. \`Object.freeze\` troca a convenção por uma regra que o programa cobra, mas tem o mesmo limite — congela só o nível de fora — e só recusa em voz alta dentro de um módulo.`,
     },
   ],
 };

@@ -33,13 +33,13 @@ Números lidos do catálogo, não de memória.
 | | |
 | --- | --- |
 | Trilhas | 2 — Fundamentos de JavaScript (20 aulas), Lógica (3) |
-| Aulas | 23, somando 478 minutos |
-| Exercícios | 95 — 27 de código, 31 de prever saída, 24 de lacuna, 13 de múltipla escolha |
+| Aulas | 23, somando 572 minutos |
+| Exercícios | 110 — 27 de código, 41 de prever saída, 24 de lacuna, 18 de múltipla escolha |
 | Verificação | 211 casos fixos + 42 propriedades |
 | Projetos | 7, com 22 critérios de aceitação |
 | Conceitos | 21, com grafo de pré-requisitos |
 | Flashcards | 22 |
-| Testes | 602 de unidade + 122 de navegador |
+| Testes | 617 de unidade + 122 de navegador |
 | Pacote | 949 kB (276 kB comprimido) |
 
 ## 4. Decisões que não devem ser desfeitas sem motivo forte
@@ -106,7 +106,7 @@ docs/curriculo.md       Roadmap de conteúdo — fonte canônica
 
 ```bash
 npm run typecheck   # inclui e2e/ e playwright.config.ts
-npm test            # 602 testes
+npm test            # 617 testes
 npm run test:e2e    # 122 no navegador (antes: npx playwright install chromium)
 npm run build
 ```
@@ -163,6 +163,13 @@ Cada uma custou tempo. Não repita.
   falhas como `::error::` para que o motivo seja legível pela API pública.
 - **O Write herda a codificação do arquivo que substitui.** Um README em UTF-16
   produziu acentos corrompidos. Apague antes de reescrever.
+- **O sandbox roda em modo estrito.** Atribuir a uma propriedade congelada
+  lança `TypeError` em vez de falhar em silêncio, e isso muda a saída esperada
+  de um exercício. Rode o trecho pelo `runProgram` antes de escrever o
+  `expectedOutput` em vez de deduzir.
+- **`\d` dentro de template literal vira `d`.** Mesma família do `[\s\S]` já
+  registrado abaixo, e ela morde ao escrever exercício de expressão regular:
+  use `[0-9]` no campo `code`, ou dobre a barra.
 - **`JSON.stringify` mente sobre `NaN`, infinitos e `undefined`** — os dois
   primeiros viram `null`, o terceiro some de dentro de objeto e vira `null`
   dentro de array. Num sandbox de ensino isso manda o aluno procurar por um
@@ -223,10 +230,10 @@ por preferência de assunto.
 magras e foram melhorando com o tempo, o que fazia o iniciante encontrar as
 piores: a aula 1 tinha 77 palavras e um exercício. O padrão novo é 500 a 900
 palavras e cinco a seis exercícios em dificuldade crescente — múltipla escolha ou
-prever saída, depois lacuna, depois código do zero. **Concluído para o bloco de
-fundamentos e o de lógica**: aulas 1 a 10 e as três de lógica estão no padrão
-novo, a mais curta delas com 304 palavras. O que resta são as aulas 11 a 20, que
-nasceram melhores (292 a 435 palavras, 3 exercícios cada) e ficam para depois.
+prever saída, depois lacuna, depois código do zero. **Concluído para as 23 aulas
+publicadas.** A mais curta tem 304 palavras; o bloco assíncrono, que é o mais
+difícil do curso, tem entre 650 e 810 palavras por aula. Nenhuma aula publicada
+está pendente de aprofundamento.
 
 **Fases 2 a 7 — não iniciadas.** Cada uma depende de um motor: iframe isolado
 (DOM, CSS, UI), transpilador (TypeScript), React, servidor simulado (Node),

@@ -9,7 +9,7 @@ export const lessonJson: Lesson = {
     'Converter entre objeto e texto com segurança, e reconhecer o que se perde na travessia.',
   concepts: ['json', 'objetos', 'strings'],
   status: 'published',
-  estimatedMinutes: 18,
+  estimatedMinutes: 28,
   blocks: [
     {
       kind: 'prose',
@@ -154,6 +154,66 @@ function recuperar(texto) {
     {
       kind: 'prose',
       markdown: `
+## A cópia profunda de pobre
+
+Existe um truque que você vai encontrar em muito código:
+
+~~~javascript
+const copia = JSON.parse(JSON.stringify(original));
+~~~
+
+Ida e volta pelo texto. Como \`parse\` constrói tudo do zero, nada fica compartilhado com o original — nem os objetos aninhados. Resolve num golpe o problema da cópia rasa.
+
+O preço é tudo que o JSON não sabe representar, e o preço é alto:
+
+| No original | Depois da ida e volta |
+|---|---|
+| \`undefined\` | a chave **some** |
+| função | a chave **some** |
+| \`Date\` | vira texto |
+| \`NaN\`, \`Infinity\` | viram \`null\` |
+| referência circular | \`stringify\` **lança** |
+
+Nenhuma dessas perdas avisa. O objeto volta parecendo certo, e o defeito aparece depois — na linha em que alguém chama \`.getFullYear()\` num texto.
+
+Hoje existe a ferramenta feita para isso: \`structuredClone(original)\` copia em profundidade preservando datas, \`Map\`, \`Set\` e até referências circulares. Quando a intenção é copiar, use ela. O truque do JSON continua útil só para o que ele foi feito: **transportar**.
+`.trim(),
+    },
+    {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-js-17-prever-copia',
+        type: 'predict-output',
+        prompt:
+          'Este objeto dá uma volta pelo JSON e retorna. O que sobrou dele?',
+        concepts: ['json', 'objetos'],
+        difficulty: 'intermediario',
+        tags: ['javascript', 'json'],
+        code: `const original = {
+  nome: 'Ana',
+  criadoEm: new Date(2026, 0, 1),
+  apelido: undefined,
+  saudar: function () { return 'oi'; },
+  tags: ['a', 'b'],
+};
+
+const copia = JSON.parse(JSON.stringify(original));
+
+console.log(Object.keys(copia).length);
+console.log(typeof copia.criadoEm);
+console.log(copia.tags === original.tags);`,
+        expectedOutput: '3\nstring\nfalse',
+        explanation:
+          'Das cinco chaves, duas não sobreviveram: `apelido` valia `undefined` e `saudar` era uma função, e o JSON não representa nenhum dos dois — as chaves somem sem aviso. A data virou texto, então `typeof` responde `"string"` e qualquer `.getFullYear()` adiante vai quebrar. Já o array é uma cópia de verdade, construída do zero pelo `parse`: por isso a comparação por identidade dá `false`, que é justamente o efeito desejado quando o objetivo era copiar.',
+        hints: [
+          'Quais tipos de valor o JSON não sabe escrever? O que acontece com essas chaves?',
+          'A data volta como `Date`, ou como outra coisa?',
+        ],
+      },
+    },
+    {
+      kind: 'prose',
+      markdown: `
 ## Todo JSON que vem de fora é suspeito
 
 Quando o texto vem de um servidor, de um arquivo ou do navegador do usuário, você não controla o conteúdo. \`JSON.parse\` **lança** ao receber algo malformado, e um \`parse\` sem proteção derruba a tela por causa de um dado ruim.
@@ -274,7 +334,7 @@ console.log(lerProduto('{"nome":"","preco":10}'));       // null`,
     },
     {
       kind: 'summary',
-      markdown: `\`stringify\` transforma objeto em texto, \`parse\` traz de volta — e o texto no meio **parece** um objeto sem ser um. Funções, \`undefined\` e datas não atravessam: as duas primeiras somem em silêncio, e a terceira volta como string. Todo \`parse\` de origem externa precisa de \`try/catch\`, porque você não controla o que chega. E JSON válido não é dado válido: a análise garante a forma, conferir o conteúdo continua sendo seu trabalho.`,
+      markdown: `\`stringify\` transforma objeto em texto, \`parse\` traz de volta — e o texto no meio **parece** um objeto sem ser um. Funções, \`undefined\` e datas não atravessam: as duas primeiras somem em silêncio, e a terceira volta como string. É por isso que a ida e volta pelo JSON, usada como cópia profunda, cobra caro — quando a intenção é copiar, \`structuredClone\` é a ferramenta feita para isso. Todo \`parse\` de origem externa precisa de \`try/catch\`, porque você não controla o que chega. E JSON válido não é dado válido: a análise garante a forma, conferir o conteúdo continua sendo seu trabalho.`,
     },
   ],
 };
