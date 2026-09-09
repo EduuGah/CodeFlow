@@ -170,3 +170,43 @@ async function buscarPreco() {
     expect(r.testResults[0].passed).toBe(true);
   });
 });
+
+describe('rejeição sem destino não escapa do sandbox', () => {
+  it('promise que rejeita sem catch não derruba quem executou', async () => {
+    // Sem contenção isto mata o processo do Node e vaza do worker para a página.
+    // Descoberto do jeito ruim: a aula sobre falhas assíncronas demonstra esse
+    // caso de propósito, e o CI ficou vermelho por sete commits.
+    const r = await runProgram(
+      `async function falhar() { throw new Error('quebrou'); }
+       falhar();
+       console.log('segui em frente');`,
+      []
+    );
+
+    expect(r.error).toBeUndefined();
+    expect(r.logs).toContain('segui em frente');
+  });
+
+  it('o programa seguinte roda normalmente', async () => {
+    await runProgram(`Promise.reject(new Error('solta'));`, []);
+
+    // A captura é desfeita ao fim de cada execução: se ela vazasse, o ambiente
+    // ficaria surdo para problemas de verdade daqui em diante.
+    const depois = await runProgram('console.log("ok");', [
+      { description: 'roda', assertion: '' },
+    ]);
+
+    expect(depois.testResults[0].passed).toBe(true);
+    expect(depois.logs).toContain('ok');
+  });
+
+  it('o teste que espera a rejeição continua vendo o erro', async () => {
+    // Conter não é esconder: quem espera a falha com await continua recebendo.
+    const r = await runProgram(`async function falhar() { throw new Error('esperado'); }`, [
+      { description: 'falhar() rejeita', assertion: 'await falhar();' },
+    ]);
+
+    expect(r.testResults[0].passed).toBe(false);
+    expect(r.testResults[0].message).toBe('esperado');
+  });
+});

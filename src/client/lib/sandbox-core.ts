@@ -112,6 +112,59 @@ async function esperarAgendados(medir: () => number): Promise<void> {
   }
 }
 
+/**
+ * Impede que uma rejeição sem destino escape do código do aluno.
+ *
+ * Uma promise que rejeita e não tem `catch` nem `await` não estoura onde foi
+ * criada: ela vira uma "rejeição não tratada", que o ambiente trata como quiser.
+ * No navegador vaza do worker para a página; no Node, **derrota o processo**.
+ *
+ * Isso não é hipótese: a aula sobre falhas assíncronas demonstra exatamente esse
+ * caso de propósito, e ao rodar aquele exercício o processo de testes morria.
+ * Um aluno escrevendo o mesmo código teria derrubado a própria aba.
+ *
+ * A captura vale só enquanto o programa do aluno roda. Devolver a função de
+ * desfazer, em vez de instalar para sempre, evita engolir problema nosso.
+ */
+function capturarRejeicoesSoltas(): () => void {
+  const ambiente = globalThis as unknown as {
+    addEventListener?: (t: string, f: unknown) => void;
+    removeEventListener?: (t: string, f: unknown) => void;
+    process?: {
+      listeners: (t: string) => unknown[];
+      removeAllListeners: (t: string) => void;
+      on: (t: string, f: unknown) => void;
+      off: (t: string, f: unknown) => void;
+    };
+  };
+
+  // Navegador e Worker: `preventDefault` cala o relatório da página.
+  if (typeof ambiente.addEventListener === 'function') {
+    const silenciar = (evento: { preventDefault?: () => void }) => evento.preventDefault?.();
+    ambiente.addEventListener('unhandledrejection', silenciar);
+    return () => ambiente.removeEventListener?.('unhandledrejection', silenciar);
+  }
+
+  // Node: um ouvinte qualquer já impede o processo de morrer, mas os que o
+  // executor de testes instalou continuariam reportando a falha. Guardamos e
+  // devolvemos depois.
+  const processo = ambiente.process;
+  if (processo && typeof processo.on === 'function') {
+    const anteriores = processo.listeners('unhandledRejection');
+    processo.removeAllListeners('unhandledRejection');
+
+    const silenciar = () => {};
+    processo.on('unhandledRejection', silenciar);
+
+    return () => {
+      processo.off('unhandledRejection', silenciar);
+      for (const ouvinte of anteriores) processo.on('unhandledRejection', ouvinte);
+    };
+  }
+
+  return () => {};
+}
+
 function formatArg(arg: unknown): string {
   if (typeof arg === 'string') return arg;
   if (arg instanceof Error) return `${arg.name}: ${arg.message}`;
@@ -407,6 +460,8 @@ export async function runProgram(
     logs.push(line.length > MAX_LOG_LENGTH ? `${line.slice(0, MAX_LOG_LENGTH)}…` : line);
   };
 
+  const devolverRejeicoes = capturarRejeicoesSoltas();
+
   const original = {
     log: console.log,
     info: console.info,
@@ -438,5 +493,6 @@ export async function runProgram(
     console.info = original.info;
     console.warn = original.warn;
     console.error = original.error;
+    devolverRejeicoes();
   }
 }
