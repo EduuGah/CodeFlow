@@ -77,6 +77,93 @@ console.log(precos);        // [10, 25, 40] — o original continua intacto`,
     {
       kind: 'exercise',
       exercise: {
+        id: 'ex-js-8-escolher-metodo',
+        type: 'multiple-choice',
+        prompt:
+          'Você tem uma lista de produtos e precisa do **valor total** do estoque. Qual método expressa essa intenção?',
+        concepts: ['arrays'],
+        difficulty: 'iniciante',
+        tags: ['javascript', 'arrays'],
+        options: [
+          '`map`, porque percorre todos os produtos',
+          '`filter`, porque separa os que têm valor',
+          '`reduce`, porque condensa a lista num número só',
+          '`forEach`, porque é o mais simples',
+        ],
+        correctIndex: 2,
+        explanation:
+          'A intenção é transformar muitos valores em **um**, e isso é exatamente `reduce`. `map` devolveria uma lista do mesmo tamanho, `filter` uma lista menor, e `forEach` não devolve nada — você teria que acumular numa variável de fora, que é justamente o que o `reduce` evita.',
+        hints: [
+          'Quantos valores você quer no fim: muitos, ou um só?',
+          'Cada método devolve uma coisa diferente. Qual devolve um valor único?',
+        ],
+      },
+    },
+    {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-js-8-lacuna-reduce',
+        type: 'fill-blank',
+        prompt:
+          'Complete o `reduce` para somar os preços. Preste atenção no valor inicial — é ele que define o que acontece com uma lista vazia.',
+        concepts: ['arrays'],
+        difficulty: 'intermediario',
+        tags: ['javascript', 'arrays'],
+        template: `function totalDoCarrinho(itens) {
+  return itens.reduce((soma, item) => soma {{1}} item.preco, {{2}});
+}`,
+        blanks: [
+          { placeholder: 'operação', size: 3 },
+          { placeholder: 'início', size: 3 },
+        ],
+        tests: [
+          {
+            description: 'soma os preços de três itens',
+            assertion: `
+              const t = totalDoCarrinho([{ preco: 10 }, { preco: 5 }, { preco: 2 }]);
+              if (t !== 17) throw new Error("Esperava 17, veio " + JSON.stringify(t) + ".");
+            `,
+          },
+          {
+            description: 'carrinho vazio custa 0, e não quebra',
+            assertion: `
+              let t;
+              try { t = totalDoCarrinho([]); }
+              catch (e) { throw new Error("Com lista vazia o reduce lançou erro. Sem valor inicial ele não tem por onde começar."); }
+              if (t !== 0) throw new Error("Esperava 0, veio " + JSON.stringify(t) + ".");
+            `,
+          },
+        ],
+        properties: [
+          {
+            description: 'o total é sempre a soma dos preços',
+            generate: `
+              const n = Math.floor(rnd() * 8);
+              const itens = [];
+              for (let i = 0; i < n; i++) itens.push({ preco: Math.floor(rnd() * 100) });
+              return { itens };
+            `,
+            check: `
+              const esperado = caso.itens.reduce((s, i) => s + i.preco, 0);
+              const obtido = totalDoCarrinho(caso.itens);
+              if (obtido !== esperado) {
+                throw new Error("com " + JSON.stringify(caso.itens) + " esperava " + esperado + ", veio " + JSON.stringify(obtido) + ".");
+              }
+            `,
+          },
+        ],
+        explanation:
+          'O segundo argumento do `reduce` é o valor de partida do acumulador. Sem ele, o `reduce` usa o primeiro item da lista como início — e numa lista vazia não há primeiro item, então ele **lança erro**. Informar o valor inicial resolve o caso vazio de graça.',
+        hints: [
+          'A primeira lacuna é a conta que junta o acumulado com o preço do item.',
+          'A segunda é por onde a soma começa. Qual número não altera uma soma?',
+        ],
+        solution: ['+', '0'],
+      },
+    },
+    {
+      kind: 'exercise',
+      exercise: {
         id: 'ex-js-8-aprovados',
         type: 'code',
         prompt: `Dado um array de alunos com \`nome\` e \`nota\`, crie \`nomesAprovados(alunos)\` que **retorna** um array com os nomes de quem tirou 7 ou mais.\n\nUse \`filter\` e \`map\` — não use \`for\`.`,

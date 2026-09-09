@@ -54,7 +54,11 @@ describe.skipIf(process.env.CI)('nenhum exercício chega perto do prazo', () => 
   // produz falha sem defeito, que é o tipo de teste que ensina a ignorar o
   // vermelho. Aqui isto é aviso durante o desenvolvimento; o portão de verdade é
   // o prazo do próprio sandbox, que o CI exercita ao rodar cada exercício.
-  const TETO = TEST_TIMEOUT_MS / 4;
+  // Metade do prazo, e não um quarto. O quarto era arbitrário e disparava com a
+  // máquina apenas ocupada — um exercício de 264ms virou 686ms sob carga. Metade
+  // continua pegando a regressão que originou esta guarda (1372ms) sem reclamar
+  // de variação normal.
+  const TETO = TEST_TIMEOUT_MS / 2;
 
   const comPropriedade = codeExercises.filter(({ exercise }) => exercise.properties?.length);
 
