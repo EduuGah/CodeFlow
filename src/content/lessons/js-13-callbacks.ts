@@ -9,7 +9,7 @@ export const lessonCallbacks: Lesson = {
     'Entender por que o programa não para para esperar, e escrever uma função que avisa quando terminou.',
   concepts: ['assincronia', 'closures', 'funcoes'],
   status: 'published',
-  estimatedMinutes: 18,
+  estimatedMinutes: 30,
   blocks: [
     {
       kind: 'prose',
@@ -83,6 +83,65 @@ console.log('C');`,
       },
     },
     {
+      kind: 'prose',
+      markdown: `
+## A pilha e a fila
+
+Para prever a ordem das coisas, basta entender dois lugares.
+
+A **pilha** é onde o código roda. Só cabe uma coisa por vez, e o JavaScript não sai dali até terminar tudo que está em andamento.
+
+A **fila** é onde esperam as funções agendadas — as de \`setTimeout\`, as respostas de rede, os cliques do usuário.
+
+A regra que liga os dois é curta: **enquanto a pilha não esvaziar, nada sai da fila.**
+
+Por isso \`setTimeout(f, 0)\` não significa "agora". Significa "assim que a pilha esvaziar". Se ainda houver dez linhas para rodar, essas dez rodam primeiro. O zero é o tempo **mínimo** de espera, não o momento.
+
+E daí vem uma consequência importante: um laço demorado no meio do caminho **trava tudo**.
+
+~~~javascript
+setTimeout(function () {
+  console.log('vou rodar quando der');
+}, 0);
+
+// enquanto este laço roda, nada da fila anda — nem o clique do usuário
+for (let i = 0; i < 1e9; i++) { }
+~~~
+
+Como só existe uma pilha, ela é também a única coisa que desenha a tela. Um cálculo pesado feito de uma vez congela a interface — o botão não responde, a animação para. É por isso que "não bloquear a pilha" é uma preocupação constante em JavaScript, e não uma sutileza acadêmica.
+`.trim(),
+    },
+    {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-js-13-prever-fila',
+        type: 'predict-output',
+        prompt:
+          'Todos os atrasos são zero. Simule a pilha e a fila antes de rodar: o que sai, e em que ordem?',
+        concepts: ['assincronia'],
+        difficulty: 'intermediario',
+        tags: ['javascript', 'assincronia'],
+        code: `console.log('A');
+
+setTimeout(function () {
+  console.log('B');
+  setTimeout(function () { console.log('C'); }, 0);
+  console.log('D');
+}, 0);
+
+setTimeout(function () { console.log('E'); }, 0);
+
+console.log('F');`,
+        expectedOutput: 'A\nF\nB\nD\nE\nC',
+        explanation:
+          'Primeiro roda tudo que está na pilha: `A` e `F`. Os dois `setTimeout` só foram **agendados**. Com a pilha vazia, a fila começa a andar na ordem em que entrou: o primeiro agendamento imprime `B`, agenda mais um, e imprime `D` — repare que o `C` não sai no meio, porque ele foi para o fim da fila. Depois vem `E`, que já esperava. E `C` por último, porque entrou na fila depois de todo mundo.',
+        hints: [
+          'Nada sai da fila enquanto ainda houver código rodando na pilha.',
+          'O `setTimeout` de dentro entra na fila em que momento — antes ou depois do que já estava lá?',
+        ],
+      },
+    },
+    {
       kind: 'exercise',
       exercise: {
         id: 'ex-js-13-lacuna-callback',
@@ -124,6 +183,65 @@ console.log('C');`,
           'Chame o parâmetro que recebeu, passando o resultado.',
         ],
         solution: ['aoTerminar'],
+      },
+    },
+    {
+      kind: 'prose',
+      markdown: `
+## O \`return\` que não volta para você
+
+Este é o erro que todo mundo comete ao tentar transformar uma tarefa demorada numa função normal:
+
+~~~javascript
+function buscarUsuario(id) {
+  setTimeout(function () {
+    return { id: id, nome: 'Ana' };   // devolve para quem?
+  }, 100);
+}
+
+console.log(buscarUsuario(1));   // undefined
+~~~
+
+O \`return\` está dentro da função anônima que o \`setTimeout\` vai chamar daqui a 100ms. Ele devolve o valor **para o \`setTimeout\`**, que não faz nada com ele.
+
+Enquanto isso, \`buscarUsuario\` chegou ao fim da própria última linha e devolveu \`undefined\` — imediatamente, muito antes de os 100ms passarem. Não há como ser diferente: para retornar o usuário, ela precisaria esperar, e esperar é justamente o que ela não faz.
+
+A saída disponível aqui é entregar o resultado por callback:
+
+~~~javascript
+function buscarUsuario(id, aoTerminar) {
+  setTimeout(function () {
+    aoTerminar({ id: id, nome: 'Ana' });
+  }, 100);
+}
+~~~
+
+Guarde a forma da pergunta, porque ela reaparece: **uma função não consegue retornar um valor que ainda não chegou.** A próxima aula devolve outra coisa no lugar — um objeto que representa a promessa desse valor — e é isso que finalmente permite escrever \`return\` de novo.
+`.trim(),
+    },
+    {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-js-13-return-perdido',
+        type: 'multiple-choice',
+        prompt:
+          'Este código imprime `undefined`:\n\n```javascript\nfunction buscar(id) {\n  setTimeout(function () {\n    return { id: id };\n  }, 100);\n}\n\nconsole.log(buscar(1));\n```\n\nPor quê?',
+        concepts: ['assincronia', 'funcoes'],
+        difficulty: 'intermediario',
+        tags: ['javascript', 'assincronia'],
+        options: [
+          'Porque `setTimeout` não aceita funções que usam `return`',
+          'O `return` devolve o valor para a função anônima que o `setTimeout` chama, e `buscar` já terminou sem devolver nada',
+          'Porque o atraso de 100ms é curto demais para o objeto ficar pronto',
+          'Porque `buscar` precisaria ter sido declarada como função de seta',
+        ],
+        correctIndex: 1,
+        explanation:
+          'São duas funções, e o `return` pertence à de dentro. `buscar` só agenda e chega ao fim — devolvendo `undefined` na mesma hora, cerca de 100ms antes de o `return` sequer acontecer. Aumentar o atraso não muda nada, e nenhuma sintaxe de declaração resolve: **uma função não consegue retornar um valor que ainda não chegou**. A saída é receber um callback e chamá-lo com o resultado, ou devolver uma promise — que é o assunto da próxima aula.',
+        hints: [
+          'Quantas funções existem nesse trecho? A que função o `return` pertence?',
+          'Em que momento `buscar` chega ao fim: antes ou depois dos 100ms?',
+        ],
       },
     },
     {
@@ -255,7 +373,7 @@ verificarIdade(20, function (erro, podeEntrar) {
     },
     {
       kind: 'summary',
-      markdown: `O JavaScript **agenda** em vez de esperar: o programa segue, e o que foi agendado roda depois que o código atual termina. Por isso atraso zero não significa "agora". Quem precisa do resultado de uma tarefa demorada usa um **callback** — e tudo que depende desse resultado acontece dentro dele, nunca fora. A convenção erro-primeiro reserva o primeiro argumento para a falha, e o \`return\` depois de tratá-la evita seguir com um valor que não existe.`,
+      markdown: `O JavaScript **agenda** em vez de esperar: o programa segue, e o que foi agendado roda depois que o código atual termina. A regra que prevê a ordem cabe numa frase — enquanto a pilha não esvaziar, nada sai da fila —, e é dela que vem tanto o \`setTimeout(f, 0)\` que não é "agora" quanto o laço pesado que congela a tela. Quem precisa do resultado de uma tarefa demorada usa um **callback**, e tudo que depende desse resultado acontece dentro dele: uma função não consegue retornar um valor que ainda não chegou. A convenção erro-primeiro reserva o primeiro argumento para a falha, e o \`return\` depois de tratá-la evita seguir com um valor que não existe.`,
     },
   ],
 };

@@ -9,7 +9,7 @@ export const lessonPromises: Lesson = {
     'Criar e encadear promises, e separar o caminho do sucesso do caminho da falha sem aninhar callbacks.',
   concepts: ['promises', 'assincronia', 'funcoes'],
   status: 'published',
-  estimatedMinutes: 20,
+  estimatedMinutes: 30,
   blocks: [
     {
       kind: 'prose',
@@ -113,6 +113,57 @@ Promise.resolve(2)
       },
     },
     {
+      kind: 'prose',
+      markdown: `
+## O que sai de um \`.then\` entra no próximo
+
+A cadeia só funciona porque cada \`.then\` **devolve uma promise nova**, e o que você retorna dentro dele vira o valor dessa promise. Três casos, e vale conhecer os três:
+
+~~~javascript
+.then((n) => n * 2)              // valor comum → o próximo recebe o dobro
+.then((n) => buscarNome(n))      // outra promise → o próximo espera ELA resolver
+.then((n) => { n * 2; })         // sem return → o próximo recebe undefined
+~~~
+
+O segundo caso é o que evita o aninhamento: quando você devolve uma promise de dentro de um \`.then\`, a cadeia **espera** por ela antes de seguir, em vez de passar adiante um objeto de promise. É o que permite escrever passos dependentes um embaixo do outro em vez de um dentro do outro.
+
+O terceiro é o bug mais comum de toda a aula. Chaves no corpo da seta sem \`return\` — exatamente a mesma armadilha do \`map\` —, e o passo seguinte recebe \`undefined\` sem nenhum aviso. Se um \`.then\` no meio da sua cadeia está recebendo \`undefined\`, olhe o \`return\` do anterior antes de qualquer outra coisa.
+
+E existe o \`.finally\`, que roda nos dois desfechos e **não** altera o valor que passa por ele. É o lugar de esconder o "carregando".
+`.trim(),
+    },
+    {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-js-14-prever-sem-return',
+        type: 'predict-output',
+        prompt:
+          'Repare no corpo de cada `.then`. O que este programa imprime, nas três linhas?',
+        concepts: ['promises'],
+        difficulty: 'intermediario',
+        tags: ['javascript', 'promises'],
+        code: `Promise.resolve(2)
+  .then((n) => {
+    console.log('A', n);
+    n * 10;
+  })
+  .then((n) => {
+    console.log('B', n);
+    return 'fim';
+  })
+  .then((v) => {
+    console.log('C', v);
+  });`,
+        expectedOutput: 'A 2\nB undefined\nC fim',
+        explanation:
+          'O primeiro `.then` calcula `n * 10` e joga fora: com chaves no corpo, a seta precisa de `return` explícito. Como ele não devolve nada, a promise seguinte resolve com `undefined`, e é isso que o segundo `.then` recebe. O segundo devolve `"fim"`, e aí o terceiro recebe o valor certo. Um `undefined` inesperado no meio de uma cadeia quase sempre é um `return` que faltou no passo anterior.',
+        hints: [
+          'O primeiro `.then` tem chaves no corpo. Ele devolve alguma coisa?',
+          'O valor que um `.then` recebe é o que o anterior retornou.',
+        ],
+      },
+    },
+    {
       kind: 'exercise',
       exercise: {
         id: 'ex-js-14-lacuna-promise',
@@ -181,6 +232,59 @@ Promise.resolve(2)
           'Erro vai pelo primeiro parâmetro ou pelo segundo? Leia os nomes.',
         ],
         solution: ['rejeitar', 'resolver'],
+      },
+    },
+    {
+      kind: 'prose',
+      markdown: `
+## Onde o \`.catch\` fica muda o que ele faz
+
+Um \`.catch\` pega erros do que veio **antes** dele na cadeia. Nunca do que vem depois.
+
+~~~javascript
+buscar()
+  .catch(tratar)          // pega só as falhas de buscar()
+  .then(usar);            // um erro AQUI não é pego por ninguém
+~~~
+
+E tem uma segunda parte, mais sutil: depois que um \`.catch\` trata o erro, **a cadeia volta a estar bem**. Ela segue resolvida, com o valor que o \`catch\` retornou — \`undefined\`, se ele não retornou nada. No exemplo acima, \`usar\` roda mesmo quando a busca falhou, recebendo \`undefined\`.
+
+Por isso a posição padrão do \`.catch\` é **no fim**:
+
+~~~javascript
+buscar()
+  .then(usar)
+  .catch(tratar);         // pega falha de buscar() E de usar()
+~~~
+
+Um \`.catch\` no meio só se justifica quando você quer mesmo continuar, e nesse caso retorne um valor de reserva de propósito: \`.catch(() => [])\` deixa claro que o passo seguinte vai receber uma lista vazia.
+
+O caso que sobra é o pior: uma promise que rejeita e **ninguém** trata. Ela não derruba o programa na hora — vira um aviso de "unhandled rejection" no console, fácil de não ver. Uma cadeia sem \`.catch\` no fim é uma falha esperando para acontecer em silêncio.
+`.trim(),
+    },
+    {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-js-14-onde-catch',
+        type: 'multiple-choice',
+        prompt:
+          'Quando a busca falha, este código imprime "erro" — e logo depois quebra dentro de `usar`:\n\n```javascript\nbuscar()\n  .catch((e) => console.log("erro"))\n  .then((dados) => usar(dados));\n```\n\nPor quê?',
+        concepts: ['promises', 'depuracao'],
+        difficulty: 'intermediario',
+        tags: ['javascript', 'promises'],
+        options: [
+          'Porque `.catch` precisa receber uma função assíncrona para funcionar',
+          'Porque depois de o `.catch` tratar o erro a cadeia segue resolvida, então o `.then` roda com o que o `catch` retornou — `undefined`',
+          'Porque `.catch` no meio da cadeia não pega erro nenhum',
+          'Porque falta um `.finally` para encerrar a cadeia',
+        ],
+        correctIndex: 1,
+        explanation:
+          'Tratar um erro **conserta** a cadeia: a partir do `.catch` ela volta a estar resolvida, com o valor que o `catch` retornou. Como esse `catch` só imprime e não retorna nada, o `.then` seguinte recebe `undefined` e chama `usar(undefined)`. Duas saídas: mover o `.catch` para o fim, e aí ele pega tanto a falha da busca quanto a de `usar`; ou, se a intenção era mesmo seguir, retornar um valor de reserva explícito — `.catch(() => [])`.',
+        hints: [
+          'Depois que o `.catch` roda, a cadeia continua rejeitada ou volta a estar resolvida?',
+          'O que a função dentro do `.catch` retorna? É esse valor que o `.then` recebe.',
+        ],
       },
     },
     {
@@ -288,7 +392,7 @@ precoTotal(['pao', 'leite']).then((t) => console.log(t)); // esperado: 16`,
     },
     {
       kind: 'summary',
-      markdown: `Uma promise é um valor que ainda não chegou, com dois destinos definidos desde o início. O que um \`.then\` devolve vira a entrada do próximo, e é isso que troca a escada de callbacks por uma sequência que desce. Um erro em qualquer etapa pula direto para o \`.catch\`, então o tratamento deixa de se repetir em cada nível. Tarefas independentes vão juntas com \`Promise.all\` — e ele desiste na primeira que rejeitar.`,
+      markdown: `Uma promise é um valor que ainda não chegou, com dois destinos definidos desde o início. O que um \`.then\` devolve vira a entrada do próximo — e devolver **outra promise** faz a cadeia esperar por ela, que é o que troca a escada de callbacks por uma sequência que desce. Chaves no corpo da seta sem \`return\` entregam \`undefined\` ao passo seguinte, e é a primeira coisa a conferir quando um \`.then\` recebe algo inesperado. Um erro em qualquer etapa pula direto para o \`.catch\`, então o tratamento deixa de se repetir em cada nível; por isso o lugar dele é no fim, já que ele só alcança o que veio antes e, depois de tratar, devolve a cadeia ao estado resolvido. Tarefas independentes vão juntas com \`Promise.all\` — e ele desiste na primeira que rejeitar.`,
     },
   ],
 };

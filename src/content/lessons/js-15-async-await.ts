@@ -9,7 +9,7 @@ export const lessonAsyncAwait: Lesson = {
     'Escrever código assíncrono que se lê de cima para baixo, e tratar falhas com try/catch.',
   concepts: ['promises', 'assincronia', 'depuracao'],
   status: 'published',
-  estimatedMinutes: 20,
+  estimatedMinutes: 32,
   blocks: [
     {
       kind: 'prose',
@@ -94,6 +94,65 @@ console.log('C');`,
       },
     },
     {
+      kind: 'prose',
+      markdown: `
+## \`await\` pausa a função, não o programa
+
+A regra 2 merece um exemplo, porque ela é a que decide a ordem de tudo.
+
+Uma função \`async\` roda **normalmente, de forma síncrona**, até encontrar o primeiro \`await\`. Nesse ponto ela é suspensa e devolve o controle a quem a chamou. O resto do corpo dela fica agendado para quando a promise resolver.
+
+~~~javascript
+async function um() {
+  console.log('A');
+  await null;          // daqui em diante, fica para depois
+  console.log('B');
+}
+
+console.log('1');
+um();
+console.log('2');
+// 1, A, 2, B
+~~~
+
+O \`A\` sai antes do \`2\` porque a função começou a rodar na hora. O \`B\` sai por último porque o \`await\` mandou o restante para a fila — mesmo esperando por \`null\`, que já está pronto.
+
+Duas consequências práticas:
+
+**Chamar sem \`await\` não é erro de sintaxe.** \`um()\` sozinho dispara a função e segue em frente. Às vezes é o que você quer; quase sempre não é, e o sintoma é o código depois rodar cedo demais.
+
+**A função devolve uma promise para o mundo.** Quem chama decide se espera. É por isso que a regra 3 existe, e é por isso que uma função \`async\` nunca "vira" síncrona por dentro.
+`.trim(),
+    },
+    {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-js-15-prever-ordem',
+        type: 'predict-output',
+        prompt:
+          'Nenhum temporizador aqui — a ordem é totalmente previsível. O que sai, e em que sequência?',
+        concepts: ['assincronia'],
+        difficulty: 'intermediario',
+        tags: ['javascript', 'assincronia'],
+        code: `async function um() {
+  console.log('A');
+  await null;
+  console.log('B');
+}
+
+console.log('1');
+um();
+console.log('2');`,
+        expectedOutput: '1\nA\n2\nB',
+        explanation:
+          'Uma função `async` roda de forma **síncrona** até o primeiro `await` — por isso o `A` sai logo depois do `1`, antes do `2`. No `await` ela é suspensa e devolve o controle: o `2` roda, e só quando a pilha esvazia o corpo restante volta a rodar, imprimindo `B`. Repare que o `await null` não espera nada de verdade e mesmo assim adia o resto: é o `await`, e não a demora, que agenda a continuação.',
+        hints: [
+          'A função começa a rodar no momento da chamada, ou só depois?',
+          'A partir de qual linha o corpo da função é adiado?',
+        ],
+      },
+    },
+    {
       kind: 'exercise',
       exercise: {
         id: 'ex-js-15-lacuna-async',
@@ -133,6 +192,73 @@ console.log('C');`,
           'Uma delas permite a outra: sem a primeira, a segunda é erro de sintaxe.',
         ],
         solution: ['async', 'await'],
+      },
+    },
+    {
+      kind: 'prose',
+      markdown: `
+## \`await\` dentro de laço, e o laço que não espera
+
+Percorrer uma lista fazendo uma tarefa assíncrona em cada item tem três formas, e elas fazem coisas bem diferentes.
+
+**Em sequência**, uma de cada vez:
+
+~~~javascript
+for (const id of ids) {
+  const dado = await buscar(id);
+  console.log(dado);
+}
+~~~
+
+Correto, e às vezes é exatamente o que se quer — quando um passo depende do anterior, ou quando disparar tudo junto sobrecarregaria o servidor. O custo é o tempo: dez buscas de 100ms levam um segundo.
+
+**Em paralelo**, todas ao mesmo tempo:
+
+~~~javascript
+const dados = await Promise.all(ids.map((id) => buscar(id)));
+~~~
+
+Dispara todas e espera o conjunto. As mesmas dez buscas levam 100ms.
+
+**E a forma que não funciona:**
+
+~~~javascript
+ids.forEach(async (id) => {
+  const dado = await buscar(id);
+  console.log(dado);
+});
+
+console.log('acabou');   // sai primeiro, sempre
+~~~
+
+\`forEach\` **descarta** o que a função devolve. Cada chamada devolve uma promise, e nenhuma delas é esperada por ninguém — o laço termina na hora e o programa segue como se as buscas já tivessem acabado. Pior: se alguma rejeitar, vira rejeição não tratada.
+
+A regra para levar: **\`await\` dentro de \`forEach\` não espera nada.** Quando precisar esperar, use \`for...of\` ou \`Promise.all\`.
+`.trim(),
+    },
+    {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-js-15-foreach-async',
+        type: 'multiple-choice',
+        prompt:
+          'Neste código, "acabou" aparece antes de qualquer dado, e o array `saida` chega vazio na linha seguinte:\n\n```javascript\nconst saida = [];\n\nids.forEach(async (id) => {\n  saida.push(await buscar(id));\n});\n\nconsole.log("acabou", saida.length); // acabou 0\n```\n\nQual é a correção?',
+        concepts: ['assincronia', 'arrays'],
+        difficulty: 'intermediario',
+        tags: ['javascript', 'assincronia'],
+        options: [
+          'Colocar `await` antes de `ids.forEach(...)`',
+          'Trocar por `for (const id of ids) { saida.push(await buscar(id)); }`, ou por `const saida = await Promise.all(ids.map(buscar))`',
+          'Declarar `saida` com `let` em vez de `const`',
+          'Mover o `console.log` para dentro do `forEach`',
+        ],
+        correctIndex: 1,
+        explanation:
+          '`forEach` descarta o valor devolvido pela função que recebe. Como uma função `async` devolve uma promise, o `forEach` joga fora exatamente a coisa que permitiria esperar — ele termina imediatamente e o programa segue. Pôr `await` antes do `forEach` não ajuda: ele devolve `undefined`, e esperar por `undefined` não espera pelas buscas. As duas saídas certas são `for...of`, que espera uma de cada vez, e `Promise.all` com `map`, que dispara todas juntas e espera o conjunto.',
+        hints: [
+          'O que o `forEach` faz com o valor que a função dele devolve?',
+          'Uma função `async` devolve o quê, mesmo quando o corpo não tem `return`?',
+        ],
       },
     },
     {
@@ -245,7 +371,7 @@ nomeDoUsuario(-1).then(console.log);  // esperado: desconhecido`,
     },
     {
       kind: 'summary',
-      markdown: `\`await\` pausa só a função onde está, e por isso o código assíncrono passa a se ler de cima para baixo. Toda função \`async\` devolve uma promise — mesmo quando o \`return\` é um número —, então quem chama precisa esperar. Falhas voltam a ser \`try/catch\`, e um bloco só cobre várias chamadas seguidas. Encadeie \`await\` quando um passo depende do anterior; quando não depende, \`Promise.all\` faz em um o que a fila faria em três.`,
+      markdown: `\`await\` pausa só a função onde está, e por isso o código assíncrono passa a se ler de cima para baixo. A função roda de forma síncrona até o primeiro \`await\` e só então devolve o controle — é isso que explica a ordem de qualquer programa assíncrono. Toda função \`async\` devolve uma promise, mesmo quando o \`return\` é um número, então quem chama precisa esperar. Falhas voltam a ser \`try/catch\`, e um bloco só cobre várias chamadas seguidas. Em laços: \`for...of\` com \`await\` espera uma de cada vez, \`Promise.all\` com \`map\` espera todas juntas, e \`forEach\` com \`async\` **não espera nada** — ele descarta a promise que permitiria esperar.`,
     },
   ],
 };
