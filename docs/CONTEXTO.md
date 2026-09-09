@@ -32,14 +32,14 @@ Números lidos do catálogo, não de memória.
 
 | | |
 | --- | --- |
-| Trilhas | 2 — Fundamentos de JavaScript (18 aulas), Lógica (3) |
-| Aulas | 21, somando 380 minutos |
-| Exercícios | 50 — 21 de código, 16 de prever saída, 9 de lacuna, 4 de múltipla escolha |
-| Verificação | 118 casos fixos + 19 propriedades |
+| Trilhas | 2 — Fundamentos de JavaScript (19 aulas), Lógica (3) |
+| Aulas | 22, somando 400 minutos |
+| Exercícios | 53 — 22 de código, 17 de prever saída, 10 de lacuna, 4 de múltipla escolha |
+| Verificação | 129 casos fixos + 21 propriedades |
 | Projetos | 7, com 22 critérios de aceitação |
 | Conceitos | 21, com grafo de pré-requisitos |
 | Flashcards | 22 |
-| Testes | 468 de unidade + 110 de navegador |
+| Testes | 476 de unidade + 110 de navegador |
 | Pacote | 949 kB (276 kB comprimido) |
 
 ## 4. Decisões que não devem ser desfeitas sem motivo forte
@@ -106,7 +106,7 @@ docs/curriculo.md       Roadmap de conteúdo — fonte canônica
 
 ```bash
 npm run typecheck   # inclui e2e/ e playwright.config.ts
-npm test            # 468 testes
+npm test            # 476 testes
 npm run test:e2e    # 110 no navegador (antes: npx playwright install chromium)
 npm run build
 ```
@@ -143,6 +143,10 @@ Cada uma custou tempo. Não repita.
 - **`window` não existe nos testes `.test.ts`** (ambiente node). Leia de
   `globalThis`.
 - **Contagem fixa em teste quebra com conteúdo novo.** Leia do catálogo.
+- **Teste de data que depende do fuso passa aqui e falha no CI**, que roda em
+  UTC. Construa com partes locais (`new Date(ano, mes, dia)`) e compare
+  componentes, nunca timestamps. O CI roda o conteúdo em Pacific/Kiritimati
+  (UTC+14) justamente para pegar isso.
 - **Script com regex sobre muitos arquivos causa dano colateral.** Um meu removeu
   `async` de seis testes sem relação com a mudança. Confira o `git diff` antes de
   seguir.
@@ -177,8 +181,8 @@ por preferência de assunto.
 
 | Item | Estado |
 | --- | --- |
-| Bloco *JavaScript real* | **8 de 10** — escopo, closures, callbacks, promises, async/await, falhas assíncronas, JSON, imutabilidade |
-| Faltam nesse bloco | datas, expressões regulares (módulos está bloqueado) |
+| Bloco *JavaScript real* | **9 de 10** — escopo, closures, callbacks, promises, async/await, falhas assíncronas, JSON, imutabilidade, datas |
+| Faltam nesse bloco | expressões regulares (módulos está bloqueado) |
 | Bloco *Como a web funciona* | **0 de 8** — HTTP, REST, autenticação, CORS, segurança |
 | Testes por propriedade | **feito** |
 | Exercício de lacuna | **feito** |

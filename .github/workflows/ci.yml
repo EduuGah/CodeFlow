@@ -36,6 +36,15 @@ jobs:
       - name: Rodar testes
         run: npm test
 
+      # O CI roda em UTC e a máquina de quem escreve, não. Um exercício de datas
+      # que dependa do fuso passa de um lado e falha do outro — e o pior caso é
+      # passar nos dois por acaso, ensinando errado. Kiritimati é UTC+14, o
+      # extremo oposto do CI.
+      - name: Conteúdo em outro fuso horário
+        run: npm test -- src/content/content.test.ts
+        env:
+          TZ: Pacific/Kiritimati
+
       - name: Build de produção
         run: npm run build
 
