@@ -39,7 +39,7 @@ Números lidos do catálogo, não de memória.
 | Projetos | 7, com 22 critérios de aceitação |
 | Conceitos | 21, com grafo de pré-requisitos |
 | Flashcards | 22 |
-| Testes | 548 de unidade + 118 de navegador |
+| Testes | 549 de unidade + 122 de navegador |
 | Pacote | 949 kB (276 kB comprimido) |
 
 ## 4. Decisões que não devem ser desfeitas sem motivo forte
@@ -106,8 +106,8 @@ docs/curriculo.md       Roadmap de conteúdo — fonte canônica
 
 ```bash
 npm run typecheck   # inclui e2e/ e playwright.config.ts
-npm test            # 548 testes
-npm run test:e2e    # 118 no navegador (antes: npx playwright install chromium)
+npm test            # 549 testes
+npm run test:e2e    # 122 no navegador (antes: npx playwright install chromium)
 npm run build
 ```
 

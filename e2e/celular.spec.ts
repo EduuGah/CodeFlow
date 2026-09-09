@@ -116,4 +116,102 @@ test.describe('celular', () => {
 
     expect(pequenos).toEqual([]);
   });
+
+  test('a aula não corta texto nem estoura a largura em nenhum passo', async ({
+    logado: page,
+  }) => {
+    await page.goto('/lesson/lesson-js-1');
+    await page.getByText(/Passo 1 de/).waitFor();
+
+    const total = Number(
+      (await page.getByText(/Passo \d+ de \d+/).textContent())!.match(/de (\d+)/)![1]
+    );
+
+    for (let passo = 1; passo <= total; passo++) {
+      const problemas = await page.evaluate(() => {
+        const largura = document.documentElement.clientWidth;
+        const estouram: string[] = [];
+        const cortados: string[] = [];
+
+        /**
+         * Bloco de código pode ser mais largo que a tela — desde que role.
+         *
+         * Quebrar linha de código à força prejudica a leitura, então esses
+         * blocos ganham rolagem própria de propósito. O que não pode é
+         * conteúdo largo **sem** rolagem: aí ele simplesmente some.
+         */
+        const dentroDeAlgoQueRola = (el: Element) => {
+          for (let p = el.parentElement; p && p.tagName !== 'MAIN'; p = p.parentElement) {
+            const ox = getComputedStyle(p).overflowX;
+            if (ox === 'auto' || ox === 'scroll') return true;
+          }
+          return false;
+        };
+
+        for (const el of document.querySelectorAll('main *')) {
+          const r = el.getBoundingClientRect();
+
+          // Fora: o que não ocupa espaço, e o que é só para leitor de tela — o
+          // padrão `sr-only` recorta o elemento a 1px, então ele "corta" texto
+          // por construção.
+          if (r.width <= 1 || r.height <= 1 || dentroDeAlgoQueRola(el)) continue;
+
+          if (r.right > largura + 1 || r.left < -1) {
+            estouram.push(`${el.tagName}.${String(el.className).slice(0, 40)}`);
+          }
+
+          // Texto largo demais para a própria caixa, sem rolagem própria.
+          // Foi assim que uma alternativa de múltipla escolha ficou ilegível no
+          // celular: o nome de variável longo é uma palavra só, e sem
+          // `overflow-wrap` ele era simplesmente cortado.
+          const estilo = getComputedStyle(el);
+          const rola = estilo.overflowX === 'auto' || estilo.overflowX === 'scroll';
+          if (!rola && el.scrollWidth > el.clientWidth + 1 && el.clientWidth > 0) {
+            cortados.push(
+              `${el.tagName}: "${(el.textContent ?? '').slice(0, 40)}" ${el.scrollWidth}>${el.clientWidth}`
+            );
+          }
+        }
+
+        return { estouram: estouram.slice(0, 4), cortados: cortados.slice(0, 4) };
+      });
+
+      expect(problemas.estouram, `passo ${passo}`).toEqual([]);
+      expect(problemas.cortados, `passo ${passo}`).toEqual([]);
+
+      const avancar = page.getByRole('button', {
+        name: /Continuar assim mesmo|Continuar|Pular por ora/,
+      });
+      if (!(await avancar.count())) break;
+      await avancar.click();
+    }
+  });
+
+  test('os controles da aula têm tamanho de dedo', async ({ logado: page }) => {
+    await page.goto('/lesson/lesson-js-1');
+    await page.getByText(/Passo 1 de/).waitFor();
+
+    // Até a múltipla escolha, que é o passo com mais controles.
+    await page.getByRole('button', { name: /Continuar|Pular por ora/ }).click();
+    await page.getByRole('radio').first().waitFor();
+
+    const pequenos = await page.evaluate(() => {
+      const fora: string[] = [];
+
+      for (const el of document.querySelectorAll('button, a[href], label')) {
+        const r = el.getBoundingClientRect();
+        if (r.height === 0) continue;
+
+        if (r.height < 44 || r.width < 44) {
+          fora.push(
+            `${el.textContent?.trim().slice(0, 30) || el.getAttribute('aria-label')}: ${Math.round(r.width)}x${Math.round(r.height)}`
+          );
+        }
+      }
+
+      return fora;
+    });
+
+    expect(pequenos).toEqual([]);
+  });
 });

@@ -74,7 +74,12 @@ export function MultipleChoice({
         <MarkdownReader content={exercise.prompt} />
       </div>
 
-      <fieldset className="space-y-2" disabled={enviada && acertou}>
+      {/* `min-w-0` no fieldset não é enfeite: o elemento tem
+          `min-inline-size: min-content` embutido no navegador e se recusa a
+          encolher abaixo da maior palavra que contém. Como as alternativas são
+          código, um identificador longo empurrava o fieldset para além da
+          largura da tela do celular e a alternativa aparecia cortada. */}
+      <fieldset className="min-w-0 space-y-2" disabled={enviada && acertou}>
         <legend className="sr-only">Escolha uma alternativa</legend>
 
         {exercise.options.map((opcao, i) => {
@@ -105,7 +110,12 @@ export function MultipleChoice({
                   setEnviada(false);
                 }}
               />
-              <span className="flex-1 text-ink">{opcao}</span>
+              {/* `min-w-0` e `break-words` porque as alternativas costumam ser
+                  trechos de código: um identificador longo é uma palavra só, e
+                  sem isto ele estourava a caixa e ficava cortado na tela do
+                  celular — a alternativa virava ilegível justamente quando o
+                  ponto do exercício era o comprimento do nome. */}
+              <span className="min-w-0 flex-1 break-words text-ink">{opcao}</span>
               {revelarCerta && <IconCheckCircle size={16} className="mt-0.5 text-success-600" />}
               {revelarErrada && <IconCloseCircle size={16} className="mt-0.5 text-danger-500" />}
             </label>
