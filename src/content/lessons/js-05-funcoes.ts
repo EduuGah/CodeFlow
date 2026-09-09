@@ -15,12 +15,61 @@ export const lessonFuncoes: Lesson = {
       markdown: `
 Uma **função** é um trecho de lógica com nome. Você a escreve uma vez e usa quantas vezes quiser, com dados diferentes.
 
+~~~javascript
+function saudar(nome) {
+  return 'Olá, ' + nome;
+}
+
+saudar('Ana');     // 'Olá, Ana'
+saudar('Bruno');   // 'Olá, Bruno'
+~~~
+
+Sem funções, cada uso exigiria repetir a lógica. E quando a regra mudasse, você teria que achar todas as cópias — e a que você esquecesse viraria um bug.
+
 Duas partes costumam confundir no começo:
 
-- **parâmetros** — os dados que a função recebe. São variáveis que só existem dentro dela.
-- **\`return\`** — o valor que ela devolve para quem a chamou.
+- **parâmetros** — os dados que a função recebe. São variáveis que **só existem dentro dela**.
+- **\`return\`** — o valor que ela devolve para quem chamou.
 
-\`console.log\` e \`return\` fazem coisas diferentes. O \`console.log\` **mostra** algo na tela; o \`return\` **entrega** um valor de volta ao código. Uma função que só imprime não pode ter o resultado reaproveitado numa conta.
+## \`return\` não é \`console.log\`
+
+Esta é a confusão número um de quem está começando, e ela custa horas:
+
+~~~javascript
+function somaImprime(a, b) {
+  console.log(a + b);      // MOSTRA na tela
+}
+
+function somaDevolve(a, b) {
+  return a + b;            // ENTREGA para o código
+}
+
+const x = somaImprime(2, 3);   // imprime 5, mas x fica undefined
+const y = somaDevolve(2, 3);   // não imprime nada, mas y vale 5
+
+console.log(x * 2);   // NaN  — undefined vezes 2
+console.log(y * 2);   // 10
+~~~
+
+\`console.log\` é para **você** ver. \`return\` é para o **programa** usar. Uma função que só imprime não pode ter o resultado reaproveitado numa conta.
+
+## O \`return\` encerra a função na hora
+
+Nada depois dele executa:
+
+~~~javascript
+function verificar(idade) {
+  if (idade < 0) {
+    return 'inválida';    // sai aqui mesmo
+  }
+
+  return idade >= 18 ? 'adulto' : 'menor';
+}
+~~~
+
+É por isso que uma sequência de \`return\` dispensa \`else\`: se o primeiro passou, o resto nem é alcançado. Isso deixa o código mais raso e mais fácil de ler.
+
+E uma função sem \`return\` devolve \`undefined\` — não devolve nada por acidente, devolve \`undefined\` de propósito.
 `.trim(),
     },
     {
@@ -114,6 +163,59 @@ console.log(total);`,
           'A segunda é a palavra que faz a função **entregar** um valor de volta.',
         ],
         solution: ['*', 'return'],
+      },
+    },
+    {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-js-5-escolher',
+        type: 'multiple-choice',
+        prompt:
+          'Você precisa do total de uma compra para depois aplicar um desconto sobre ele. Qual função serve?',
+        concepts: ['funcoes'],
+        difficulty: 'iniciante',
+        tags: ['javascript', 'funcoes'],
+        options: [
+          'function total(a, b) { console.log(a + b); }',
+          'function total(a, b) { return a + b; }',
+          'function total(a, b) { a + b; }',
+          'function total(a, b) { console.log(a + b); return; }',
+        ],
+        correctIndex: 1,
+        explanation:
+          'Só a segunda **entrega** o valor para o código continuar usando. A primeira e a quarta mostram na tela e devolvem `undefined`. A terceira calcula e joga o resultado fora — a conta acontece e ninguém recebe.',
+        hints: [
+          'Você precisa usar o resultado numa conta seguinte. Mostrar na tela resolve isso?',
+          'Duas dessas devolvem `undefined`, e uma delas nem guarda o resultado da conta.',
+        ],
+      },
+    },
+    {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-js-5-prever-escopo',
+        type: 'predict-output',
+        prompt:
+          'O que este programa imprime? Repare em quais nomes existem em cada lugar.',
+        concepts: ['funcoes', 'variaveis'],
+        difficulty: 'intermediario',
+        tags: ['javascript', 'funcoes'],
+        code: `let total = 100;
+
+function dobrar(total) {
+  total = total * 2;
+  return total;
+}
+
+console.log(dobrar(5));
+console.log(total);`,
+        expectedOutput: '10\n100',
+        explanation:
+          'O parâmetro `total` é uma variável **nova**, que só existe dentro da função — ela apenas tem o mesmo nome da de fora. Alterá-la não toca na externa. Por isso a função devolve 10 e o `total` de fora continua 100.',
+        hints: [
+          'O parâmetro e a variável de fora têm o mesmo nome. São a mesma variável?',
+          'Um parâmetro nasce a cada chamada, com o valor que foi passado.',
+        ],
       },
     },
     {

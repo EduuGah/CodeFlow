@@ -24,7 +24,7 @@ Fase 7  Projeto final            ░░░░░░░░░░░░░░░�
 | | Hoje | Previsto | Feito |
 | --- | ---: | ---: | ---: |
 | Aulas | **23** | 135 | 17% |
-| Exercícios | **66** | ~700 | 9% |
+| Exercícios | **70** | ~700 | 10% |
 | Tipos de exercício | **4** | 11 | 36% |
 | Motores de execução | **1** | 7 | 14% |
 | Projetos | **7** | ~30 | 23% |
@@ -48,8 +48,8 @@ Aula 1  Variáveis                ██████████  77 → 508 pal
 Aula 2  Tipos e operadores       ██████████  82 → 700 palavras,  2 → 5 exercícios
 Aula 3  Condições                ██████████  135 → 429 palavras, 2 → 4 exercícios
 Aula 4  Loops                    ██████████  132 → 304 palavras, 2 → 4 exercícios
-Aula 5  Funções                  ░░░░░░░░░░  119 palavras, 3 exercícios
-Aula 6  Arrays                   ░░░░░░░░░░  124 palavras, 2 exercícios
+Aula 5  Funções                  ██████████  119 → 327 palavras, 3 → 5 exercícios
+Aula 6  Arrays                   ██████████  124 → 317 palavras, 2 → 4 exercícios
 Aula 7  Objetos                  ░░░░░░░░░░  171 palavras, 2 exercícios
 Aula 8  map, filter e reduce     ░░░░░░░░░░  167 palavras, 2 exercícios
 Aula 9  Strings                  ░░░░░░░░░░  143 palavras, 2 exercícios

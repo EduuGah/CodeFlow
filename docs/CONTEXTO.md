@@ -34,12 +34,12 @@ Números lidos do catálogo, não de memória.
 | --- | --- |
 | Trilhas | 2 — Fundamentos de JavaScript (20 aulas), Lógica (3) |
 | Aulas | 23, somando 422 minutos |
-| Exercícios | 66 — 24 de código, 22 de prever saída, 14 de lacuna, 6 de múltipla escolha |
+| Exercícios | 70 — 24 de código, 25 de prever saída, 15 de lacuna, 6 de múltipla escolha |
 | Verificação | 135 casos fixos + 23 propriedades |
 | Projetos | 7, com 22 critérios de aceitação |
 | Conceitos | 21, com grafo de pré-requisitos |
 | Flashcards | 22 |
-| Testes | 504 de unidade + 110 de navegador |
+| Testes | 513 de unidade + 110 de navegador |
 | Pacote | 949 kB (276 kB comprimido) |
 
 ## 4. Decisões que não devem ser desfeitas sem motivo forte
@@ -106,7 +106,7 @@ docs/curriculo.md       Roadmap de conteúdo — fonte canônica
 
 ```bash
 npm run typecheck   # inclui e2e/ e playwright.config.ts
-npm test            # 504 testes
+npm test            # 513 testes
 npm run test:e2e    # 110 no navegador (antes: npx playwright install chromium)
 npm run build
 ```
@@ -150,6 +150,11 @@ Cada uma custou tempo. Não repita.
 - **Script com regex sobre muitos arquivos causa dano colateral.** Um meu removeu
   `async` de seis testes sem relação com a mudança. Confira o `git diff` antes de
   seguir.
+- **Rejeição de promise sem destino escapa do sandbox** e derruba o processo do
+  Node, ou vaza do worker para a página. `runProgram` contém isso enquanto o
+  código do aluno roda. Foi o que deixou o CI vermelho por sete commits.
+- **O log do CI exige autenticação; a anotação, não.** O passo de testes emite as
+  falhas como `::error::` para que o motivo seja legível pela API pública.
 - **O Write herda a codificação do arquivo que substitui.** Um README em UTF-16
   produziu acentos corrompidos. Apague antes de reescrever.
 
@@ -193,7 +198,7 @@ por preferência de assunto.
 magras e foram melhorando com o tempo, o que fazia o iniciante encontrar as
 piores: a aula 1 tinha 77 palavras e um exercício. O padrão novo é 500 a 900
 palavras e cinco a seis exercícios em dificuldade crescente — múltipla escolha ou
-prever saída, depois lacuna, depois código do zero. Aulas 1 a 4 refeitas; 5 a 10 e as
+prever saída, depois lacuna, depois código do zero. Aulas 1 a 6 refeitas; 7 a 10 e as
 de lógica ainda no formato antigo.
 
 **Fases 2 a 7 — não iniciadas.** Cada uma depende de um motor: iframe isolado

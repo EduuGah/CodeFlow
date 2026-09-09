@@ -13,11 +13,51 @@ export const lessonArrays: Lesson = {
     {
       kind: 'prose',
       markdown: `
-Uma variável guarda um valor. Um **array** guarda uma lista deles, em ordem.
+Uma variável guarda um valor. Quando você precisa de vários — as notas de uma turma, os itens de um carrinho —, criar \`nota1\`, \`nota2\`, \`nota3\` não escala: e se forem trinta?
 
-Cada posição tem um **índice**, e a contagem começa em **zero** — não em um. Essa é a origem de boa parte dos erros de quem está começando: num array de 3 itens, os índices válidos são 0, 1 e 2. Acessar a posição 3 devolve \`undefined\`, não um erro, o que torna o problema silencioso.
+Um **array** guarda muitos valores sob um nome só, em ordem.
 
-Para saber o tamanho, use \`.length\`. Como a contagem começa no zero, o **último índice é sempre \`length - 1\`**.
+~~~javascript
+const notas = [7, 5, 9];
+
+notas.length;   // 3   — quantos itens
+notas[0];       // 7   — o primeiro
+notas[2];       // 9   — o último
+notas[3];       // undefined — não existe, e não dá erro
+~~~
+
+## Índices começam em zero
+
+Esta é a fonte do erro de um a mais, e vale internalizar de vez: o primeiro item está na posição **0**, e o último em \`length - 1\`.
+
+~~~javascript
+const cores = ['azul', 'verde', 'rosa'];
+//   posição:     0        1        2      length é 3
+~~~
+
+Por isso o loop que percorre uma lista usa \`<\` e não \`<=\`:
+
+~~~javascript
+for (let i = 0; i < cores.length; i++) { ... }   // certo
+for (let i = 0; i <= cores.length; i++) { ... }  // uma volta a mais
+~~~
+
+A volta extra acessa uma posição que não existe. E o JavaScript **não avisa** — devolve \`undefined\`, que só vira erro mais adiante, longe da causa.
+
+## Acrescentar, remover, procurar
+
+~~~javascript
+const lista = ['a'];
+
+lista.push('b');        // acrescenta no fim   -> ['a', 'b']
+lista.pop();            // remove do fim       -> ['a']
+lista.unshift('z');     // acrescenta no começo -> ['z', 'a']
+
+lista.includes('a');    // true  — está lá?
+lista.indexOf('a');     // 1     — em qual posição? (-1 se não achar)
+~~~
+
+Repare que \`indexOf\` devolve \`-1\` quando não encontra, e não \`undefined\`. Como \`-1\` é um número válido, esquecer de checar produz um bug silencioso: \`lista[-1]\` devolve \`undefined\` em vez de reclamar.
 `.trim(),
     },
     {
@@ -55,6 +95,84 @@ console.log(cores[3]);`,
         hints: [
           'A contagem dos índices começa em zero.',
           'Quantos itens tem o array? Qual é o maior índice válido?',
+        ],
+      },
+    },
+    {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-js-6-lacuna-ultimo',
+        type: 'fill-blank',
+        prompt: 'Complete para a função devolver o **último** item de qualquer lista.',
+        concepts: ['arrays'],
+        difficulty: 'iniciante',
+        tags: ['javascript', 'arrays'],
+        template: `function ultimo(lista) {
+  return lista[lista.length {{1}}];
+}`,
+        blanks: [{ placeholder: 'ajuste', size: 4 }],
+        tests: [
+          {
+            description: "ultimo(['a', 'b', 'c']) devolve 'c'",
+            assertion: `const r = ultimo(['a','b','c']); if (r !== 'c') throw new Error("Esperava 'c', veio " + JSON.stringify(r) + ". Se veio undefined, o índice passou do fim.");`,
+          },
+          {
+            description: 'funciona com um item só',
+            assertion: `const r = ultimo([42]); if (r !== 42) throw new Error("Esperava 42, veio " + JSON.stringify(r) + ".");`,
+          },
+          {
+            description: 'lista vazia devolve undefined, sem quebrar',
+            assertion: `const r = ultimo([]); if (r !== undefined) throw new Error("Numa lista vazia esperava undefined, veio " + JSON.stringify(r) + ".");`,
+            hidden: true,
+          },
+        ],
+        properties: [
+          {
+            description: 'devolve sempre o item da última posição',
+            generate: `
+              const n = Math.floor(rnd() * 10);
+              const lista = [];
+              for (let i = 0; i < n; i++) lista.push(Math.floor(rnd() * 100));
+              return { lista };
+            `,
+            check: `
+              const esperado = caso.lista.length === 0 ? undefined : caso.lista[caso.lista.length - 1];
+              const obtido = ultimo(caso.lista);
+              if (obtido !== esperado) {
+                throw new Error("com " + JSON.stringify(caso.lista) + " esperava " + JSON.stringify(esperado) + ", veio " + JSON.stringify(obtido) + ".");
+              }
+            `,
+          },
+        ],
+        explanation:
+          'Como o primeiro item está na posição 0, o último está em `length - 1`. Usar `length` direto aponta para uma posição que não existe — e o JavaScript devolve `undefined` em silêncio, em vez de reclamar.',
+        hints: [
+          'Numa lista de 3 itens, `length` é 3. Em que posição está o último?',
+          'A resposta é uma subtração.',
+        ],
+        solution: ['- 1'],
+      },
+    },
+    {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-js-6-prever-indexof',
+        type: 'predict-output',
+        prompt: 'O que este programa imprime? Repare no que `indexOf` devolve quando não encontra.',
+        concepts: ['arrays', 'casos-extremos'],
+        difficulty: 'intermediario',
+        tags: ['javascript', 'arrays'],
+        code: `const cores = ['azul', 'verde'];
+
+console.log(cores.indexOf('verde'));
+console.log(cores.indexOf('rosa'));
+console.log(cores[cores.indexOf('rosa')]);`,
+        expectedOutput: '1\n-1\nundefined',
+        explanation:
+          '`indexOf` devolve `-1` quando não encontra, e `-1` é um número válido. Usá-lo como índice sem checar dá `undefined` em vez de erro — o bug aparece bem depois, longe da causa. Por isso a checagem certa é `if (posicao !== -1)`, ou usar `includes` quando você só quer saber se está lá.',
+        hints: [
+          'O que `indexOf` devolve quando o item não existe? Não é `undefined`.',
+          'Qual item está na posição -1 de uma lista?',
         ],
       },
     },
