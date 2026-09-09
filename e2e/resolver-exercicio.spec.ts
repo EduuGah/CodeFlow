@@ -2,7 +2,7 @@ import type { Page } from '@playwright/test';
 
 import { getLesson } from '../src/content';
 import { buildLessonSteps } from '../src/client/lib/lesson-steps';
-import { expect, irAteOEditor, test } from './fixtures';
+import { AULA_CURTA, concluirAula, expect, irAteOEditor, test } from './fixtures';
 
 /**
  * Do aluno logado até a lição concluída, na aplicação de verdade.
@@ -18,9 +18,6 @@ import { expect, irAteOEditor, test } from './fixtures';
  */
 
 const AULA = 'lesson-js-4';
-
-/** Aula curta com um exercício de cada extremo: dois no total. */
-const AULA_CURTA = 'lesson-logica-1';
 
 // O Monaco vem do CDN em tempo de execução; o padrão de 30s não cobre a primeira
 // carga somada à execução do worker.
@@ -127,43 +124,11 @@ test('resolver todos os exercícios conclui a aula e grava o progresso', async (
   banco,
 }) => {
   const total = quantosExercicios(AULA_CURTA);
-  const passos = buildLessonSteps(getLesson(AULA_CURTA)!);
 
-  await page.goto(`/lesson/${AULA_CURTA}`);
-
-  for (const passo of passos) {
-    if (passo.kind === 'exercise' && passo.exercise.type === 'multiple-choice') {
-      // Alternativas são radios; a certa vem do próprio conteúdo.
-      await page.getByRole('radio').nth(passo.exercise.correctIndex).check();
-      await page.getByRole('button', { name: 'Verificar resposta' }).click();
-      await expect(page.getByText('Resposta correta')).toBeVisible();
-    }
-
-    if (passo.kind === 'exercise' && passo.exercise.type === 'code') {
-      await page.locator('.monaco-editor').first().waitFor({ timeout: 40_000 });
-      await page.waitForFunction(
-        () => {
-          const m = (window as unknown as { monaco?: { editor: { getModels(): unknown[] } } })
-            .monaco;
-          return !!m && m.editor.getModels().length > 0;
-        },
-        undefined,
-        { timeout: 40_000 }
-      );
-
-      await escreverNoEditor(
-        page,
-        `${passo.exercise.initialCode}\n${passo.exercise.solution}`
-      );
-      await page.getByRole('button', { name: 'Executar código' }).click();
-      await expect(page.getByText('Todos os testes passaram')).toBeVisible({ timeout: 30_000 });
-    }
-
-    const avancar = page.getByRole('button', {
-      name: /Continuar assim mesmo|Continuar|Pular por ora/,
-    });
-    if (await avancar.count()) await avancar.click();
-  }
+  // O percurso vive no fixtures, e não aqui, porque três specs precisam dele.
+  // A cópia local que existia antes ficou para trás quando a aula alvo ganhou
+  // exercícios de tipos novos, e o teste passou a falhar longe da causa.
+  await concluirAula(page, AULA_CURTA);
 
   // O contador do cabeçalho fecha.
   await expect(page.getByLabel(`${total} de ${total} exercícios resolvidos`)).toBeVisible();

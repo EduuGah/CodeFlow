@@ -10,6 +10,16 @@ import { AULA_CURTA, concluirAula, esperarConteudo, expect, test } from './fixtu
  */
 
 /**
+ * Em série, como o `resolver-exercicio`.
+ *
+ * Os dois testes daqui concluem uma aula inteira, o que significa três
+ * execuções no sandbox cada um. Rodando ao mesmo tempo, na mesma máquina, eles
+ * estouravam o limite de 3s do sandbox e o relatório acusava "laço que nunca
+ * termina" numa solução de referência que leva dezenas de milissegundos.
+ */
+test.describe.configure({ mode: 'serial' });
+
+/**
  * Conta os canvas do confete.
  *
  * Contar `canvas` sem qualificar não serve: o Monaco cria três por conta própria
@@ -39,7 +49,7 @@ test.describe('sem restrição de movimento', () => {
   test.use({ reducedMotion: 'no-preference' });
 
   test('a conclusão comemora', async ({ logado: page }) => {
-    test.setTimeout(90_000);
+    test.setTimeout(150_000);
     await resolver(page);
 
     await expect.poll(() => canvasDeConfete(page), { timeout: 8_000 }).toBeGreaterThan(0);
@@ -50,7 +60,7 @@ test.describe('com menos movimento pedido', () => {
   test.use({ reducedMotion: 'reduce' });
 
   test('a conclusão não dispara partículas', async ({ logado: page }) => {
-    test.setTimeout(90_000);
+    test.setTimeout(150_000);
     await resolver(page);
 
     // A confirmação continua: o que some é a explosão, não a notícia.

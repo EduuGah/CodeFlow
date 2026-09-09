@@ -1,5 +1,7 @@
 import { test as base, type Page } from '@playwright/test';
 
+import type { Exercise } from '../src/content/types';
+
 /**
  * Um aluno logado, sem Supabase de verdade.
  *
@@ -240,20 +242,27 @@ export async function irAteOEditor(page: Page): Promise<void> {
 export { expect } from '@playwright/test';
 
 /**
- * Aula curta com um exercício de cada extremo — múltipla escolha e código.
+ * Aula curta, com um exercício de cada tipo que exige verificação.
  *
  * Serve de alvo para tudo que depende de a aula ser **concluída**, e não só de
- * um exercício ser resolvido. Duas coisas dependem disso: a comemoração e a
- * gravação do progresso.
+ * um exercício ser resolvido: a comemoração e a gravação do progresso. Três
+ * exercícios é o mínimo que ainda cobre prever-saída, lacuna e código.
  */
-export const AULA_CURTA = 'lesson-logica-1';
+export const AULA_CURTA = 'lesson-js-11';
 
 /**
  * Resolve todos os exercícios de uma aula, do jeito que um aluno resolveria.
  *
  * As respostas saem do próprio conteúdo: a alternativa certa vem de
- * `correctIndex`, e o código vem da solução de referência — a mesma que o CI usa
- * para provar que o exercício é resolvível.
+ * `correctIndex`, a saída esperada vem de `expectedOutput`, e o código vem da
+ * solução de referência — a mesma que o CI usa para provar que o exercício é
+ * resolvível.
+ *
+ * Um tipo de exercício que este helper não saiba responder **lança**, em vez de
+ * ser pulado em silêncio. A versão anterior pulava, e o efeito foi este: uma
+ * aula ganhou exercícios de tipos novos, o helper deixou de concluí-la, e o
+ * teste passou a falhar numa asserção sobre confete — três passos longe da
+ * causa real.
  */
 export async function concluirAula(page: Page, aulaId: string): Promise<void> {
   const { getLesson } = await import('../src/content');
@@ -263,43 +272,89 @@ export async function concluirAula(page: Page, aulaId: string): Promise<void> {
   await page.goto(`/lesson/${aulaId}`);
 
   for (const passo of passos) {
-    if (passo.kind === 'exercise' && passo.exercise.type === 'multiple-choice') {
-      await page.getByRole('radio').nth(passo.exercise.correctIndex).check();
-      await page.getByRole('button', { name: 'Verificar resposta' }).click();
-      await page.getByText('Resposta correta').waitFor({ timeout: 10_000 });
-    }
-
-    if (passo.kind === 'exercise' && passo.exercise.type === 'code') {
-      if (!passo.exercise.solution) {
-        throw new Error(`${passo.exercise.id} não tem solução de referência`);
-      }
-
-      await page.locator('.monaco-editor').first().waitFor({ timeout: 40_000 });
-      await page.waitForFunction(
-        () => {
-          const m = (window as unknown as { monaco?: { editor: { getModels(): unknown[] } } })
-            .monaco;
-          return !!m && m.editor.getModels().length > 0;
-        },
-        undefined,
-        { timeout: 40_000 }
-      );
-
-      await page.evaluate((valor) => {
-        (
-          window as unknown as {
-            monaco: { editor: { getModels(): Array<{ setValue(v: string): void }> } };
-          }
-        ).monaco.editor.getModels()[0].setValue(valor);
-      }, `${passo.exercise.initialCode}\n${passo.exercise.solution}`);
-
-      await page.getByRole('button', { name: /Executar código|Executar de novo/ }).click();
-      await page.getByText('Todos os testes passaram').waitFor({ timeout: 40_000 });
+    if (passo.kind === 'exercise') {
+      await resolverExercicio(page, passo.exercise);
     }
 
     const avancar = page.getByRole('button', {
       name: /Continuar assim mesmo|Continuar|Pular por ora/,
     });
     if (await avancar.count()) await avancar.click();
+  }
+}
+
+/** Espera o Monaco existir e ter um modelo, e escreve o código nele. */
+async function escreverNoEditor(page: Page, codigo: string): Promise<void> {
+  await page.locator('.monaco-editor').first().waitFor({ timeout: 40_000 });
+  await page.waitForFunction(
+    () => {
+      const m = (window as unknown as { monaco?: { editor: { getModels(): unknown[] } } }).monaco;
+      return !!m && m.editor.getModels().length > 0;
+    },
+    undefined,
+    { timeout: 40_000 }
+  );
+
+  await page.evaluate((valor) => {
+    (
+      window as unknown as {
+        monaco: { editor: { getModels(): Array<{ setValue(v: string): void }> } };
+      }
+    ).monaco.editor.getModels()[0].setValue(valor);
+  }, codigo);
+}
+
+async function resolverExercicio(page: Page, exercicio: Exercise): Promise<void> {
+  switch (exercicio.type) {
+    case 'multiple-choice': {
+      await page.getByRole('radio').nth(exercicio.correctIndex).check();
+      await page.getByRole('button', { name: 'Verificar resposta' }).click();
+      await page.getByText('Resposta correta').waitFor({ timeout: 10_000 });
+      return;
+    }
+
+    case 'predict-output': {
+      await page
+        .getByRole('textbox', { name: /O que você acha que será impresso/ })
+        .fill(exercicio.expectedOutput);
+      await page.getByRole('button', { name: /Executar e comparar/ }).click();
+      await page.getByText('Previsão correta').waitFor({ timeout: 30_000 });
+      return;
+    }
+
+    case 'fill-blank': {
+      if (!exercicio.solution) {
+        throw new Error(`${exercicio.id} não tem solução de referência`);
+      }
+
+      const campos = page.getByRole('textbox', { name: /Lacuna/ });
+      for (let i = 0; i < exercicio.solution.length; i++) {
+        await campos.nth(i).fill(exercicio.solution[i]);
+      }
+
+      await page.getByRole('button', { name: 'Verificar' }).click();
+      await page.getByText('Resposta correta').waitFor({ timeout: 40_000 });
+      return;
+    }
+
+    case 'code': {
+      if (!exercicio.solution) {
+        throw new Error(`${exercicio.id} não tem solução de referência`);
+      }
+
+      await escreverNoEditor(page, `${exercicio.initialCode}\n${exercicio.solution}`);
+      await page.getByRole('button', { name: /Executar código|Executar de novo/ }).click();
+      await page.getByText('Todos os testes passaram').waitFor({ timeout: 40_000 });
+      return;
+    }
+
+    default: {
+      // Tipo novo no conteúdo e desconhecido aqui: falha alto, com nome.
+      const desconhecido = exercicio as { type: string; id: string };
+      throw new Error(
+        `concluirAula não sabe resolver exercício do tipo "${desconhecido.type}" (${desconhecido.id}). ` +
+          'Ensine o helper antes de usar uma aula que contenha esse tipo.'
+      );
+    }
   }
 }
