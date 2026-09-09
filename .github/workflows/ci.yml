@@ -33,8 +33,28 @@ jobs:
 
       # A suíte que mais importa aqui: um exercício com teste errado não quebra
       # a aplicação, ele ensina errado — e nada mais nesta lista pegaria isso.
+      #
+      # As falhas viram anotações do GitHub porque o log de execução exige
+      # autenticação para ser lido, e a anotação não. Sem isso, descobrir por que
+      # o CI quebrou depende de ter acesso à conta — foi assim que sete commits
+      # seguidos ficaram vermelhos sem ninguém enxergar o motivo.
       - name: Rodar testes
-        run: npm test
+        # FORCE_COLOR=0 porque a saída vira anotação: código de cor no meio do
+        # texto deixa a mensagem ilegível justamente quando ela é mais necessária.
+        env:
+          FORCE_COLOR: '0'
+        run: |
+          set +e
+          npm test 2>&1 | tee /tmp/testes.txt
+          codigo=${PIPESTATUS[0]}
+
+          if [ "$codigo" -ne 0 ]; then
+            grep -E "FAIL|AssertionError|Error:|expected" /tmp/testes.txt | head -30 | while IFS= read -r linha; do
+              echo "::error::$linha"
+            done
+          fi
+
+          exit "$codigo"
 
       # O CI roda em UTC e a máquina de quem escreve, não. Um exercício de datas
       # que dependa do fuso passa de um lado e falha do outro — e o pior caso é

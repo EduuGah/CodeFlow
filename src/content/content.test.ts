@@ -44,11 +44,16 @@ it('o catálogo não está vazio', async () => {
   expect(codeExercises.length).toBeGreaterThan(0);
 });
 
-describe('nenhum exercício chega perto do prazo', () => {
+describe.skipIf(process.env.CI)('nenhum exercício chega perto do prazo', () => {
   // O prazo por teste é de 2000ms. A máquina de quem escreve é mais rápida que o
   // runner do CI, então um exercício que leva 1400ms aqui estoura lá — e foi
   // exatamente o que aconteceu: sete commits seguidos com o CI vermelho enquanto
   // a suíte local passava.
+  //
+  // Não roda no CI de propósito. Medir tempo de parede num runner compartilhado
+  // produz falha sem defeito, que é o tipo de teste que ensina a ignorar o
+  // vermelho. Aqui isto é aviso durante o desenvolvimento; o portão de verdade é
+  // o prazo do próprio sandbox, que o CI exercita ao rodar cada exercício.
   const TETO = TEST_TIMEOUT_MS / 4;
 
   const comPropriedade = codeExercises.filter(({ exercise }) => exercise.properties?.length);
