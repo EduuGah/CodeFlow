@@ -79,7 +79,7 @@ src/content/            Aulas, exercícios, projetos, conceitos, flashcards
   types.ts              Tipos (Exercise é união discriminada por `type`)
   schema.ts             Espelhos Zod; valida na carga e falha alto em DEV
   index.ts              Única fronteira de leitura do conteúdo
-  content.test.ts       Integridade: 144 checagens sobre o catálogo
+  content.test.ts       Integridade: 372 checagens sobre o catálogo
   lessons/              Uma aula por arquivo
   tracks/               A ORDEM da trilha vive aqui, não nos arquivos de aula
 
@@ -214,7 +214,8 @@ por preferência de assunto.
 
 **Fase 0 — completa.** Fundamentos e lógica, 13 aulas.
 
-**Fase 1 — em andamento.** Aprofundar o que já roda, sem motor novo.
+**Fase 1 — completa em conteúdo e em tipos de exercício.** Só as duas pendências
+de plataforma seguem abertas: publicar, e servir o Monaco do próprio domínio.
 
 | Item | Estado |
 | --- | --- |
@@ -222,7 +223,7 @@ por preferência de assunto.
 | Bloco *Como a web funciona* | **8 de 8, concluído** — cliente e servidor, HTTP, cabeçalhos, REST, autenticação, tokens, CORS, segurança |
 | Testes por propriedade | **feito** |
 | Exercício de lacuna | **feito** |
-| Outros tipos de exercício | encontrar o bug, ordenar passos, refatorar, escrever o teste |
+| Outros tipos de exercício | **feito** — ordenar passos, escrever o teste, encontrar o bug, refatorar |
 | Publicar | **não feito** |
 | Monaco do próprio domínio | **não feito** |
 
@@ -230,7 +231,7 @@ por preferência de assunto.
 magras e foram melhorando com o tempo, o que fazia o iniciante encontrar as
 piores: a aula 1 tinha 77 palavras e um exercício. O padrão novo é 500 a 900
 palavras e cinco a seis exercícios em dificuldade crescente — múltipla escolha ou
-prever saída, depois lacuna, depois código do zero. **Concluído para as 23 aulas
+prever saída, depois lacuna, depois código do zero. **Concluído para as 31 aulas
 publicadas.** A mais curta tem 304 palavras; o bloco assíncrono, que é o mais
 difícil do curso, tem entre 650 e 810 palavras por aula. Nenhuma aula publicada
 está pendente de aprofundamento.
