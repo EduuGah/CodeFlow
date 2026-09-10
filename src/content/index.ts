@@ -20,6 +20,7 @@ import { concepts as allConcepts } from './concepts';
 import { flashcards as allFlashcards } from './flashcards';
 import { trackJsFundamentos } from './tracks/javascript';
 import { trackLogica } from './tracks/logica';
+import { trackWeb } from './tracks/web';
 import { lessonVariaveis } from './lessons/js-01-variaveis';
 import { lessonTiposEOperadores } from './lessons/js-02-tipos-e-operadores';
 import { lessonCondicoes } from './lessons/js-03-condicoes';
@@ -43,6 +44,9 @@ import { lessonRegex } from './lessons/js-20-regex';
 import { lessonDecompor } from './lessons/logica-01-decompor';
 import { lessonCasosExtremos } from './lessons/logica-02-casos-extremos';
 import { lessonSimular } from './lessons/logica-03-simular';
+import { lessonClienteServidor } from './lessons/web-01-cliente-servidor';
+import { lessonHttp } from './lessons/web-02-http';
+import { lessonCabecalhos } from './lessons/web-03-cabecalhos';
 import { projetoImc } from './projects/js-imc';
 import { projetoConversor } from './projects/js-conversor';
 import { projetoBoletim } from './projects/js-boletim';
@@ -80,6 +84,9 @@ const lessons: Lesson[] = [
   lessonDecompor,
   lessonCasosExtremos,
   lessonSimular,
+  lessonClienteServidor,
+  lessonHttp,
+  lessonCabecalhos,
 ];
 const projects: Project[] = [
   projetoImc,
@@ -90,7 +97,7 @@ const projects: Project[] = [
   projetoSenha,
   projetoEstoque,
 ];
-const tracks: Track[] = [trackJsFundamentos, trackLogica];
+const tracks: Track[] = [trackJsFundamentos, trackLogica, trackWeb];
 
 /**
  * Checagem de integridade referencial que o Zod sozinho não faz: schema garante

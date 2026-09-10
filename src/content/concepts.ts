@@ -152,4 +152,48 @@ export const concepts: Concept[] = [
     prerequisites: ['strings'],
     tags: ['javascript', 'intermediario'],
   },
+  {
+    id: 'cliente-servidor',
+    title: 'Cliente e servidor',
+    summary:
+      'Os dois lugares onde o código de uma aplicação web roda, e o que cada um pode e não pode fazer.',
+    prerequisites: ['assincronia'],
+    tags: ['web', 'fundamentos'],
+  },
+  {
+    id: 'http',
+    title: 'HTTP',
+    summary: 'O formato de um pedido e de uma resposta: método, caminho, cabeçalhos, corpo e status.',
+    prerequisites: ['cliente-servidor'],
+    tags: ['web', 'fundamentos'],
+  },
+  {
+    id: 'rest',
+    title: 'REST',
+    summary: 'Desenhar endereços e métodos que descrevem recursos, em vez de ações avulsas.',
+    prerequisites: ['http'],
+    tags: ['web', 'intermediario'],
+  },
+  {
+    id: 'autenticacao',
+    title: 'Autenticação e autorização',
+    summary: 'Provar quem é quem, e decidir o que cada um pode — sempre do lado que ninguém controla.',
+    prerequisites: ['http'],
+    tags: ['web', 'seguranca'],
+  },
+  {
+    id: 'cors',
+    title: 'CORS e origem',
+    summary:
+      'A regra do navegador que separa sites por origem, e por que a correção fica no servidor.',
+    prerequisites: ['http'],
+    tags: ['web', 'seguranca'],
+  },
+  {
+    id: 'seguranca-web',
+    title: 'Segurança na web',
+    summary: 'Não confiar no cliente, escapar o que vem de fora, e nunca guardar segredo no navegador.',
+    prerequisites: ['http'],
+    tags: ['web', 'seguranca'],
+  },
 ];
