@@ -13,6 +13,7 @@ import {
 import { preencher } from '../client/lib/fill-blank';
 import { embaralhar, estaOrdenado } from '../client/lib/ordenar';
 import { avaliarTestes } from '../client/lib/escrever-teste';
+import { corrigirLinha, linhasNumeradas } from '../client/lib/encontrar-bug';
 import type { CodeExercise, Exercise, FillBlankExercise, Lesson } from './types';
 
 /**
@@ -443,6 +444,76 @@ describe('exercícios de escrever o teste', () => {
           dica.split('assert(').length - 1,
           `a dica "${dica}" já traz as asserções prontas`
         ).toBeLessThan(2);
+      }
+    }
+  );
+});
+
+describe('exercícios de encontrar o bug', () => {
+  const comBug = allExercises.filter(({ exercise }) => exercise.type === 'find-bug');
+
+  it.each(comBug.map(({ exercise }) => [exercise.id, exercise] as const))(
+    '%s: o programa como está de fato quebra',
+    async (_id, exercise) => {
+      if (exercise.type !== 'find-bug') throw new Error('filtro inconsistente');
+
+      // Um "exercício de bug" cujo programa roda liso não tem o que encontrar,
+      // e o aluno procuraria um defeito que não está lá.
+      const resultado = await runProgram(exercise.code, []);
+      expect(resultado.error, 'o programa roda sem erro nenhum').toBeDefined();
+    },
+    TEST_TIMEOUT_MS * 4
+  );
+
+  it.each(comBug.map(({ exercise }) => [exercise.id, exercise] as const))(
+    '%s: trocar a linha declarada pela correção resolve',
+    async (_id, exercise) => {
+      if (exercise.type !== 'find-bug') throw new Error('filtro inconsistente');
+
+      // Esta é a prova de que o NÚMERO da linha está certo. Um engano de uma
+      // linha tornaria o exercício impossível sem nada denunciar — e foi
+      // exatamente o engano que cometi escrevendo o teste desta biblioteca.
+      const corrigido = corrigirLinha(exercise.code, exercise.buggyLine, exercise.fix);
+
+      expect(corrigido, 'a correção é idêntica à linha original').not.toBe(exercise.code);
+
+      const resultado = await runProgram(corrigido, []);
+      expect(
+        resultado.error,
+        `com a linha ${exercise.buggyLine} corrigida o programa ainda quebra`
+      ).toBeUndefined();
+    },
+    TEST_TIMEOUT_MS * 4
+  );
+
+  it.each(comBug.map(({ exercise }) => [exercise.id, exercise] as const))(
+    '%s: a linha do sintoma é onde o erro realmente aparece',
+    async (_id, exercise) => {
+      if (exercise.type !== 'find-bug') throw new Error('filtro inconsistente');
+      if (exercise.symptomLine === undefined) return;
+
+      // Se a linha do sintoma estivesse errada, o retorno específico dela
+      // apareceria para quem apontou outra coisa — e o exercício ensinaria a
+      // distinção com o exemplo trocado.
+      const linhas = linhasNumeradas(exercise.code);
+      const doSintoma = linhas[exercise.symptomLine - 1].texto.trim();
+
+      expect(doSintoma.length, 'a linha do sintoma está vazia').toBeGreaterThan(0);
+      expect(exercise.symptomFeedback, 'a linha do sintoma precisa de retorno próprio').toBeTruthy();
+    }
+  );
+
+  it.each(comBug.map(({ exercise }) => [exercise.id, exercise] as const))(
+    '%s: a dica não entrega o número da linha',
+    async (_id, exercise) => {
+      if (exercise.type !== 'find-bug') throw new Error('filtro inconsistente');
+
+      // "O defeito está na linha 2" não é dica, é gabarito.
+      for (const dica of exercise.hints) {
+        expect(
+          new RegExp(`linha ${exercise.buggyLine}\\b`).test(dica),
+          `a dica "${dica}" cita a linha da resposta`
+        ).toBe(false);
       }
     }
   );

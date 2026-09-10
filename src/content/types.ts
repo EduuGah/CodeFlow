@@ -210,13 +210,48 @@ export interface WriteTestExercise extends ExerciseBase {
 }
 
 /**
- * União discriminada por `type`. Acrescentar um tipo novo (encontre o erro,
- * refatore…) é estender esta união — nenhuma página precisa saber de todos os
+ * Aponta a linha onde está o defeito.
+ *
+ * Já existe exercício de **consertar** — um `code` com o esqueleto quebrado. O
+ * que faltava era separar as duas metades, porque localizar e corrigir são
+ * habilidades diferentes: quem já sabe corrigir mas não sabe localizar passa
+ * horas mexendo na linha errada.
+ *
+ * E o tipo existe principalmente por uma distinção que a aula de erros ensina e
+ * nenhum exercício cobrava: **a linha onde o erro aparece quase nunca é a linha
+ * onde o defeito está**. Por isso o exercício declara também a linha do sintoma
+ * — a resposta que quase todo mundo dá primeiro — e responde a ela com um
+ * retorno próprio, em vez de um "errado" sem explicação.
+ */
+export interface FindBugExercise extends ExerciseBase {
+  type: 'find-bug';
+  code: string;
+  /** Linha (1-indexada) que **contém** o defeito. */
+  buggyLine: number;
+  /**
+   * A linha corrigida.
+   *
+   * O CI troca esta linha pela declarada e roda o programa: é a única forma de
+   * provar que o número da linha está certo, e um engano de uma linha aqui
+   * tornaria o exercício impossível sem nada denunciar.
+   */
+  fix: string;
+  /** Linha onde o erro **aparece**, quando é diferente da causa. */
+  symptomLine?: number;
+  /** Retorno para quem escolhe a linha do sintoma. Obrigatório quando ela existe. */
+  symptomFeedback?: string;
+  explanation: string;
+}
+
+/**
+ * União discriminada por `type`. Acrescentar um tipo novo (refatorar, arrastar
+ * e soltar…) é estender esta união — nenhuma página precisa saber de todos os
  * tipos, só dos que renderiza (§315).
  */
 export type Exercise =
   | CodeExercise
   | FillBlankExercise
+  | FindBugExercise
   | MultipleChoiceExercise
   | OrderStepsExercise
   | PredictOutputExercise

@@ -248,6 +248,41 @@ A pergunta que decide: **esse valor pode ser confundido com uma resposta legíti
     {
       kind: 'exercise',
       exercise: {
+        id: 'ex-logica-2-achar-limite',
+        type: 'find-bug',
+        prompt:
+          'Esta função deveria devolver os últimos nomes da lista, em maiúsculas. Ela quebra com `Cannot read properties of undefined`.\n\n**Aponte a linha onde o defeito está.**',
+        concepts: ['casos-extremos', 'depuracao'],
+        difficulty: 'intermediario',
+        tags: ['logica', 'casos-extremos'],
+        code: `function ultimos(lista, quantos) {
+  const inicio = lista.length - quantos;
+  const saida = [];
+
+  for (let i = inicio; i <= lista.length; i++) {
+    saida.push(lista[i].toUpperCase());
+  }
+
+  return saida;
+}
+
+console.log(ultimos(['ana', 'bruno', 'carla'], 2));`,
+        buggyLine: 5,
+        fix: '  for (let i = inicio; i < lista.length; i++) {',
+        symptomLine: 6,
+        symptomFeedback:
+          'É onde o programa para, e a linha está certa: `toUpperCase` funciona em qualquer texto. O problema é que ela recebeu `undefined`, e isso quer dizer que `lista[i]` foi lido numa posição que não existe. Quem decide até onde o `i` vai é a linha de cima.',
+        explanation:
+          'A última posição de um array é `length - 1`, então o `<=` deixa o laço dar uma volta a mais e ler `lista[3]` numa lista de três. Essa leitura não dá erro — devolve `undefined` —, e o erro só estoura na linha seguinte, quando alguém tenta usar esse valor.\n\nÉ o erro de um a mais da aula, agora com o sintoma três caracteres longe da causa: trocar `<=` por `<` resolve tudo.',
+        hints: [
+          'A mensagem fala de uma propriedade lida de `undefined`. Qual expressão pode ter devolvido `undefined` aqui?',
+          'Numa lista de 3 itens, quais índices existem? Até onde o `i` chega?',
+        ],
+      },
+    },
+    {
+      kind: 'exercise',
+      exercise: {
         id: 'ex-logica-2-escrever-teste',
         type: 'write-test',
         prompt: `A função abaixo está **correta**. Seu trabalho é escrever os testes dela.\n\nUse \`assert(condicao, mensagem)\` — ele lança quando a condição é falsa.\n\nSeus testes vão ser rodados contra esta versão, onde precisam **passar**, e contra três versões quebradas de propósito, onde precisam **falhar**. Um teste que aceita tudo não pega nada: é essa a diferença que o exercício cobra.`,

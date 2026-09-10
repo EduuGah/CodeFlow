@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { problemasDoMolde } from '../client/lib/fill-blank';
 import { problemasDaOrdenacao } from '../client/lib/ordenar';
 import { problemasDaEscritaDeTeste } from '../client/lib/escrever-teste';
+import { problemasDoBug } from '../client/lib/encontrar-bug';
 
 /**
  * Validação de conteúdo (§295). Roda uma vez, no carregamento, e falha alto em
@@ -143,6 +144,32 @@ export const exerciseSchema = z.discriminatedUnion('type', [
     .superRefine((ex, ctx) => {
       for (const problema of problemasDaEscritaDeTeste(ex)) {
         ctx.addIssue({ code: 'custom', message: problema, path: ['mutants'] });
+      }
+    }),
+  z
+    .object({
+      ...exerciseBase,
+      type: z.literal('find-bug'),
+      code: z.string().min(1),
+      buggyLine: z.number().int().positive(),
+      fix: z.string().min(1),
+      symptomLine: z.number().int().positive().optional(),
+      symptomFeedback: z.string().min(1).optional(),
+      explanation: z.string().min(1),
+    })
+    .superRefine((ex, ctx) => {
+      for (const problema of problemasDoBug(ex)) {
+        ctx.addIssue({ code: 'custom', message: problema, path: ['buggyLine'] });
+      }
+
+      // Declarar a linha do sintoma sem o retorno dela desperdiça o que este
+      // tipo tem de próprio: responder ao engano mais comum com uma explicação.
+      if (ex.symptomLine !== undefined && !ex.symptomFeedback) {
+        ctx.addIssue({
+          code: 'custom',
+          message: 'a linha do sintoma precisa de um retorno próprio',
+          path: ['symptomFeedback'],
+        });
       }
     }),
   z.object({

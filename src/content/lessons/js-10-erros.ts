@@ -437,6 +437,41 @@ console.log(lerConfig('42', PADRAO));                // { tema: 'claro' }`,
     {
       kind: 'exercise',
       exercise: {
+        id: 'ex-js-10-achar-linha',
+        type: 'find-bug',
+        prompt:
+          'Este programa quebra com `TypeError: itens is not iterable`.\n\nO erro é reportado numa linha. **Aponte a linha onde o defeito está** — que é outra.',
+        concepts: ['depuracao'],
+        difficulty: 'intermediario',
+        tags: ['javascript', 'erros'],
+        code: `function total(carrinho) {
+  const itens = carrinho.produtos;
+  let soma = 0;
+
+  for (const item of itens) {
+    soma += item.preco;
+  }
+
+  return soma;
+}
+
+console.log(total({ itens: [{ preco: 10 }] }));`,
+        buggyLine: 2,
+        fix: '  const itens = carrinho.itens;',
+        symptomLine: 5,
+        symptomFeedback:
+          'É aí que o programa para, mas o `for` está correto: ele só recebeu `undefined` no lugar de uma lista. Suba uma linha de cada vez perguntando "de onde veio esse valor?" — a resposta está na linha 2, que lê uma propriedade que este carrinho não tem.',
+        explanation:
+          'A linha 2 lê `carrinho.produtos`, mas o objeto que chega tem `itens`. Ler uma propriedade que não existe **não dá erro**: devolve `undefined` em silêncio, e esse `undefined` viaja três linhas até encontrar o `for`, que é o primeiro lugar que não sabe o que fazer com ele.\n\nÉ o formato mais comum de bug em JavaScript: o erro aparece onde o valor errado foi **usado**, e o defeito está onde ele foi **produzido**.',
+        hints: [
+          'A mensagem diz que `itens` não é iterável. De onde veio o valor de `itens`?',
+          'Compare os nomes de propriedade: o que a função lê, e o que o objeto passado realmente tem.',
+        ],
+      },
+    },
+    {
+      kind: 'exercise',
+      exercise: {
         id: 'ex-js-10-corrigir',
         type: 'code',
         prompt: `A função abaixo deveria devolver o total do carrinho, mas quebra. **Encontre e corrija os dois problemas** sem reescrever tudo do zero.\n\nEla deve devolver 35 para o carrinho de exemplo, e 0 para um carrinho vazio.`,

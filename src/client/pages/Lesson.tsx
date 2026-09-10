@@ -16,6 +16,7 @@ import { celebrar } from '../lib/celebrar';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { CodeExerciseStep } from '../components/lesson/CodeExerciseStep';
 import { FillBlank } from '../components/lesson/FillBlank';
+import { FindBug } from '../components/lesson/FindBug';
 import { LessonBlocks } from '../components/lesson/LessonBlocks';
 import { MultipleChoice } from '../components/lesson/MultipleChoice';
 import { OrderSteps } from '../components/lesson/OrderSteps';
@@ -371,6 +372,14 @@ export function Lesson() {
 
         {passo.kind === 'exercise' && passo.exercise.type === 'order-steps' && (
           <OrderSteps
+            exercise={passo.exercise}
+            lessonId={lesson.id}
+            onEstado={(estado) => registrarEstado(passo.exercise.id, estado)}
+          />
+        )}
+
+        {passo.kind === 'exercise' && passo.exercise.type === 'find-bug' && (
+          <FindBug
             exercise={passo.exercise}
             lessonId={lesson.id}
             onEstado={(estado) => registrarEstado(passo.exercise.id, estado)}

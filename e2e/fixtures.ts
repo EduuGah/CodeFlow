@@ -371,6 +371,15 @@ async function resolverExercicio(page: Page, exercicio: Exercise): Promise<void>
       return;
     }
 
+    case 'find-bug': {
+      await page.getByRole('radio', { name: new RegExp(`^Linha ${exercicio.buggyLine}:`) }).check();
+      await page.getByRole('button', { name: /Apontar a linha|Verificar de novo/ }).click();
+      await page
+        .getByText(`A linha ${exercicio.buggyLine} é onde o defeito está`)
+        .waitFor({ timeout: 10_000 });
+      return;
+    }
+
     case 'write-test': {
       if (!exercicio.solution) {
         throw new Error(`${exercicio.id} não tem teste de referência`);
