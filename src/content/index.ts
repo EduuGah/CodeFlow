@@ -47,6 +47,11 @@ import { lessonSimular } from './lessons/logica-03-simular';
 import { lessonClienteServidor } from './lessons/web-01-cliente-servidor';
 import { lessonHttp } from './lessons/web-02-http';
 import { lessonCabecalhos } from './lessons/web-03-cabecalhos';
+import { lessonRest } from './lessons/web-04-rest';
+import { lessonAutenticacao } from './lessons/web-05-autenticacao';
+import { lessonTokens } from './lessons/web-06-tokens';
+import { lessonCors } from './lessons/web-07-cors';
+import { lessonSegurancaWeb } from './lessons/web-08-seguranca';
 import { projetoImc } from './projects/js-imc';
 import { projetoConversor } from './projects/js-conversor';
 import { projetoBoletim } from './projects/js-boletim';
@@ -87,6 +92,11 @@ const lessons: Lesson[] = [
   lessonClienteServidor,
   lessonHttp,
   lessonCabecalhos,
+  lessonRest,
+  lessonAutenticacao,
+  lessonTokens,
+  lessonCors,
+  lessonSegurancaWeb,
 ];
 const projects: Project[] = [
   projetoImc,

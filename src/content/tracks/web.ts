@@ -12,5 +12,10 @@ export const trackWeb: Track = {
     'lesson-web-1',
     'lesson-web-2',
     'lesson-web-3',
+    'lesson-web-4',
+    'lesson-web-5',
+    'lesson-web-6',
+    'lesson-web-7',
+    'lesson-web-8',
   ],
 };

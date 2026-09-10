@@ -6,12 +6,12 @@ que conclui uma fase.
 
 ## Onde estamos
 
-**Fase 1 de 8 · Bloco de JavaScript: 10 de 10 aulas · Bloco da web: 0 de 8**
+**Fase 1 de 8 · JavaScript: 10 de 10 · Web: 8 de 8 · falta só a plataforma**
 
 ```
 Fase 0  Fundamentos e lógica      ██████████████████████  13/13  pronto
 Fase 1  JavaScript real          ██████████████████████  10/10  pronto
-        Como a web funciona      ░░░░░░░░░░░░░░░░░░░░░░   0/8
+        Como a web funciona      ██████████████████████   8/8  pronto
         Plataforma                █████░░░░░░░░░░░░░░░░░   2/7
 Fase 2  A página                 ░░░░░░░░░░░░░░░░░░░░░░   0/26
 Fase 3  Tipos e componentes      ░░░░░░░░░░░░░░░░░░░░░░   0/24
@@ -23,15 +23,15 @@ Fase 7  Projeto final            ░░░░░░░░░░░░░░░�
 
 | | Hoje | Previsto | Feito |
 | --- | ---: | ---: | ---: |
-| Aulas | **23** | 135 | 17% |
-| Exercícios | **110** | ~700 | 16% |
+| Aulas | **31** | 135 | 23% |
+| Exercícios | **142** | ~700 | 20% |
 | Tipos de exercício | **4** | 11 | 36% |
 | Motores de execução | **1** | 7 | 14% |
 | Projetos | **7** | ~30 | 23% |
 
-**Últimas aulas concluídas**, da mais recente para a mais antiga: expressões
-regulares, datas e fuso, imutabilidade, JSON, falhas assíncronas, async/await,
-promises, callbacks, closures, escopo.
+**Últimas aulas concluídas**, da mais recente para a mais antiga: segurança na
+web, CORS, tokens, autenticação, REST, cabeçalhos, HTTP, cliente e servidor —
+a trilha "Como a Web Funciona" inteira.
 
 ## Aprofundamento das aulas antigas
 
@@ -168,8 +168,21 @@ Módulos saiu do bloco: `import`/`export` é erro de sintaxe no sandbox, porque
 ou entra como aula conceitual. O lugar dele na contagem foi ocupado por escopo e
 closures, que a versão original tratava como uma aula só e na prática pediam duas.
 
-**Como a web funciona — 0 de 8**: cliente e servidor, HTTP, cabeçalhos, REST,
-autenticação, tokens, CORS, segurança básica.
+**Como a web funciona — 8 de 8, concluído.** Trilha própria, `track-web`, com
+32 exercícios. Nenhum deles precisa de rede: URL, status, cabeçalho e token são
+tratados como o que de fato são — texto com estrutura —, o que deixa a trilha
+inteira caber no motor que já existe.
+
+| Aula | Assunto | Exercícios |
+| --- | --- | ---: |
+| 1 | Cliente e servidor, e as partes de uma URL | 4 |
+| 2 | HTTP: métodos, seguro e idempotente, status | 4 |
+| 3 | Cabeçalhos, e por que normalizar os dois lados | 4 |
+| 4 | REST: o caminho nomeia, o método age | 4 |
+| 5 | Autenticação contra autorização, 401 contra 403 | 5 |
+| 6 | Tokens: base64 não é segredo, e o exp em segundos | 4 |
+| 7 | CORS: origem, verificação prévia, e onde corrigir | 4 |
+| 8 | Injeção, escape de HTML, e nunca confiar no cliente | 4 |
 
 **Plataforma**
 
