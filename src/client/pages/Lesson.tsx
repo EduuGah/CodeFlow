@@ -20,6 +20,7 @@ import { LessonBlocks } from '../components/lesson/LessonBlocks';
 import { MultipleChoice } from '../components/lesson/MultipleChoice';
 import { OrderSteps } from '../components/lesson/OrderSteps';
 import { PredictOutput } from '../components/lesson/PredictOutput';
+import { WriteTest } from '../components/lesson/WriteTest';
 import { MarkdownReader } from '../components/ui/MarkdownReader';
 import {
   IconArrowLeft,
@@ -372,6 +373,15 @@ export function Lesson() {
           <OrderSteps
             exercise={passo.exercise}
             lessonId={lesson.id}
+            onEstado={(estado) => registrarEstado(passo.exercise.id, estado)}
+          />
+        )}
+
+        {passo.kind === 'exercise' && passo.exercise.type === 'write-test' && (
+          <WriteTest
+            exercise={passo.exercise}
+            lessonId={lesson.id}
+            language={lesson.language}
             onEstado={(estado) => registrarEstado(passo.exercise.id, estado)}
           />
         )}

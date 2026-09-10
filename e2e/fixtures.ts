@@ -371,6 +371,17 @@ async function resolverExercicio(page: Page, exercicio: Exercise): Promise<void>
       return;
     }
 
+    case 'write-test': {
+      if (!exercicio.solution) {
+        throw new Error(`${exercicio.id} não tem teste de referência`);
+      }
+
+      await escreverNoEditor(page, exercicio.solution);
+      await page.getByRole('button', { name: /Rodar meus testes|Rodar de novo/ }).click();
+      await page.getByText('Seus testes pegam todos os defeitos').waitFor({ timeout: 40_000 });
+      return;
+    }
+
     default: {
       // Tipo novo no conteúdo e desconhecido aqui: falha alto, com nome.
       const desconhecido = exercicio as { type: string; id: string };

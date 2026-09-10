@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 import { problemasDoMolde } from '../client/lib/fill-blank';
 import { problemasDaOrdenacao } from '../client/lib/ordenar';
+import { problemasDaEscritaDeTeste } from '../client/lib/escrever-teste';
 
 /**
  * Validação de conteúdo (§295). Roda uma vez, no carregamento, e falha alto em
@@ -125,6 +126,23 @@ export const exerciseSchema = z.discriminatedUnion('type', [
     .superRefine((ex, ctx) => {
       for (const problema of problemasDaOrdenacao(ex.steps)) {
         ctx.addIssue({ code: 'custom', message: problema, path: ['steps'] });
+      }
+    }),
+  z
+    .object({
+      ...exerciseBase,
+      type: z.literal('write-test'),
+      subject: z.string().min(1),
+      initialCode: z.string(),
+      mutants: z
+        .array(z.object({ description: z.string().min(1), code: z.string().min(1) }))
+        .min(1, 'sem sabotagem, um teste vazio passaria no exercício'),
+      explanation: z.string().min(1),
+      solution: z.string().optional(),
+    })
+    .superRefine((ex, ctx) => {
+      for (const problema of problemasDaEscritaDeTeste(ex)) {
+        ctx.addIssue({ code: 'custom', message: problema, path: ['mutants'] });
       }
     }),
   z.object({

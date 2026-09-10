@@ -248,6 +248,73 @@ A pergunta que decide: **esse valor pode ser confundido com uma resposta legíti
     {
       kind: 'exercise',
       exercise: {
+        id: 'ex-logica-2-escrever-teste',
+        type: 'write-test',
+        prompt: `A função abaixo está **correta**. Seu trabalho é escrever os testes dela.\n\nUse \`assert(condicao, mensagem)\` — ele lança quando a condição é falsa.\n\nSeus testes vão ser rodados contra esta versão, onde precisam **passar**, e contra três versões quebradas de propósito, onde precisam **falhar**. Um teste que aceita tudo não pega nada: é essa a diferença que o exercício cobra.`,
+        concepts: ['casos-extremos', 'depuracao'],
+        difficulty: 'intermediario',
+        tags: ['logica', 'testes'],
+        subject: `function maior(lista) {
+  if (lista.length === 0) return null;
+
+  let melhor = lista[0];
+  for (const n of lista) {
+    if (n > melhor) melhor = n;
+  }
+  return melhor;
+}`,
+        initialCode: `// Escreva asserções sobre \`maior\`. Uma por linha.
+//
+// assert(maior([3, 1, 2]) === 3, 'o maior de 3, 1 e 2 é 3');
+
+`,
+        mutants: [
+          {
+            description: 'devolve o primeiro item em vez do maior',
+            code: `function maior(lista) {
+  if (lista.length === 0) return null;
+  return lista[0];
+}`,
+          },
+          {
+            description: 'começa a comparação em zero, e erra com lista toda negativa',
+            code: `function maior(lista) {
+  if (lista.length === 0) return null;
+
+  let melhor = 0;
+  for (const n of lista) {
+    if (n > melhor) melhor = n;
+  }
+  return melhor;
+}`,
+          },
+          {
+            description: 'devolve undefined com lista vazia, em vez de null',
+            code: `function maior(lista) {
+  let melhor = lista[0];
+  for (const n of lista) {
+    if (n > melhor) melhor = n;
+  }
+  return melhor;
+}`,
+          },
+        ],
+        hints: [
+          'Comece pelo caso normal, e repare que ele sozinho não denuncia nada: `[3, 1, 2]` tem o maior logo na frente.',
+          'A lista da aula: vazio, um só, o limite exato, negativo, tipo errado. Três dessas pegam as três versões quebradas.',
+          'Uma lista em que o maior NÃO é o primeiro. Uma lista toda negativa. E a lista vazia.',
+          "assert(maior([1, 3, 2]) === 3, 'o maior não é o primeiro'); assert(maior([-5, -1]) === -1, 'todos negativos'); assert(maior([]) === null, 'lista vazia');",
+        ],
+        solution: `assert(maior([1, 3, 2]) === 3, 'o maior nao e necessariamente o primeiro');
+assert(maior([-5, -1, -3]) === -1, 'com todos negativos, o maior ainda e negativo');
+assert(maior([]) === null, 'lista vazia nao tem maior');`,
+        explanation:
+          'Repare no que cada teste faz. `[1, 3, 2]` existe porque `[3, 1, 2]` **não** denunciaria a versão que devolve o primeiro item — o caso feliz mais óbvio é justamente o que menos verifica. A lista negativa pega o acumulador que começa em zero, que é o erro de valor inicial da aula de escopo. E a lista vazia pega a guarda que faltou.\n\nÉ isso que "cobertura" significa na prática: não quantas linhas o teste percorre, mas quantos defeitos ele conseguiria perceber.',
+      },
+    },
+    {
+      kind: 'exercise',
+      exercise: {
         id: 'ex-logica-2-robusta',
         type: 'code',
         prompt: `Crie \`mediaSegura(numeros)\` que **retorna** a média de um array — mas que aguenta as bordas:\n\n- array vazio → \`0\` (não \`NaN\`)\n- itens que não são números → ignorados no cálculo\n- se nenhum item válido sobrar → \`0\`\n\nAqui o \`0\` é aceitável porque a função é usada para exibir um resumo, e "sem dados" e "média zero" aparecem iguais na tela de qualquer jeito.`,

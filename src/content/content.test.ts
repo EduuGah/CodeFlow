@@ -12,6 +12,7 @@ import {
 } from './index';
 import { preencher } from '../client/lib/fill-blank';
 import { embaralhar, estaOrdenado } from '../client/lib/ordenar';
+import { avaliarTestes } from '../client/lib/escrever-teste';
 import type { CodeExercise, Exercise, FillBlankExercise, Lesson } from './types';
 
 /**
@@ -354,6 +355,94 @@ describe('exercícios de ordenar passos', () => {
           posicoes.length,
           `a dica "${dica}" cita ${posicoes.length} passos na ordem da resposta`
         ).toBeLessThan(arrumado.length);
+      }
+    }
+  );
+});
+
+describe('exercícios de escrever o teste', () => {
+  const escritas = allExercises.filter(({ exercise }) => exercise.type === 'write-test');
+
+  /** Roda o programa no mesmo sandbox que o navegador do aluno usa. */
+  const executar = (programa: string) => runProgram(programa, []);
+
+  it.each(escritas.map(({ exercise }) => [exercise.id, exercise] as const))(
+    '%s: o teste de referência aceita a implementação correta e pega todas as sabotagens',
+    async (_id, exercise) => {
+      if (exercise.type !== 'write-test') throw new Error('filtro inconsistente');
+
+      // Sem solução declarada, o CI não consegue provar que o exercício é
+      // resolvível — e um exercício impossível só aparece quando um aluno trava.
+      expect(exercise.solution, `${exercise.id} não tem teste de referência`).toBeTruthy();
+
+      const veredito = await avaliarTestes(
+        exercise.subject,
+        exercise.mutants,
+        exercise.solution ?? '',
+        executar
+      );
+
+      expect(
+        veredito.referenciaPassou,
+        `o teste de referência recusa a implementação correta: ${veredito.erroNaReferencia}`
+      ).toBe(true);
+
+      const escaparam = veredito.sabotagens.filter((s) => !s.pego).map((s) => s.description);
+      expect(escaparam, `sabotagens que o teste de referência não pega`).toEqual([]);
+    },
+    TEST_TIMEOUT_MS * 8
+  );
+
+  it.each(escritas.map(({ exercise }) => [exercise.id, exercise] as const))(
+    '%s: o esqueleto NÃO resolve o exercício',
+    async (_id, exercise) => {
+      if (exercise.type !== 'write-test') throw new Error('filtro inconsistente');
+
+      // Se o ponto de partida já passasse, o aluno resolveria sem escrever nada
+      // — que é exatamente o hábito que este tipo de exercício combate.
+      const veredito = await avaliarTestes(
+        exercise.subject,
+        exercise.mutants,
+        exercise.initialCode,
+        executar
+      );
+
+      expect(veredito.aprovado, 'o código inicial já resolve o exercício').toBe(false);
+    },
+    TEST_TIMEOUT_MS * 8
+  );
+
+  it.each(escritas.map(({ exercise }) => [exercise.id, exercise] as const))(
+    '%s: cada sabotagem é código que roda',
+    async (_id, exercise) => {
+      if (exercise.type !== 'write-test') throw new Error('filtro inconsistente');
+
+      // A sabotagem precisa ser código válido. Uma que nem chega a rodar seria
+      // "pega" por qualquer teste, inclusive por um arquivo vazio — e o
+      // exercício passaria a aprovar quem não escreveu nada.
+      for (const mutante of exercise.mutants) {
+        const sozinha = await executar(mutante.code);
+        expect(
+          sozinha.error,
+          `a sabotagem "${mutante.description}" nem chega a rodar`
+        ).toBeUndefined();
+      }
+    },
+    TEST_TIMEOUT_MS * 8
+  );
+
+  it.each(escritas.map(({ exercise }) => [exercise.id, exercise] as const))(
+    '%s: a dica não entrega o teste pronto antes da última',
+    async (_id, exercise) => {
+      if (exercise.type !== 'write-test') throw new Error('filtro inconsistente');
+
+      // A última dica pode entregar a solução — é o combinado das outras aulas.
+      // As anteriores, não.
+      for (const dica of exercise.hints.slice(0, -1)) {
+        expect(
+          dica.split('assert(').length - 1,
+          `a dica "${dica}" já traz as asserções prontas`
+        ).toBeLessThan(2);
       }
     }
   );

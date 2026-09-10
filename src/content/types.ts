@@ -179,16 +179,48 @@ export interface OrderStepsExercise extends ExerciseBase {
 }
 
 /**
+ * Escreve o teste de uma função que já está pronta.
+ *
+ * Todos os outros tipos verificam o aluno. Este verifica **a verificação dele**:
+ * as asserções que ele escrever são rodadas contra a implementação correta —
+ * onde precisam passar — e contra versões sabotadas, onde precisam falhar.
+ *
+ * É a única forma honesta de ensinar teste, porque a lição central não é a
+ * sintaxe: é que um teste que aceita tudo não vale nada. Um arquivo de teste
+ * vazio passa em qualquer implementação, e aqui ele reprova o exercício com a
+ * mensagem dizendo qual defeito passou despercebido.
+ */
+export interface WriteTestExercise extends ExerciseBase {
+  type: 'write-test';
+  /** A implementação correta, mostrada ao aluno. É ela que ele vai testar. */
+  subject: string;
+  /** Por onde o aluno começa — normalmente um comentário e um exemplo. */
+  initialCode: string;
+  /**
+   * Versões quebradas de propósito.
+   *
+   * Cada uma precisa ser reprovada pelos testes do aluno. A descrição é o que
+   * ele lê quando o teste dele deixa o defeito passar, então ela nomeia o
+   * defeito — não a linha alterada.
+   */
+  mutants: Array<{ description: string; code: string }>;
+  explanation: string;
+  /** Teste de referência, para o CI provar que o exercício é resolvível. */
+  solution?: string;
+}
+
+/**
  * União discriminada por `type`. Acrescentar um tipo novo (encontre o erro,
- * refatore, escreva o teste…) é estender esta união — nenhuma página precisa
- * saber de todos os tipos, só dos que renderiza (§315).
+ * refatore…) é estender esta união — nenhuma página precisa saber de todos os
+ * tipos, só dos que renderiza (§315).
  */
 export type Exercise =
   | CodeExercise
   | FillBlankExercise
   | MultipleChoiceExercise
   | OrderStepsExercise
-  | PredictOutputExercise;
+  | PredictOutputExercise
+  | WriteTestExercise;
 
 /** Blocos que compõem uma aula. Nem toda aula usa todos (§316). */
 export type LessonBlock =

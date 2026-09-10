@@ -381,6 +381,71 @@ console.log(escaparHtml(42));`,
       },
     },
     {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-web-8-escrever-teste',
+        type: 'write-test',
+        prompt: `Esta função de escape está **correta** — ela trata \`&\`, \`<\`, \`>\` e \`"\`.\n\nEscreva os testes dela com \`assert(condicao, mensagem)\`.\n\nNuma função de segurança, o teste importa mais que em qualquer outro lugar: um escape que falha em silêncio não quebra a tela, ele abre uma porta. Três versões quebradas vão ser testadas contra o que você escrever.`,
+        concepts: ['seguranca-web', 'strings'],
+        difficulty: 'avancado',
+        tags: ['web', 'seguranca', 'testes'],
+        subject: `function escaparHtml(valor) {
+  return String(valor)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;');
+}`,
+        initialCode: `// Escreva asserções sobre \`escaparHtml\`. Uma por linha.
+//
+// assert(escaparHtml('a') === 'a', 'texto comum nao muda');
+
+`,
+        mutants: [
+          {
+            description: 'troca só a primeira ocorrência de cada caractere',
+            code: `function escaparHtml(valor) {
+  return String(valor)
+    .replace('&', '&amp;')
+    .replace('<', '&lt;')
+    .replace('>', '&gt;')
+    .replace('"', '&quot;');
+}`,
+          },
+          {
+            description: 'escapa o & por último, escapando duas vezes o que ele mesmo criou',
+            code: `function escaparHtml(valor) {
+  return String(valor)
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll('&', '&amp;');
+}`,
+          },
+          {
+            description: 'esquece de escapar as aspas duplas',
+            code: `function escaparHtml(valor) {
+  return String(valor)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;');
+}`,
+          },
+        ],
+        hints: [
+          'Um teste com uma tag só não separa as três versões: todas as três acertam `<b>`.',
+          'Para a que troca só a primeira: use um texto com **duas** tags.',
+          'Para a da ordem: escape um `<` sozinho e confira que o resultado não tem `&amp;` dentro.',
+          "assert(escaparHtml('<a><b>') === '&lt;a&gt;&lt;b&gt;', 'todas'); assert(escaparHtml('<') === '&lt;', 'sem escapar duas vezes'); assert(escaparHtml('\\\"x\\\"') === '&quot;x&quot;', 'aspas');",
+        ],
+        solution: `assert(escaparHtml('<a><b>') === '&lt;a&gt;&lt;b&gt;', 'todas as ocorrencias');
+assert(escaparHtml('<') === '&lt;', 'nao escapa duas vezes');
+assert(escaparHtml('"x"') === '&quot;x&quot;', 'as aspas tambem');`,
+        explanation:
+          'O teste com uma tag só — `escaparHtml("<b>")` — passa nas **três** versões quebradas. É o teste que dá a sensação de cobertura sem cobrir nada, e é o mais fácil de escrever primeiro.\n\nCada um dos três que resolvem foi escolhido contra um defeito específico: duas tags para a que só troca a primeira, um `<` sozinho para a que escapa o `&` por último, e as aspas para a que as ignora. Num escape de segurança essa disciplina não é preciosismo — um caractere que escapa da função é uma tag que o navegador vai executar.',
+      },
+    },
+    {
       kind: 'summary',
       markdown: `Quase toda falha de segurança em web tem a mesma forma: **um dado foi lido como se fosse instrução**. Injeção de SQL e XSS são o mesmo mecanismo em interpretadores diferentes. A defesa boa não é caçar caracteres perigosos — essa lista nunca acaba —, é **separar o canal do dado do canal da instrução**: consulta parametrizada no banco, \`textContent\` em vez de \`innerHTML\` na tela. Quando precisar mesmo montar HTML, escape — e o \`&\` vem primeiro, porque ele aparece dentro das substituições dos outros. Do lado da confiança: validar no cliente é experiência, validar no servidor é proteção, e o servidor recalcula tudo que importa, porque o pedido não precisa vir da sua tela. E nada secreto vai para o navegador: tudo que chega ao cliente é público, e minificado não é escondido.`,
     },
