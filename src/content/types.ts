@@ -243,10 +243,45 @@ export interface FindBugExercise extends ExerciseBase {
   explanation: string;
 }
 
+/** Uma exigência sobre a **forma** do código, não sobre o que ele faz. */
+export interface RefactorConstraint {
+  /** O que se pede, em uma frase. É o que o aluno lê na lista. */
+  description: string;
+  /** Trecho que o código **não** pode conter. Busca literal. */
+  forbidden?: string;
+  /** Trecho que o código **precisa** conter. Busca literal. */
+  required?: string;
+  /** Teto de linhas de código, sem contar brancos nem comentários. */
+  maxLines?: number;
+}
+
 /**
- * União discriminada por `type`. Acrescentar um tipo novo (refatorar, arrastar
- * e soltar…) é estender esta união — nenhuma página precisa saber de todos os
- * tipos, só dos que renderiza (§315).
+ * Melhora a forma de um código que já funciona.
+ *
+ * O exercício de código pergunta "funciona?". Este pergunta a seguinte:
+ * **continua funcionando depois de você melhorar a forma?**
+ *
+ * É a única maneira de ensinar que código que funciona não é código pronto — e,
+ * mais que isso, de ensinar a disciplina do refatoramento: os testes são o
+ * contrato do comportamento, e mexer na forma não pode mudar nenhum deles. O
+ * aluno recebe um código que já passa em tudo, e precisa continuar passando.
+ */
+export interface RefactorExercise extends ExerciseBase {
+  type: 'refactor';
+  /** Código que já funciona, e que o aluno vai reescrever. */
+  initialCode: string;
+  /** O contrato do comportamento. Precisa continuar passando depois da reescrita. */
+  tests: TestCase[];
+  properties?: ExerciseProperty[];
+  constraints: RefactorConstraint[];
+  explanation: string;
+  solution?: string;
+}
+
+/**
+ * União discriminada por `type`. Acrescentar um tipo novo (arrastar e soltar,
+ * completar um diagrama…) é estender esta união — nenhuma página precisa saber
+ * de todos os tipos, só dos que renderiza (§315).
  */
 export type Exercise =
   | CodeExercise
@@ -255,6 +290,7 @@ export type Exercise =
   | MultipleChoiceExercise
   | OrderStepsExercise
   | PredictOutputExercise
+  | RefactorExercise
   | WriteTestExercise;
 
 /** Blocos que compõem uma aula. Nem toda aula usa todos (§316). */

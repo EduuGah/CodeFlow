@@ -356,6 +356,91 @@ Um detalhe de \`every\`: numa lista vazia ele devolve \`true\`. Faz sentido logi
       },
     },
     {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-js-8-refatorar-laco',
+        type: 'refactor',
+        prompt:
+          'Este código **já funciona** — todos os testes passam antes de você tocar nele.\n\nReescreva usando os métodos da aula, mantendo os testes verdes. Os testes são o contrato do comportamento: se algum deles ficar vermelho, a reescrita mudou o que o código faz, e isso não é refatorar.',
+        concepts: ['arrays', 'funcoes'],
+        difficulty: 'intermediario',
+        tags: ['javascript', 'arrays', 'refatoracao'],
+        initialCode: `function nomesDosCaros(produtos) {
+  const saida = [];
+
+  for (let i = 0; i < produtos.length; i++) {
+    if (produtos[i].preco > 100) {
+      saida.push(produtos[i].nome);
+    }
+  }
+
+  return saida;
+}`,
+        constraints: [
+          { description: 'Sem laço manual', forbidden: 'for (' },
+          { description: 'Sem empurrar item por item', forbidden: '.push(' },
+          { description: 'Selecione com filter', required: '.filter(' },
+          { description: 'Transforme com map', required: '.map(' },
+        ],
+        tests: [
+          {
+            description: 'devolve os nomes dos produtos acima de 100',
+            assertion: `
+              const r = nomesDosCaros([
+                { nome: 'mesa', preco: 250 },
+                { nome: 'caneta', preco: 5 },
+                { nome: 'cadeira', preco: 400 },
+              ]);
+              if (r.join(',') !== 'mesa,cadeira') throw new Error("Esperava ['mesa', 'cadeira'], veio [" + r.join(', ') + "].");
+            `,
+          },
+          {
+            description: 'mantém a ordem original',
+            assertion: `
+              const r = nomesDosCaros([
+                { nome: 'z', preco: 200 },
+                { nome: 'a', preco: 300 },
+              ]);
+              if (r.join(',') !== 'z,a') throw new Error("A ordem da lista original precisa ser preservada. Veio [" + r.join(', ') + "].");
+            `,
+          },
+          {
+            description: 'lista vazia devolve lista vazia',
+            assertion: `const r = nomesDosCaros([]); if (!Array.isArray(r) || r.length !== 0) throw new Error("Esperava [], veio " + JSON.stringify(r) + ".");`,
+            hidden: true,
+          },
+          {
+            description: 'exatamente 100 não conta como caro',
+            assertion: `
+              const r = nomesDosCaros([{ nome: 'x', preco: 100 }]);
+              if (r.length !== 0) throw new Error("A regra é ACIMA de 100, e 100 não está acima de 100. Veio [" + r.join(', ') + "].");
+            `,
+            hidden: true,
+          },
+          {
+            description: 'a lista recebida não é alterada',
+            assertion: `
+              const original = [{ nome: 'mesa', preco: 250 }, { nome: 'caneta', preco: 5 }];
+              nomesDosCaros(original);
+              if (original.length !== 2) throw new Error("A lista recebida encolheu de 2 para " + original.length + " itens.");
+            `,
+            hidden: true,
+          },
+        ],
+        hints: [
+          'Duas intenções estão misturadas no mesmo laço: escolher alguns produtos, e pegar um campo de cada um.',
+          'Separe as duas: primeiro fique só com os caros, depois transforme cada um no nome.',
+          'A saída do primeiro método é a entrada do segundo — dá para encadear numa linha.',
+          'return produtos.filter((p) => p.preco > 100).map((p) => p.nome);',
+        ],
+        solution: `function nomesDosCaros(produtos) {
+  return produtos.filter((p) => p.preco > 100).map((p) => p.nome);
+}`,
+        explanation:
+          'O laço original faz duas coisas ao mesmo tempo, e quem lê precisa desmontá-lo mentalmente para descobrir quais. A versão encadeada declara as duas intenções na ordem em que acontecem: **filtrar**, depois **transformar**.\n\nRepare no que não mudou: nenhum teste. É essa a definição de refatorar — o comportamento é o contrato, e os testes existem justamente para você poder mexer na forma sem medo.',
+      },
+    },
+    {
       kind: 'summary',
       markdown: `\`map\` transforma, \`filter\` seleciona, \`reduce\` condensa. Escolher o método certo faz o código **anunciar a intenção** — e nenhum dos três altera o array original, então encadeá-los é seguro. Duas armadilhas para guardar: chaves no corpo da seta sem \`return\` produzem um array cheio de \`undefined\`, e \`filter\` devolve sempre um array — inclusive o vazio, que é verdadeiro numa condição. Quando a pergunta é "existe algum?", use \`some\`; quando é "qual é o primeiro?", use \`find\`.`,
     },

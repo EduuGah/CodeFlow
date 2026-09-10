@@ -4,6 +4,7 @@ import { problemasDoMolde } from '../client/lib/fill-blank';
 import { problemasDaOrdenacao } from '../client/lib/ordenar';
 import { problemasDaEscritaDeTeste } from '../client/lib/escrever-teste';
 import { problemasDoBug } from '../client/lib/encontrar-bug';
+import { problemasDaRefatoracao } from '../client/lib/refatorar';
 
 /**
  * Validação de conteúdo (§295). Roda uma vez, no carregamento, e falha alto em
@@ -170,6 +171,33 @@ export const exerciseSchema = z.discriminatedUnion('type', [
           message: 'a linha do sintoma precisa de um retorno próprio',
           path: ['symptomFeedback'],
         });
+      }
+    }),
+  z
+    .object({
+      ...exerciseBase,
+      type: z.literal('refactor'),
+      initialCode: z.string().min(1),
+      tests: z
+        .array(testCaseSchema)
+        .min(1, 'refatorar sem teste é reescrever no escuro: o comportamento precisa de contrato'),
+      properties: z.array(propertySchema).optional(),
+      constraints: z
+        .array(
+          z.object({
+            description: z.string().min(1),
+            forbidden: z.string().min(1).optional(),
+            required: z.string().min(1).optional(),
+            maxLines: z.number().int().positive().optional(),
+          })
+        )
+        .min(1, 'sem restrição nenhuma, o código de partida já estaria pronto'),
+      explanation: z.string().min(1),
+      solution: z.string().optional(),
+    })
+    .superRefine((ex, ctx) => {
+      for (const problema of problemasDaRefatoracao(ex)) {
+        ctx.addIssue({ code: 'custom', message: problema, path: ['constraints'] });
       }
     }),
   z.object({

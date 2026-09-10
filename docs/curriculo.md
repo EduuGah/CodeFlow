@@ -24,8 +24,8 @@ Fase 7  Projeto final            ░░░░░░░░░░░░░░░�
 | | Hoje | Previsto | Feito |
 | --- | ---: | ---: | ---: |
 | Aulas | **31** | 135 | 23% |
-| Exercícios | **149** | ~700 | 21% |
-| Tipos de exercício | **7** | 11 | 64% |
+| Exercícios | **151** | ~700 | 22% |
+| Tipos de exercício | **8** | 11 | 73% |
 | Motores de execução | **1** | 7 | 14% |
 | Projetos | **7** | ~30 | 23% |
 
@@ -193,7 +193,11 @@ inteira caber no motor que já existe.
 | Ordenar passos | feito |
 | Escrever o teste | feito |
 | Encontrar o bug | feito |
-| Refatorar | — |
+| Refatorar | feito |
+
+**Todos os tipos que cabem no motor atual estão prontos.** Os três que faltam
+— arrastar e soltar, completar diagrama, e o de banco de dados — dependem de
+fases posteriores.
 | Publicar de verdade | — |
 | Servir o editor do próprio domínio | — |
 

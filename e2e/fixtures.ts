@@ -371,6 +371,17 @@ async function resolverExercicio(page: Page, exercicio: Exercise): Promise<void>
       return;
     }
 
+    case 'refactor': {
+      if (!exercicio.solution) {
+        throw new Error(`${exercicio.id} não tem solução de referência`);
+      }
+
+      await escreverNoEditor(page, exercicio.solution);
+      await page.getByRole('button', { name: /Rodar os testes|Rodar de novo/ }).click();
+      await page.getByText('Mesma coisa, escrita melhor').waitFor({ timeout: 40_000 });
+      return;
+    }
+
     case 'find-bug': {
       await page.getByRole('radio', { name: new RegExp(`^Linha ${exercicio.buggyLine}:`) }).check();
       await page.getByRole('button', { name: /Apontar a linha|Verificar de novo/ }).click();

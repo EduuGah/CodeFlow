@@ -350,6 +350,85 @@ console.log(carrinho[1].quantidade); // esperado: 1 — o original não muda`,
       },
     },
     {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-js-18-refatorar-copia',
+        type: 'refactor',
+        prompt:
+          'Este código **já funciona**, e um dos testes garante que ele não altera a lista recebida.\n\nReescreva-o em no máximo três linhas de código, sem montar a saída item por item. Os testes precisam continuar todos verdes.',
+        concepts: ['imutabilidade', 'arrays'],
+        difficulty: 'intermediario',
+        tags: ['javascript', 'imutabilidade', 'refatoracao'],
+        initialCode: `function comDesconto(produtos, percentual) {
+  const saida = [];
+
+  for (const p of produtos) {
+    const copia = {};
+    copia.nome = p.nome;
+    copia.preco = p.preco * (1 - percentual);
+    saida.push(copia);
+  }
+
+  return saida;
+}`,
+        constraints: [
+          { description: 'Sem empurrar item por item', forbidden: '.push(' },
+          { description: 'Transforme com map', required: '.map(' },
+          { description: 'No máximo 3 linhas de código', maxLines: 3 },
+        ],
+        tests: [
+          {
+            description: 'aplica o desconto em cada produto',
+            assertion: `
+              const r = comDesconto([{ nome: 'mesa', preco: 200 }, { nome: 'caneta', preco: 10 }], 0.1);
+              if (r.length !== 2) throw new Error("Esperava 2 produtos, veio " + r.length + ".");
+              if (Math.abs(r[0].preco - 180) > 1e-9) throw new Error("200 com 10% de desconto é 180, veio " + r[0].preco + ".");
+              if (Math.abs(r[1].preco - 9) > 1e-9) throw new Error("10 com 10% de desconto é 9, veio " + r[1].preco + ".");
+            `,
+          },
+          {
+            description: 'o nome é preservado',
+            assertion: `
+              const r = comDesconto([{ nome: 'mesa', preco: 200 }], 0.5);
+              if (r[0].nome !== 'mesa') throw new Error("O nome deveria continuar 'mesa', veio " + JSON.stringify(r[0].nome) + ".");
+            `,
+          },
+          {
+            description: 'a lista recebida continua intacta',
+            assertion: `
+              const original = [{ nome: 'mesa', preco: 200 }];
+              comDesconto(original, 0.1);
+              if (original[0].preco !== 200) throw new Error("O produto original mudou para " + original[0].preco + ". Copiar em vez de alterar é o ponto da aula.");
+            `,
+          },
+          {
+            description: 'desconto zero não muda nada',
+            assertion: `
+              const r = comDesconto([{ nome: 'x', preco: 50 }], 0);
+              if (r[0].preco !== 50) throw new Error("Com desconto 0 o preço continua 50, veio " + r[0].preco + ".");
+            `,
+            hidden: true,
+          },
+          {
+            description: 'lista vazia devolve lista vazia',
+            assertion: `const r = comDesconto([], 0.2); if (!Array.isArray(r) || r.length !== 0) throw new Error("Esperava [], veio " + JSON.stringify(r) + ".");`,
+            hidden: true,
+          },
+        ],
+        hints: [
+          'O laço inteiro faz uma coisa só: transformar cada produto em outro produto.',
+          'Copiar as propriedades uma a uma é o que o espalhamento faz numa expressão.',
+          'Depois do espalhamento, a propriedade que você escrever de novo sobrescreve a copiada.',
+          'return produtos.map((p) => ({ ...p, preco: p.preco * (1 - percentual) }));',
+        ],
+        solution: `function comDesconto(produtos, percentual) {
+  return produtos.map((p) => ({ ...p, preco: p.preco * (1 - percentual) }));
+}`,
+        explanation:
+          'O espalhamento copia as propriedades existentes, e o `preco` escrito **depois** sobrescreve a copiada — é o padrão de "o mesmo objeto, com uma coisa diferente" que você vai escrever centenas de vezes.\n\nA versão original também estava correta, e é importante dizer isso: ela copiava, não alterava, e passava em todos os testes. O que mudou foi a forma. Ganhou-se algo concreto, porém: a versão nova continua funcionando se o produto ganhar uma propriedade nova amanhã, enquanto a antiga silenciosamente a descartaria.',
+      },
+    },
+    {
       kind: 'summary',
       markdown: `Atribuir um objeto copia o endereço, não o conteúdo: dois nomes, um objeto só. \`sort\`, \`push\`, \`reverse\` e \`splice\` alteram no lugar; \`map\`, \`filter\` e o espalhamento produzem valor novo. Copiar antes de mexer evita o bug cuja causa fica longe do sintoma — uma função que reordena a lista de quem a chamou. E o espalhamento copia **um nível**: o que estiver aninhado continua compartilhado até você copiá-lo também. \`Object.freeze\` troca a convenção por uma regra que o programa cobra, mas tem o mesmo limite — congela só o nível de fora — e só recusa em voz alta dentro de um módulo.`,
     },

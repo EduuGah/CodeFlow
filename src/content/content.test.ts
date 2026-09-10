@@ -14,6 +14,7 @@ import { preencher } from '../client/lib/fill-blank';
 import { embaralhar, estaOrdenado } from '../client/lib/ordenar';
 import { avaliarTestes } from '../client/lib/escrever-teste';
 import { corrigirLinha, linhasNumeradas } from '../client/lib/encontrar-bug';
+import { avaliarRestricoes, todasCumpridas } from '../client/lib/refatorar';
 import type { CodeExercise, Exercise, FillBlankExercise, Lesson } from './types';
 
 /**
@@ -514,6 +515,88 @@ describe('exercícios de encontrar o bug', () => {
           new RegExp(`linha ${exercise.buggyLine}\\b`).test(dica),
           `a dica "${dica}" cita a linha da resposta`
         ).toBe(false);
+      }
+    }
+  );
+});
+
+describe('exercícios de refatorar', () => {
+  const refatoracoes = allExercises.filter(({ exercise }) => exercise.type === 'refactor');
+
+  it.each(refatoracoes.map(({ exercise }) => [exercise.id, exercise] as const))(
+    '%s: o código de partida JÁ passa nos testes',
+    async (_id, exercise) => {
+      if (exercise.type !== 'refactor') throw new Error('filtro inconsistente');
+
+      // É o que separa refatorar de consertar. Se o ponto de partida estivesse
+      // quebrado, o exercício seria um `code` disfarçado — e a lição de que o
+      // comportamento é o contrato se perderia.
+      const resultado = await runProgram(exercise.initialCode, exercise.tests, exercise.properties);
+
+      expect(resultado.error, 'o código de partida lança').toBeUndefined();
+
+      const falhas = resultado.testResults.filter((t) => !t.passed).map((t) => t.message);
+      expect(falhas, 'o código de partida já deveria funcionar').toEqual([]);
+    },
+    TEST_TIMEOUT_MS * 8
+  );
+
+  it.each(refatoracoes.map(({ exercise }) => [exercise.id, exercise] as const))(
+    '%s: o código de partida NÃO cumpre a forma',
+    async (_id, exercise) => {
+      if (exercise.type !== 'refactor') throw new Error('filtro inconsistente');
+
+      // Se já cumprisse, o aluno apertaria "verificar" e passaria sem tocar em
+      // nada — um exercício que aprova quem não fez.
+      const forma = avaliarRestricoes(exercise.initialCode, exercise.constraints);
+      expect(todasCumpridas(forma), 'não há nada a refatorar').toBe(false);
+    }
+  );
+
+  it.each(refatoracoes.map(({ exercise }) => [exercise.id, exercise] as const))(
+    '%s: a solução passa nos testes e cumpre a forma',
+    async (_id, exercise) => {
+      if (exercise.type !== 'refactor') throw new Error('filtro inconsistente');
+
+      expect(exercise.solution, 'exercício de refatoração precisa declarar uma solução').toBeTruthy();
+
+      const resultado = await runProgram(
+        exercise.solution ?? '',
+        exercise.tests,
+        exercise.properties
+      );
+
+      expect(resultado.error, 'a solução lança').toBeUndefined();
+
+      const falhas = resultado.testResults.filter((t) => !t.passed).map((t) => t.message);
+      expect(falhas, 'a solução deveria passar em tudo').toEqual([]);
+
+      const forma = avaliarRestricoes(exercise.solution ?? '', exercise.constraints);
+      const naoCumpridas = forma.filter((r) => !r.cumprida).map((r) => r.motivo);
+      expect(naoCumpridas, 'a solução não cumpre as próprias restrições').toEqual([]);
+    },
+    TEST_TIMEOUT_MS * 8
+  );
+
+  it.each(refatoracoes.map(({ exercise }) => [exercise.id, exercise] as const))(
+    '%s: a dica não entrega a solução antes da última',
+    async (_id, exercise) => {
+      if (exercise.type !== 'refactor') throw new Error('filtro inconsistente');
+
+      // A última dica pode entregar; é o combinado dos outros tipos. As
+      // anteriores, não — e o sinal aqui é a dica trazer o corpo pronto.
+      const corpo = (exercise.solution ?? '')
+        .split('\n')
+        .map((l) => l.trim())
+        .filter((l) => l !== '' && !l.startsWith('function') && l !== '}');
+
+      for (const dica of exercise.hints.slice(0, -1)) {
+        for (const linha of corpo) {
+          expect(
+            dica.includes(linha),
+            `a dica "${dica}" já traz a linha da solução`
+          ).toBe(false);
+        }
       }
     }
   );
