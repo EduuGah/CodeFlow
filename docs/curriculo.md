@@ -24,8 +24,8 @@ Fase 7  Projeto final            ░░░░░░░░░░░░░░░�
 | | Hoje | Previsto | Feito |
 | --- | ---: | ---: | ---: |
 | Aulas | **31** | 135 | 23% |
-| Exercícios | **142** | ~700 | 20% |
-| Tipos de exercício | **4** | 11 | 36% |
+| Exercícios | **145** | ~700 | 21% |
+| Tipos de exercício | **5** | 11 | 45% |
 | Motores de execução | **1** | 7 | 14% |
 | Projetos | **7** | ~30 | 23% |
 
@@ -190,7 +190,8 @@ inteira caber no motor que já existe.
 | --- | --- |
 | Testes por propriedade | feito |
 | Exercício de lacuna | feito |
-| Encontrar o bug, ordenar passos, refatorar, escrever o teste | — |
+| Ordenar passos | feito |
+| Encontrar o bug, refatorar, escrever o teste | — |
 | Publicar de verdade | — |
 | Servir o editor do próprio domínio | — |
 

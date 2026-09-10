@@ -11,6 +11,7 @@ import {
   listTracks,
 } from './index';
 import { preencher } from '../client/lib/fill-blank';
+import { embaralhar, estaOrdenado } from '../client/lib/ordenar';
 import type { CodeExercise, Exercise, FillBlankExercise, Lesson } from './types';
 
 /**
@@ -294,6 +295,66 @@ describe('exercícios de múltipla escolha', () => {
       // o aluno nunca conseguiria acertar e nada denunciaria o erro.
       expect(exercise.correctIndex).toBeLessThan(exercise.options.length);
       expect(exercise.options[exercise.correctIndex]).toBeTruthy();
+    }
+  );
+});
+
+describe('exercícios de ordenar passos', () => {
+  const ordenacoes = allExercises.filter(({ exercise }) => exercise.type === 'order-steps');
+
+  it.each(ordenacoes.map(({ exercise }) => [exercise.id, exercise] as const))(
+    '%s: a ordem inicial não é a resposta',
+    async (_id, exercise) => {
+      if (exercise.type !== 'order-steps') throw new Error('filtro inconsistente');
+
+      // Um exercício que abre já resolvido é pior do que um difícil demais: o
+      // aluno passa sem fazer nada e sem perceber que passou.
+      expect(estaOrdenado(embaralhar(exercise.steps, exercise.id))).toBe(false);
+    }
+  );
+
+  it.each(ordenacoes.map(({ exercise }) => [exercise.id, exercise] as const))(
+    '%s: a ordem declarada é resolvível',
+    async (_id, exercise) => {
+      if (exercise.type !== 'order-steps') throw new Error('filtro inconsistente');
+
+      // Arrumar pelo campo `ordem` tem que produzir uma sequência aceita — é o
+      // equivalente à solução de referência dos outros tipos.
+      const arrumado = [...exercise.steps].sort((a, b) => a.ordem - b.ordem);
+      expect(estaOrdenado(arrumado)).toBe(true);
+    }
+  );
+
+  it.each(ordenacoes.map(({ exercise }) => [exercise.id, exercise] as const))(
+    '%s: nenhum passo repete texto',
+    async (_id, exercise) => {
+      if (exercise.type !== 'order-steps') throw new Error('filtro inconsistente');
+
+      // Dois passos com o mesmo texto são indistinguíveis na tela, e o aluno
+      // não teria como saber qual mover.
+      const textos = exercise.steps.map((p) => p.text.trim());
+      expect(new Set(textos).size, `textos repetidos em ${exercise.id}`).toBe(textos.length);
+    }
+  );
+
+  it.each(ordenacoes.map(({ exercise }) => [exercise.id, exercise] as const))(
+    '%s: a dica não entrega a ordem',
+    async (_id, exercise) => {
+      if (exercise.type !== 'order-steps') throw new Error('filtro inconsistente');
+
+      // Uma dica que enumera os passos na ordem certa não é dica, é gabarito.
+      const arrumado = [...exercise.steps].sort((a, b) => a.ordem - b.ordem);
+
+      for (const dica of exercise.hints) {
+        const posicoes = arrumado
+          .map((passo) => dica.toLowerCase().indexOf(passo.text.toLowerCase().slice(0, 20)))
+          .filter((i) => i !== -1);
+
+        expect(
+          posicoes.length,
+          `a dica "${dica}" cita ${posicoes.length} passos na ordem da resposta`
+        ).toBeLessThan(arrumado.length);
+      }
     }
   );
 });

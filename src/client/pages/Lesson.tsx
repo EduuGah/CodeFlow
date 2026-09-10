@@ -18,6 +18,7 @@ import { CodeExerciseStep } from '../components/lesson/CodeExerciseStep';
 import { FillBlank } from '../components/lesson/FillBlank';
 import { LessonBlocks } from '../components/lesson/LessonBlocks';
 import { MultipleChoice } from '../components/lesson/MultipleChoice';
+import { OrderSteps } from '../components/lesson/OrderSteps';
 import { PredictOutput } from '../components/lesson/PredictOutput';
 import { MarkdownReader } from '../components/ui/MarkdownReader';
 import {
@@ -361,6 +362,14 @@ export function Lesson() {
 
         {passo.kind === 'exercise' && passo.exercise.type === 'multiple-choice' && (
           <MultipleChoice
+            exercise={passo.exercise}
+            lessonId={lesson.id}
+            onEstado={(estado) => registrarEstado(passo.exercise.id, estado)}
+          />
+        )}
+
+        {passo.kind === 'exercise' && passo.exercise.type === 'order-steps' && (
+          <OrderSteps
             exercise={passo.exercise}
             lessonId={lesson.id}
             onEstado={(estado) => registrarEstado(passo.exercise.id, estado)}

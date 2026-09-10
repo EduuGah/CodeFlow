@@ -219,6 +219,30 @@ console.log(podeVer(pedidoDaAna, { id: 2 }));`,
     {
       kind: 'exercise',
       exercise: {
+        id: 'ex-web-5-ordenar-guardas',
+        type: 'order-steps',
+        prompt:
+          'Uma rota protegida faz as checagens numa ordem específica, e trocá-las produz o status errado. Coloque as guardas na ordem certa.',
+        concepts: ['autenticacao', 'http'],
+        difficulty: 'intermediario',
+        tags: ['web', 'autenticacao'],
+        steps: [
+          { id: 'quem', text: 'Sem usuário identificado, responder 401', ordem: 1 },
+          { id: 'existe', text: 'Sem o recurso no banco, responder 404', ordem: 2 },
+          { id: 'pode', text: 'Se não for dono nem administrador, responder 403', ordem: 3 },
+          { id: 'fazer', text: 'Executar a operação e responder o status de sucesso', ordem: 4 },
+        ],
+        explanation:
+          'Identidade antes de existência: sem saber quem está pedindo, responder `404` já contaria a um estranho que aquele recurso não existe — e responder `403` afirmaria que ele existe. E permissão só depois de existência, porque decidir se alguém é dono exige ter o recurso em mãos para comparar. A operação vem por último, quando as três perguntas já foram respondidas.',
+        hints: [
+          'Antes de dizer se algo existe, faz sentido saber com quem você está falando?',
+          'Para decidir se a pessoa é dona do recurso, você precisa do recurso.',
+        ],
+      },
+    },
+    {
+      kind: 'exercise',
+      exercise: {
         id: 'ex-web-5-autorizar',
         type: 'code',
         prompt: `Crie \`autorizar(pedido, usuario, acao)\`, que **retorna** o status HTTP que o servidor deve responder.\n\n- Sem usuário → \`401\`.\n- Pedido inexistente (\`null\`) → \`404\`.\n- Ler (\`"ler"\`): dono ou admin → \`200\`; qualquer outro → \`403\`.\n- Apagar (\`"apagar"\`): **só** admin → \`204\`; qualquer outro, inclusive o dono → \`403\`.\n- Ação desconhecida → \`400\`.\n\nA ordem das checagens importa: identidade antes de existência, existência antes de permissão.`,

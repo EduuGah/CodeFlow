@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import { problemasDoMolde } from '../client/lib/fill-blank';
+import { problemasDaOrdenacao } from '../client/lib/ordenar';
 
 /**
  * Validação de conteúdo (§295). Roda uma vez, no carregamento, e falha alto em
@@ -103,6 +104,28 @@ export const exerciseSchema = z.discriminatedUnion('type', [
     .refine((ex) => ex.correctIndex < ex.options.length, {
       message: 'correctIndex aponta para uma alternativa que não existe',
       path: ['correctIndex'],
+    }),
+  z
+    .object({
+      ...exerciseBase,
+      type: z.literal('order-steps'),
+      steps: z
+        .array(
+          z.object({
+            id: idSchema,
+            text: z.string().min(1),
+            ordem: z.number().int().nonnegative(),
+          })
+        )
+        .min(3, 'ordenar dois passos é uma escolha entre duas, não uma sequência'),
+      explanation: z.string().min(1),
+    })
+    // Um exercício em que qualquer arrumação passa não cobra nada, e passaria
+    // despercebido: todo teste que alguém fizesse daria verde.
+    .superRefine((ex, ctx) => {
+      for (const problema of problemasDaOrdenacao(ex.steps)) {
+        ctx.addIssue({ code: 'custom', message: problema, path: ['steps'] });
+      }
     }),
   z.object({
     ...exerciseBase,

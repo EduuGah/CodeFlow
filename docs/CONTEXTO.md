@@ -34,12 +34,12 @@ Números lidos do catálogo, não de memória.
 | --- | --- |
 | Trilhas | 3 — Fundamentos de JavaScript (20 aulas), Lógica (3), Como a Web Funciona (8) |
 | Aulas | 31, somando 790 minutos |
-| Exercícios | 142 — 35 de código, 49 de prever saída, 32 de lacuna, 26 de múltipla escolha |
+| Exercícios | 145 — 35 de código, 49 de prever saída, 32 de lacuna, 26 de múltipla escolha, 3 de ordenar passos |
 | Verificação | 304 casos fixos + 58 propriedades |
 | Projetos | 7, com 22 critérios de aceitação |
 | Conceitos | 27, com grafo de pré-requisitos |
 | Flashcards | 22 |
-| Testes | 689 de unidade + 122 de navegador |
+| Testes | 737 de unidade + 122 de navegador |
 | Pacote | 949 kB (276 kB comprimido) |
 
 ## 4. Decisões que não devem ser desfeitas sem motivo forte
@@ -106,7 +106,7 @@ docs/curriculo.md       Roadmap de conteúdo — fonte canônica
 
 ```bash
 npm run typecheck   # inclui e2e/ e playwright.config.ts
-npm test            # 689 testes
+npm test            # 737 testes
 npm run test:e2e    # 122 no navegador (antes: npx playwright install chromium)
 npm run build
 ```

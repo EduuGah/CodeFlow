@@ -246,6 +246,30 @@ O contrário também existe: quebrar demais. Uma função de uma linha usada num
     {
       kind: 'exercise',
       exercise: {
+        id: 'ex-logica-1-ordenar-carrinho',
+        type: 'order-steps',
+        prompt:
+          'Um carrinho fecha assim: soma dos itens, desconto do cupom, frete, e o valor arredondado para centavos.\n\nO cupom vale **sobre os itens**, não sobre o frete. Coloque os passos na ordem que produz o preço certo.',
+        concepts: ['decomposicao'],
+        difficulty: 'iniciante',
+        tags: ['logica', 'decomposicao'],
+        steps: [
+          { id: 'somar', text: 'Somar o preço de todos os itens', ordem: 1 },
+          { id: 'cupom', text: 'Descontar o cupom desse total', ordem: 2 },
+          { id: 'frete', text: 'Somar o frete', ordem: 3 },
+          { id: 'arredondar', text: 'Arredondar para centavos', ordem: 4 },
+        ],
+        explanation:
+          'A ordem não é gosto: cada troca muda o valor cobrado. Somar o frete antes do cupom daria desconto sobre a entrega, o que a regra não previa. E arredondar no meio faria a conta seguinte partir de um número já alterado — o clássico problema de arredondar em cada etapa em vez de uma vez, no fim.',
+        hints: [
+          'Sobre o que o cupom incide? Esse valor precisa existir antes.',
+          'Arredondar no meio faz a etapa seguinte trabalhar em cima de um número já alterado.',
+        ],
+      },
+    },
+    {
+      kind: 'exercise',
+      exercise: {
         id: 'ex-logica-1-resumo',
         type: 'code',
         prompt: `Crie \`resumo(numeros)\`, que **retorna** um objeto \`{ menor, maior, media }\` sobre a lista recebida.\n\nSão três perguntas independentes sobre os mesmos dados — decomponha antes de escrever.\n\n- Lista vazia devolve \`null\`: não existe menor nem média de nada.\n- A lista recebida **não pode ser alterada**.`,

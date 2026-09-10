@@ -337,6 +337,29 @@ async function resolverExercicio(page: Page, exercicio: Exercise): Promise<void>
       return;
     }
 
+    case 'order-steps': {
+      // Sobe cada passo até a posição dele, um de cada vez — que é exatamente o
+      // que o aluno faz. A ordem certa vem do próprio conteúdo.
+      const certa = [...exercicio.steps].sort((a, b) => a.ordem - b.ordem).map((p) => p.text);
+
+      const naTela = () =>
+        page.locator('ol li span.flex-1').allTextContents().then((t) => t.map((x) => x.trim()));
+
+      for (let alvo = 0; alvo < certa.length; alvo++) {
+        for (let guarda = 0; guarda < certa.length + 1; guarda++) {
+          const atual = await naTela();
+          const onde = atual.indexOf(certa[alvo]);
+          if (onde <= alvo) break;
+
+          await page.getByRole('button', { name: `Mover "${certa[alvo]}" para cima` }).click();
+        }
+      }
+
+      await page.getByRole('button', { name: /Verificar ordem/ }).click();
+      await page.getByText('Sequência correta').waitFor({ timeout: 10_000 });
+      return;
+    }
+
     case 'code': {
       if (!exercicio.solution) {
         throw new Error(`${exercicio.id} não tem solução de referência`);

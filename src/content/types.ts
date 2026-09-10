@@ -152,14 +152,42 @@ export interface PredictOutputExercise extends ExerciseBase {
 }
 
 /**
- * União discriminada por `type`. Acrescentar um tipo novo (ordenação, encontre o
- * erro, arraste e solte…) é estender esta união — nenhuma página precisa saber
- * de todos os tipos, só dos que renderiza (§315).
+ * Coloca os passos de uma solução na ordem certa.
+ *
+ * Os outros tipos cobram escrita ou escolha; nenhum cobra **sequência**, que é
+ * metade do que separa quem sabe a sintaxe de quem resolve o problema. Um aluno
+ * pode conhecer `trim`, `split` e `filter` e ainda assim não saber em que ordem
+ * aplicá-los.
+ *
+ * Como não há o que digitar, o exercício isola o raciocínio de sequência de
+ * qualquer dificuldade de escrita — e por isso funciona bem cedo na trilha.
+ */
+export interface OrderStepsExercise extends ExerciseBase {
+  type: 'order-steps';
+  steps: Array<{
+    id: string;
+    /** O passo, como o aluno lê. Uma linha de código, ou uma frase. */
+    text: string;
+    /**
+     * Posição na sequência. Passos com o **mesmo** número podem trocar de lugar
+     * entre si — é assim que o exercício aceita mais de uma resposta certa sem
+     * enumerar combinações.
+     */
+    ordem: number;
+  }>;
+  explanation: string;
+}
+
+/**
+ * União discriminada por `type`. Acrescentar um tipo novo (encontre o erro,
+ * refatore, escreva o teste…) é estender esta união — nenhuma página precisa
+ * saber de todos os tipos, só dos que renderiza (§315).
  */
 export type Exercise =
   | CodeExercise
   | FillBlankExercise
   | MultipleChoiceExercise
+  | OrderStepsExercise
   | PredictOutputExercise;
 
 /** Blocos que compõem uma aula. Nem toda aula usa todos (§316). */

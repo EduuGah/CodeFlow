@@ -446,6 +446,31 @@ console.log(iniciais(""));                 // ""`,
     {
       kind: 'exercise',
       exercise: {
+        id: 'ex-js-9-ordenar-normalizar',
+        type: 'order-steps',
+        prompt:
+          'Estes são os passos de `normalizarEmail`. Coloque-os na ordem que funciona.\n\nDois deles podem trocar de lugar entre si — se a sua ordem passar, ela está certa.',
+        concepts: ['strings', 'condicoes'],
+        difficulty: 'intermediario',
+        tags: ['javascript', 'strings'],
+        steps: [
+          { id: 'texto', text: 'Converter a entrada para texto', ordem: 1 },
+          { id: 'trim', text: 'Tirar os espaços das pontas', ordem: 2 },
+          { id: 'minusculas', text: 'Passar tudo para minúsculas', ordem: 2 },
+          { id: 'validar', text: 'Conferir se há algo antes e depois do @', ordem: 3 },
+          { id: 'devolver', text: 'Devolver o email limpo', ordem: 4 },
+        ],
+        explanation:
+          'A conversão para texto vem primeiro porque os métodos de string não existem em `null` nem em número. `trim` e `toLowerCase` podem vir em qualquer ordem entre si — nenhuma das duas depende da outra —, e é por isso que as duas arrumações passam. Já a validação precisa vir **depois** da limpeza: um espaço invisível no fim faria um email perfeitamente válido ser recusado.',
+        hints: [
+          'Qual passo precisa acontecer antes de qualquer método de texto ser chamado?',
+          'Validar antes ou depois de limpar? Pense num email com um espaço no fim.',
+        ],
+      },
+    },
+    {
+      kind: 'exercise',
+      exercise: {
         id: 'ex-js-9-validar',
         type: 'code',
         prompt: `Crie \`normalizarEmail(entrada)\` que **retorna** o email limpo — sem espaços nas pontas e em minúsculas.\n\nSe a entrada não for um texto válido de email (precisa conter \`"@"\` e ter algo antes e depois dele), retorne \`null\`.`,
