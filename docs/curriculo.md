@@ -194,12 +194,12 @@ inteira caber no motor que já existe.
 | Escrever o teste | feito |
 | Encontrar o bug | feito |
 | Refatorar | feito |
-
-**Todos os tipos que cabem no motor atual estão prontos.** Os três que faltam
-— arrastar e soltar, completar diagrama, e o de banco de dados — dependem de
-fases posteriores.
 | Publicar de verdade | — |
 | Servir o editor do próprio domínio | — |
+
+**Todos os tipos de exercício que cabem no motor atual estão prontos.** Os três
+que faltam — arrastar e soltar, completar diagrama, e o de banco de dados —
+dependem de fases posteriores.
 
 Duas correções que a Fase 1 exigiu e que não estavam previstas: o sandbox era
 síncrono, e uma asserção assíncrona reportava sucesso antes de a promise resolver
