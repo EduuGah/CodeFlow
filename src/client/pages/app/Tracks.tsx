@@ -7,6 +7,7 @@ import { buildPath, summarizePath } from '../../lib/path';
 import { LearningPath } from '../../components/dashboard/LearningPath';
 import { TrackBanner } from '../../components/dashboard/TrackBanner';
 import { IconArrowRight, IconAward, IconProject } from '../../components/ui/Icon';
+import { cardClasses } from '../../components/ui/Card';
 import { ProgressBar } from '../../components/ui/ProgressBar';
 import { Carregando, Skeleton } from '../../components/ui/Skeleton';
 import { EmptyState } from '../../components/ui/States';
@@ -99,7 +100,9 @@ export function Tracks() {
                 <li key={projeto.id}>
                   <Link
                     to={`/project/${projeto.id}`}
-                    className="flex items-center gap-4 rounded-xl border border-line bg-surface p-4 transition-colors hover:border-line-strong"
+                    className={cardClasses({
+                      className: 'flex items-center gap-4 transition-colors hover:border-line-strong',
+                    })}
                   >
                     <span
                       className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg ${

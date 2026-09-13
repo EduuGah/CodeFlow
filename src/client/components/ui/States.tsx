@@ -1,6 +1,7 @@
 import React from 'react';
 import { IconAlert, IconRetry } from './Icon';
 import { Button } from './Button';
+import { cardClasses } from './Card';
 import { cn } from '../../lib/utils';
 
 /**
@@ -63,7 +64,7 @@ export function ErrorState({
   return (
     <div
       role="alert"
-      className={cn('rounded-xl border border-danger-200 bg-danger-50 p-5', className)}
+      className={cardClasses({ tone: 'danger', className })}
     >
       <div className="flex items-start gap-3">
         <IconAlert size={18} className="mt-0.5 flex-shrink-0 text-danger-500" />

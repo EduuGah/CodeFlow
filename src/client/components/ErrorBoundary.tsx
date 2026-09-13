@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { buttonClasses } from './ui/Button';
+import { Card } from './ui/Card';
 import { IconArrowLeft, IconCloseCircle } from './ui/Icon';
 
 /**
@@ -36,7 +38,7 @@ export class ErrorBoundary extends React.Component<{ children: React.ReactNode }
 
     return (
       <div className="flex min-h-screen items-center justify-center bg-canvas px-4">
-        <div className="w-full max-w-md rounded-xl border border-line bg-surface p-6 text-center">
+        <Card padding="lg" className="w-full max-w-md text-center">
           <span className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-danger-50 text-danger-500">
             <IconCloseCircle size={26} />
           </span>
@@ -58,14 +60,11 @@ export class ErrorBoundary extends React.Component<{ children: React.ReactNode }
 
           {/* `href` em vez de `Link`: a árvore do roteador é justamente o que
               acabou de falhar, então a recuperação confiável é recarregar. */}
-          <a
-            href="/app"
-            className="mt-5 flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-brand-600 font-bold text-white transition-colors hover:bg-brand-700"
-          >
+          <a href="/app" className={buttonClasses({ size: 'lg', block: true, className: 'mt-5' })}>
             <IconArrowLeft size={18} />
             Voltar ao início
           </a>
-        </div>
+        </Card>
       </div>
     );
   }

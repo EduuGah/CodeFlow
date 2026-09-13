@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
+import { buttonClasses } from '../components/ui/Button';
 import { IconAlert, IconSpinner } from '../components/ui/Icon';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -63,10 +64,7 @@ export function AuthCallback() {
             <h1 className="text-lg font-semibold text-ink">Não foi possível concluir o login</h1>
             <p className="text-sm leading-relaxed text-ink-faint">{failure}</p>
           </div>
-          <Link
-            to="/login"
-            className="inline-block rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
-          >
+          <Link to="/login" className={buttonClasses()}>
             Voltar para o login
           </Link>
         </div>

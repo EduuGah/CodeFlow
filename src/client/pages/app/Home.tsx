@@ -14,6 +14,8 @@ import {
   IconStreak,
   IconTarget,
 } from '../../components/ui/Icon';
+import { buttonClasses } from '../../components/ui/Button';
+import { Card } from '../../components/ui/Card';
 import { Carregando, Skeleton } from '../../components/ui/Skeleton';
 import { ErrorState } from '../../components/ui/States';
 import { useDocumentTitle } from '../../hooks/useDocumentTitle';
@@ -185,7 +187,7 @@ export function Home() {
           <Skeleton className="h-56 w-full rounded-xl" />
         </Carregando>
       ) : destino ? (
-        <section className="overflow-hidden rounded-xl border border-line bg-surface">
+        <Card as="section" padding="none" className="overflow-hidden">
           <div className="bg-brand-600 px-5 py-4 text-white sm:px-6">
             <p className="label-mono text-brand-100">
               {primeiraVez
@@ -212,7 +214,7 @@ export function Home() {
 
             <Link
               to={`/lesson/${destino.id}`}
-              className="mt-5 flex w-full items-center justify-center gap-2 rounded-lg bg-brand-600 px-5 py-3.5 font-bold text-white transition-colors hover:bg-brand-700 active:translate-y-px"
+              className={buttonClasses({ size: 'lg', block: true, className: 'mt-5' })}
             >
               {primeiraVez ? 'Começar a primeira aula' : 'Continuar aprendendo'}
               <IconArrowRight size={18} />
@@ -222,9 +224,9 @@ export function Home() {
               {destino.estimatedMinutes} minutos
             </p>
           </div>
-        </section>
+        </Card>
       ) : (
-        <section className="rounded-xl border border-success-200 bg-success-50 p-6 text-center">
+        <Card as="section" tone="success" padding="lg" className="text-center">
           <span className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-success-600 text-white">
             <IconCheck size={24} />
           </span>
@@ -233,14 +235,11 @@ export function Home() {
             Você terminou {trilha.title}. Os projetos são o próximo passo natural: eles não têm
             passo a passo, só requisitos.
           </p>
-          <Link
-            to="/app/trilhas"
-            className="mt-4 inline-flex items-center gap-2 rounded-lg bg-brand-600 px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-brand-700"
-          >
+          <Link to="/app/trilhas" className={buttonClasses({ className: 'mt-4' })}>
             Ver projetos
             <IconArrowRight size={17} />
           </Link>
-        </section>
+        </Card>
       )}
 
       {/* O QUE VEM DEPOIS — sequência sobre um traço, não uma grade de cards. */}

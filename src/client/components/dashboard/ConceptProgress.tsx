@@ -1,6 +1,7 @@
 import { getConcept } from '../../../content';
 import { MASTERY_LABELS, type ConceptMastery } from '../../lib/mastery';
 import { Badge, type BadgeTone } from '../ui/Badge';
+import { Card } from '../ui/Card';
 import { EmptyState } from '../ui/States';
 
 /**
@@ -31,7 +32,7 @@ export function ConceptProgress({ mastery }: { mastery: ConceptMastery[] }) {
   }
 
   return (
-    <ul className="divide-y divide-line overflow-hidden rounded-xl border border-line bg-surface">
+    <Card as="ul" padding="none" className="divide-y divide-line overflow-hidden">
       {comHistorico.map((m) => {
         const conceito = getConcept(m.conceptId);
 
@@ -56,6 +57,6 @@ export function ConceptProgress({ mastery }: { mastery: ConceptMastery[] }) {
           </li>
         );
       })}
-    </ul>
+    </Card>
   );
 }

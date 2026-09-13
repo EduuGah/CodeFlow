@@ -39,7 +39,7 @@ Números lidos do catálogo, não de memória.
 | Projetos | 7, com 22 critérios de aceitação |
 | Conceitos | 27, com grafo de pré-requisitos |
 | Flashcards | 22 |
-| Testes | 832 de unidade + 126 de navegador |
+| Testes | 884 de unidade + 126 de navegador |
 | Pacote | 1.340 kB (383 kB comprimido) — o conteúdo vai junto no chunk principal |
 
 ## 4. Decisões que não devem ser desfeitas sem motivo forte
@@ -97,6 +97,12 @@ src/client/lib/         Lógica pura e testada
 
 src/client/pages/       Telas
 src/client/components/  Componentes
+  ui/Button.tsx         O botão — o único. Variantes × tamanhos, `loading`,
+                        ícones; `buttonClasses()` para um <Link> ser botão
+  ui/Card.tsx           A superfície: tons com significado, `cardClasses()`,
+                        e `SectionLabel`, o rótulo monoespaçado das seções
+  lesson/               Um componente por tipo de exercício; `ExerciseAction`
+                        e `ExerciseFeedback` são o botão e o retorno de todos
 e2e/                    Playwright; `fixtures.ts` tem o dublê do Supabase
 supabase/migrations/    0001 a 0006, aplicadas em ordem
 docs/curriculo.md       Roadmap de conteúdo — fonte canônica
@@ -106,7 +112,7 @@ docs/curriculo.md       Roadmap de conteúdo — fonte canônica
 
 ```bash
 npm run typecheck   # inclui e2e/ e playwright.config.ts
-npm test            # 832 testes
+npm test            # 884 testes
 npm run test:e2e    # 126 no navegador (antes: npx playwright install chromium)
 npm run build
 ```
@@ -270,3 +276,12 @@ sql.js (SQL), Pyodide (Python).
   responsividade > consistência visual > qualidade dos exercícios > progressão >
   gamificação.
 - Push direto no `main` está autorizado. Commits explicam **por que**, não o quê.
+- **Botão e card são componentes, não classes copiadas.** A base é uma matriz
+  pequena, no padrão das bibliotecas que funcionam (shadcn, 21st.dev): `Button`
+  com 5 variantes × 3 tamanhos, todos ≥ 40px, `md` = 44px; `Card` com tons que
+  carregam significado (`success` acerto, `caution` erro de resposta, `danger`
+  falha). Antes eram 19 botões e 25 cards escritos à mão, cada um envelhecendo
+  sozinho. Hoje: zero botões primários inline (o E2E do painel conta os
+  `bg-brand-600`), e os `<button>` crus que restam são os que têm motivo —
+  setas de reordenar com ref, abas, disclosure. Se um estilo novo parecer
+  necessário, é uma variante nova, não uma classe copiada.

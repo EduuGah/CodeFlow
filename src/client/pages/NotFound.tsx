@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 
 import { useAuth } from '../contexts/AuthContext';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
+import { buttonClasses } from '../components/ui/Button';
 import { IconArrowRight, IconAlert } from '../components/ui/Icon';
 
 /**
@@ -39,10 +40,7 @@ export function NotFound() {
       {/* Enquanto a sessão carrega, o destino ainda não é conhecido: um link que
           leva ao lugar errado é pior do que um instante sem link. */}
       {!loading && (
-        <Link
-          to={destino}
-          className="mt-6 inline-flex items-center gap-2 rounded-lg bg-brand-600 px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-brand-700"
-        >
+        <Link to={destino} className={buttonClasses({ className: 'mt-6' })}>
           {rotulo}
           <IconArrowRight size={17} />
         </Link>

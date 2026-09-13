@@ -7,6 +7,7 @@ import { useRecordAttempt } from '../../hooks/useRecordAttempt';
 import { useFocusRescue } from '../../hooks/useFocusRescue';
 import { useReportarEstado } from '../../hooks/useReportarEstado';
 import { IconChevronDown } from '../ui/Icon';
+import { Card, SectionLabel } from '../ui/Card';
 import { MarkdownReader } from '../ui/MarkdownReader';
 import { ExerciseAction, ExerciseFeedback } from './ExerciseAction';
 import { HintPanel } from './HintPanel';
@@ -133,8 +134,10 @@ export function OrderSteps({
   const travado = enviado && acertou;
 
   return (
-    <section className="rounded-xl border border-line bg-surface p-4 sm:p-5">
-      <h2 className="label-mono mb-3 text-brand-600">Coloque na ordem</h2>
+    <Card as="section">
+      <SectionLabel tone="brand" className="mb-3">
+        Coloque na ordem
+      </SectionLabel>
 
       <div className="mb-4">
         <MarkdownReader content={exercise.prompt} />
@@ -255,6 +258,6 @@ export function OrderSteps({
           onRevealedChange={setDicasAbertas}
         />
       )}
-    </section>
+    </Card>
   );
 }

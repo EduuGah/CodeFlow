@@ -7,6 +7,7 @@ import { MASTERY_LABELS, type ConceptMastery } from '../../lib/mastery';
 import { IconArrowRight, IconCheck, IconExit, IconStreak } from '../../components/ui/Icon';
 import { Badge, type BadgeTone } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
+import { Card, cardClasses } from '../../components/ui/Card';
 import { ProgressBar } from '../../components/ui/ProgressBar';
 import { Carregando, Skeleton } from '../../components/ui/Skeleton';
 import { EmptyState } from '../../components/ui/States';
@@ -92,7 +93,9 @@ export function Profile() {
       {papel === 'admin' && (
         <Link
           to="/admin"
-          className="flex items-center justify-between gap-3 rounded-xl border border-line bg-surface p-4 transition-colors hover:bg-sunken"
+          className={cardClasses({
+            className: 'flex items-center justify-between gap-3 transition-colors hover:bg-sunken',
+          })}
         >
           <span>
             <span className="block font-bold text-ink">Administração</span>
@@ -104,7 +107,7 @@ export function Profile() {
         </Link>
       )}
 
-      <section className="rounded-xl border border-line bg-surface p-5">
+      <Card as="section">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <h2 className="font-bold text-ink">{level.xp} XP</h2>
           {streak > 0 && (
@@ -135,14 +138,14 @@ export function Profile() {
           exercícios {xp.exercicios} · aulas {xp.aulas} · projetos {xp.projetos} · revisão{' '}
           {xp.revisao}
         </p>
-      </section>
+      </Card>
 
       <section>
         <h2 className="label-mono mb-3 text-ink-faint">
           Conquistas ({conquistadas.length} de {achievements.length})
         </h2>
 
-        <ul className="divide-y divide-line overflow-hidden rounded-xl border border-line bg-surface">
+        <Card as="ul" padding="none" className="divide-y divide-line overflow-hidden">
           {achievements.map((a) => (
             <li key={a.id} className="flex items-start gap-3 p-4">
               <span
@@ -163,7 +166,7 @@ export function Profile() {
               </span>
             </li>
           ))}
-        </ul>
+        </Card>
       </section>
 
       <section>
@@ -178,7 +181,7 @@ export function Profile() {
             description="Assim que você resolver exercícios, o domínio de cada conceito aparece aqui — com as tentativas que geraram cada avaliação."
           />
         ) : (
-          <ul className="divide-y divide-line overflow-hidden rounded-xl border border-line bg-surface">
+          <Card as="ul" padding="none" className="divide-y divide-line overflow-hidden">
             {comHistorico.map((m) => (
               <li key={m.conceptId} className="flex flex-wrap items-center gap-x-4 gap-y-2 p-4">
                 <span className="min-w-0 flex-1">
@@ -198,7 +201,7 @@ export function Profile() {
                 </span>
               </li>
             ))}
-          </ul>
+          </Card>
         )}
       </section>
 

@@ -8,6 +8,7 @@ import { executeCode, type ExecutionResult } from '../../lib/sandbox';
 import { useRecordAttempt } from '../../hooks/useRecordAttempt';
 import { useReportarEstado } from '../../hooks/useReportarEstado';
 import { IconCheck, IconClose, IconPlay } from '../ui/Icon';
+import { Card, SectionLabel } from '../ui/Card';
 import { MarkdownReader } from '../ui/MarkdownReader';
 import { ExerciseAction, ExerciseFeedback } from './ExerciseAction';
 import { HintPanel } from './HintPanel';
@@ -103,15 +104,19 @@ export function Refactor({
 
   return (
     <div className="space-y-4">
-      <div className="rounded-xl border border-line bg-surface p-4 sm:p-5">
-        <h2 className="label-mono mb-2 text-brand-600">Refatore</h2>
+      <Card>
+        <SectionLabel tone="brand" className="mb-2">
+          Refatore
+        </SectionLabel>
         <MarkdownReader content={exercise.prompt} />
-      </div>
+      </Card>
 
       {/* A lista de tarefas, marcada em tempo real. Escondê-la até a primeira
           tentativa transformaria o exercício em adivinhação. */}
-      <div className="rounded-xl border border-line bg-surface p-4 sm:p-5">
-        <p className="label-mono mb-3 text-ink-faint">A forma que se pede</p>
+      <Card>
+        <SectionLabel as="p" className="mb-3">
+          A forma que se pede
+        </SectionLabel>
         <ul className="space-y-2">
           {restricoes.map((restricao) => (
             <li
@@ -136,7 +141,7 @@ export function Refactor({
             </li>
           ))}
         </ul>
-      </div>
+      </Card>
 
       <div
         className={`overflow-hidden rounded-xl border transition-colors ${

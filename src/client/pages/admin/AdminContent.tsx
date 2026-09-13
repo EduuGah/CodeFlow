@@ -11,7 +11,9 @@ import {
   type ExercisePerformance,
 } from '../../lib/admin';
 import { IconArrowLeft, IconInfo } from '../../components/ui/Icon';
+import { buttonClasses } from '../../components/ui/Button';
 import { Badge, type BadgeTone } from '../../components/ui/Badge';
+import { Card, SectionLabel } from '../../components/ui/Card';
 import { Carregando, Skeleton } from '../../components/ui/Skeleton';
 import { EmptyState } from '../../components/ui/States';
 import { useDocumentTitle } from '../../hooks/useDocumentTitle';
@@ -88,10 +90,7 @@ export function AdminContent() {
           Saúde do catálogo e como os alunos estão reagindo a ele.
         </p>
 
-        <Link
-          to="/admin/novo-exercicio"
-          className="mt-4 inline-flex items-center gap-2 rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-brand-700"
-        >
+        <Link to="/admin/novo-exercicio" className={buttonClasses({ className: 'mt-4' })}>
           Criar exercício
         </Link>
       </header>
@@ -105,31 +104,33 @@ export function AdminContent() {
             ['Exercícios', saude.exercises],
             ['Projetos', saude.projects],
           ].map(([rotulo, valor]) => (
-            <div key={rotulo} className="rounded-xl border border-line bg-surface p-4">
+            <Card key={rotulo}>
               <p className="text-2xl font-extrabold tabular-nums text-ink">{valor}</p>
-              <p className="label-mono text-ink-faint">{rotulo}</p>
-            </div>
+              <SectionLabel as="p">{rotulo}</SectionLabel>
+            </Card>
           ))}
         </div>
 
         {totalDeLacunas === 0 ? (
-          <p className="flex items-start gap-2 rounded-xl border border-success-200 bg-success-50 p-4 text-sm leading-relaxed text-success-700">
+          <Card tone="success" className="flex items-start gap-2 text-sm leading-relaxed text-success-700">
             <IconInfo size={16} className="mt-0.5 shrink-0" />
             Nenhuma lacuna estrutural. Todo exercício tem dica, e todo exercício de código e todo
             projeto têm solução de referência que o CI usa para provar que são resolvíveis.
-          </p>
+          </Card>
         ) : (
           <ul className="space-y-2">
             {lacunas
               .filter(([, ids]) => ids.length > 0)
               .map(([rotulo, ids]) => (
-                <li
+                <Card
+                  as="li"
                   key={rotulo}
-                  className="rounded-xl border border-energy-200 bg-energy-50 p-4 text-sm leading-relaxed text-energy-700"
+                  tone="caution"
+                  className="text-sm leading-relaxed text-energy-700"
                 >
                   <strong className="font-semibold">{rotulo}:</strong>{' '}
                   <span className="font-mono">{ids.join(', ')}</span>
-                </li>
+                </Card>
               ))}
           </ul>
         )}
@@ -158,7 +159,7 @@ export function AdminContent() {
         ) : (
           <ul className="space-y-2">
             {diagnosticos.map((d) => (
-              <li key={d.exerciseId} className="rounded-xl border border-line bg-surface p-4">
+              <Card as="li" key={d.exerciseId}>
                 <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
                   <span className="font-mono text-sm font-semibold text-ink">{d.exerciseId}</span>
                   <Badge tone={tomDoSinal[d.signal]}>{rotuloDoSinal[d.signal]}</Badge>
@@ -171,7 +172,7 @@ export function AdminContent() {
                   {d.students === 1 ? 'aluno' : 'alunos'} · {d.attempts} tentativas ·{' '}
                   {d.avgHintsUsed} dicas em média
                 </p>
-              </li>
+              </Card>
             ))}
           </ul>
         )}

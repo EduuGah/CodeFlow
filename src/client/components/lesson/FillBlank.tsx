@@ -8,6 +8,7 @@ import { useRecordAttempt } from '../../hooks/useRecordAttempt';
 import { useFocusRescue } from '../../hooks/useFocusRescue';
 import { useReportarEstado } from '../../hooks/useReportarEstado';
 import { IconCheck, IconClose, IconPlay } from '../ui/Icon';
+import { Card, SectionLabel } from '../ui/Card';
 import { MarkdownReader } from '../ui/MarkdownReader';
 import { ExerciseAction, ExerciseFeedback } from './ExerciseAction';
 import { HintPanel } from './HintPanel';
@@ -118,10 +119,12 @@ export function FillBlank({
 
   return (
     <div className="space-y-4">
-      <div className="rounded-xl border border-line bg-surface p-4 sm:p-5">
-        <h2 className="label-mono mb-2 text-brand-600">Complete o código</h2>
+      <Card>
+        <SectionLabel tone="brand" className="mb-2">
+          Complete o código
+        </SectionLabel>
         <MarkdownReader content={exercise.prompt} />
-      </div>
+      </Card>
 
       {/* O código com os campos embutidos. Superfície escura, como o editor: é a
           troca de superfície que sinaliza "aqui você escreve". */}

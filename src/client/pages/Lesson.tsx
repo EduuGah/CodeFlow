@@ -23,6 +23,8 @@ import { OrderSteps } from '../components/lesson/OrderSteps';
 import { PredictOutput } from '../components/lesson/PredictOutput';
 import { Refactor } from '../components/lesson/Refactor';
 import { WriteTest } from '../components/lesson/WriteTest';
+import { Button, buttonClasses } from '../components/ui/Button';
+import { Card, SectionLabel } from '../components/ui/Card';
 import { MarkdownReader } from '../components/ui/MarkdownReader';
 import {
   IconArrowLeft,
@@ -300,17 +302,17 @@ export function Lesson() {
 
         {passo.kind === 'summary' && (
           <div className="space-y-5">
-            <div className="rounded-xl border border-line bg-surface p-5">
-              <h2 className="label-mono mb-2 text-ink-faint">Em resumo</h2>
+            <Card>
+              <SectionLabel className="mb-2">Em resumo</SectionLabel>
               <MarkdownReader content={passo.markdown} />
-            </div>
+            </Card>
 
             {/* O fecho diz o que de fato aconteceu. A versão anterior afirmava
                 "Aula concluída — seu progresso foi salvo" para todo mundo,
                 inclusive para quem tinha pulado todos os exercícios e não tinha
                 salvo nada. */}
             {tudoResolvido || jaConcluida ? (
-              <div className="rounded-xl border border-success-200 bg-success-50 p-5 text-center">
+              <Card tone="success" className="text-center">
                 <span className="mx-auto mb-2 flex h-11 w-11 items-center justify-center rounded-full bg-success-600 text-white">
                   <IconCheckCircle size={24} />
                 </span>
@@ -320,9 +322,9 @@ export function Lesson() {
                     ? 'Seu progresso foi salvo. A próxima aula continua daqui.'
                     : 'Você chegou ao fim desta trilha.'}
                 </p>
-              </div>
+              </Card>
             ) : (
-              <div className="rounded-xl border border-energy-200 bg-energy-50 p-5">
+              <Card tone="caution">
                 <p className="font-bold text-energy-700">
                   {faltando.length === 1
                     ? 'Falta 1 exercício para fechar esta aula'
@@ -333,15 +335,16 @@ export function Lesson() {
                   quando os exercícios estiverem resolvidos, porque é neles que o conceito sai
                   do texto e vira coisa que você sabe fazer.
                 </p>
-                <button
-                  type="button"
+                <Button
+                  size="lg"
+                  block
+                  className="mt-4"
                   onClick={irParaPendente}
-                  className="mt-4 flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-brand-600 px-5 font-bold text-white transition-colors hover:bg-brand-700 active:translate-y-px"
+                  iconRight={<IconArrowRight size={18} />}
                 >
                   Voltar ao exercício que ficou
-                  <IconArrowRight size={18} />
-                </button>
-              </div>
+                </Button>
+              </Card>
             )}
           </div>
         )}
@@ -418,37 +421,37 @@ export function Lesson() {
           no fim de uma rolagem que muda de tamanho a cada passo. */}
       <footer className="sticky bottom-0 border-t border-line bg-surface pb-[env(safe-area-inset-bottom)]">
         <div className="mx-auto flex w-full max-w-2xl items-center gap-3 px-4 py-3">
-          <button
-            type="button"
+          <Button
+            variant="outline"
+            size="lg"
             onClick={voltar}
             disabled={posicao === 0}
-            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border border-line text-ink-soft transition-colors hover:bg-sunken disabled:opacity-40 disabled:hover:bg-transparent"
+            className="w-12 shrink-0 px-0 text-ink-soft"
             aria-label="Passo anterior"
-          >
-            <IconArrowLeft size={20} />
-          </button>
+            icon={<IconArrowLeft size={20} />}
+          />
 
           {ultimo ? (
             <Link
               to={proximaAula ? `/lesson/${proximaAula.id}` : '/app'}
-              className="flex h-12 flex-1 items-center justify-center gap-2 rounded-lg bg-brand-600 font-bold text-white transition-colors hover:bg-brand-700"
+              className={buttonClasses({ size: 'lg', className: 'flex-1' })}
             >
               {proximaAula ? 'Próxima aula' : 'Voltar ao início'}
               <IconArrowRight size={18} />
             </Link>
           ) : (
-            <button
-              type="button"
+            <Button
+              size="lg"
               onClick={avancar}
-              className="flex h-12 flex-1 items-center justify-center gap-2 rounded-lg bg-brand-600 font-bold text-white transition-colors hover:bg-brand-700 active:translate-y-px"
+              className="flex-1"
+              // Um check antes do rótulo, e não um botão verde: verde já quer
+              // dizer "você acertou" no retorno do exercício, e repetir a cor
+              // num controle faria a mesma cor significar duas coisas.
+              icon={resolvido ? <IconCheck size={17} /> : undefined}
+              iconRight={<IconArrowRight size={18} />}
             >
-              {/* Um check antes do rótulo, e não um botão verde: verde já quer
-                  dizer "você acertou" no retorno do exercício, e repetir a cor
-                  num controle faria a mesma cor significar duas coisas. */}
-              {resolvido && <IconCheck size={17} />}
               {passo.kind === 'exercise' ? rotuloDeAvanco(estadoDoPasso) : 'Continuar'}
-              <IconArrowRight size={18} />
-            </button>
+            </Button>
           )}
         </div>
       </footer>

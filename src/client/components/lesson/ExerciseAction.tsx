@@ -1,6 +1,7 @@
 import React from 'react';
 
-import { IconCheckCircle, IconCloseCircle, IconSpinner } from '../ui/Icon';
+import { Button } from '../ui/Button';
+import { IconCheckCircle, IconCloseCircle } from '../ui/Icon';
 import type { ExerciseState } from '../../lib/exercise-state';
 
 /**
@@ -15,18 +16,15 @@ import type { ExerciseState } from '../../lib/exercise-state';
 export function ExerciseAction({
   carregando = false,
   children,
-  className = '',
+  className,
   ...props
 }: React.ButtonHTMLAttributes<HTMLButtonElement> & { carregando?: boolean }) {
+  // Uma casca sobre o Button, e não um botão próprio: o nome continua dizendo
+  // "a ação do exercício", mas os estilos vêm de um lugar só.
   return (
-    <button
-      type="button"
-      {...props}
-      className={`flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-brand-600 px-5 py-3.5 font-bold text-white transition-colors hover:bg-brand-700 active:translate-y-px disabled:opacity-50 disabled:hover:bg-brand-600 ${className}`}
-    >
-      {carregando ? <IconSpinner size={18} className="animate-spin" /> : null}
+    <Button size="lg" block loading={carregando} className={className} {...props}>
       {children}
-    </button>
+    </Button>
   );
 }
 

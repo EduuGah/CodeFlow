@@ -5,6 +5,7 @@ import { useStudentData } from '../../contexts/StudentDataContext';
 import { MASTERY_LABELS } from '../../lib/mastery';
 import { IconArrowRight, IconCalendarCheck, IconPractice, IconReview } from '../../components/ui/Icon';
 import { Badge } from '../../components/ui/Badge';
+import { Card, cardClasses } from '../../components/ui/Card';
 import { ProgressBar } from '../../components/ui/ProgressBar';
 import { Carregando, Skeleton } from '../../components/ui/Skeleton';
 import { EmptyState } from '../../components/ui/States';
@@ -60,7 +61,9 @@ export function Practice() {
         ) : (
           <Link
             to="/review"
-            className="flex items-center gap-4 rounded-xl border border-line bg-surface p-4 transition-colors hover:border-line-strong"
+            className={cardClasses({
+              className: 'flex items-center gap-4 transition-colors hover:border-line-strong',
+            })}
           >
             <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-energy-50 text-energy-700">
               <IconReview size={22} />
@@ -101,7 +104,7 @@ export function Practice() {
             terminar uma aula sem dominar o conceito dela.
           </p>
 
-          <ul className="divide-y divide-line overflow-hidden rounded-xl border border-line bg-surface">
+          <Card as="ul" padding="none" className="divide-y divide-line overflow-hidden">
             {conceptsToReview.map((m) => (
               <li key={m.conceptId} className="flex flex-wrap items-center gap-x-4 gap-y-2 p-4">
                 <span className="min-w-0 flex-1">
@@ -117,14 +120,14 @@ export function Practice() {
                 <Badge tone="caution">{MASTERY_LABELS[m.level]}</Badge>
               </li>
             ))}
-          </ul>
+          </Card>
         </section>
       )}
 
       <section>
         <h2 className="label-mono mb-3 text-ink-faint">Exercícios</h2>
 
-        <div className="rounded-xl border border-line bg-surface p-5">
+        <Card>
           <ProgressBar
             label="Resolvidos"
             value={resolvidos}
@@ -146,7 +149,7 @@ export function Practice() {
               {stats.activeDays === 1 ? 'dia de estudo' : 'dias de estudo'}
             </p>
           )}
-        </div>
+        </Card>
       </section>
     </div>
   );

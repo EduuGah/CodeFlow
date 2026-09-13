@@ -6,6 +6,8 @@ import type { ExerciseState, OnExerciseState } from '../../lib/exercise-state';
 import { executeCode, type ExecutionResult } from '../../lib/sandbox';
 import { useRecordAttempt } from '../../hooks/useRecordAttempt';
 import { useReportarEstado } from '../../hooks/useReportarEstado';
+import { Button } from '../ui/Button';
+import { Card, SectionLabel } from '../ui/Card';
 import { IconCheck, IconClose, IconPlay } from '../ui/Icon';
 import { MarkdownReader } from '../ui/MarkdownReader';
 import { ExerciseAction, ExerciseFeedback } from './ExerciseAction';
@@ -115,10 +117,12 @@ export function CodeExerciseStep({
 
   return (
     <div className="space-y-4">
-      <div className="rounded-xl border border-line bg-surface p-4 sm:p-5">
-        <h2 className="label-mono mb-2 text-brand-600">Sua tarefa</h2>
+      <Card>
+        <SectionLabel tone="brand" className="mb-2">
+          Sua tarefa
+        </SectionLabel>
         <MarkdownReader content={exercise.prompt} />
-      </div>
+      </Card>
 
       {/* Altura fixa e generosa: o editor precisa de espaço previsível, e rolar
           dentro dele é melhor do que espremê-lo contra a janela. */}
@@ -246,13 +250,14 @@ export function CodeExerciseStep({
                   </p>
                 </>
               ) : (
-                <button
-                  type="button"
+                <Button
+                  variant="ghost"
+                  block
                   onClick={() => setVerSolucao(true)}
-                  className="min-h-11 w-full rounded-lg text-sm font-semibold text-brand-600 transition-colors hover:bg-brand-50"
+                  className="text-brand-600 hover:bg-brand-50 hover:text-brand-700"
                 >
                   Comparar com uma solução de referência
-                </button>
+                </Button>
               )}
             </div>
           )}

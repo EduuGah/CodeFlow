@@ -11,6 +11,8 @@ import { CheckpointList, type CheckpointResult } from '../components/project/Che
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { celebrar } from '../lib/celebrar';
 import { MarkdownReader } from '../components/ui/MarkdownReader';
+import { Button } from '../components/ui/Button';
+import { Card, SectionLabel } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import {
   IconCheckCircle,
@@ -19,7 +21,6 @@ import {
   IconLesson,
   IconPlay,
   IconSend,
-  IconSpinner,
 } from '../components/ui/Icon';
 
 /**
@@ -233,9 +234,9 @@ export function ProjectWorkspace() {
         >
           <MarkdownReader content={project.brief} />
 
-          <div className="mt-8 rounded-xl border border-line bg-surface p-4">
+          <Card className="mt-8">
             <div className="mb-3 flex items-baseline justify-between gap-2">
-              <h2 className="label-mono text-ink-faint">Critérios de aceitação</h2>
+              <SectionLabel>Critérios de aceitação</SectionLabel>
               {verificado && (
                 <span className="label-mono text-ink-faint">
                   {fechados} de {project.checkpoints.length}
@@ -254,7 +255,7 @@ export function ProjectWorkspace() {
                 Verifique quantas vezes quiser. Cada critério mostra o que ainda falta.
               </p>
             )}
-          </div>
+          </Card>
         </section>
 
         {/* Editor e console */}
@@ -335,32 +336,31 @@ export function ProjectWorkspace() {
           ficam ancoradas em vez de perdidas no fim de uma coluna que rola. */}
       <footer className="sticky bottom-0 border-t border-line bg-surface pb-[env(safe-area-inset-bottom)]">
         <div className="flex items-center gap-2 px-4 py-3">
-          <button
-            type="button"
+          <Button
+            variant="outline"
+            size="lg"
             onClick={executar}
-            disabled={isRunning || isVerifying}
-            className="flex h-12 items-center justify-center gap-2 rounded-lg border border-line px-4 font-semibold text-ink transition-colors hover:bg-sunken disabled:opacity-50"
+            disabled={isVerifying}
+            loading={isRunning}
+            icon={<IconPlay size={18} />}
           >
-            {isRunning ? <IconSpinner size={18} className="animate-spin" /> : <IconPlay size={18} />}
             <span className="hidden sm:inline">Rodar</span>
-          </button>
+          </Button>
 
-          <button
-            type="button"
+          <Button
+            variant="outline"
+            size="lg"
+            className="flex-1"
             onClick={verificar}
-            disabled={isVerifying || isRunning}
-            className="flex h-12 flex-1 items-center justify-center gap-2 rounded-lg border border-line px-4 font-semibold text-ink transition-colors hover:bg-sunken disabled:opacity-50"
+            disabled={isRunning}
+            loading={isVerifying}
+            icon={<IconChecklist size={18} />}
           >
-            {isVerifying ? (
-              <IconSpinner size={18} className="animate-spin" />
-            ) : (
-              <IconChecklist size={18} />
-            )}
             {isVerifying ? 'Verificando…' : 'Verificar critérios'}
-          </button>
+          </Button>
 
-          <button
-            type="button"
+          <Button
+            size="lg"
             onClick={submeter}
             // Entregar sem os critérios fechados tornaria o selo "Entregue" uma
             // afirmação sem lastro — era exatamente o que acontecia antes.
@@ -372,11 +372,10 @@ export function ProjectWorkspace() {
                   ? 'Todos os critérios foram atendidos'
                   : 'Feche todos os critérios antes de entregar'
             }
-            className="flex h-12 items-center justify-center gap-2 rounded-lg bg-brand-600 px-4 font-bold text-white transition-colors hover:bg-brand-700 disabled:opacity-40"
+            icon={<IconSend size={18} />}
           >
-            <IconSend size={18} />
             <span className="hidden sm:inline">{isCompleted ? 'Entregue' : 'Entregar'}</span>
-          </button>
+          </Button>
         </div>
       </footer>
     </div>

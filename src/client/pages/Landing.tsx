@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 
 import { getLessonsOfTrack, listProjects, listTracks } from '../../content';
+import { buttonClasses } from '../components/ui/Button';
 import { IconArrowRight, IconLogo } from '../components/ui/Icon';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 
@@ -51,10 +52,7 @@ export function Landing() {
             apenas se você acertou.
           </p>
 
-          <Link
-            to="/login"
-            className="inline-flex items-center justify-center gap-2 rounded-lg bg-brand-600 px-6 py-3.5 font-bold text-white transition-colors hover:bg-brand-700 active:translate-y-px"
-          >
+          <Link to="/login" className={buttonClasses({ size: 'lg', className: 'px-6' })}>
             Começar agora
             <IconArrowRight size={18} />
           </Link>

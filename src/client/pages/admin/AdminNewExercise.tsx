@@ -15,9 +15,10 @@ import {
   IconCheck,
   IconClose,
   IconPlay,
-  IconSpinner,
 } from '../../components/ui/Icon';
+import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
+import { Card } from '../../components/ui/Card';
 import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 
 /**
@@ -226,20 +227,20 @@ export function AdminNewExercise() {
               />
             ))}
           </div>
-          <button
-            type="button"
+          <Button
+            variant="ghost"
             onClick={() => atualizar({ hints: [...draft.hints, ''] })}
-            className="mt-2 text-sm font-semibold text-brand-600 hover:text-brand-700"
+            className="-ml-4 mt-1 text-brand-600 hover:text-brand-700"
           >
             + Outra dica
-          </button>
+          </Button>
         </fieldset>
 
         <fieldset>
           <legend className="label-mono mb-1.5 text-ink-faint">Testes</legend>
           <div className="space-y-3">
             {draft.tests.map((teste, i) => (
-              <div key={i} className="rounded-xl border border-line bg-surface p-3">
+              <Card key={i} padding="sm">
                 <input
                   className={`${campo} mb-2`}
                   value={teste.description}
@@ -280,20 +281,20 @@ export function AdminNewExercise() {
                   />
                   Oculto — não aparece no enunciado
                 </label>
-              </div>
+              </Card>
             ))}
           </div>
-          <button
-            type="button"
+          <Button
+            variant="ghost"
             onClick={() =>
               atualizar({
                 tests: [...draft.tests, { description: '', assertion: '', hidden: false }],
               })
             }
-            className="mt-2 text-sm font-semibold text-brand-600 hover:text-brand-700"
+            className="-ml-4 mt-1 text-brand-600 hover:text-brand-700"
           >
             + Outro teste
-          </button>
+          </Button>
         </fieldset>
       </div>
 
@@ -324,15 +325,16 @@ export function AdminNewExercise() {
       <section className="mt-6">
         <h2 className="label-mono mb-2 text-ink-faint">Checagem no sandbox</h2>
 
-        <button
-          type="button"
+        <Button
+          size="lg"
+          block
           onClick={testar}
-          disabled={testando || !valido}
-          className="flex w-full items-center justify-center gap-2 rounded-lg bg-brand-600 px-5 py-3 font-bold text-white transition-colors hover:bg-brand-700 disabled:opacity-50"
+          disabled={!valido}
+          loading={testando}
+          icon={<IconPlay size={18} />}
         >
-          {testando ? <IconSpinner size={18} className="animate-spin" /> : <IconPlay size={18} />}
           {testando ? 'Executando…' : 'Rodar as checagens do CI'}
-        </button>
+        </Button>
 
         {checagem && (
           <ul className="mt-3 space-y-2">
@@ -388,13 +390,9 @@ export function AdminNewExercise() {
           <code className="font-mono text-white/90">{toTypeScript(draft)}</code>
         </pre>
 
-        <button
-          type="button"
-          onClick={copiar}
-          className="mt-3 rounded-lg border border-line px-4 py-2.5 text-sm font-semibold text-ink transition-colors hover:bg-sunken"
-        >
+        <Button variant="outline" className="mt-3" onClick={copiar}>
           {copiado ? 'Copiado' : 'Copiar bloco'}
-        </button>
+        </Button>
 
         <p className="mt-3 text-xs leading-relaxed text-ink-faint">
           Cole dentro de <span className="font-mono">blocks</span> no arquivo da aula em{' '}

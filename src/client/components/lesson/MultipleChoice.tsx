@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { IconCheckCircle, IconCloseCircle } from '../ui/Icon';
 import type { MultipleChoiceExercise } from '../../../content/types';
 import type { ExerciseState, OnExerciseState } from '../../lib/exercise-state';
+import { Card, SectionLabel } from '../ui/Card';
 import { MarkdownReader } from '../ui/MarkdownReader';
 import { ExerciseAction, ExerciseFeedback } from './ExerciseAction';
 import { HintPanel } from './HintPanel';
@@ -67,8 +68,10 @@ export function MultipleChoice({
   };
 
   return (
-    <section className="rounded-xl border border-line bg-surface p-4 sm:p-5">
-      <h2 className="label-mono mb-3 text-brand-600">Escolha a alternativa</h2>
+    <Card as="section">
+      <SectionLabel tone="brand" className="mb-3">
+        Escolha a alternativa
+      </SectionLabel>
 
       <div className="mb-4">
         <MarkdownReader content={exercise.prompt} />
@@ -147,6 +150,6 @@ export function MultipleChoice({
       {!acertou && (
         <HintPanel hints={exercise.hints} className="mt-3" onRevealedChange={setDicasAbertas} />
       )}
-    </section>
+    </Card>
   );
 }

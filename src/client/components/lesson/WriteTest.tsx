@@ -8,6 +8,7 @@ import { executeCode } from '../../lib/sandbox';
 import { useRecordAttempt } from '../../hooks/useRecordAttempt';
 import { useReportarEstado } from '../../hooks/useReportarEstado';
 import { IconCheck, IconClose, IconPlay } from '../ui/Icon';
+import { Card, SectionLabel } from '../ui/Card';
 import { MarkdownReader } from '../ui/MarkdownReader';
 import { ExerciseAction, ExerciseFeedback } from './ExerciseAction';
 import { HintPanel } from './HintPanel';
@@ -104,10 +105,12 @@ export function WriteTest({
 
   return (
     <div className="space-y-4">
-      <div className="rounded-xl border border-line bg-surface p-4 sm:p-5">
-        <h2 className="label-mono mb-2 text-brand-600">Escreva o teste</h2>
+      <Card>
+        <SectionLabel tone="brand" className="mb-2">
+          Escreva o teste
+        </SectionLabel>
         <MarkdownReader content={exercise.prompt} />
-      </div>
+      </Card>
 
       {/* A função sob teste fica visível o tempo todo: ela é o enunciado, não
           um detalhe. Superfície escura porque é código que se lê, não se edita. */}
