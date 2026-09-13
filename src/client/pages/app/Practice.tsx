@@ -23,7 +23,7 @@ import { useDocumentTitle } from '../../hooks/useDocumentTitle';
  */
 export function Practice() {
   useDocumentTitle('Praticar');
-  const { loading, dueCards, conceptsToReview, pendingExercises, totalExercises, stats } =
+  const { loading, dueCards, cards, conceptsToReview, pendingExercises, totalExercises, stats } =
     useStudentData();
 
   if (loading) {
@@ -66,13 +66,26 @@ export function Practice() {
               <IconReview size={22} />
             </span>
             <span className="min-w-0 flex-1">
+              {/* Vencido e novo são coisas diferentes, e o painel já separa os
+                  dois. Chamar de "para revisar" 22 cartões que a pessoa nunca
+                  viu era cobrar uma dívida que ela não contraiu. */}
               <span className="block font-bold text-ink">
-                {dueCards} {dueCards === 1 ? 'cartão para revisar' : 'cartões para revisar'}
+                {cards.vencidos > 0
+                  ? `${cards.vencidos} ${cards.vencidos === 1 ? 'cartão vencido' : 'cartões vencidos'}`
+                  : `${cards.novos} ${cards.novos === 1 ? 'cartão novo para conhecer' : 'cartões novos para conhecer'}`}
               </span>
               <span className="block text-sm leading-relaxed text-ink-soft">
-                {conceptsToReview.length > 0
-                  ? 'Os conceitos que você vem errando entram primeiro na fila.'
-                  : 'Sessão curta, no seu ritmo.'}
+                {cards.vencidos > 0 && cards.novos > 0
+                  ? `Mais ${cards.novos} ${cards.novos === 1 ? 'novo' : 'novos'} esperando. ${
+                      conceptsToReview.length > 0
+                        ? 'Os conceitos que você vem errando entram primeiro.'
+                        : 'Os vencidos entram primeiro.'
+                    }`
+                  : conceptsToReview.length > 0
+                    ? 'Os conceitos que você vem errando entram primeiro na fila.'
+                    : cards.vencidos > 0
+                      ? 'Um cartão vencido perde valor a cada dia. Sessão curta.'
+                      : 'Sem pressa: são os primeiros, não estão atrasados.'}
               </span>
             </span>
             <IconArrowRight size={18} className="shrink-0 text-ink-faint" />

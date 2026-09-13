@@ -39,8 +39,8 @@ Números lidos do catálogo, não de memória.
 | Projetos | 7, com 22 critérios de aceitação |
 | Conceitos | 27, com grafo de pré-requisitos |
 | Flashcards | 22 |
-| Testes | 832 de unidade + 122 de navegador |
-| Pacote | 949 kB (276 kB comprimido) |
+| Testes | 832 de unidade + 126 de navegador |
+| Pacote | 1.340 kB (383 kB comprimido) — o conteúdo vai junto no chunk principal |
 
 ## 4. Decisões que não devem ser desfeitas sem motivo forte
 
@@ -107,7 +107,7 @@ docs/curriculo.md       Roadmap de conteúdo — fonte canônica
 ```bash
 npm run typecheck   # inclui e2e/ e playwright.config.ts
 npm test            # 832 testes
-npm run test:e2e    # 122 no navegador (antes: npx playwright install chromium)
+npm run test:e2e    # 126 no navegador (antes: npx playwright install chromium)
 npm run build
 ```
 
@@ -184,6 +184,16 @@ Cada uma custou tempo. Não repita.
   depende dele roda sempre; se o efeito produz array ou objeto novo em `setState`,
   vira laço infinito. Dependa de `user?.id`, e faça o `setState` devolver o valor
   anterior quando nada mudou.
+- **`height="100%"` no Monaco precisa de um pai com altura de verdade.**
+  `min-height` não conta: com `min-h-[320px]` e altura automática, o editor do
+  projeto media 5px no celular — invisível, e ninguém conseguia escrever código
+  num projeto pelo telefone. No celular a altura é fixa (`h-[360px]`); no
+  desktop o flex da linha basta. O E2E cobre os dois.
+- **O painel do navegador do Claude nem sempre pinta.** Quando está oculto, o
+  `ResizeObserver` não dispara e o Monaco fica em 5×5 em TODAS as telas — o que
+  parece um bug do produto e não é. `layout()` manual funciona porque o DOM tem
+  geometria. Antes de concluir que um editor quebrou, rode o E2E: o Chromium
+  headless renderiza de verdade.
 - **Uma prop opcional é um contrato que ninguém garante.** `onSolved` era opcional
   e dois dos quatro tipos de exercício simplesmente não a recebiam — 36 dos 78
   exercícios nunca conseguiam avisar que tinham sido resolvidos, e nenhum dos 521

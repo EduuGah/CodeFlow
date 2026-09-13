@@ -93,6 +93,42 @@ test.describe('celular', () => {
     expect(caixa.width).toBeGreaterThan(largura * 0.8);
   });
 
+  /**
+   * O projeto tem o mesmo editor da aula, mas com `height="100%"` dentro de
+   * uma aba que começa oculta. São duas armadilhas que a aula não tem: um pai
+   * sem altura definida colapsa o 100%, e um editor montado em `display:none`
+   * não se mede sozinho. Este teste não existia, e o editor do projeto nunca
+   * tinha sido conferido num navegador de verdade.
+   */
+  test('o editor do projeto se dimensiona depois de abrir a aba Código', async ({
+    logado: page,
+  }) => {
+    await page.goto('/project/js-imc');
+    await page.getByRole('tab', { name: 'Código' }).click();
+
+    const editor = page.locator('.monaco-editor').first();
+    await editor.waitFor({ timeout: 40_000 });
+
+    // O Monaco pode aparecer antes de se medir: espera a caixa ter tamanho.
+    await expect
+      .poll(async () => (await editor.boundingBox())?.height ?? 0, { timeout: 15_000 })
+      .toBeGreaterThan(180);
+
+    const caixa = (await editor.boundingBox())!;
+    expect(caixa.width).toBeGreaterThan(page.viewportSize()!.width * 0.8);
+
+    // E dá para escrever nele: o modelo existe e aceita valor.
+    await page.waitForFunction(
+      () => {
+        const m = (window as unknown as { monaco?: { editor: { getModels(): unknown[] } } })
+          .monaco;
+        return !!m && m.editor.getModels().length > 0;
+      },
+      undefined,
+      { timeout: 40_000 }
+    );
+  });
+
   test('os alvos de toque têm tamanho de dedo', async ({ logado: page }) => {
     await page.goto('/app');
     await esperarConteudo(page);

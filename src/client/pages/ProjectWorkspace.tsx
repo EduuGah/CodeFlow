@@ -167,7 +167,7 @@ export function ProjectWorkspace() {
           <Link
             to="/app/trilhas"
             aria-label="Sair do projeto"
-            className="-ml-2 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-ink-soft transition-colors hover:bg-sunken hover:text-ink"
+            className="-ml-2 flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-ink-soft transition-colors hover:bg-sunken hover:text-ink"
           >
             <IconClose size={20} />
           </Link>
@@ -264,7 +264,12 @@ export function ProjectWorkspace() {
           aria-labelledby="aba-codigo"
           className={`flex flex-1 flex-col md:flex ${aba === 'codigo' ? 'flex' : 'hidden'}`}
         >
-          <div className="min-h-[320px] flex-1 md:min-h-0">
+          {/* No celular a altura é fixa, de propósito. O `height="100%"` do
+              Monaco resolve contra a altura do pai, e `min-height` não conta
+              como altura: com `min-h-[320px]` e altura automática, o editor
+              media 5×5 pixels — invisível — depois de abrir a aba Código. No
+              desktop a coluna é limitada pela linha do layout e o flex basta. */}
+          <div className="h-[360px] md:h-auto md:min-h-0 md:flex-1">
             <Editor
               height="100%"
               language={project.language}

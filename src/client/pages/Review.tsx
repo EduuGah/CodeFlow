@@ -108,7 +108,7 @@ export function Review() {
           <Link
             to="/app/praticar"
             aria-label="Sair da revisão"
-            className="-ml-2 flex h-9 w-9 items-center justify-center rounded-lg text-ink-soft transition-colors hover:bg-sunken hover:text-ink"
+            className="-ml-2 flex h-11 w-11 items-center justify-center rounded-lg text-ink-soft transition-colors hover:bg-sunken hover:text-ink"
           >
             <IconClose size={20} />
           </Link>
@@ -151,9 +151,14 @@ export function Review() {
           </div>
         ) : (
           <div className="flex w-full max-w-xl flex-col gap-8">
+            {/* `div` com papel de botão, e não `<button>`: o cartão contém um
+                título, e um `<h2>` dentro de `<button>` é HTML inválido. O
+                `aria-expanded` é o que diz ao leitor de tela se a resposta
+                está à mostra — sem ele, virar o cartão é uma mudança muda. */}
             <div
               role="button"
               tabIndex={0}
+              aria-expanded={virado}
               onClick={() => setVirado((v) => !v)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
@@ -201,7 +206,9 @@ export function Review() {
                     <Button
                       key={rating}
                       variant="outline"
-                      className={`flex-col py-3 ${classe}`}
+                      // `h-auto` derruba os 40px fixos do tamanho padrão; com
+                      // duas linhas de texto, o mínimo de 44px vira 56 e cabe.
+                      className={`h-auto min-h-11 flex-col py-3 ${classe}`}
                       onClick={() => avaliar(rating)}
                     >
                       <span>{label}</span>

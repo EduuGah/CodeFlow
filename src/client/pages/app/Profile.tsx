@@ -129,9 +129,11 @@ export function Profile() {
           />
         )}
 
+        {/* De onde o XP veio. "0 de exercícios" lia como frase quebrada — é uma
+            partição, então cada fonte vem com o número depois dela. */}
         <p className="mt-3 text-xs leading-relaxed text-ink-faint">
-          {xp.exercicios} de exercícios · {xp.aulas} de aulas · {xp.projetos} de projetos ·{' '}
-          {xp.revisao} de revisão
+          exercícios {xp.exercicios} · aulas {xp.aulas} · projetos {xp.projetos} · revisão{' '}
+          {xp.revisao}
         </p>
       </section>
 
