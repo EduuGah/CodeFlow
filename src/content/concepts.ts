@@ -262,4 +262,12 @@ export const concepts: Concept[] = [
     prerequisites: ['css-cores'],
     tags: ['pagina', 'css', 'acessibilidade'],
   },
+  {
+    id: 'css-movimento',
+    title: 'Movimento',
+    summary:
+      'transition no repouso, transform e opacity como as propriedades baratas, @keyframes, e prefers-reduced-motion.',
+    prerequisites: ['css-estados'],
+    tags: ['pagina', 'css', 'acessibilidade'],
+  },
 ];
