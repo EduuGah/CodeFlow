@@ -334,4 +334,12 @@ export const concepts: Concept[] = [
     prerequisites: ['dom-eventos', 'json'],
     tags: ['pagina', 'dom', 'seguranca'],
   },
+  {
+    id: 'dom-fetch',
+    title: 'Buscar e desenhar',
+    summary:
+      'fetch, resposta.ok, resposta.json(); os três estados da tela — carregando, erro, dados —; e a resposta antiga que não pode sobrescrever a nova.',
+    prerequisites: ['dom-criar', 'promises', 'http'],
+    tags: ['pagina', 'dom', 'web'],
+  },
 ];
