@@ -230,4 +230,12 @@ export const concepts: Concept[] = [
     prerequisites: ['css-flexbox'],
     tags: ['pagina', 'css'],
   },
+  {
+    id: 'css-responsivo',
+    title: 'Responsivo',
+    summary:
+      'Unidades fluidas, max-width, a meta viewport, e media queries mobile-first com min-width onde o conteúdo pede.',
+    prerequisites: ['css-grid'],
+    tags: ['pagina', 'css'],
+  },
 ];
