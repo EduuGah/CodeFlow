@@ -350,4 +350,12 @@ export const concepts: Concept[] = [
     prerequisites: ['css-tipografia', 'css-cores'],
     tags: ['pagina', 'ui'],
   },
+  {
+    id: 'ui-texto',
+    title: 'Texto legível',
+    summary:
+      'Alinhado ao início, parágrafos curtos separados por margem, listas para enumerações, números tabulares à direita, maiúsculas só em rótulos.',
+    prerequisites: ['css-tipografia', 'ui-hierarquia'],
+    tags: ['pagina', 'ui'],
+  },
 ];
