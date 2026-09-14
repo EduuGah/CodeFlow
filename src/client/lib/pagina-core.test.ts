@@ -163,3 +163,48 @@ describe('rodando no jsdom', () => {
     expect(r.testResults[0].passed).toBe(true);
   });
 });
+
+describe('o que a página do aluno recebe no lugar do que a origem opaca não tem', () => {
+  it('localStorage funciona durante a execução, com a API de verdade', async () => {
+    const r = await rodarPaginaNoJsdom(
+      `<script>
+         localStorage.setItem('tema', 'escuro');
+         localStorage.setItem('lista', JSON.stringify([1, 2]));
+         document.title = localStorage.getItem('tema') + ':' + localStorage.length;
+         localStorage.removeItem('tema');
+       </script>`,
+      [
+        {
+          description: 'guardou, leu e removeu',
+          assertion: `if (document.title !== 'escuro:2') throw new Error('title: ' + document.title); if (localStorage.getItem('tema') !== null) throw new Error('não removeu'); if (JSON.parse(localStorage.getItem('lista'))[1] !== 2) throw new Error('lista');`,
+        },
+      ]
+    );
+    expect(r.error).toBeUndefined();
+    expect(r.testResults[0]).toEqual({ passed: true, message: 'guardou, leu e removeu' });
+  });
+
+  it('fetch responde com o que a página declarou em __servidor, e 404 para o resto', async () => {
+    const r = await rodarPaginaNoJsdom(
+      `<script>
+         window.__servidor = { '/api/produtos': [{ nome: 'pão', preco: 8 }] };
+         async function carregar() {
+           const resposta = await fetch('/api/produtos');
+           const produtos = await resposta.json();
+           document.body.dataset.nome = produtos[0].nome;
+           const outra = await fetch('https://exemplo.com/api/nada');
+           document.body.dataset.status = String(outra.status) + ':' + outra.ok;
+         }
+         window.pronto = carregar();
+       </script>`,
+      [
+        {
+          description: 'a busca chegou, e o caminho inexistente deu 404',
+          assertion: `await window.pronto; if (document.body.dataset.nome !== 'pão') throw new Error('nome: ' + document.body.dataset.nome); if (document.body.dataset.status !== '404:false') throw new Error('status: ' + document.body.dataset.status);`,
+        },
+      ]
+    );
+    expect(r.error).toBeUndefined();
+    expect(r.testResults[0].passed).toBe(true);
+  });
+});

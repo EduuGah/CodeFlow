@@ -72,17 +72,25 @@ test('a página do aluno aparece no iframe, isolada e sem rede', async ({ logado
   await expect(quadro.locator('h1')).toHaveText('Receita de pão');
   await expect(page.getByText('Todos os testes passaram')).toBeVisible({ timeout: 20_000 });
 
-  // A origem é opaca: de dentro da página do aluno, `localStorage` (onde a
-  // sessão do Supabase mora) nem existe para ser lido.
-  const isolada = await quadro.locator('body').evaluate(() => {
+  // A origem é opaca: de dentro da página do aluno, o documento de fora é
+  // inalcançável, e o `localStorage` que ela vê é a memória do motor — não
+  // o da aplicação, onde a sessão do Supabase mora.
+  const isolamento = await quadro.locator('body').evaluate(() => {
+    let paiInalcancavel = false;
     try {
-      void window.localStorage;
-      return false;
+      void window.parent.document;
     } catch {
-      return true;
+      paiInalcancavel = true;
     }
+    window.localStorage.setItem('sonda', '1');
+    const chavesDaAplicacao = Object.keys(window.localStorage).filter((k) => /supabase|sb-/.test(k));
+    return { paiInalcancavel, sonda: window.localStorage.getItem('sonda'), chavesDaAplicacao };
   });
-  expect(isolada, 'o iframe consegue ler o localStorage da aplicação').toBe(true);
+  expect(isolamento.paiInalcancavel, 'o iframe alcança o documento da aplicação').toBe(true);
+  expect(isolamento.sonda).toBe('1');
+  // E o que a página guardou não vazou para a aplicação.
+  const naAplicacao = await page.evaluate(() => window.localStorage.getItem('sonda'));
+  expect(naAplicacao, 'o localStorage do iframe é o mesmo da aplicação').toBeNull();
 });
 
 test('um <script> que quebra vira mensagem, e não trava a aula', async ({ logado: page }) => {

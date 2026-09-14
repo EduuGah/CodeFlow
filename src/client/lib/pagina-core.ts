@@ -115,6 +115,54 @@ const CAPTURA = `
     e.preventDefault();
   });
   window.__codeflow = { logs: logs, erro: function () { return erro; } };
+
+  // Armazenamento em memória no lugar do localStorage.
+  //
+  // A origem opaca do iframe não tem localStorage: ler window.localStorage
+  // lança SecurityError no navegador e ReferenceError no jsdom. As aulas de
+  // armazenamento ensinam a API — getItem, setItem, JSON —, e é a API que
+  // este objeto oferece; ele dura uma execução da página, e a aula diz isso.
+  function criarArmazenamento() {
+    var dados = {};
+    return {
+      getItem: function (chave) { return Object.prototype.hasOwnProperty.call(dados, chave) ? dados[chave] : null; },
+      setItem: function (chave, valor) { dados[String(chave)] = String(valor); },
+      removeItem: function (chave) { delete dados[chave]; },
+      clear: function () { dados = {}; },
+      key: function (i) { return Object.keys(dados)[i] === undefined ? null : Object.keys(dados)[i]; },
+      get length() { return Object.keys(dados).length; }
+    };
+  }
+  try { Object.defineProperty(window, 'localStorage', { value: criarArmazenamento(), configurable: true }); } catch (e) {}
+  try { Object.defineProperty(window, 'sessionStorage', { value: criarArmazenamento(), configurable: true }); } catch (e) {}
+
+  // Um servidor de mentira para o fetch.
+  //
+  // A CSP bloqueia toda rede, de propósito. Mas a aula de buscar dados precisa
+  // do gesto real — fetch(url), conferir ok, await resposta.json() —, então
+  // fetch aqui responde com o que a página declarou em window.__servidor:
+  // um objeto de caminho → dados. Caminho desconhecido é 404, como na vida.
+  window.fetch = function (url, opcoes) {
+    var caminho = String(url).replace(/^https?:\\/\\/[^/]+/, '').split('?')[0];
+    var servidor = window.__servidor || {};
+    var metodo = (opcoes && opcoes.method ? opcoes.method : 'GET').toUpperCase();
+    var existe = Object.prototype.hasOwnProperty.call(servidor, caminho);
+    var dados = existe ? servidor[caminho] : null;
+    if (existe && typeof dados === 'function') dados = dados(opcoes || {});
+    var status = existe ? 200 : 404;
+    var corpo = existe ? JSON.stringify(dados) : JSON.stringify({ erro: 'não encontrado: ' + caminho });
+    var resposta = {
+      ok: status >= 200 && status < 300,
+      status: status,
+      statusText: status === 200 ? 'OK' : 'Not Found',
+      url: String(url),
+      headers: { get: function (nome) { return String(nome).toLowerCase() === 'content-type' ? 'application/json' : null; } },
+      json: function () { return Promise.resolve(JSON.parse(corpo)); },
+      text: function () { return Promise.resolve(corpo); }
+    };
+    void metodo;
+    return new Promise(function (resolver) { setTimeout(function () { resolver(resposta); }, 30); });
+  };
 })();
 `;
 
