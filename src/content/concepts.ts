@@ -278,4 +278,12 @@ export const concepts: Concept[] = [
     prerequisites: ['css-responsivo', 'css-tipografia'],
     tags: ['pagina', 'css'],
   },
+  {
+    id: 'dom',
+    title: 'O DOM',
+    summary:
+      'A árvore de objetos que o navegador monta do HTML: querySelector, textContent, dataset, e quando o script roda.',
+    prerequisites: ['html', 'funcoes', 'arrays'],
+    tags: ['pagina', 'dom'],
+  },
 ];
