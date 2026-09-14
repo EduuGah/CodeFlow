@@ -222,4 +222,12 @@ export const concepts: Concept[] = [
     prerequisites: ['css-caixa'],
     tags: ['pagina', 'css'],
   },
+  {
+    id: 'css-grid',
+    title: 'Grid',
+    summary:
+      'Layout em duas dimensões: colunas com fr e repeat, itens espalhados com grid-column, a página desenhada com grid-template-areas.',
+    prerequisites: ['css-flexbox'],
+    tags: ['pagina', 'css'],
+  },
 ];

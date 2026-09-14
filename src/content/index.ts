@@ -56,6 +56,7 @@ import { lessonSegurancaWeb } from './lessons/web-08-seguranca';
 import { lessonHtmlSemantico } from './lessons/pagina-01-html-semantico';
 import { lessonCaixa } from './lessons/pagina-02-caixa';
 import { lessonFlexbox } from './lessons/pagina-03-flexbox';
+import { lessonGrid } from './lessons/pagina-04-grid';
 import { projetoImc } from './projects/js-imc';
 import { projetoConversor } from './projects/js-conversor';
 import { projetoBoletim } from './projects/js-boletim';
@@ -104,6 +105,7 @@ const lessons: Lesson[] = [
   lessonHtmlSemantico,
   lessonCaixa,
   lessonFlexbox,
+  lessonGrid,
 ];
 const projects: Project[] = [
   projetoImc,

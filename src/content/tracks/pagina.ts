@@ -16,5 +16,5 @@ export const trackPagina: Track = {
   language: 'html',
   status: 'published',
   // A ordem desta lista é a progressão da trilha: é daqui que sai "próxima aula".
-  lessonIds: ['lesson-pagina-1', 'lesson-pagina-2', 'lesson-pagina-3'],
+  lessonIds: ['lesson-pagina-1', 'lesson-pagina-2', 'lesson-pagina-3', 'lesson-pagina-4'],
 };
