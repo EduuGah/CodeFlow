@@ -13,7 +13,7 @@ Fase 0  Fundamentos e lógica      ███████████████
 Fase 1  JavaScript real          ██████████████████████  10/10  pronto
         Como a web funciona      ██████████████████████   8/8  pronto
         Plataforma                ██████████████████████   7/7  pronto
-Fase 2  A página                 ░░░░░░░░░░░░░░░░░░░░░░   0/26
+Fase 2  A página                 █░░░░░░░░░░░░░░░░░░░░░   1/26  motor pronto
 Fase 3  Tipos e componentes      ░░░░░░░░░░░░░░░░░░░░░░   0/24
 Fase 4  Back-end e dados         ░░░░░░░░░░░░░░░░░░░░░░   0/20
 Fase 5  Profissionalização       ░░░░░░░░░░░░░░░░░░░░░░   0/19
@@ -23,16 +23,16 @@ Fase 7  Projeto final            ░░░░░░░░░░░░░░░�
 
 | | Hoje | Previsto | Feito |
 | --- | ---: | ---: | ---: |
-| Aulas | **31** | 135 | 23% |
-| Exercícios | **174** | ~700 | 25% |
+| Aulas | **32** | 135 | 24% |
+| Exercícios | **180** | ~700 | 26% |
 | Tipos de exercício | **8** | 11 | 73% |
-| Motores de execução | **1** | 7 | 14% |
+| Motores de execução | **2** | 7 | 29% |
 | Projetos | **7** | ~30 | 23% |
 
-**Último trabalho de conteúdo** (2026-09-14): 23 exercícios novos, um por aula,
-para toda aula ter ao menos um dos quatro tipos da Fase 1 — encontrar o bug,
-ordenar passos, escrever o teste, refatorar. Antes disso: a trilha "Como a Web
-Funciona" inteira.
+**Último trabalho** (2026-09-14): o motor iframe da Fase 2 e a primeira aula da
+trilha "A Página" (HTML semântico). Antes disso, no mesmo dia: 23 exercícios
+novos, um por aula, para toda aula ter ao menos um dos quatro tipos de prática
+de dev.
 
 ## Aprofundamento das aulas antigas
 
@@ -232,8 +232,23 @@ síncrono, e uma asserção assíncrona reportava sucesso antes de a promise res
 certa. E não havia prazo por teste, então um exercício de callback travava para
 sempre quando o aluno esquecia de chamar o callback.
 
-### Fase 2 — A página · 26 aulas
-Motor **1: executor em iframe isolado**. Destrava três blocos, sem download extra.
+### Fase 2 — A página · 26 aulas · EM ANDAMENTO (1 de 26)
+Motor **1: executor em iframe isolado** — **pronto** (2026-09-14). Destrava
+três blocos, sem download extra.
+
+Como o motor funciona, para quem for escrever as aulas: o código do aluno é o
+conteúdo do `body` de um documento nosso, num `<iframe sandbox>` de origem
+opaca e sem rede. Os testes são as mesmas asserções dos outros exercícios,
+só que rodam **dentro** da página e enxergam `document` — `querySelector`,
+`textContent`, `click()`, `getComputedStyle`. Um exercício vira "de página"
+com `runtime: 'iframe'`, nos tipos `code` e `fill-blank`; a solução de página
+é o documento inteiro, não um acréscimo ao esqueleto. O CI prova cada um no
+jsdom (sem layout; cor vem como declarada, não normalizada) e o E2E prova a
+aula inteira no Chromium.
+
+| Aula | Estado |
+| --- | --- |
+| HTML semântico | feita — 6 exercícios |
 
 - **HTML e CSS** (10): semântica, caixa, flexbox, grid, responsivo, tipografia,
   cores, pseudo-classes, transições, CSS moderno.

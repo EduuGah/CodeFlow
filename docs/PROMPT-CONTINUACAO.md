@@ -61,7 +61,7 @@ consistência visual > qualidade dos exercícios > progressão > gamificação.
 | Projetos | 7, com 22 critérios de aceitação |
 | Conceitos | 27, com grafo de pré-requisitos |
 | Flashcards | 22 |
-| Testes | 1.001 de unidade + 132 de navegador |
+| Testes | 1.029 de unidade + 140 de navegador |
 
 Todas as 31 aulas publicadas estão no padrão de profundidade: 300 a 830 palavras
 e de 4 a 7 exercícios em dificuldade crescente. Nenhuma está pendente de
@@ -119,9 +119,9 @@ executor atual.** O Web Worker sem DOM deu o que tinha para dar.
 
 ## 6. O que VAI SER FEITO — e a decisão que precisa ser tomada
 
-O projeto está em **~25%**. A porcentagem por aula (31 de 135, 23%) engana: a
-plataforma está muito mais adiantada que isso, e os motores de execução muito
-menos (1 de 7).
+O projeto está em **~27%**. A porcentagem por aula (32 de 135, 24%) engana: a
+plataforma está muito mais adiantada que isso, e os motores de execução menos
+(2 de 7).
 
 Há três caminhos, e eles **não são equivalentes**:
 
@@ -137,21 +137,30 @@ um deploy de produção. O que ainda vale fazer, do lado do usuário:
 Boa parte disso depende do dono do projeto, não de quem programa. Se for este o
 caminho, escreva o passo a passo exato e peça a ele que execute.
 
-### B) Motor de iframe isolado — o maior salto, e o maior risco
+### B) Motor de iframe isolado — FEITO em 2026-09-14
 
-Destrava sozinho as **26 aulas da fase 2** (DOM, CSS, interface) e é
-pré-requisito do caminho para React. É um trabalho de engenharia diferente de
-tudo que foi feito até aqui:
+O motor está pronto e provado nos dois lados. O que existe:
 
-- iframe com `sandbox` e política de segurança (CSP) própria
-- um tipo de exercício novo, que verifica **a página renderizada** em vez do
-  valor devolvido — provavelmente consultando o DOM do iframe por seletor
-- decidir como o CI prova que esses exercícios são resolvíveis, já que o
-  `runProgram` atual não serve
+- `lib/pagina-core.ts` (puro): monta o documento — CSP com `default-src
+  'none'`, captura de console e erros antes do aluno, testes no `load` — e lê
+  a mensagem de volta. `lib/pagina.ts`: escreve o documento num `<iframe
+  sandbox="allow-scripts allow-modals">` e espera a resposta com prazo.
+  `lib/pagina-jsdom.ts`: o mesmo documento no jsdom, para o CI.
+- `runtime: 'iframe'` nos tipos `code` e `fill-blank`; `CodeExerciseStep` e
+  `FillBlank` mostram a página num painel entre o editor e a ação.
+- Trilha `track-pagina` com a primeira aula (`lesson-pagina-1`, HTML
+  semântico, 6 exercícios). O E2E `e2e/pagina.spec.ts` conclui a aula
+  inteira no Chromium e prova o isolamento (sem `localStorage`, CSP ativa).
 
-Se escolher este, comece pelo menor exercício possível de ponta a ponta — um
-`<h1>` que precisa existir — e só depois generalize. Não escreva conteúdo antes
-de o motor estar provado.
+Duas armadilhas já pagas: o jsdom ignora CSP (o `'unsafe-eval'` que o `new
+Function` exige só apareceu no navegador), e `getComputedStyle` no jsdom
+devolve a cor declarada, não a normalizada — exercício de CSS que dependa
+disso é conferido pelo E2E.
+
+O que falta são as **25 aulas** da fase: 9 de HTML e CSS, 8 de DOM e eventos,
+8 de UI e UX. Cada aula nova segue o padrão das outras — 500 a 900 palavras,
+cinco a sete exercícios, um deles de prática de dev — e ganha, além disso,
+pelo menos dois exercícios de página.
 
 ### C) Mais projetos com o motor atual — barato, sem currículo novo
 
@@ -173,7 +182,7 @@ são investimentos grandes o bastante para a escolha ser dele.
 
 ```bash
 npm run typecheck   # inclui e2e/ e playwright.config.ts
-npm test            # 1.001 testes
+npm test            # 1.029 testes
 npm run test:e2e    # 122 no navegador (antes: npx playwright install chromium)
 npm run build
 ```

@@ -3,6 +3,8 @@ import { useEffect, useRef, useState } from 'react';
 import type { FillBlankExercise } from '../../../content/types';
 import type { ExerciseState, OnExerciseState } from '../../lib/exercise-state';
 import { dividirMolde, estaCompleto, preencher } from '../../lib/fill-blank';
+import { executarPagina } from '../../lib/pagina';
+import { SANDBOX_DO_IFRAME } from '../../lib/pagina-core';
 import { executeCode, type ExecutionResult } from '../../lib/sandbox';
 import { useRecordAttempt } from '../../hooks/useRecordAttempt';
 import { useFocusRescue } from '../../hooks/useFocusRescue';
@@ -72,11 +74,17 @@ export function FillBlank({
 
   // Trocar de exercício reaproveita o componente: sem isto as respostas
   // anteriores continuariam nos campos.
+  const ehPagina = exercise.runtime === 'iframe';
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const [paginaRenderizada, setPaginaRenderizada] = useState(false);
+
   useEffect(() => {
     setRespostas(exercise.blanks.map(() => ''));
     setResultado(null);
     setUltimaRegistrada(null);
     setDicasAbertas(0);
+    setPaginaRenderizada(false);
+    if (iframeRef.current) iframeRef.current.srcdoc = '';
   }, [exercise.id, exercise.blanks]);
 
   const responder = (indice: number, valor: string) => {
@@ -90,11 +98,12 @@ export function FillBlank({
     setRodando(true);
 
     const enviado = JSON.stringify(respostas);
-    const execucao = await executeCode(
-      preencher(exercise.template, respostas),
-      exercise.tests,
-      exercise.properties
-    );
+    const preenchido = preencher(exercise.template, respostas);
+    const execucao =
+      ehPagina && iframeRef.current
+        ? await executarPagina(iframeRef.current, preenchido, exercise.tests)
+        : await executeCode(preenchido, exercise.tests, exercise.properties);
+    if (ehPagina) setPaginaRenderizada(true);
 
     setResultado(execucao);
     setRodando(false);
@@ -158,6 +167,33 @@ export function FillBlank({
           </code>
         </pre>
       </div>
+
+      {/* Na lacuna de página, o molde preenchido vira uma página de verdade,
+          e vê-la é metade do retorno: um <h1> no lugar errado se nota antes
+          de qualquer teste dizer. */}
+      {ehPagina && (
+        <Card padding="none" className="overflow-hidden">
+          <div className="flex items-center justify-between border-b border-line px-4 py-2">
+            <SectionLabel as="p">Página</SectionLabel>
+            {paginaRenderizada && (
+              <span className="text-xs text-ink-faint">como o navegador mostra</span>
+            )}
+          </div>
+          <div className="relative h-[220px] bg-white">
+            <iframe
+              ref={iframeRef}
+              title="Pré-visualização da página"
+              sandbox={SANDBOX_DO_IFRAME}
+              className="h-full w-full border-0"
+            />
+            {!paginaRenderizada && (
+              <div className="absolute inset-0 flex items-center justify-center bg-canvas px-6 text-center text-sm text-ink-faint">
+                A página aparece aqui quando você verificar.
+              </div>
+            )}
+          </div>
+        </Card>
+      )}
 
       {!passouTudo && (
         <ExerciseAction onClick={verificar} disabled={rodando || !completo} carregando={rodando}>

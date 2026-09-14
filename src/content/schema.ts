@@ -14,7 +14,8 @@ import { problemasDaRefatoracao } from '../client/lib/refatorar';
 
 const statusSchema = z.enum(['draft', 'published', 'archived']);
 const difficultySchema = z.enum(['iniciante', 'intermediario', 'avancado']);
-const languageSchema = z.enum(['javascript', 'typescript', 'python', 'sql']);
+const languageSchema = z.enum(['javascript', 'typescript', 'python', 'sql', 'html']);
+const runtimeSchema = z.enum(['worker', 'iframe']).optional();
 const idSchema = z.string().min(1).regex(/^[a-z0-9-]+$/, 'ids usam apenas minúsculas, números e hífen');
 
 export const conceptSchema = z.object({
@@ -56,6 +57,7 @@ export const exerciseSchema = z.discriminatedUnion('type', [
   z.object({
     ...exerciseBase,
     type: z.literal('code'),
+    runtime: runtimeSchema,
     initialCode: z.string(),
     // Exercício de código sem teste daria feedback errado ao aluno (§ "testes pedagógicos").
     tests: z.array(testCaseSchema).min(1, 'exercício de código precisa de ao menos um teste'),
@@ -66,6 +68,7 @@ export const exerciseSchema = z.discriminatedUnion('type', [
     .object({
       ...exerciseBase,
       type: z.literal('fill-blank'),
+      runtime: runtimeSchema,
       template: z.string().min(1),
       blanks: z
         .array(z.object({ placeholder: z.string().optional(), size: z.number().int().positive().optional() }))

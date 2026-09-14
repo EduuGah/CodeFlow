@@ -215,7 +215,9 @@ export async function esperarConteudo(page: Page): Promise<void> {
  * editor só aparece segundos depois, quando o Monaco termina de carregar.
  */
 export async function irAteOEditor(page: Page): Promise<void> {
-  const executar = page.getByRole('button', { name: 'Executar código' });
+  // "Executar código" no sandbox de JavaScript; "Rodar a página" no motor de
+  // página. Os dois são o mesmo passo para quem navega.
+  const executar = page.getByRole('button', { name: /^(Executar código|Rodar a página)$/ });
 
   for (let i = 0; i < 12 && !(await executar.count()); i++) {
     const acao = page.getByRole('button', {
@@ -327,9 +329,14 @@ async function resolverExercicio(page: Page, exercicio: Exercise): Promise<void>
         throw new Error(`${exercicio.id} não tem solução de referência`);
       }
 
-      const campos = page.getByRole('textbox', { name: /Lacuna/ });
+      // Uma lacuna pode aparecer duas vezes no molde (a tag que abre e a que
+      // fecha): os dois campos espelham a mesma resposta, e preencher o
+      // primeiro de cada número basta.
       for (let i = 0; i < exercicio.solution.length; i++) {
-        await campos.nth(i).fill(exercicio.solution[i]);
+        await page
+          .getByRole('textbox', { name: new RegExp(`^Lacuna ${i + 1} de `) })
+          .first()
+          .fill(exercicio.solution[i]);
       }
 
       await page.getByRole('button', { name: 'Verificar' }).click();
@@ -369,8 +376,15 @@ async function resolverExercicio(page: Page, exercicio: Exercise): Promise<void>
         throw new Error(`${exercicio.id} não tem solução de referência`);
       }
 
-      await escreverNoEditor(page, `${exercicio.initialCode}\n${exercicio.solution}`);
-      await page.getByRole('button', { name: /Executar código|Executar de novo/ }).click();
+      if (exercicio.runtime === 'iframe') {
+        // A solução de página é o documento inteiro: somá-la ao esqueleto
+        // duplicaria os elementos.
+        await escreverNoEditor(page, exercicio.solution);
+        await page.getByRole('button', { name: /Rodar a página|Rodar de novo/ }).click();
+      } else {
+        await escreverNoEditor(page, `${exercicio.initialCode}\n${exercicio.solution}`);
+        await page.getByRole('button', { name: /Executar código|Executar de novo/ }).click();
+      }
       await page.getByText('Todos os testes passaram').waitFor({ timeout: 40_000 });
       return;
     }

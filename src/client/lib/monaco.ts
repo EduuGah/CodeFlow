@@ -35,13 +35,16 @@ import 'monaco-editor/features/wordPartOperations/register';
 // O teclado virtual do iPad só aparece se alguém pedir.
 import 'monaco-editor/features/iPadShowKeyboard/register';
 
-// As quatro linguagens do catálogo (`LanguageId`). Só a sintaxe: colorir e
-// fechar parênteses. As outras oitenta linguagens que o pacote traz não
-// entram no chunk.
+// As linguagens do catálogo (`LanguageId`). Só a sintaxe: colorir e fechar
+// parênteses e tags. HTML traz CSS e JavaScript embutidos, porque uma página
+// de exercício tem `<style>` e `<script>` no mesmo arquivo. As outras oitenta
+// linguagens que o pacote traz não entram no chunk.
 import 'monaco-editor/languages/definitions/javascript/register';
 import 'monaco-editor/languages/definitions/typescript/register';
 import 'monaco-editor/languages/definitions/python/register';
 import 'monaco-editor/languages/definitions/sql/register';
+import 'monaco-editor/languages/definitions/html/register';
+import 'monaco-editor/languages/definitions/css/register';
 
 // O serviço de linguagem de JavaScript e TypeScript: é ele que sublinha o
 // erro de sintaxe antes de rodar e completa `console.` com `log`. Roda num

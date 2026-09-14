@@ -19,7 +19,17 @@ export type Difficulty = 'iniciante' | 'intermediario' | 'avancado';
  * tanto para rotular o conteúdo quanto para configurar o editor.
  * Só JavaScript tem conteúdo hoje; os demais estão previstos no roadmap (§287).
  */
-export type LanguageId = 'javascript' | 'typescript' | 'python' | 'sql';
+export type LanguageId = 'javascript' | 'typescript' | 'python' | 'sql' | 'html';
+
+/**
+ * Onde o código do aluno roda.
+ *
+ * `worker` é o sandbox de JavaScript puro: rápido, sem DOM, interrompível. É
+ * o padrão. `iframe` é o motor de página: o código vira um documento HTML
+ * num `<iframe sandbox>` de origem opaca, e os testes rodam lá dentro com
+ * `document` à mão. É o que as aulas de HTML, CSS e DOM usam.
+ */
+export type Runtime = 'worker' | 'iframe';
 
 /**
  * Os ids de dificuldade são sem acento por serem identificadores; o que o aluno
@@ -36,6 +46,7 @@ export const LANGUAGE_LABELS: Record<LanguageId, string> = {
   typescript: 'TypeScript',
   python: 'Python',
   sql: 'SQL',
+  html: 'HTML',
 };
 
 /**
@@ -93,6 +104,8 @@ export interface ExerciseProperty {
 /** Escreve código e passa nos testes. */
 export interface CodeExercise extends ExerciseBase {
   type: 'code';
+  /** Padrão `worker`. Com `iframe`, o código é uma página e os testes veem o DOM. */
+  runtime?: Runtime;
   initialCode: string;
   tests: TestCase[];
   /**
@@ -119,6 +132,8 @@ export interface CodeExercise extends ExerciseBase {
  */
 export interface FillBlankExercise extends ExerciseBase {
   type: 'fill-blank';
+  /** Padrão `worker`. Com `iframe`, o molde preenchido é uma página. */
+  runtime?: Runtime;
   /** Código com as lacunas marcadas: `{{1}}`, `{{2}}`… numeradas a partir de 1. */
   template: string;
   /** Uma entrada por lacuna, na ordem da numeração. */

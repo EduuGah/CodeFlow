@@ -1,7 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import type { CodeExercise, LanguageId } from '../../../content/types';
 import type { ExerciseState, OnExerciseState } from '../../lib/exercise-state';
+import { executarPagina } from '../../lib/pagina';
+import { SANDBOX_DO_IFRAME } from '../../lib/pagina-core';
 import { executeCode, type ExecutionResult } from '../../lib/sandbox';
 import { useRecordAttempt } from '../../hooks/useRecordAttempt';
 import { useReportarEstado } from '../../hooks/useReportarEstado';
@@ -23,6 +25,11 @@ import { HintPanel } from './HintPanel';
  * Aqui tudo empilha numa coluna: enunciado, editor com altura própria, ação e
  * resultado. Funciona no celular por construção, e no desktop ganha largura sem
  * precisar de outro layout.
+ *
+ * Dois motores, uma tela. Com `runtime: 'iframe'` o código é uma página: ela
+ * é renderizada num `<iframe sandbox>` que fica visível entre o editor e a
+ * ação — é o que o aluno quer ver —, e os testes rodam lá dentro. O resto
+ * (veredito, saída, lista de testes, dicas) é o mesmo.
  */
 
 interface CodeExerciseStepProps {
@@ -54,6 +61,10 @@ export function CodeExerciseStep({
   const [codigoVerificado, setCodigoVerificado] = useState<string | null>(null);
 
   const registrar = useRecordAttempt();
+  const ehPagina = exercise.runtime === 'iframe';
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  /** A página já foi renderizada ao menos uma vez neste exercício. */
+  const [paginaRenderizada, setPaginaRenderizada] = useState(false);
 
   // Trocar de exercício reaproveita o componente: sem isto, o código anterior
   // continuaria no editor.
@@ -63,6 +74,8 @@ export function CodeExerciseStep({
     setCodigoVerificado(null);
     setDicasAbertas(0);
     setVerSolucao(false);
+    setPaginaRenderizada(false);
+    if (iframeRef.current) iframeRef.current.srcdoc = '';
   }, [exercise.id, exercise.initialCode]);
 
   const passouTudo =
@@ -91,7 +104,11 @@ export function CodeExerciseStep({
     setResultado(null);
 
     const enviado = code;
-    const execucao = await executeCode(enviado, exercise.tests, exercise.properties);
+    const execucao =
+      ehPagina && iframeRef.current
+        ? await executarPagina(iframeRef.current, enviado, exercise.tests)
+        : await executeCode(enviado, exercise.tests, exercise.properties);
+    if (ehPagina) setPaginaRenderizada(true);
     setResultado(execucao);
     setCodigoVerificado(enviado);
     setRodando(false);
@@ -139,9 +156,46 @@ export function CodeExerciseStep({
         />
       </div>
 
+      {ehPagina && (
+        <Card padding="none" className="overflow-hidden">
+          <div className="flex items-center justify-between border-b border-line px-4 py-2">
+            <SectionLabel as="p">Página</SectionLabel>
+            {paginaRenderizada && (
+              <span className="text-xs text-ink-faint">como o navegador mostra</span>
+            )}
+          </div>
+          {/* O iframe existe desde o início — o motor escreve nele — mas fica
+              coberto por um aviso até a primeira execução, para o retângulo
+              branco vazio não parecer um erro. */}
+          <div className="relative h-[280px] bg-white">
+            <iframe
+              ref={iframeRef}
+              title="Pré-visualização da página"
+              sandbox={SANDBOX_DO_IFRAME}
+              className="h-full w-full border-0"
+            />
+            {!paginaRenderizada && (
+              <div className="absolute inset-0 flex items-center justify-center bg-canvas px-6 text-center text-sm text-ink-faint">
+                A página aparece aqui quando você rodar o código.
+              </div>
+            )}
+          </div>
+        </Card>
+      )}
+
       <ExerciseAction onClick={executar} disabled={rodando} carregando={rodando}>
         {!rodando && <IconPlay size={18} />}
-        {rodando ? 'Executando…' : resultado === null ? 'Executar código' : 'Executar de novo'}
+        {rodando
+          ? ehPagina
+            ? 'Rodando a página…'
+            : 'Executando…'
+          : resultado === null
+            ? ehPagina
+              ? 'Rodar a página'
+              : 'Executar código'
+            : ehPagina
+              ? 'Rodar de novo'
+              : 'Executar de novo'}
       </ExerciseAction>
 
       {desatualizado && (

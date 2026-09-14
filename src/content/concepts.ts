@@ -196,4 +196,14 @@ export const concepts: Concept[] = [
     prerequisites: ['http'],
     tags: ['web', 'seguranca'],
   },
+  {
+    id: 'html',
+    title: 'HTML semântico',
+    summary:
+      'A estrutura de uma página dita com as tags que carregam significado: regiões, títulos em hierarquia, listas.',
+    // Sem pré-requisito de propósito: HTML não depende de JavaScript, e a
+    // trilha da página pode ser a primeira de quem chega pelo visual.
+    prerequisites: [],
+    tags: ['pagina', 'fundamentos'],
+  },
 ];

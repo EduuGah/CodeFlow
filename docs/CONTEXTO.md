@@ -32,14 +32,14 @@ Números lidos do catálogo, não de memória.
 
 | | |
 | --- | --- |
-| Trilhas | 3 — Fundamentos de JavaScript (20 aulas), Lógica (3), Como a Web Funciona (8) |
-| Aulas | 31, somando 790 minutos |
-| Exercícios | 174, em 8 tipos — 49 de prever saída, 35 de código, 32 de lacuna, 26 de múltipla escolha, 14 de encontrar o bug, 9 de ordenar passos, 5 de escrever o teste, 4 de refatorar. **Toda aula tem ao menos um dos quatro tipos novos** |
+| Trilhas | 4 — Fundamentos de JavaScript (20 aulas), Lógica (3), Como a Web Funciona (8), A Página (1) |
+| Aulas | 32, somando 818 minutos |
+| Exercícios | 180, em 8 tipos — 49 de prever saída, 37 de código, 33 de lacuna, 28 de múltipla escolha, 14 de encontrar o bug, 10 de ordenar passos, 5 de escrever o teste, 4 de refatorar. **Toda aula tem ao menos um dos quatro tipos de prática de dev** |
 | Verificação | 321 casos fixos + 58 propriedades |
 | Projetos | 7, com 22 critérios de aceitação |
-| Conceitos | 27, com grafo de pré-requisitos |
+| Conceitos | 28, com grafo de pré-requisitos |
 | Flashcards | 22 |
-| Testes | 1.001 de unidade + 132 de navegador |
+| Testes | 1.029 de unidade + 140 de navegador |
 | Pacote | 1.340 kB (384 kB comprimido) no chunk principal — o conteúdo vai junto; o Monaco são mais 3.360 kB (869 kB) num chunk à parte, baixado só quando o primeiro editor monta |
 
 ## 4. Decisões que não devem ser desfeitas sem motivo forte
@@ -66,6 +66,15 @@ fraco; não tranca. Transformar dificuldade em parede é o oposto do objetivo.
 funcione passa. Comparar com gabarito ensinaria a adivinhar o que o professor
 quer, em vez de resolver o problema.
 
+**A página do aluno roda num iframe de origem opaca.** `sandbox="allow-scripts
+allow-modals"` — sem `allow-same-origin` — e uma CSP com `default-src 'none'`.
+Nada lá dentro alcança a sessão do Supabase, o `localStorage` da aplicação ou
+a rede. Os testes rodam **dentro** do iframe, com `document` à mão, e voltam
+por `postMessage`; o pai só aceita a mensagem cuja `source` é a janela do seu
+próprio iframe. `'unsafe-eval'` está na CSP porque as asserções passam por
+`new Function` — o Chromium recusava sem ele, e o jsdom, que ignora CSP, não
+tinha como avisar.
+
 **O sandbox é descartável.** Worker novo por execução, 3 segundos de limite,
 `terminate()` no fim. `fetch`, `XMLHttpRequest`, `WebSocket`, `importScripts`,
 `indexedDB`, `caches` e `Notification` são apagados antes de qualquer código do
@@ -79,7 +88,7 @@ src/content/            Aulas, exercícios, projetos, conceitos, flashcards
   types.ts              Tipos (Exercise é união discriminada por `type`)
   schema.ts             Espelhos Zod; valida na carga e falha alto em DEV
   index.ts              Única fronteira de leitura do conteúdo
-  content.test.ts       Integridade: 504 checagens sobre o catálogo
+  content.test.ts       Integridade: 520 checagens sobre o catálogo
   lessons/              Uma aula por arquivo
   tracks/               A ORDEM da trilha vive aqui, não nos arquivos de aula
 
@@ -88,6 +97,13 @@ src/client/lib/         Lógica pura e testada
   sandbox.worker.ts     Worker: bloqueia rede e chama o core
   sandbox.ts            executeCode(). Dois relógios: 20s para o worker
                         existir, e só então os 3s do código do aluno
+  pagina-core.ts        Motor de página, parte pura: monta o documento
+                        (CSP, captura de console, testes no load) e lê a
+                        mensagem de volta. Roda no Node com jsdom
+  pagina.ts             executarPagina(): escreve o documento num <iframe
+                        sandbox>, espera a mensagem, cuida do prazo
+  pagina-jsdom.ts       O executor do CI: mesmo documento, no jsdom. Sem
+                        layout e sem cor normalizada — o E2E é o árbitro
   fill-blank.ts         Molde com lacunas: dividir, preencher, validar
   mastery.ts            Domínio por conceito, em 4 níveis
   review.ts             Repetição espaçada, Leitner [1,3,7,14,30,60] dias
@@ -119,8 +135,8 @@ docs/curriculo.md       Roadmap de conteúdo — fonte canônica
 
 ```bash
 npm run typecheck   # inclui e2e/ e playwright.config.ts
-npm test            # 1.001 testes
-npm run test:e2e    # 132 no navegador (antes: npx playwright install chromium)
+npm test            # 1.029 testes
+npm run test:e2e    # 140 no navegador (antes: npx playwright install chromium)
 npm run build
 ```
 
@@ -232,6 +248,14 @@ Cada uma custou tempo. Não repita.
   controla (resolve num, rejeita noutro) só funciona com `vi.doMock` antes de
   cada `import()` — foi assim que o teste do textarea de contingência passou a
   falhar de verdade quando a contingência é sabotada.
+- **O jsdom não aplica CSP, e o Chromium aplica.** O motor de página passou
+  em 12 testes no jsdom e falhou na primeira página de verdade: `new
+  Function` exige `'unsafe-eval'` na CSP. Todo motor novo precisa de um teste
+  no navegador antes de ser dado por pronto; o jsdom prova o conteúdo, não a
+  plataforma.
+- **Um rádio `sr-only` não recebe `check()` do Playwright.** O ponto de 1px
+  fica em cima do número da linha, que intercepta o clique — 240 tentativas
+  até o timeout. Clique no `<label>`, como o aluno faz.
 - **Uma prop opcional é um contrato que ninguém garante.** `onSolved` era opcional
   e dois dos quatro tipos de exercício simplesmente não a recebiam — 36 dos 78
   exercícios nunca conseguiam avisar que tinham sido resolvidos, e nenhum dos 521
@@ -286,9 +310,15 @@ publicadas.** A mais curta tem 304 palavras; o bloco assíncrono, que é o mais
 difícil do curso, tem entre 650 e 810 palavras por aula. Nenhuma aula publicada
 está pendente de aprofundamento.
 
-**Fases 2 a 7 — não iniciadas.** Cada uma depende de um motor: iframe isolado
-(DOM, CSS, UI), transpilador (TypeScript), React, servidor simulado (Node),
-sql.js (SQL), Pyodide (Python).
+**Fase 2 — iniciada em 2026-09-14.** O motor iframe está pronto e provado nos
+dois lados (jsdom no CI, Chromium no E2E), com `runtime: 'iframe'` nos tipos
+`code` e `fill-blank`, HTML e CSS no editor, e a trilha "A Página" com a
+primeira aula (HTML semântico, 6 exercícios). Faltam 25 aulas: 9 de HTML e
+CSS, 8 de DOM e eventos, 8 de UI e UX. Exercícios de CSS que dependam de
+layout ou cor normalizada precisam ser conferidos pelo E2E, não pelo jsdom.
+
+**Fases 3 a 7 — não iniciadas.** Cada uma depende de um motor: transpilador
+(TypeScript), React, servidor simulado (Node), sql.js (SQL), Pyodide (Python).
 
 ## 9. Pendências do lado do usuário
 

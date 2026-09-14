@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
-import { runProgram, TEST_TIMEOUT_MS } from '../client/lib/sandbox-core';
+import {
+  runProgram,
+  TEST_TIMEOUT_MS,
+  type SandboxProperty,
+  type SandboxTest,
+} from '../client/lib/sandbox-core';
+import { rodarPaginaNoJsdom } from '../client/lib/pagina-jsdom';
 import {
   getExercises,
   getLessonsOfTrack,
@@ -33,6 +39,40 @@ const allLessons: Lesson[] = listTracks().flatMap((track) => getLessonsOfTrack(t
 const allExercises: Array<{ lesson: Lesson; exercise: Exercise }> = allLessons.flatMap((lesson) =>
   getExercises(lesson).map((exercise) => ({ lesson, exercise }))
 );
+
+/**
+ * Roda o código no motor que o exercício declara.
+ *
+ * `worker` é o sandbox de JavaScript, aqui direto no Node. `iframe` é o motor
+ * de página, aqui no jsdom — o mesmo documento que o navegador do aluno
+ * recebe, sem layout. Um exercício de página que dependa de layout ou de cor
+ * normalizada precisa do E2E, que roda no Chromium.
+ */
+async function executar(
+  exercise: { runtime?: 'worker' | 'iframe' },
+  codigo: string,
+  tests: SandboxTest[],
+  properties: SandboxProperty[] = []
+) {
+  if (exercise.runtime === 'iframe') {
+    const r = await rodarPaginaNoJsdom(codigo, tests);
+    return { logs: r.logs, testResults: r.testResults, error: r.error };
+  }
+  return runProgram(codigo, tests, properties);
+}
+
+/**
+ * O programa que a solução de referência forma.
+ *
+ * No Worker a solução é acrescentada ao esqueleto — ela redefine as funções.
+ * Numa página isso duplicaria os elementos (dois `<h1>`), então a solução de
+ * página é o documento inteiro e substitui o esqueleto.
+ */
+function programaDaSolucao(exercise: CodeExercise): string {
+  return exercise.runtime === 'iframe'
+    ? (exercise.solution ?? '')
+    : exercise.initialCode + '\n' + exercise.solution;
+}
 
 const codeExercises = allExercises.filter(
   (item): item is { lesson: Lesson; exercise: CodeExercise } => item.exercise.type === 'code'
@@ -157,7 +197,8 @@ describe('exercícios de lacuna', () => {
       // e um molde impossível só apareceria para o aluno.
       expect(exercise.solution, 'exercício de lacuna precisa declarar uma solução').toBeDefined();
 
-      const resultado = await runProgram(
+      const resultado = await executar(
+        exercise,
         preencher(exercise.template, exercise.solution!),
         exercise.tests,
         exercise.properties
@@ -174,7 +215,8 @@ describe('exercícios de lacuna', () => {
     '%s: com as lacunas vazias NÃO passa',
     async (_id, exercise) => {
       const vazio = exercise.blanks.map(() => '');
-      const resultado = await runProgram(
+      const resultado = await executar(
+        exercise,
         preencher(exercise.template, vazio),
         exercise.tests,
         exercise.properties
@@ -211,7 +253,7 @@ describe('exercícios de código', () => {
       // Sem solução declarada, não há como garantir que o exercício é resolvível.
       expect(exercise.solution, 'exercício de código precisa declarar uma solução').toBeDefined();
 
-      const resultado = await runProgram(`${exercise.initialCode}\n${exercise.solution}`, exercise.tests);
+      const resultado = await executar(exercise, programaDaSolucao(exercise), exercise.tests);
 
       expect(resultado.error, 'a solução não deveria lançar erro').toBeUndefined();
 
@@ -224,7 +266,12 @@ describe('exercícios de código', () => {
   it.each(codeExercises.map(({ exercise }) => [exercise.id, exercise] as const))(
     '%s: o código inicial NÃO passa (o exercício exige trabalho do aluno)',
     async (_id, exercise) => {
-      const resultado = await runProgram(exercise.initialCode, exercise.tests, exercise.properties);
+      const resultado = await executar(
+        exercise,
+        exercise.initialCode,
+        exercise.tests,
+        exercise.properties
+      );
       const todosPassaram =
         resultado.testResults.length > 0 && resultado.testResults.every((t) => t.passed);
 
@@ -253,7 +300,12 @@ describe('exercícios de código', () => {
   it.each(codeExercises.map(({ exercise }) => [exercise.id, exercise] as const))(
     '%s: toda mensagem de falha é escrita para o aluno',
     async (_id, exercise) => {
-      const resultado = await runProgram(exercise.initialCode, exercise.tests, exercise.properties);
+      const resultado = await executar(
+        exercise,
+        exercise.initialCode,
+        exercise.tests,
+        exercise.properties
+      );
 
       for (const teste of resultado.testResults) {
         if (teste.passed) continue;

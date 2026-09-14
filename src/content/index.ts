@@ -21,6 +21,7 @@ import { flashcards as allFlashcards } from './flashcards';
 import { trackJsFundamentos } from './tracks/javascript';
 import { trackLogica } from './tracks/logica';
 import { trackWeb } from './tracks/web';
+import { trackPagina } from './tracks/pagina';
 import { lessonVariaveis } from './lessons/js-01-variaveis';
 import { lessonTiposEOperadores } from './lessons/js-02-tipos-e-operadores';
 import { lessonCondicoes } from './lessons/js-03-condicoes';
@@ -52,6 +53,7 @@ import { lessonAutenticacao } from './lessons/web-05-autenticacao';
 import { lessonTokens } from './lessons/web-06-tokens';
 import { lessonCors } from './lessons/web-07-cors';
 import { lessonSegurancaWeb } from './lessons/web-08-seguranca';
+import { lessonHtmlSemantico } from './lessons/pagina-01-html-semantico';
 import { projetoImc } from './projects/js-imc';
 import { projetoConversor } from './projects/js-conversor';
 import { projetoBoletim } from './projects/js-boletim';
@@ -97,6 +99,7 @@ const lessons: Lesson[] = [
   lessonTokens,
   lessonCors,
   lessonSegurancaWeb,
+  lessonHtmlSemantico,
 ];
 const projects: Project[] = [
   projetoImc,
@@ -107,7 +110,7 @@ const projects: Project[] = [
   projetoSenha,
   projetoEstoque,
 ];
-const tracks: Track[] = [trackJsFundamentos, trackLogica, trackWeb];
+const tracks: Track[] = [trackJsFundamentos, trackLogica, trackWeb, trackPagina];
 
 /**
  * Checagem de integridade referencial que o Zod sozinho não faz: schema garante
