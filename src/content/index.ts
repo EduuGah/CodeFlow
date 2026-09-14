@@ -59,6 +59,7 @@ import { lessonFlexbox } from './lessons/pagina-03-flexbox';
 import { lessonGrid } from './lessons/pagina-04-grid';
 import { lessonResponsivo } from './lessons/pagina-05-responsivo';
 import { lessonTipografia } from './lessons/pagina-06-tipografia';
+import { lessonCores } from './lessons/pagina-07-cores';
 import { projetoImc } from './projects/js-imc';
 import { projetoConversor } from './projects/js-conversor';
 import { projetoBoletim } from './projects/js-boletim';
@@ -110,6 +111,7 @@ const lessons: Lesson[] = [
   lessonGrid,
   lessonResponsivo,
   lessonTipografia,
+  lessonCores,
 ];
 const projects: Project[] = [
   projetoImc,

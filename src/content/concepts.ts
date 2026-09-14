@@ -246,4 +246,12 @@ export const concepts: Concept[] = [
     prerequisites: ['css-caixa'],
     tags: ['pagina', 'css'],
   },
+  {
+    id: 'css-cores',
+    title: 'Cores',
+    summary:
+      'Formatos de cor, uma paleta de papéis em variáveis de CSS, contraste de 4.5:1, e cor nunca como único sinal.',
+    prerequisites: ['css-caixa'],
+    tags: ['pagina', 'css', 'acessibilidade'],
+  },
 ];
