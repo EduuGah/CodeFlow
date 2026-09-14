@@ -68,6 +68,7 @@ import { lessonCriarRemover } from './lessons/pagina-12-criar-remover';
 import { lessonClasses } from './lessons/pagina-13-classes';
 import { lessonEventos } from './lessons/pagina-14-eventos';
 import { lessonDelegacao } from './lessons/pagina-15-delegacao';
+import { lessonFormularios } from './lessons/pagina-16-formularios';
 import { projetoImc } from './projects/js-imc';
 import { projetoConversor } from './projects/js-conversor';
 import { projetoBoletim } from './projects/js-boletim';
@@ -128,6 +129,7 @@ const lessons: Lesson[] = [
   lessonClasses,
   lessonEventos,
   lessonDelegacao,
+  lessonFormularios,
 ];
 const projects: Project[] = [
   projetoImc,

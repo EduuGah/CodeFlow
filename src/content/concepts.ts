@@ -318,4 +318,12 @@ export const concepts: Concept[] = [
     prerequisites: ['dom-eventos'],
     tags: ['pagina', 'dom'],
   },
+  {
+    id: 'dom-formularios',
+    title: 'Formulários',
+    summary:
+      'label, name, type e required; o evento submit com preventDefault; FormData; mensagens de erro que ajudam; um envio só.',
+    prerequisites: ['dom-eventos'],
+    tags: ['pagina', 'dom', 'acessibilidade'],
+  },
 ];
