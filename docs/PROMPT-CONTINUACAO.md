@@ -61,7 +61,7 @@ consistência visual > qualidade dos exercícios > progressão > gamificação.
 | Projetos | 7, com 22 critérios de aceitação |
 | Conceitos | 27, com grafo de pré-requisitos |
 | Flashcards | 22 |
-| Testes | 1.029 de unidade + 140 de navegador |
+| Testes | 1.173 de unidade + 158 de navegador |
 
 Todas as 31 aulas publicadas estão no padrão de profundidade: 300 a 830 palavras
 e de 4 a 7 exercícios em dificuldade crescente. Nenhuma está pendente de
@@ -119,7 +119,7 @@ executor atual.** O Web Worker sem DOM deu o que tinha para dar.
 
 ## 6. O que VAI SER FEITO — e a decisão que precisa ser tomada
 
-O projeto está em **~27%**. A porcentagem por aula (32 de 135, 24%) engana: a
+O projeto está em **~32%**. A porcentagem por aula (41 de 135, 30%) engana: a
 plataforma está muito mais adiantada que isso, e os motores de execução menos
 (2 de 7).
 
@@ -148,17 +148,17 @@ O motor está pronto e provado nos dois lados. O que existe:
   `lib/pagina-jsdom.ts`: o mesmo documento no jsdom, para o CI.
 - `runtime: 'iframe'` nos tipos `code` e `fill-blank`; `CodeExerciseStep` e
   `FillBlank` mostram a página num painel entre o editor e a ação.
-- Trilha `track-pagina` com a primeira aula (`lesson-pagina-1`, HTML
-  semântico, 6 exercícios). O E2E `e2e/pagina.spec.ts` conclui a aula
-  inteira no Chromium e prova o isolamento (sem `localStorage`, CSP ativa).
+- Trilha `track-pagina` com o bloco de HTML e CSS inteiro (10 aulas, 60
+  exercícios, 27 de página). O E2E `e2e/pagina.spec.ts` conclui **toda**
+  aula da trilha no Chromium e prova o isolamento (sem `localStorage`, CSP
+  ativa) — cada aula nova entra nele sozinha.
 
 Duas armadilhas já pagas: o jsdom ignora CSP (o `'unsafe-eval'` que o `new
 Function` exige só apareceu no navegador), e `getComputedStyle` no jsdom
 devolve a cor declarada, não a normalizada — exercício de CSS que dependa
 disso é conferido pelo E2E.
 
-O que falta são as **25 aulas** da fase: 9 de HTML e CSS, 8 de DOM e eventos,
-8 de UI e UX. Cada aula nova segue o padrão das outras — 500 a 900 palavras,
+O que falta são as **16 aulas** da fase: 8 de DOM e eventos, 8 de UI e UX. Cada aula nova segue o padrão das outras — 500 a 900 palavras,
 cinco a sete exercícios, um deles de prática de dev — e ganha, além disso,
 pelo menos dois exercícios de página.
 
@@ -182,7 +182,7 @@ são investimentos grandes o bastante para a escolha ser dele.
 
 ```bash
 npm run typecheck   # inclui e2e/ e playwright.config.ts
-npm test            # 1.029 testes
+npm test            # 1.173 testes
 npm run test:e2e    # 122 no navegador (antes: npx playwright install chromium)
 npm run build
 ```

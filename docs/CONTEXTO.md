@@ -32,14 +32,14 @@ Números lidos do catálogo, não de memória.
 
 | | |
 | --- | --- |
-| Trilhas | 4 — Fundamentos de JavaScript (20 aulas), Lógica (3), Como a Web Funciona (8), A Página (1) |
-| Aulas | 32, somando 818 minutos |
-| Exercícios | 180, em 8 tipos — 49 de prever saída, 37 de código, 33 de lacuna, 28 de múltipla escolha, 14 de encontrar o bug, 10 de ordenar passos, 5 de escrever o teste, 4 de refatorar. **Toda aula tem ao menos um dos quatro tipos de prática de dev** |
+| Trilhas | 4 — Fundamentos de JavaScript (20 aulas), Lógica (3), Como a Web Funciona (8), A Página (10) |
+| Aulas | 41, somando 1.090 minutos |
+| Exercícios | 234, em 8 tipos — 55 de código, 49 de prever saída, 46 de múltipla escolha, 42 de lacuna, 19 de ordenar passos, 14 de encontrar o bug, 5 de escrever o teste, 4 de refatorar. 27 exercícios de página (`runtime: 'iframe'`). **Toda aula tem ao menos um dos quatro tipos de prática de dev** |
 | Verificação | 321 casos fixos + 58 propriedades |
 | Projetos | 7, com 22 critérios de aceitação |
-| Conceitos | 28, com grafo de pré-requisitos |
+| Conceitos | 36, com grafo de pré-requisitos |
 | Flashcards | 22 |
-| Testes | 1.029 de unidade + 140 de navegador |
+| Testes | 1.173 de unidade + 158 de navegador |
 | Pacote | 1.340 kB (384 kB comprimido) no chunk principal — o conteúdo vai junto; o Monaco são mais 3.360 kB (869 kB) num chunk à parte, baixado só quando o primeiro editor monta |
 
 ## 4. Decisões que não devem ser desfeitas sem motivo forte
@@ -88,7 +88,7 @@ src/content/            Aulas, exercícios, projetos, conceitos, flashcards
   types.ts              Tipos (Exercise é união discriminada por `type`)
   schema.ts             Espelhos Zod; valida na carga e falha alto em DEV
   index.ts              Única fronteira de leitura do conteúdo
-  content.test.ts       Integridade: 520 checagens sobre o catálogo
+  content.test.ts       Integridade: 664 checagens sobre o catálogo
   lessons/              Uma aula por arquivo
   tracks/               A ORDEM da trilha vive aqui, não nos arquivos de aula
 
@@ -135,8 +135,8 @@ docs/curriculo.md       Roadmap de conteúdo — fonte canônica
 
 ```bash
 npm run typecheck   # inclui e2e/ e playwright.config.ts
-npm test            # 1.029 testes
-npm run test:e2e    # 140 no navegador (antes: npx playwright install chromium)
+npm test            # 1.173 testes
+npm run test:e2e    # 158 no navegador (antes: npx playwright install chromium)
 npm run build
 ```
 
@@ -256,6 +256,18 @@ Cada uma custou tempo. Não repita.
 - **Um rádio `sr-only` não recebe `check()` do Playwright.** O ponto de 1px
   fica em cima do número da linha, que intercepta o clique — 240 tentativas
   até o timeout. Clique no `<label>`, como o aluno faz.
+- **O jsdom e o Chromium divergem no estilo computado de formas que só
+  aparecem escrevendo os testes.** Medido, aula a aula: `rem`, `ch`, `1fr`
+  e `line-height` sem unidade voltam resolvidos em px no Chromium e
+  declarados no jsdom; cores literais voltam `rgb()` nos dois, mas `var()`
+  não é resolvido no jsdom; `@media` é ignorado pelo jsdom; pseudo-elemento
+  em `getComputedStyle` lança; o Chromium omite `ease` (o padrão) ao
+  serializar `transition`; colunas `1fr` resolvem com diferenças de
+  centésimos; margem nunca declarada é `''` num e `'0px'` no outro; e o
+  **aninhamento nativo de CSS derruba o analisador do jsdom** — a folha
+  inteira some. A regra que saiu disso: o que o aluno **escreveu** se lê na
+  folha de estilo (`document.styleSheets`), igual nos dois; o computado só
+  quando é literal e portátil (`display`, px declarados, `rgb()` de hex).
 - **Uma prop opcional é um contrato que ninguém garante.** `onSolved` era opcional
   e dois dos quatro tipos de exercício simplesmente não a recebiam — 36 dos 78
   exercícios nunca conseguiam avisar que tinham sido resolvidos, e nenhum dos 521
@@ -310,12 +322,15 @@ publicadas.** A mais curta tem 304 palavras; o bloco assíncrono, que é o mais
 difícil do curso, tem entre 650 e 810 palavras por aula. Nenhuma aula publicada
 está pendente de aprofundamento.
 
-**Fase 2 — iniciada em 2026-09-14.** O motor iframe está pronto e provado nos
-dois lados (jsdom no CI, Chromium no E2E), com `runtime: 'iframe'` nos tipos
-`code` e `fill-blank`, HTML e CSS no editor, e a trilha "A Página" com a
-primeira aula (HTML semântico, 6 exercícios). Faltam 25 aulas: 9 de HTML e
-CSS, 8 de DOM e eventos, 8 de UI e UX. Exercícios de CSS que dependam de
-layout ou cor normalizada precisam ser conferidos pelo E2E, não pelo jsdom.
+**Fase 2 — em andamento, 10 de 26 (2026-09-14).** O motor iframe está pronto
+e provado nos dois lados (jsdom no CI, Chromium no E2E), com `runtime:
+'iframe'` nos tipos `code` e `fill-blank`, HTML e CSS no editor. O bloco de
+**HTML e CSS está completo**: semântica, caixa, flexbox, grid, responsivo,
+tipografia, cores, estados, movimento, CSS moderno — 10 aulas, 60
+exercícios, 27 deles de página. Faltam 16 aulas: 8 de DOM e eventos, 8 de
+UI e UX. Os ajudantes que as asserções de CSS colam no início (`trilhas`,
+`regraBase`, `regraEmMedia`, `declarado`) estão em
+`src/content/lessons/_ajudantes-css.ts`, cada um com o motivo medido.
 
 **Fases 3 a 7 — não iniciadas.** Cada uma depende de um motor: transpilador
 (TypeScript), React, servidor simulado (Node), sql.js (SQL), Pyodide (Python).

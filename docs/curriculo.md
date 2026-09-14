@@ -13,7 +13,7 @@ Fase 0  Fundamentos e lógica      ███████████████
 Fase 1  JavaScript real          ██████████████████████  10/10  pronto
         Como a web funciona      ██████████████████████   8/8  pronto
         Plataforma                ██████████████████████   7/7  pronto
-Fase 2  A página                 █░░░░░░░░░░░░░░░░░░░░░   1/26  motor pronto
+Fase 2  A página                 ████████░░░░░░░░░░░░░░  10/26  HTML e CSS pronto
 Fase 3  Tipos e componentes      ░░░░░░░░░░░░░░░░░░░░░░   0/24
 Fase 4  Back-end e dados         ░░░░░░░░░░░░░░░░░░░░░░   0/20
 Fase 5  Profissionalização       ░░░░░░░░░░░░░░░░░░░░░░   0/19
@@ -23,16 +23,16 @@ Fase 7  Projeto final            ░░░░░░░░░░░░░░░�
 
 | | Hoje | Previsto | Feito |
 | --- | ---: | ---: | ---: |
-| Aulas | **32** | 135 | 24% |
-| Exercícios | **180** | ~700 | 26% |
+| Aulas | **41** | 135 | 30% |
+| Exercícios | **234** | ~700 | 33% |
 | Tipos de exercício | **8** | 11 | 73% |
 | Motores de execução | **2** | 7 | 29% |
 | Projetos | **7** | ~30 | 23% |
 
-**Último trabalho** (2026-09-14): o motor iframe da Fase 2 e a primeira aula da
-trilha "A Página" (HTML semântico). Antes disso, no mesmo dia: 23 exercícios
-novos, um por aula, para toda aula ter ao menos um dos quatro tipos de prática
-de dev.
+**Último trabalho** (2026-09-14): o motor iframe da Fase 2 e o bloco inteiro de
+HTML e CSS da trilha "A Página" — 10 aulas, 60 exercícios. Antes disso, no
+mesmo dia: 23 exercícios novos, um por aula, para toda aula ter ao menos um
+dos quatro tipos de prática de dev.
 
 ## Aprofundamento das aulas antigas
 
@@ -232,7 +232,7 @@ síncrono, e uma asserção assíncrona reportava sucesso antes de a promise res
 certa. E não havia prazo por teste, então um exercício de callback travava para
 sempre quando o aluno esquecia de chamar o callback.
 
-### Fase 2 — A página · 26 aulas · EM ANDAMENTO (1 de 26)
+### Fase 2 — A página · 26 aulas · EM ANDAMENTO (10 de 26)
 Motor **1: executor em iframe isolado** — **pronto** (2026-09-14). Destrava
 três blocos, sem download extra.
 
@@ -246,9 +246,27 @@ com `runtime: 'iframe'`, nos tipos `code` e `fill-blank`; a solução de página
 jsdom (sem layout; cor vem como declarada, não normalizada) e o E2E prova a
 aula inteira no Chromium.
 
-| Aula | Estado |
+**HTML e CSS — 10 de 10, concluído.** Cada aula com 6 exercícios, 3 deles de
+página.
+
+| Aula | Assunto |
 | --- | --- |
-| HTML semântico | feita — 6 exercícios |
+| 1 | HTML semântico: regiões, hierarquia de títulos, a sopa de div |
+| 2 | A caixa: as quatro camadas, box-sizing, bloco e inline, margens que se fundem |
+| 3 | Flexbox: contêiner e itens, os dois eixos, gap, flex-wrap, flex |
+| 4 | Grid: fr e repeat, grid-column, a página desenhada com áreas |
+| 5 | Responsivo: fluidez, max-width, viewport, media queries mobile-first |
+| 6 | Tipografia: fontes, rem, entrelinha sem unidade, ch, escala de títulos |
+| 7 | Cores: formatos, paleta de papéis em variáveis, contraste 4.5:1, cor nunca sozinha |
+| 8 | Estados: hover, focus-visible que nunca some, disabled, checked, nth-child, ::before |
+| 9 | Movimento: transition no repouso, transform e opacity, keyframes, reduced-motion |
+| 10 | CSS moderno: clamp, min, propriedades lógicas, :is, aspect-ratio, o reset |
+
+**DOM e eventos — 0 de 8.** Selecionar, criar e remover, classes, eventos,
+delegação, formulários, armazenamento local, buscar dados e desenhar.
+
+**UI e UX — 0 de 8.** Hierarquia, tipografia legível, cor e contraste, estados,
+acessibilidade por teclado, formulários, escrever a interface, polegar.
 
 - **HTML e CSS** (10): semântica, caixa, flexbox, grid, responsivo, tipografia,
   cores, pseudo-classes, transições, CSS moderno.

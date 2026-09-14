@@ -350,11 +350,28 @@ precoTotal(['pao', 'leite']).then((t) => console.log(t)); // esperado: 16`,
           },
           {
             description: 'as buscas acontecem juntas, não em fila',
+            // Conta quantas buscas estão em andamento ao mesmo tempo, em vez de
+            // cronometrar: um relógio reprovava a solução certa quando a máquina
+            // estava ocupada (a suíte inteira rodando em paralelo), e um aluno
+            // com o computador lento leria "use Promise.all" tendo usado.
             assertion: `
-              const inicio = Date.now();
-              await precoTotal(['a', 'b', 'c', 'd', 'e', 'f']);
-              const gasto = Date.now() - inicio;
-              if (gasto > 90) throw new Error("Levou " + gasto + "ms para 6 buscas de 25ms. Em fila daria 150ms; juntas, cerca de 25ms. Use Promise.all para dispará-las ao mesmo tempo.");
+              // Os testes rodam ao mesmo tempo, então só contam as buscas
+              // deste teste — reconhecidas pelo prefixo dos nomes.
+              const original = buscarPreco;
+              let emAndamento = 0;
+              let maximo = 0;
+              buscarPreco = function (produto) {
+                if (!/^x\\d$/.test(String(produto))) return original(produto);
+                emAndamento += 1;
+                maximo = Math.max(maximo, emAndamento);
+                return original(produto).then((preco) => { emAndamento -= 1; return preco; });
+              };
+              try {
+                await precoTotal(['x1', 'x2', 'x3', 'x4', 'x5', 'x6']);
+              } finally {
+                buscarPreco = original;
+              }
+              if (maximo < 2) throw new Error("As 6 buscas foram feitas uma de cada vez: nunca houve duas em andamento ao mesmo tempo. Use Promise.all para dispará-las juntas.");
             `,
             hidden: true,
           },
