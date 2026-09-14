@@ -206,4 +206,12 @@ export const concepts: Concept[] = [
     prerequisites: [],
     tags: ['pagina', 'fundamentos'],
   },
+  {
+    id: 'css-caixa',
+    title: 'O modelo de caixa',
+    summary:
+      'Conteúdo, padding, borda e margem; box-sizing; bloco, inline e inline-block; margens que se fundem.',
+    prerequisites: ['html'],
+    tags: ['pagina', 'css'],
+  },
 ];

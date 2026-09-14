@@ -17,28 +17,34 @@ test.describe.configure({ mode: 'serial' });
 
 const AULA = 'lesson-pagina-1';
 
-test('a aula inteira da trilha da página é concluída, exercício por exercício', async ({
-  logado: page,
-  banco,
-}) => {
-  test.setTimeout(180_000);
+// Toda aula da trilha, e não só a primeira: cada aula nova de página entra
+// aqui sozinha, e é percorrida no Chromium antes de chegar a um aluno.
+for (const aula of getLessonsOfTrack('track-pagina')) {
+  test(`${aula.id}: a aula inteira é concluída no navegador, exercício por exercício`, async ({
+    logado: page,
+    banco,
+  }) => {
+    test.setTimeout(180_000);
 
-  await concluirAula(page, AULA);
+    await concluirAula(page, aula.id);
 
-  // A conclusão chegou ao banco: é a prova de que todos os exercícios — os de
-  // página inclusive — foram lidos como resolvidos.
-  await expect
-    .poll(
-      () =>
-        banco.escritas.filter(
-          (e) =>
-            e.tabela === 'users' &&
-            ((e.corpo as { completed_lessons?: string[] })?.completed_lessons ?? []).includes(AULA)
-        ).length,
-      { timeout: 15_000, message: 'a aula não foi marcada como concluída' }
-    )
-    .toBeGreaterThan(0);
-});
+    // A conclusão chegou ao banco: é a prova de que todos os exercícios — os
+    // de página inclusive — foram lidos como resolvidos.
+    await expect
+      .poll(
+        () =>
+          banco.escritas.filter(
+            (e) =>
+              e.tabela === 'users' &&
+              ((e.corpo as { completed_lessons?: string[] })?.completed_lessons ?? []).includes(
+                aula.id
+              )
+          ).length,
+        { timeout: 15_000, message: 'a aula não foi marcada como concluída' }
+      )
+      .toBeGreaterThan(0);
+  });
+}
 
 test('a página do aluno aparece no iframe, isolada e sem rede', async ({ logado: page }) => {
   test.setTimeout(120_000);
