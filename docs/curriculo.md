@@ -6,13 +6,13 @@ que conclui uma fase.
 
 ## Onde estamos
 
-**Fase 1 de 8 · JavaScript: 10 de 10 · Web: 8 de 8 · falta só a plataforma**
+**Fase 1 de 8 concluída · JavaScript: 10 de 10 · Web: 8 de 8 · plataforma: 6 de 7 — falta só publicar**
 
 ```
 Fase 0  Fundamentos e lógica      ██████████████████████  13/13  pronto
 Fase 1  JavaScript real          ██████████████████████  10/10  pronto
         Como a web funciona      ██████████████████████   8/8  pronto
-        Plataforma                █████░░░░░░░░░░░░░░░░░   2/7
+        Plataforma                ███████████████████░░░   6/7  falta publicar
 Fase 2  A página                 ░░░░░░░░░░░░░░░░░░░░░░   0/26
 Fase 3  Tipos e componentes      ░░░░░░░░░░░░░░░░░░░░░░   0/24
 Fase 4  Back-end e dados         ░░░░░░░░░░░░░░░░░░░░░░   0/20
@@ -131,10 +131,15 @@ Quatro mudanças, em ordem de impacto:
 
 ## Tipos de exercício
 
-Existem: escrever o código, múltipla escolha, prever a saída.
+Existem oito: escrever o código, múltipla escolha, prever a saída, completar a
+lacuna, ordenar os passos, escrever o teste, encontrar o bug, refatorar. Os
+quatro últimos nasceram na Fase 1 como prova de conceito — 2 ou 3 exercícios
+cada, em 8 aulas — e são independentes de motor: cabem em qualquer aula que já
+existe, e é para lá que os próximos devem ir antes de qualquer aula nova.
 
-A construir: completar a lacuna, encontrar o bug, ordenar os passos, refatorar,
-escrever o teste, consertar a tela, consulta ao banco, construir do zero.
+A construir, cada um preso a um motor de fase posterior: consertar a tela
+(iframe, Fase 2), consulta ao banco (sql.js, Fase 4), construir do zero
+(capstone, Fase 7).
 
 Cada exercício em três níveis de apoio: **guiado** (esqueleto quase pronto),
 **livre** (enunciado e testes) e **desafio** (caso extremo ou restrição, sempre
@@ -145,7 +150,7 @@ opcional).
 ### Fase 0 — Fundamentos e lógica · PRONTO
 13 aulas, 7 projetos. Motor: Web Worker sem DOM.
 
-### Fase 1 — Aprofundar o que já roda · 18 aulas · EM ANDAMENTO
+### Fase 1 — Aprofundar o que já roda · 18 aulas · PRONTO (falta publicar)
 Motor: **nenhum novo**.
 
 **JavaScript real — 10 de 10, concluído**
@@ -194,8 +199,8 @@ inteira caber no motor que já existe.
 | Escrever o teste | feito |
 | Encontrar o bug | feito |
 | Refatorar | feito |
-| Publicar de verdade | — |
-| Servir o editor do próprio domínio | — |
+| Servir o editor do próprio domínio | feito — chunk próprio, sob demanda; o E2E bloqueia toda rede externa e o editor monta assim mesmo |
+| Publicar de verdade | — (do lado do usuário) |
 
 **Todos os tipos de exercício que cabem no motor atual estão prontos.** Os três
 que faltam — arrastar e soltar, completar diagrama, e o de banco de dados —
