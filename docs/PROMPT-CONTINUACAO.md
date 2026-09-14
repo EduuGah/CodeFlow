@@ -125,18 +125,14 @@ menos (1 de 7).
 
 Há três caminhos, e eles **não são equivalentes**:
 
-### A) Publicar — barato, e desbloqueia o teste que nenhum teste automatizado faz
+### A) Publicar — FEITO em 2026-09-14
 
-Nada está no ar. Existe `vercel.json` com as rewrites de SPA, mas nenhum deploy.
-
-O que precisa acontecer:
-1. Conectar o repositório na Vercel.
-2. Definir `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY` no painel da Vercel.
-   **Use a chave publishable/anon, nunca a `service_role`** — o código recusa a
-   secreta, mas confira.
-3. Acrescentar a URL da Vercel nas *Redirect URLs* do Supabase, senão o login
-   com Google volta para lugar nenhum.
-4. Abrir num telefone de verdade e percorrer uma aula inteira.
+Está no ar na Vercel, pela integração com o GitHub: cada push no `main` vira
+um deploy de produção. O que ainda vale fazer, do lado do usuário:
+1. Abrir num telefone de verdade e percorrer uma aula inteira, inclusive um
+   exercício de código — o editor agora é servido pela própria Vercel.
+2. Conferir que o login com Google volta para a URL de produção (as *Redirect
+   URLs* do Supabase precisam incluí-la).
 
 Boa parte disso depende do dono do projeto, não de quem programa. Se for este o
 caminho, escreva o passo a passo exato e peça a ele que execute.

@@ -248,9 +248,12 @@ Cada uma custou tempo. Não repita.
   é um `@font-face` e dois arquivos `.woff2`; ainda não foi feito.
 - **`import`/`export` é erro de sintaxe no sandbox** — `new Function` não aceita
   módulos. A aula de módulos terá que ser conceitual, ou esperar outro executor.
-- **Nada publicado.** Existe `vercel.json` com as rewrites de SPA, mas nenhum
-  deploy. Ao publicar, definir `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY` no
-  painel da Vercel.
+- **Publicado na Vercel** (2026-09-14) pela integração com o GitHub: cada
+  push no `main` vira um deploy de produção — dá para ver em
+  `api.github.com/repos/EduuGah/CodeFlow/deployments`. A URL por deploy
+  (`codeflow-<hash>-….vercel.app`) exige login na Vercel; a pública é o domínio
+  de produção do projeto. O `vercel.json` só tem as rewrites de SPA; o build é
+  o `npm run build` padrão, e o `dist/server.cjs` que ele gera não é usado lá.
 - **Nada testado em telefone real.** O E2E emula um Pixel 7.
 - **Sem tutor com IA.** A rota foi removida enquanto a integração não existe.
 
@@ -262,8 +265,7 @@ por preferência de assunto.
 
 **Fase 0 — completa.** Fundamentos e lógica, 13 aulas.
 
-**Fase 1 — completa em conteúdo, tipos de exercício e plataforma.** A única
-pendência é publicar, e ela é do lado do usuário.
+**Fase 1 — completa.** Conteúdo, tipos de exercício, plataforma e publicação.
 
 | Item | Estado |
 | --- | --- |
@@ -272,7 +274,7 @@ pendência é publicar, e ela é do lado do usuário.
 | Testes por propriedade | **feito** |
 | Exercício de lacuna | **feito** |
 | Outros tipos de exercício | **feito** — ordenar passos, escrever o teste, encontrar o bug, refatorar |
-| Publicar | **não feito** — do lado do usuário |
+| Publicar | **feito** — Vercel, deploy automático a cada push no `main` |
 | Monaco do próprio domínio | **feito** — chunk próprio, sob demanda; o E2E bloqueia toda rede externa e o editor monta assim mesmo |
 
 **Aprofundamento das aulas antigas — em andamento.** As primeiras aulas nasceram
@@ -293,7 +295,9 @@ sql.js (SQL), Pyodide (Python).
 - Rodar `supabase/migrations/0006_promote_admin.sql` no SQL Editor, se ainda não
   rodou. Ela conserta o gatilho que impedia promover alguém a administrador.
 - Para virar administrador: `select public.set_user_role('SEU-EMAIL', 'admin');`
-- Conferir o aplicativo num telefone de verdade.
+- Conferir o aplicativo publicado num telefone de verdade — inclusive um
+  exercício de código, que agora depende do editor servido pela Vercel.
+- Informar a URL pública de produção, para entrar aqui e no README.
 
 ## 10. Preferências já estabelecidas
 

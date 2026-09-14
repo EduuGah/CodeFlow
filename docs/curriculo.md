@@ -6,13 +6,13 @@ que conclui uma fase.
 
 ## Onde estamos
 
-**Fase 1 de 8 concluída · JavaScript: 10 de 10 · Web: 8 de 8 · plataforma: 6 de 7 — falta só publicar**
+**Fase 1 de 8 concluída · JavaScript: 10 de 10 · Web: 8 de 8 · plataforma: 7 de 7 · publicado**
 
 ```
 Fase 0  Fundamentos e lógica      ██████████████████████  13/13  pronto
 Fase 1  JavaScript real          ██████████████████████  10/10  pronto
         Como a web funciona      ██████████████████████   8/8  pronto
-        Plataforma                ███████████████████░░░   6/7  falta publicar
+        Plataforma                ██████████████████████   7/7  pronto
 Fase 2  A página                 ░░░░░░░░░░░░░░░░░░░░░░   0/26
 Fase 3  Tipos e componentes      ░░░░░░░░░░░░░░░░░░░░░░   0/24
 Fase 4  Back-end e dados         ░░░░░░░░░░░░░░░░░░░░░░   0/20
@@ -170,7 +170,7 @@ opcional).
 ### Fase 0 — Fundamentos e lógica · PRONTO
 13 aulas, 7 projetos. Motor: Web Worker sem DOM.
 
-### Fase 1 — Aprofundar o que já roda · 18 aulas · PRONTO (falta publicar)
+### Fase 1 — Aprofundar o que já roda · 18 aulas · PRONTO
 Motor: **nenhum novo**.
 
 **JavaScript real — 10 de 10, concluído**
@@ -220,7 +220,7 @@ inteira caber no motor que já existe.
 | Encontrar o bug | feito |
 | Refatorar | feito |
 | Servir o editor do próprio domínio | feito — chunk próprio, sob demanda; o E2E bloqueia toda rede externa e o editor monta assim mesmo |
-| Publicar de verdade | — (do lado do usuário) |
+| Publicar de verdade | feito — Vercel, deploy automático a cada push no `main` |
 
 **Todos os tipos de exercício que cabem no motor atual estão prontos.** Os três
 que faltam — arrastar e soltar, completar diagrama, e o de banco de dados —
