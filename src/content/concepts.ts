@@ -326,4 +326,12 @@ export const concepts: Concept[] = [
     prerequisites: ['dom-eventos'],
     tags: ['pagina', 'dom', 'acessibilidade'],
   },
+  {
+    id: 'dom-armazenamento',
+    title: 'Armazenamento local',
+    summary:
+      'localStorage com JSON, o par carregar/salvar com try/catch, o null da primeira visita, e o que nunca se guarda ali.',
+    prerequisites: ['dom-eventos', 'json'],
+    tags: ['pagina', 'dom', 'seguranca'],
+  },
 ];

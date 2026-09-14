@@ -33,5 +33,6 @@ export const trackPagina: Track = {
     'lesson-pagina-14',
     'lesson-pagina-15',
     'lesson-pagina-16',
+    'lesson-pagina-17',
   ],
 };
