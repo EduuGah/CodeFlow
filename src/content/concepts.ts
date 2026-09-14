@@ -302,4 +302,12 @@ export const concepts: Concept[] = [
     prerequisites: ['dom', 'css-estados'],
     tags: ['pagina', 'dom', 'acessibilidade'],
   },
+  {
+    id: 'dom-eventos',
+    title: 'Eventos',
+    summary:
+      'addEventListener, o objeto do evento (target, key, preventDefault), click, input e keydown, e estado na variável com a tela redesenhada.',
+    prerequisites: ['dom-criar', 'assincronia'],
+    tags: ['pagina', 'dom'],
+  },
 ];

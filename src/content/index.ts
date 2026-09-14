@@ -66,6 +66,7 @@ import { lessonCssModerno } from './lessons/pagina-10-css-moderno';
 import { lessonSelecionar } from './lessons/pagina-11-selecionar';
 import { lessonCriarRemover } from './lessons/pagina-12-criar-remover';
 import { lessonClasses } from './lessons/pagina-13-classes';
+import { lessonEventos } from './lessons/pagina-14-eventos';
 import { projetoImc } from './projects/js-imc';
 import { projetoConversor } from './projects/js-conversor';
 import { projetoBoletim } from './projects/js-boletim';
@@ -124,6 +125,7 @@ const lessons: Lesson[] = [
   lessonSelecionar,
   lessonCriarRemover,
   lessonClasses,
+  lessonEventos,
 ];
 const projects: Project[] = [
   projetoImc,
