@@ -374,4 +374,12 @@ export const concepts: Concept[] = [
     prerequisites: ['dom-fetch', 'ui-hierarquia'],
     tags: ['pagina', 'ui', 'acessibilidade'],
   },
+  {
+    id: 'ui-teclado',
+    title: 'Acessível pelo teclado',
+    summary:
+      'O elemento certo já é acessível; a ordem do Tab é a do HTML; tabindex só 0 ou -1; aria-label para ícones; e o foco com destino depois de cada ação.',
+    prerequisites: ['dom-delegacao', 'css-estados'],
+    tags: ['pagina', 'ui', 'acessibilidade'],
+  },
 ];
