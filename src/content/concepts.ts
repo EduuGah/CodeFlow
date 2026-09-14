@@ -238,4 +238,12 @@ export const concepts: Concept[] = [
     prerequisites: ['css-grid'],
     tags: ['pagina', 'css'],
   },
+  {
+    id: 'css-tipografia',
+    title: 'Tipografia',
+    summary:
+      'Lista de fontes, tamanho em rem, entrelinha sem unidade, medida em ch, e uma escala de títulos com saltos claros.',
+    prerequisites: ['css-caixa'],
+    tags: ['pagina', 'css'],
+  },
 ];

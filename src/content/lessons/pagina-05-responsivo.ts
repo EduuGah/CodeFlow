@@ -1,50 +1,11 @@
 import type { Lesson } from '../types';
 
-/**
- * Os testes desta aula leem a **folha de estilo**, não o estilo computado.
- *
- * O motivo: uma media query depende da largura da janela, e a janela aqui é
- * o iframe de pré-visualização — 340px no celular, 600 e poucos no desktop.
- * O mesmo CSS certo daria resultados computados diferentes nos dois, e o
- * jsdom (o executor do CI) ignora `@media` por completo. O que é igual nos
- * três lugares é o que o aluno escreveu: `document.styleSheets` expõe cada
- * regra, inclusive as que estão dentro de um `@media`, com o texto da
- * condição e as declarações.
- */
-const AJUDANTES = `
-  function trilhas(valor) {
-    const expandido = String(valor).replace(/repeat\\((\\d+),\\s*([^)]+)\\)/g, (_, n, x) => Array(Number(n)).fill(x.trim()).join(' '));
-    return expandido.trim().split(/\\s+/).filter(Boolean);
-  }
-  function normalizar(seletor) { return String(seletor || '').replace(/\\s+/g, ' ').trim(); }
-  // A regra de um seletor fora de qualquer @media.
-  function regraBase(seletor) {
-    for (const folha of document.styleSheets) {
-      for (const r of folha.cssRules) {
-        if (r.selectorText && normalizar(r.selectorText) === seletor) return r.style;
-      }
-    }
-    return null;
-  }
-  // Os @media cuja condição casa com o predicado, com a regra do seletor dentro.
-  function regraEmMedia(condicao, seletor) {
-    for (const folha of document.styleSheets) {
-      for (const r of folha.cssRules) {
-        if (!r.media) continue;
-        if (!condicao(r.media.mediaText.replace(/\\s+/g, ''))) continue;
-        for (const interna of r.cssRules) {
-          if (interna.selectorText && normalizar(interna.selectorText) === seletor) return interna.style;
-        }
-      }
-    }
-    return null;
-  }
-  function minWidthPx(texto) {
-    const m = /min-width:(\\d+(?:\\.\\d+)?)(px|em|rem)/.exec(texto);
-    if (!m) return null;
-    return m[2] === 'px' ? Number(m[1]) : Number(m[1]) * 16;
-  }
-`;
+import { AJUDANTES_CSS } from './_ajudantes-css';
+
+// Os testes desta aula leem a folha de estilo, não o estilo computado: uma
+// media query depende da largura do iframe, e o jsdom ignora @media. Veja
+// `_ajudantes-css.ts`.
+const AJUDANTES = AJUDANTES_CSS;
 
 export const lessonResponsivo: Lesson = {
   id: 'lesson-pagina-5',

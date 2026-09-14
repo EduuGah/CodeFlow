@@ -1,32 +1,10 @@
 import type { Lesson } from '../types';
 
-/**
- * Os testes de grid leem o CSS de dois jeitos, e o motivo vale registrar.
- *
- * `getComputedStyle` devolve `grid-template-columns` **resolvido** no navegador
- * (`"128px 128px 128px"`) e **declarado** no jsdom (`"repeat(3, 1fr)"`). Contar
- * colunas precisa expandir o `repeat()` antes de dividir — é o `trilhas()` que
- * aparece nas asserções. Já `grid-area` num item vem diferente nos dois motores
- * quando computado, então esse é lido da **folha de estilo** (`cssRules`), onde
- * o valor é o que o aluno escreveu nos dois lugares.
- */
-const TRILHAS = `
-  function trilhas(valor) {
-    const expandido = String(valor).replace(/repeat\\((\\d+),\\s*([^)]+)\\)/g, (_, n, x) => Array(Number(n)).fill(x.trim()).join(' '));
-    return expandido.trim().split(/\\s+/).filter(Boolean);
-  }
-`;
+import { AJUDANTES_CSS } from './_ajudantes-css';
 
-const REGRA = `
-  function regra(seletor) {
-    for (const folha of document.styleSheets) {
-      for (const r of folha.cssRules) {
-        if (r.selectorText && r.selectorText.replace(/\\s+/g, ' ').trim() === seletor) return r.style;
-      }
-    }
-    return null;
-  }
-`;
+// Por que os testes leem o CSS de dois jeitos: veja `_ajudantes-css.ts`.
+const TRILHAS = AJUDANTES_CSS;
+const REGRA = AJUDANTES_CSS;
 
 export const lessonGrid: Lesson = {
   id: 'lesson-pagina-4',
@@ -425,7 +403,7 @@ Leia assim: "quantas colunas de pelo menos 200px couberem; o que sobrar, divida 
             assertion: `${REGRA}
               const pares = [['header', 'cabecalho'], ['nav', 'menu'], ['main', 'conteudo'], ['footer', 'rodape']];
               for (const [seletor, area] of pares) {
-                const r = regra(seletor);
+                const r = regraBase(seletor);
                 const valor = r ? r.getPropertyValue('grid-area').replace(/\\s*\\/\\s*/g, '/').split('/')[0].trim() : '';
                 if (valor !== area) throw new Error('A regra de ' + seletor + ' precisa ter grid-area: ' + area + '. ' + (r ? 'Veio "' + (r.getPropertyValue('grid-area') || '(nada)') + '".' : 'Não encontrei uma regra com o seletor ' + seletor + '.'));
               }
