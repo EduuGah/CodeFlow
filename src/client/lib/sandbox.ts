@@ -27,7 +27,15 @@ export interface ExecutionResult {
  */
 export const EXECUTION_TIMEOUT_MS = 3000;
 
-function toResult(response: WorkerResponse): ExecutionResult {
+/**
+ * Tempo máximo para o worker **existir** — baixar o arquivo, compilar, avisar
+ * que está pronto. Não é tempo do aluno: é rede e servidor. Por isso é
+ * separado dos 3 segundos, e generoso: numa conexão de celular, o arquivo do
+ * worker disputa banda com o editor, que é muito maior.
+ */
+export const STARTUP_TIMEOUT_MS = 20_000;
+
+function toResult(response: Exclude<WorkerResponse, 'pronto'>): ExecutionResult {
   return {
     output: response.logs.join('\n'),
     logs: response.logs,
@@ -65,6 +73,7 @@ export function executeCode(
     }
 
     let settled = false;
+    let timer: ReturnType<typeof setTimeout>;
 
     const finish = (result: ExecutionResult) => {
       if (settled) return;
@@ -74,19 +83,39 @@ export function executeCode(
       resolve(result);
     };
 
-    const timer = setTimeout(() => {
+    // Dois relógios, um de cada vez. O primeiro mede a infraestrutura: o
+    // worker precisa avisar que existe. Só então começa o relógio do aluno.
+    // Contar os 3s desde o `new Worker()` produzia "seu código passou de 3
+    // segundos" para programas que nem tinham começado a rodar.
+    timer = setTimeout(() => {
       finish({
         output: '',
         logs: [],
         testResults: [],
-        timedOut: true,
-        error: `Seu código passou de ${
-          EXECUTION_TIMEOUT_MS / 1000
-        } segundos e foi interrompido. Isso costuma indicar um laço que nunca termina — verifique se a condição de parada realmente chega a ser falsa.`,
+        error:
+          'O ambiente de execução não ficou pronto a tempo. Confira a conexão e tente executar de novo.',
       });
-    }, EXECUTION_TIMEOUT_MS);
+    }, STARTUP_TIMEOUT_MS);
 
-    worker.onmessage = (event: MessageEvent<WorkerResponse>) => finish(toResult(event.data));
+    worker.onmessage = (event: MessageEvent<WorkerResponse>) => {
+      if (event.data === 'pronto') {
+        clearTimeout(timer);
+        timer = setTimeout(() => {
+          finish({
+            output: '',
+            logs: [],
+            testResults: [],
+            timedOut: true,
+            error: `Seu código passou de ${
+              EXECUTION_TIMEOUT_MS / 1000
+            } segundos e foi interrompido. Isso costuma indicar um laço que nunca termina — verifique se a condição de parada realmente chega a ser falsa.`,
+          });
+        }, EXECUTION_TIMEOUT_MS);
+        return;
+      }
+
+      finish(toResult(event.data));
+    };
 
     worker.onerror = (event) => {
       // Evita que o erro suba para o window.onerror da aplicação.

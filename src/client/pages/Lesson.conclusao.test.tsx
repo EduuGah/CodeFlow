@@ -23,8 +23,8 @@ import { Lesson } from './Lesson';
  *    quem tinha pulado todos os exercícios e não tinha salvo nada.
  */
 
-vi.mock('@monaco-editor/react', () => ({
-  default: ({ value, onChange }: { value: string; onChange: (v: string) => void }) => (
+vi.mock('../components/ui/CodeEditor', () => ({
+  CodeEditor: ({ value, onChange }: { value: string; onChange: (v: string) => void }) => (
     <textarea
       aria-label="Editor de código"
       value={value}

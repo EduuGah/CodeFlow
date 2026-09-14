@@ -44,7 +44,7 @@ consistência visual > qualidade dos exercícios > progressão > gamificação.
 - Express só para servir (tsx em dev, esbuild no build)
 - Supabase: login com Google + Postgres com RLS
 - Vitest (unidade e componente) + Playwright (navegador)
-- Monaco como editor, **vindo de CDN externo** — é um bloqueio conhecido
+- Monaco como editor, servido do próprio domínio num chunk sob demanda (`lib/monaco.ts`, `ui/CodeEditor.tsx`)
 - Repositório `EduuGah/CodeFlow`, trabalho direto no `main`, push autorizado, CI
   obrigatório a cada push
 
@@ -61,7 +61,7 @@ consistência visual > qualidade dos exercícios > progressão > gamificação.
 | Projetos | 7, com 22 critérios de aceitação |
 | Conceitos | 27, com grafo de pré-requisitos |
 | Flashcards | 22 |
-| Testes | 884 de unidade + 126 de navegador |
+| Testes | 895 de unidade + 132 de navegador |
 
 Todas as 31 aulas publicadas estão no padrão de profundidade: 300 a 830 palavras
 e de 4 a 7 exercícios em dificuldade crescente. Nenhuma está pendente de
@@ -177,7 +177,7 @@ são investimentos grandes o bastante para a escolha ser dele.
 
 ```bash
 npm run typecheck   # inclui e2e/ e playwright.config.ts
-npm test            # 884 testes
+npm test            # 895 testes
 npm run test:e2e    # 122 no navegador (antes: npx playwright install chromium)
 npm run build
 ```

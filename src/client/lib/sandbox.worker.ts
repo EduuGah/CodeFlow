@@ -31,7 +31,17 @@ export interface WorkerRequest {
   properties?: SandboxProperty[];
 }
 
-export type WorkerResponse = SandboxRunResult;
+/**
+ * A primeira mensagem do worker é `'pronto'`, e só depois vem o resultado.
+ *
+ * É o que permite ao `sandbox.ts` contar os 3 segundos a partir do momento em
+ * que o código do aluno de fato começa a rodar — e não a partir do `new
+ * Worker()`, que inclui baixar e compilar este arquivo. Numa conexão lenta,
+ * ou com o servidor ocupado servindo o editor, essa espera passava de 3s e o
+ * aluno lia "seu código passou de 3 segundos" sobre um programa de duas
+ * linhas que nem tinha começado.
+ */
+export type WorkerResponse = 'pronto' | SandboxRunResult;
 
 /**
  * Remove as APIs de rede e persistência do escopo do worker.
@@ -70,3 +80,7 @@ self.onmessage = async (event: MessageEvent<WorkerRequest>) => {
   lockDownGlobals();
   self.postMessage(await runProgram(code, tests, properties));
 };
+
+// Depois de `onmessage` existir, e não antes: a mensagem com o programa pode
+// já estar na fila, e ela precisa encontrar o tratador pronto.
+self.postMessage('pronto' satisfies WorkerResponse);

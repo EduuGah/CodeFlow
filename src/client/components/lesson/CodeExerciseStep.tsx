@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import Editor from '@monaco-editor/react';
 
 import type { CodeExercise, LanguageId } from '../../../content/types';
 import type { ExerciseState, OnExerciseState } from '../../lib/exercise-state';
@@ -8,6 +7,7 @@ import { useRecordAttempt } from '../../hooks/useRecordAttempt';
 import { useReportarEstado } from '../../hooks/useReportarEstado';
 import { Button } from '../ui/Button';
 import { Card, SectionLabel } from '../ui/Card';
+import { CodeEditor } from '../ui/CodeEditor';
 import { IconCheck, IconClose, IconPlay } from '../ui/Icon';
 import { MarkdownReader } from '../ui/MarkdownReader';
 import { ExerciseAction, ExerciseFeedback } from './ExerciseAction';
@@ -131,28 +131,11 @@ export function CodeExerciseStep({
           estado === 'acertou' ? 'border-success-200' : 'border-line'
         }`}
       >
-        <Editor
+        <CodeEditor
           height="280px"
           language={language}
-          theme="vs-dark"
           value={code}
-          onChange={(valor) => setCode(valor ?? '')}
-          options={{
-            minimap: { enabled: false },
-            fontSize: 14,
-            fontFamily: "'JetBrains Mono', monospace",
-            padding: { top: 14, bottom: 14 },
-            scrollBeyondLastLine: false,
-            smoothScrolling: true,
-            lineNumbersMinChars: 3,
-            // Sem isto o Monaco mede o contêiner uma unica vez, ao montar. Como
-            // o passo entra em cena junto com o layout, ele media cedo demais e
-            // ficava travado em 5x5 pixels — editor invisivel no celular.
-            automaticLayout: true,
-            // No celular a rolagem da página precisa funcionar por cima do
-            // editor, senão o aluno fica preso dentro dele.
-            scrollbar: { alwaysConsumeMouseWheel: false },
-          }}
+          onChange={setCode}
         />
       </div>
 

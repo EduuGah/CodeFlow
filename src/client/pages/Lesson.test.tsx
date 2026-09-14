@@ -18,8 +18,8 @@ import { Lesson } from './Lesson';
 
 // O Monaco não roda no jsdom e não é o objeto destes testes: um textarea
 // preserva o contrato (valor entra, alteração sai) sem arrastar o editor real.
-vi.mock('@monaco-editor/react', () => ({
-  default: ({ value, onChange }: { value: string; onChange: (v: string) => void }) => (
+vi.mock('../components/ui/CodeEditor', () => ({
+  CodeEditor: ({ value, onChange }: { value: string; onChange: (v: string) => void }) => (
     <textarea aria-label="Editor de código" value={value} onChange={(e) => onChange(e.target.value)} />
   ),
 }));

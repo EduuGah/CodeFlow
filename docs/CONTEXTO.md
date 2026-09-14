@@ -39,8 +39,8 @@ Números lidos do catálogo, não de memória.
 | Projetos | 7, com 22 critérios de aceitação |
 | Conceitos | 27, com grafo de pré-requisitos |
 | Flashcards | 22 |
-| Testes | 884 de unidade + 126 de navegador |
-| Pacote | 1.340 kB (383 kB comprimido) — o conteúdo vai junto no chunk principal |
+| Testes | 895 de unidade + 132 de navegador |
+| Pacote | 1.340 kB (384 kB comprimido) no chunk principal — o conteúdo vai junto; o Monaco são mais 3.360 kB (869 kB) num chunk à parte, baixado só quando o primeiro editor monta |
 
 ## 4. Decisões que não devem ser desfeitas sem motivo forte
 
@@ -86,7 +86,8 @@ src/content/            Aulas, exercícios, projetos, conceitos, flashcards
 src/client/lib/         Lógica pura e testada
   sandbox-core.ts       Monta e roda o programa do aluno. ASSÍNCRONO.
   sandbox.worker.ts     Worker: bloqueia rede e chama o core
-  sandbox.ts            executeCode(), com timeout de 3s
+  sandbox.ts            executeCode(). Dois relógios: 20s para o worker
+                        existir, e só então os 3s do código do aluno
   fill-blank.ts         Molde com lacunas: dividir, preencher, validar
   mastery.ts            Domínio por conceito, em 4 níveis
   review.ts             Repetição espaçada, Leitner [1,3,7,14,30,60] dias
@@ -94,6 +95,9 @@ src/client/lib/         Lógica pura e testada
   path.ts               Caminho da trilha; nunca bloqueia, só avisa
   study.ts              Sequência, retomada, exercícios abandonados
   celebrar.ts           Confete que respeita prefers-reduced-motion
+  monaco.ts             O Monaco do próprio domínio: recursos escolhidos a
+                        dedo, 4 linguagens, workers, tema `codeflow`. Só entra
+                        pela import() do CodeEditor
 
 src/client/pages/       Telas
 src/client/components/  Componentes
@@ -101,6 +105,9 @@ src/client/components/  Componentes
                         ícones; `buttonClasses()` para um <Link> ser botão
   ui/Card.tsx           A superfície: tons com significado, `cardClasses()`,
                         e `SectionLabel`, o rótulo monoespaçado das seções
+  ui/CodeEditor.tsx     O editor — o único. Carrega o Monaco sob demanda,
+                        mostra o código enquanto espera, cai num textarea se
+                        o chunk não vier
   lesson/               Um componente por tipo de exercício; `ExerciseAction`
                         e `ExerciseFeedback` são o botão e o retorno de todos
 e2e/                    Playwright; `fixtures.ts` tem o dublê do Supabase
@@ -112,8 +119,8 @@ docs/curriculo.md       Roadmap de conteúdo — fonte canônica
 
 ```bash
 npm run typecheck   # inclui e2e/ e playwright.config.ts
-npm test            # 884 testes
-npm run test:e2e    # 126 no navegador (antes: npx playwright install chromium)
+npm test            # 895 testes
+npm run test:e2e    # 132 no navegador (antes: npx playwright install chromium)
 npm run build
 ```
 
@@ -200,6 +207,31 @@ Cada uma custou tempo. Não repita.
   parece um bug do produto e não é. `layout()` manual funciona porque o DOM tem
   geometria. Antes de concluir que um editor quebrou, rode o E2E: o Chromium
   headless renderiza de verdade.
+- **O Monaco 0.56 tem mapa de `exports`, e os caminhos antigos não resolvem.**
+  `monaco-editor/esm/vs/editor/editor.worker` — o que todo guia de Vite
+  ensina — cai em `esm/vs/esm/vs/...` e falha. Os pontos de entrada com
+  suporte são `monaco-editor/editor`, `monaco-editor/features/<x>/register`,
+  `monaco-editor/languages/definitions/<x>/register`,
+  `monaco-editor/languages/features/typescript/register`, e os workers em
+  `monaco-editor/editor/editor.worker` e
+  `monaco-editor/languages/features/typescript/ts.worker`. O worker de
+  TypeScript tem 7 MB; é por isso que ele é um arquivo à parte e só sobe
+  quando um modelo JS ou TS abre.
+- **Em desenvolvimento, o Vite embute um sourcemap com o conteúdo inteiro em
+  cada módulo de `node_modules`.** Para os dois arquivos gigantes do serviço
+  de TypeScript do Monaco (9 MB e 3 MB) isso dava 47 MB e 16 MB por
+  requisição, e o worker do sandbox ficava 20 segundos na fila atrás deles —
+  o aluno lia "seu código passou de 3 segundos" sobre um programa de duas
+  linhas. Duas correções, as duas necessárias: o plugin
+  `semSourcemapNosGigantes` no `vite.config.ts` (só em `serve`), e o sandbox
+  passou a contar os 3s a partir do `'pronto'` do worker, e não do `new
+  Worker()`. O E2E roda no servidor de desenvolvimento, então ele sente isso
+  antes do aluno.
+- **`vi.mock` com fábrica assíncrona é avaliado uma vez por arquivo**, mesmo
+  com `vi.resetModules()` entre os testes. Um dublê cuja promessa o teste
+  controla (resolve num, rejeita noutro) só funciona com `vi.doMock` antes de
+  cada `import()` — foi assim que o teste do textarea de contingência passou a
+  falhar de verdade quando a contingência é sabotada.
 - **Uma prop opcional é um contrato que ninguém garante.** `onSolved` era opcional
   e dois dos quatro tipos de exercício simplesmente não a recebiam — 36 dos 78
   exercícios nunca conseguiam avisar que tinham sido resolvidos, e nenhum dos 521
@@ -210,10 +242,10 @@ Cada uma custou tempo. Não repita.
 
 ### Bloqueios técnicos
 
-- **Monaco vem de `cdn.jsdelivr.net` em tempo de execução** — cerca de 15
-  arquivos por aluno. Rede que bloqueia CDN deixa o aluno sem editor, e não
-  funciona offline. Servir do próprio domínio exige carga sob demanda, senão o
-  pacote inicial estoura.
+- **As fontes vêm do Google Fonts.** É o último recurso externo em tempo de
+  execução (o Monaco já é servido do próprio domínio). Sem rede, o texto cai
+  para a fonte do sistema — degrada, mas funciona. Servir do próprio domínio
+  é um `@font-face` e dois arquivos `.woff2`; ainda não foi feito.
 - **`import`/`export` é erro de sintaxe no sandbox** — `new Function` não aceita
   módulos. A aula de módulos terá que ser conceitual, ou esperar outro executor.
 - **Nada publicado.** Existe `vercel.json` com as rewrites de SPA, mas nenhum
@@ -230,8 +262,8 @@ por preferência de assunto.
 
 **Fase 0 — completa.** Fundamentos e lógica, 13 aulas.
 
-**Fase 1 — completa em conteúdo e em tipos de exercício.** Só as duas pendências
-de plataforma seguem abertas: publicar, e servir o Monaco do próprio domínio.
+**Fase 1 — completa em conteúdo, tipos de exercício e plataforma.** A única
+pendência é publicar, e ela é do lado do usuário.
 
 | Item | Estado |
 | --- | --- |
@@ -240,8 +272,8 @@ de plataforma seguem abertas: publicar, e servir o Monaco do próprio domínio.
 | Testes por propriedade | **feito** |
 | Exercício de lacuna | **feito** |
 | Outros tipos de exercício | **feito** — ordenar passos, escrever o teste, encontrar o bug, refatorar |
-| Publicar | **não feito** |
-| Monaco do próprio domínio | **não feito** |
+| Publicar | **não feito** — do lado do usuário |
+| Monaco do próprio domínio | **feito** — chunk próprio, sob demanda; o E2E bloqueia toda rede externa e o editor monta assim mesmo |
 
 **Aprofundamento das aulas antigas — em andamento.** As primeiras aulas nasceram
 magras e foram melhorando com o tempo, o que fazia o iniciante encontrar as

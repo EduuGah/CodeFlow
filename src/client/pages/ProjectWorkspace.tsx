@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import Editor from '@monaco-editor/react';
 
 import { getProject, listProjects } from '../../content';
 import { LANGUAGE_LABELS } from '../../content/types';
@@ -13,6 +12,7 @@ import { celebrar } from '../lib/celebrar';
 import { MarkdownReader } from '../components/ui/MarkdownReader';
 import { Button } from '../components/ui/Button';
 import { Card, SectionLabel } from '../components/ui/Card';
+import { CodeEditor } from '../components/ui/CodeEditor';
 import { Badge } from '../components/ui/Badge';
 import {
   IconCheckCircle,
@@ -271,26 +271,11 @@ export function ProjectWorkspace() {
               media 5×5 pixels — invisível — depois de abrir a aba Código. No
               desktop a coluna é limitada pela linha do layout e o flex basta. */}
           <div className="h-[360px] md:h-auto md:min-h-0 md:flex-1">
-            <Editor
+            <CodeEditor
               height="100%"
               language={project.language}
-              theme="vs-dark"
               value={code}
-              onChange={(valor) => setCode(valor ?? '')}
-              options={{
-                minimap: { enabled: false },
-                // Sem isto o Monaco mede o contêiner só ao montar, e pode ficar
-                // travado num tamanho errado ao trocar de aba.
-                automaticLayout: true,
-                fontSize: 14,
-                fontFamily: "'JetBrains Mono', monospace",
-                lineHeight: 22,
-                padding: { top: 16, bottom: 16 },
-                scrollBeyondLastLine: false,
-                smoothScrolling: true,
-                lineNumbersMinChars: 3,
-                scrollbar: { alwaysConsumeMouseWheel: false },
-              }}
+              onChange={setCode}
             />
           </div>
 

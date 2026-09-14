@@ -16,8 +16,8 @@ import { Lesson } from './Lesson';
  * de cada troca de passo.
  */
 
-vi.mock('@monaco-editor/react', () => ({
-  default: ({ value, onChange }: { value: string; onChange: (v: string) => void }) => (
+vi.mock('../components/ui/CodeEditor', () => ({
+  CodeEditor: ({ value, onChange }: { value: string; onChange: (v: string) => void }) => (
     <textarea
       aria-label="Editor de código"
       value={value}

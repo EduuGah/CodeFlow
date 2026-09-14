@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import Editor from '@monaco-editor/react';
 
 import type { LanguageId, RefactorExercise } from '../../../content/types';
 import type { ExerciseState, OnExerciseState } from '../../lib/exercise-state';
@@ -9,6 +8,7 @@ import { useRecordAttempt } from '../../hooks/useRecordAttempt';
 import { useReportarEstado } from '../../hooks/useReportarEstado';
 import { IconCheck, IconClose, IconPlay } from '../ui/Icon';
 import { Card, SectionLabel } from '../ui/Card';
+import { CodeEditor } from '../ui/CodeEditor';
 import { MarkdownReader } from '../ui/MarkdownReader';
 import { ExerciseAction, ExerciseFeedback } from './ExerciseAction';
 import { HintPanel } from './HintPanel';
@@ -148,23 +148,11 @@ export function Refactor({
           aprovado ? 'border-success-200' : 'border-line'
         }`}
       >
-        <Editor
+        <CodeEditor
           height="300px"
           language={language}
-          theme="vs-dark"
           value={codigo}
-          onChange={(valor) => setCodigo(valor ?? '')}
-          options={{
-            minimap: { enabled: false },
-            fontSize: 14,
-            fontFamily: "'JetBrains Mono', monospace",
-            padding: { top: 14, bottom: 14 },
-            scrollBeyondLastLine: false,
-            smoothScrolling: true,
-            lineNumbersMinChars: 3,
-            automaticLayout: true,
-            scrollbar: { alwaysConsumeMouseWheel: false },
-          }}
+          onChange={setCodigo}
         />
       </div>
 

@@ -13,8 +13,8 @@ import { ProjectWorkspace } from './ProjectWorkspace';
  * ligação entre cada aba e o painel que ela controla.
  */
 
-vi.mock('@monaco-editor/react', () => ({
-  default: ({ value, onChange }: { value: string; onChange: (v: string) => void }) => (
+vi.mock('../components/ui/CodeEditor', () => ({
+  CodeEditor: ({ value, onChange }: { value: string; onChange: (v: string) => void }) => (
     <textarea
       aria-label="Editor de código"
       value={value}

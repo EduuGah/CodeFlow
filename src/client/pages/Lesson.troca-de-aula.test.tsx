@@ -23,8 +23,8 @@ import { Lesson } from './Lesson';
  * exatamente os que quebravam.
  */
 
-vi.mock('@monaco-editor/react', () => ({
-  default: () => <textarea aria-label="Editor de código" />,
+vi.mock('../components/ui/CodeEditor', () => ({
+  CodeEditor: () => <textarea aria-label="Editor de código" />,
 }));
 
 vi.mock('canvas-confetti', () => ({ default: vi.fn() }));
