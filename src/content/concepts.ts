@@ -286,4 +286,12 @@ export const concepts: Concept[] = [
     prerequisites: ['html', 'funcoes', 'arrays'],
     tags: ['pagina', 'dom'],
   },
+  {
+    id: 'dom-criar',
+    title: 'Criar e remover elementos',
+    summary:
+      'createElement, textContent, append e remove; a função desenhar(dados) que limpa e reconstrói a tela a partir dos dados.',
+    prerequisites: ['dom'],
+    tags: ['pagina', 'dom'],
+  },
 ];
