@@ -55,6 +55,7 @@ import { lessonCors } from './lessons/web-07-cors';
 import { lessonSegurancaWeb } from './lessons/web-08-seguranca';
 import { lessonHtmlSemantico } from './lessons/pagina-01-html-semantico';
 import { lessonCaixa } from './lessons/pagina-02-caixa';
+import { lessonFlexbox } from './lessons/pagina-03-flexbox';
 import { projetoImc } from './projects/js-imc';
 import { projetoConversor } from './projects/js-conversor';
 import { projetoBoletim } from './projects/js-boletim';
@@ -102,6 +103,7 @@ const lessons: Lesson[] = [
   lessonSegurancaWeb,
   lessonHtmlSemantico,
   lessonCaixa,
+  lessonFlexbox,
 ];
 const projects: Project[] = [
   projetoImc,

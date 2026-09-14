@@ -214,4 +214,12 @@ export const concepts: Concept[] = [
     prerequisites: ['html'],
     tags: ['pagina', 'css'],
   },
+  {
+    id: 'css-flexbox',
+    title: 'Flexbox',
+    summary:
+      'Itens lado a lado: contêiner e itens, os dois eixos, justify-content, align-items, gap, flex-wrap e flex.',
+    prerequisites: ['css-caixa'],
+    tags: ['pagina', 'css'],
+  },
 ];
