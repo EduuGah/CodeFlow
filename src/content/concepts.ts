@@ -254,4 +254,12 @@ export const concepts: Concept[] = [
     prerequisites: ['css-caixa'],
     tags: ['pagina', 'css', 'acessibilidade'],
   },
+  {
+    id: 'css-estados',
+    title: 'Estados e pseudo-classes',
+    summary:
+      ':hover, :focus-visible, :active, :disabled, :checked; posição com :nth-child, :last-child, :not; e ::before/::after.',
+    prerequisites: ['css-cores'],
+    tags: ['pagina', 'css', 'acessibilidade'],
+  },
 ];
