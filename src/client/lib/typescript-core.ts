@@ -267,6 +267,20 @@ const EXPLICACOES: Record<number, Array<[RegExp, (...grupos: string[]) => string
     ],
     [/./, () => 'O objeto tem uma propriedade que o tipo não conhece.'],
   ],
+  2561: [
+    [
+      /^Object literal may only specify known properties, but '(.+)' does not exist in type '(.+)'\. Did you mean to write '(.+)'\?$/,
+      (prop, tipo, sugestao) => `${tipo} não tem a propriedade ${prop}. Você quis escrever ${sugestao}?`,
+    ],
+    [/./, () => 'O objeto tem uma propriedade que o tipo não conhece; o compilador sugere uma parecida.'],
+  ],
+  18046: [
+    [
+      /^'(.+)' is of type 'unknown'\.$/,
+      (nome) => `${nome} é unknown: o compilador não deixa usar sem antes estreitar (typeof, instanceof, uma verificação).`,
+    ],
+    [/./, () => 'O valor é unknown: estreite o tipo antes de usar.'],
+  ],
   2367: [
     [
       /^This comparison appears to be unintentional because the types '(.+)' and '(.+)' have no overlap\.$/,

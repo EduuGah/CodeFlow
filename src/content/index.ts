@@ -82,6 +82,7 @@ import { lessonEscreverAInterface } from './lessons/pagina-25-escrever-a-interfa
 import { lessonPolegar } from './lessons/pagina-26-polegar';
 import { lessonPorQueTipar } from './lessons/ts-01-por-que-tipar';
 import { lessonInferencia } from './lessons/ts-02-inferencia';
+import { lessonInterfaces } from './lessons/ts-03-interfaces';
 import { projetoImc } from './projects/js-imc';
 import { projetoConversor } from './projects/js-conversor';
 import { projetoBoletim } from './projects/js-boletim';
@@ -155,6 +156,7 @@ const lessons: Lesson[] = [
   lessonPolegar,
   lessonPorQueTipar,
   lessonInferencia,
+  lessonInterfaces,
 ];
 const projects: Project[] = [
   projetoImc,

@@ -422,4 +422,12 @@ export const concepts: Concept[] = [
     prerequisites: ['ts-por-que'],
     tags: ['typescript'],
   },
+  {
+    id: 'ts-interfaces',
+    title: 'Interfaces',
+    summary:
+      'A forma de um objeto: propriedades tipadas, opcionais com ?, readonly, formas aninhadas e listas; objeto literal não pode ter propriedade a mais; interface como contrato de função.',
+    prerequisites: ['ts-inferencia', 'objetos'],
+    tags: ['typescript'],
+  },
 ];
