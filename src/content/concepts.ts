@@ -390,4 +390,12 @@ export const concepts: Concept[] = [
     prerequisites: ['dom-formularios', 'ui-hierarquia'],
     tags: ['pagina', 'ui', 'acessibilidade'],
   },
+  {
+    id: 'ui-texto-interface',
+    title: 'Escrever a interface',
+    summary:
+      'Botões com verbo e objeto, confirmações que nomeiam a consequência, erros com o que houve e o que fazer, títulos que dizem onde, e uma palavra para cada coisa.',
+    prerequisites: ['ui-hierarquia', 'ui-estados-tela'],
+    tags: ['pagina', 'ui'],
+  },
 ];
