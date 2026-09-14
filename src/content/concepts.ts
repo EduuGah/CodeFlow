@@ -310,4 +310,12 @@ export const concepts: Concept[] = [
     prerequisites: ['dom-criar', 'assincronia'],
     tags: ['pagina', 'dom'],
   },
+  {
+    id: 'dom-delegacao',
+    title: 'Delegação de eventos',
+    summary:
+      'Os eventos sobem: um ouvinte no pai para todos os filhos, closest para achar o alvo, data-acao e data-id para agir.',
+    prerequisites: ['dom-eventos'],
+    tags: ['pagina', 'dom'],
+  },
 ];
