@@ -228,7 +228,12 @@ export async function irAteOEditor(page: Page): Promise<void> {
   }
 
   await executar.waitFor({ timeout: 15_000 });
-  await page.locator('.monaco-editor').first().waitFor({ timeout: 40_000 });
+  // Em desenvolvimento o Monaco são centenas de módulos servidos pelo Vite, e
+  // o outro worker do Playwright disputa o mesmo servidor — com a trilha da
+  // página inteira na suíte, 40s já não bastaram numa máquina ocupada. O
+  // limite real é o `setTimeout` de cada teste; este só existe para a falha
+  // dizer "o editor não montou" em vez de estourar o teste sem explicação.
+  await page.locator('.monaco-editor').first().waitFor({ timeout: 90_000 });
 
   // O elemento aparecer não basta: o `setValue` precisa de um modelo existente.
   await page.waitForFunction(

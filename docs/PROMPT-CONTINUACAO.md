@@ -54,18 +54,18 @@ consistência visual > qualidade dos exercícios > progressão > gamificação.
 
 | | |
 | --- | --- |
-| Trilhas | 3 — Fundamentos de JavaScript (20 aulas), Lógica (3), Como a Web Funciona (8) |
-| Aulas | 31, somando 790 minutos |
-| Exercícios | 151, em 8 tipos |
-| Verificação | 304 casos fixos + 58 testes por propriedade |
+| Trilhas | 4 — Fundamentos de JavaScript (20 aulas), Lógica (3), Como a Web Funciona (8), A Página (26) |
+| Aulas | 57, somando 1.564 minutos |
+| Exercícios | 330, em 8 tipos; 78 são de página (`runtime: 'iframe'`) |
+| Verificação | 561 casos fixos + 58 testes por propriedade |
 | Projetos | 7, com 22 critérios de aceitação |
-| Conceitos | 27, com grafo de pré-requisitos |
+| Conceitos | 53, com grafo de pré-requisitos |
 | Flashcards | 22 |
-| Testes | 1.173 de unidade + 158 de navegador |
+| Testes | 1.431 de unidade + 190 de navegador |
 
-Todas as 31 aulas publicadas estão no padrão de profundidade: 300 a 830 palavras
-e de 4 a 7 exercícios em dificuldade crescente. Nenhuma está pendente de
-aprofundamento.
+Todas as 57 aulas publicadas estão no padrão de profundidade: 300 a 900 palavras
+e de 4 a 7 exercícios em dificuldade crescente, ao menos um deles de prática de
+dev. Nenhuma está pendente de aprofundamento.
 
 ### Os 8 tipos de exercício
 
@@ -111,15 +111,17 @@ sondas de borda, CI com anotações legíveis, E2E em celular e desktop.
 
 ## 5. O que ESTÁ SENDO FEITO agora
 
-**Nada em andamento.** O último commit fecha o oitavo tipo de exercício, o CI
-está verde, e a árvore está limpa. Você começa num ponto estável.
+**Nada em andamento.** O último commit fecha a Fase 2 — as 26 aulas da trilha
+"A Página" sobre o motor de iframe —, o CI está verde, e a árvore está limpa.
+Você começa num ponto estável.
 
-O que acabou de ser concluído: **todo o conteúdo e toda a mecânica que cabem no
-executor atual.** O Web Worker sem DOM deu o que tinha para dar.
+O que acabou de ser concluído: **todo o conteúdo que cabe nos dois motores
+existentes.** O Web Worker sem DOM e o iframe isolado deram o que tinham para
+dar; o que vem agora precisa de motor novo.
 
 ## 6. O que VAI SER FEITO — e a decisão que precisa ser tomada
 
-O projeto está em **~32%**. A porcentagem por aula (41 de 135, 30%) engana: a
+O projeto está em **~45%**. A porcentagem por aula (57 de 135, 42%) engana: a
 plataforma está muito mais adiantada que isso, e os motores de execução menos
 (2 de 7).
 
@@ -148,19 +150,22 @@ O motor está pronto e provado nos dois lados. O que existe:
   `lib/pagina-jsdom.ts`: o mesmo documento no jsdom, para o CI.
 - `runtime: 'iframe'` nos tipos `code` e `fill-blank`; `CodeExerciseStep` e
   `FillBlank` mostram a página num painel entre o editor e a ação.
-- Trilha `track-pagina` com o bloco de HTML e CSS inteiro (10 aulas, 60
-  exercícios, 27 de página). O E2E `e2e/pagina.spec.ts` conclui **toda**
-  aula da trilha no Chromium e prova o isolamento (sem `localStorage`, CSP
-  ativa) — cada aula nova entra nele sozinha.
+- Dentro da página, `localStorage`/`sessionStorage` em memória e um `fetch`
+  dublê servido por `window.__servidor`, que o exercício define — sem rede,
+  com armazenamento e busca de dados para ensinar.
+- Trilha `track-pagina` completa: **26 aulas, 156 exercícios, 78 de página**
+  — 10 de HTML e CSS, 8 de DOM e eventos, 8 de UI e UX. O E2E
+  `e2e/pagina.spec.ts` conclui **toda** aula da trilha no Chromium e prova o
+  isolamento (sem `localStorage`, CSP ativa) — cada aula nova entra nele
+  sozinha.
 
-Duas armadilhas já pagas: o jsdom ignora CSP (o `'unsafe-eval'` que o `new
-Function` exige só apareceu no navegador), e `getComputedStyle` no jsdom
-devolve a cor declarada, não a normalizada — exercício de CSS que dependa
-disso é conferido pelo E2E.
+As armadilhas do jsdom contra o Chromium (CSP ignorada, `rem`/`var()`/`@media`
+não resolvidos, aninhamento de CSS que derruba o analisador, `innerText`
+ausente) estão medidas no `CONTEXTO.md` §7, e os ajudantes que as asserções de
+CSS usam em `src/content/lessons/_ajudantes-css.ts`.
 
-O que falta são as **16 aulas** da fase: 8 de DOM e eventos, 8 de UI e UX. Cada aula nova segue o padrão das outras — 500 a 900 palavras,
-cinco a sete exercícios, um deles de prática de dev — e ganha, além disso,
-pelo menos dois exercícios de página.
+A Fase 2 está **fechada**. Ficou um item de plataforma, sem dependência de
+motor: mapa de tópicos e busca.
 
 ### C) Mais projetos com o motor atual — barato, sem currículo novo
 
@@ -169,12 +174,13 @@ dão prática aplicada. É o caminho de menor risco e menor retorno.
 
 ### Recomendação
 
-**A, depois B.** Publicar é barato, tira o projeto do limbo e produz a única
-informação que nenhum teste dá: alguém usando de verdade. Depois disso, o motor
-de iframe merece ser encarado sabendo que é uma frente nova.
+A e B estão feitos. O que vem agora é a **Fase 3** — transpilador de
+TypeScript e React no iframe, os dois apoiados no motor de página — ou C.
+Antes de qualquer um, vale o que só o dono do projeto pode fazer: usar o
+aplicativo publicado num telefone de verdade.
 
-Se o dono do projeto não indicar o caminho, pergunte antes de começar B ou C —
-são investimentos grandes o bastante para a escolha ser dele.
+Se o dono do projeto não indicar o caminho, pergunte antes de começar a Fase 3
+ou C — são investimentos grandes o bastante para a escolha ser dele.
 
 ## 7. Como trabalhar
 
@@ -182,8 +188,8 @@ são investimentos grandes o bastante para a escolha ser dele.
 
 ```bash
 npm run typecheck   # inclui e2e/ e playwright.config.ts
-npm test            # 1.173 testes
-npm run test:e2e    # 122 no navegador (antes: npx playwright install chromium)
+npm test            # 1.431 testes
+npm run test:e2e    # 190 no navegador (antes: npx playwright install chromium)
 npm run build
 ```
 

@@ -6,14 +6,14 @@ que conclui uma fase.
 
 ## Onde estamos
 
-**Fase 1 de 8 concluída · JavaScript: 10 de 10 · Web: 8 de 8 · plataforma: 7 de 7 · publicado**
+**Fases 1 e 2 de 8 concluídas · A Página: 26 de 26 · publicado**
 
 ```
 Fase 0  Fundamentos e lógica      ██████████████████████  13/13  pronto
 Fase 1  JavaScript real          ██████████████████████  10/10  pronto
         Como a web funciona      ██████████████████████   8/8  pronto
         Plataforma                ██████████████████████   7/7  pronto
-Fase 2  A página                 ████████░░░░░░░░░░░░░░  10/26  HTML e CSS pronto
+Fase 2  A página                 ██████████████████████  26/26  pronto
 Fase 3  Tipos e componentes      ░░░░░░░░░░░░░░░░░░░░░░   0/24
 Fase 4  Back-end e dados         ░░░░░░░░░░░░░░░░░░░░░░   0/20
 Fase 5  Profissionalização       ░░░░░░░░░░░░░░░░░░░░░░   0/19
@@ -23,16 +23,16 @@ Fase 7  Projeto final            ░░░░░░░░░░░░░░░�
 
 | | Hoje | Previsto | Feito |
 | --- | ---: | ---: | ---: |
-| Aulas | **41** | 135 | 30% |
-| Exercícios | **234** | ~700 | 33% |
+| Aulas | **57** | 135 | 42% |
+| Exercícios | **330** | ~700 | 47% |
 | Tipos de exercício | **8** | 11 | 73% |
 | Motores de execução | **2** | 7 | 29% |
 | Projetos | **7** | ~30 | 23% |
 
-**Último trabalho** (2026-09-14): o motor iframe da Fase 2 e o bloco inteiro de
-HTML e CSS da trilha "A Página" — 10 aulas, 60 exercícios. Antes disso, no
-mesmo dia: 23 exercícios novos, um por aula, para toda aula ter ao menos um
-dos quatro tipos de prática de dev.
+**Último trabalho** (2026-09-14): a Fase 2 inteira — o motor iframe e as 26
+aulas da trilha "A Página", 156 exercícios, 78 deles de página. No mesmo dia,
+antes: 23 exercícios novos, um por aula, para toda aula ter ao menos um dos
+quatro tipos de prática de dev.
 
 ## Aprofundamento das aulas antigas
 
@@ -232,7 +232,7 @@ síncrono, e uma asserção assíncrona reportava sucesso antes de a promise res
 certa. E não havia prazo por teste, então um exercício de callback travava para
 sempre quando o aluno esquecia de chamar o callback.
 
-### Fase 2 — A página · 26 aulas · EM ANDAMENTO (10 de 26)
+### Fase 2 — A página · 26 aulas · PRONTO (2026-09-14)
 Motor **1: executor em iframe isolado** — **pronto** (2026-09-14). Destrava
 três blocos, sem download extra.
 
@@ -246,8 +246,14 @@ com `runtime: 'iframe'`, nos tipos `code` e `fill-blank`; a solução de página
 jsdom (sem layout; cor vem como declarada, não normalizada) e o E2E prova a
 aula inteira no Chromium.
 
-**HTML e CSS — 10 de 10, concluído.** Cada aula com 6 exercícios, 3 deles de
-página.
+Cada aula tem 6 exercícios, 3 deles de página, e o E2E conclui todas as 26 no
+Chromium, em celular e desktop. Duas coisas que o motor ganhou para os blocos
+de DOM e UI: `localStorage`/`sessionStorage` em memória (a origem opaca lança
+ao tocar nos reais) e um `fetch` dublê que responde a partir de
+`window.__servidor`, definido pelo exercício, com 404 para o resto — sem rede,
+mas com armazenamento e busca de dados de verdade para ensinar.
+
+**HTML e CSS — 10 de 10.**
 
 | Aula | Assunto |
 | --- | --- |
@@ -262,20 +268,35 @@ página.
 | 9 | Movimento: transition no repouso, transform e opacity, keyframes, reduced-motion |
 | 10 | CSS moderno: clamp, min, propriedades lógicas, :is, aspect-ratio, o reset |
 
-**DOM e eventos — 0 de 8.** Selecionar, criar e remover, classes, eventos,
-delegação, formulários, armazenamento local, buscar dados e desenhar.
+**DOM e eventos — 8 de 8.**
 
-**UI e UX — 0 de 8.** Hierarquia, tipografia legível, cor e contraste, estados,
-acessibilidade por teclado, formulários, escrever a interface, polegar.
+| Aula | Assunto |
+| --- | --- |
+| 11 | O DOM: a árvore de objetos, querySelector, o null, textContent, dataset |
+| 12 | Criar e remover: createElement, append, remove, a função desenhar que transforma a lista em HTML |
+| 13 | Classes: classList e atributos — o JavaScript decide o estado, o CSS decide a aparência |
+| 14 | Eventos: addEventListener, o objeto do evento, o estado numa variável que a tela redesenha |
+| 15 | Delegação: o evento que sobe, um ouvinte para a lista inteira, itens que ainda não existem |
+| 16 | Formulários: interceptar o envio, FormData, validação com mensagens que ajudam, envio duplo |
+| 17 | Armazenamento local: localStorage e JSON, carregar ao abrir, o que nunca vai lá |
+| 18 | Buscar e desenhar: fetch, os três estados, desenhar a partir dos dados, erro na tela |
 
-- **HTML e CSS** (10): semântica, caixa, flexbox, grid, responsivo, tipografia,
-  cores, pseudo-classes, transições, CSS moderno.
-- **DOM e eventos** (8): selecionar, criar e remover, classes, eventos,
-  delegação, formulários, armazenamento local, buscar dados e desenhar.
-- **UI e UX** (8): hierarquia, tipografia legível, cor e contraste, estados,
-  acessibilidade por teclado, formulários, escrever a interface, polegar.
+**UI e UX — 8 de 8.**
 
-Plataforma: exercício julgado pela tela renderizada; mapa de tópicos e busca.
+| Aula | Assunto |
+| --- | --- |
+| 19 | Hierarquia: uma ação principal por tela, títulos em escala, grupos por proximidade |
+| 20 | Texto legível: alinhamento, parágrafos, listas e números para quem lê depressa e no celular |
+| 21 | Cor na interface: cor como estado consistente, nada que dependa só dela, tema escuro com contraste |
+| 22 | Os estados da tela: vazio, carregando, erro e sucesso, cada um dizendo o que fazer |
+| 23 | Teclado: Tab, Enter, espaço e Escape; os elementos certos; nome para o que é só ícone; para onde o foco vai |
+| 24 | Formulários que ajudam: menos campos, uma coluna, rótulos visíveis, teclado certo no celular, erros na hora e no lugar |
+| 25 | Escrever a interface: botões, títulos, erros, confirmações e estados vazios que dizem o que vai acontecer |
+| 26 | O polegar: alvos de 44px, ação principal no rodapé, 16px nos campos, :active |
+
+Plataforma: exercício julgado pela tela renderizada — **feito**. Mapa de
+tópicos e busca — **não feito**; é o único item da fase que ficou, e cabe em
+qualquer momento, porque não depende de motor.
 
 ### Fase 3 — Tipos e componentes · 24 aulas
 Motores **2 (transpilador)** e **3 (React no iframe)**.
@@ -316,13 +337,15 @@ telefone real, passagem final de acessibilidade.
 
 ## Sobre tamanho
 
-As 31 aulas de hoje levaram bastante tempo para ficar no padrão do projeto. As
-104 restantes são muitas vezes esse trabalho, e os ~525 exercícios novos são a
+As 57 aulas de hoje levaram bastante tempo para ficar no padrão do projeto. As
+78 restantes são muitas vezes esse trabalho, e os ~370 exercícios novos são a
 maior parte dele. Por isso a unidade é a fase: cada uma termina numa versão do
 produto que dá para usar. O roadmap escolhe a ordem; não promete prazo.
 
 A Fase 1 foi o primeiro passo por um motivo concreto: era a única que não
 precisava de motor nenhum, e é onde estão os testes por propriedade e os
 quatro tipos de prática de dev — que mudam a qualidade de todos os exercícios
-que vierem depois. A Fase 2 é a próxima pela mesma lógica invertida: é a
-primeira que precisa de um motor novo, e o iframe é o mais barato dos seis.
+que vierem depois. A Fase 2 veio em seguida pela mesma lógica invertida: era a
+primeira que precisava de um motor novo, e o iframe é o mais barato dos seis. A
+Fase 3 é a próxima porque os dois motores dela — o transpilador de TypeScript
+e o React no iframe — se apoiam no motor de página que já existe.

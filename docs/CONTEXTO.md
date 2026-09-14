@@ -3,7 +3,7 @@
 Documento de retomada. Escrito para alguém — ou alguma sessão — que não viu nada
 do que veio antes e precisa continuar sem redescobrir tudo.
 
-Atualizado em 2026-09-09. **Mantenha-o atualizado no mesmo commit que muda o que
+Atualizado em 2026-09-14. **Mantenha-o atualizado no mesmo commit que muda o que
 ele descreve.** Um documento de contexto desatualizado é pior que nenhum: induz a
 decisões erradas com aparência de informação.
 
@@ -32,15 +32,15 @@ Números lidos do catálogo, não de memória.
 
 | | |
 | --- | --- |
-| Trilhas | 4 — Fundamentos de JavaScript (20 aulas), Lógica (3), Como a Web Funciona (8), A Página (10) |
-| Aulas | 41, somando 1.090 minutos |
-| Exercícios | 234, em 8 tipos — 55 de código, 49 de prever saída, 46 de múltipla escolha, 42 de lacuna, 19 de ordenar passos, 14 de encontrar o bug, 5 de escrever o teste, 4 de refatorar. 27 exercícios de página (`runtime: 'iframe'`). **Toda aula tem ao menos um dos quatro tipos de prática de dev** |
-| Verificação | 321 casos fixos + 58 propriedades |
+| Trilhas | 4 — Fundamentos de JavaScript (20 aulas), Lógica (3), Como a Web Funciona (8), A Página (26) |
+| Aulas | 57, somando 1.564 minutos |
+| Exercícios | 330, em 8 tipos — 87 de código, 49 de prever saída, 78 de múltipla escolha, 58 de lacuna, 35 de ordenar passos, 14 de encontrar o bug, 5 de escrever o teste, 4 de refatorar. 78 exercícios de página (`runtime: 'iframe'`). **Toda aula tem ao menos um dos quatro tipos de prática de dev** |
+| Verificação | 561 casos fixos + 58 propriedades |
 | Projetos | 7, com 22 critérios de aceitação |
-| Conceitos | 36, com grafo de pré-requisitos |
+| Conceitos | 53, com grafo de pré-requisitos |
 | Flashcards | 22 |
-| Testes | 1.173 de unidade + 158 de navegador |
-| Pacote | 1.340 kB (384 kB comprimido) no chunk principal — o conteúdo vai junto; o Monaco são mais 3.360 kB (869 kB) num chunk à parte, baixado só quando o primeiro editor monta |
+| Testes | 1.431 de unidade + 190 de navegador |
+| Pacote | 1.856 kB (518 kB comprimido) no chunk principal — o conteúdo vai junto, e a trilha da página mais os exercícios de prática de dev o fizeram crescer 500 kB; o Monaco são mais 3.362 kB (868 kB) num chunk à parte, baixado só quando o primeiro editor monta |
 
 ## 4. Decisões que não devem ser desfeitas sem motivo forte
 
@@ -73,7 +73,12 @@ a rede. Os testes rodam **dentro** do iframe, com `document` à mão, e voltam
 por `postMessage`; o pai só aceita a mensagem cuja `source` é a janela do seu
 próprio iframe. `'unsafe-eval'` está na CSP porque as asserções passam por
 `new Function` — o Chromium recusava sem ele, e o jsdom, que ignora CSP, não
-tinha como avisar.
+tinha como avisar. Dentro da página, `localStorage` e `sessionStorage` são
+uma versão em memória (a origem opaca lança ao tocar nos reais) e `fetch` é
+um dublê que responde a partir de `window.__servidor`, que o próprio
+exercício define — 404 para o resto, 30 ms de atraso para os estados de
+carregamento existirem. Nada disso alcança a rede nem o armazenamento da
+aplicação; o E2E de isolamento prova.
 
 **O sandbox é descartável.** Worker novo por execução, 3 segundos de limite,
 `terminate()` no fim. `fetch`, `XMLHttpRequest`, `WebSocket`, `importScripts`,
@@ -135,8 +140,8 @@ docs/curriculo.md       Roadmap de conteúdo — fonte canônica
 
 ```bash
 npm run typecheck   # inclui e2e/ e playwright.config.ts
-npm test            # 1.173 testes
-npm run test:e2e    # 158 no navegador (antes: npx playwright install chromium)
+npm test            # 1.431 testes
+npm run test:e2e    # 190 no navegador (antes: npx playwright install chromium)
 npm run build
 ```
 
@@ -268,6 +273,22 @@ Cada uma custou tempo. Não repita.
   inteira some. A regra que saiu disso: o que o aluno **escreveu** se lê na
   folha de estilo (`document.styleSheets`), igual nos dois; o computado só
   quando é literal e portátil (`display`, px declarados, `rgb()` de hex).
+- **O jsdom não tem `innerText`, e o `textContent` do `body` inclui os
+  scripts do próprio motor.** Um teste que procurava uma palavra proibida no
+  texto da página achou `item` dentro de `getItem` do dublê de
+  armazenamento. Para ler o que o aluno escreveu, percorra os nós de texto
+  com `TreeWalker` pulando `SCRIPT` e `STYLE`.
+- **Os testes de página rodam no `load`, e o trabalho assíncrono do aluno
+  pode ainda não ter acabado.** Um exercício que busca dados no dublê de
+  `fetch` (30 ms) precisa esperar dentro da asserção antes de ler o
+  resultado — e duas asserções que disparam a mesma busca ao mesmo tempo
+  disputam o DOM. Sequencie com esperas explícitas e teste o estado final,
+  não o intermediário.
+- **Teste que mede tempo é intermitente sob carga.** "As buscas acontecem
+  juntas" comparava milissegundos e falhava quando a máquina estava ocupada
+  com o E2E. A versão certa conta quantas chamadas estão em voo ao mesmo
+  tempo, e a sabotagem (`for await` em vez de `Promise.all`) prova que o
+  teste falha quando deve.
 - **Uma prop opcional é um contrato que ninguém garante.** `onSolved` era opcional
   e dois dos quatro tipos de exercício simplesmente não a recebiam — 36 dos 78
   exercícios nunca conseguiam avisar que tinham sido resolvidos, e nenhum dos 521
@@ -322,18 +343,23 @@ publicadas.** A mais curta tem 304 palavras; o bloco assíncrono, que é o mais
 difícil do curso, tem entre 650 e 810 palavras por aula. Nenhuma aula publicada
 está pendente de aprofundamento.
 
-**Fase 2 — em andamento, 10 de 26 (2026-09-14).** O motor iframe está pronto
-e provado nos dois lados (jsdom no CI, Chromium no E2E), com `runtime:
-'iframe'` nos tipos `code` e `fill-blank`, HTML e CSS no editor. O bloco de
-**HTML e CSS está completo**: semântica, caixa, flexbox, grid, responsivo,
-tipografia, cores, estados, movimento, CSS moderno — 10 aulas, 60
-exercícios, 27 deles de página. Faltam 16 aulas: 8 de DOM e eventos, 8 de
-UI e UX. Os ajudantes que as asserções de CSS colam no início (`trilhas`,
+**Fase 2 — completa (2026-09-14).** O motor iframe está pronto e provado nos
+dois lados (jsdom no CI, Chromium no E2E), com `runtime: 'iframe'` nos tipos
+`code` e `fill-blank`, HTML e CSS no editor. A trilha **A Página** tem as 26
+aulas previstas — 10 de HTML e CSS, 8 de DOM e eventos, 8 de UI e UX — com
+156 exercícios, 78 deles de página. O E2E `e2e/pagina.spec.ts` conclui cada
+aula da trilha no navegador, em celular e desktop; uma aula nova entra nele
+sozinha. Os ajudantes que as asserções de CSS colam no início (`trilhas`,
 `regraBase`, `regraEmMedia`, `declarado`) estão em
-`src/content/lessons/_ajudantes-css.ts`, cada um com o motivo medido.
+`src/content/lessons/_ajudantes-css.ts`, cada um com o motivo medido. Do lado
+da plataforma ficou um item da fase: mapa de tópicos e busca — não depende de
+motor e cabe em qualquer momento.
 
 **Fases 3 a 7 — não iniciadas.** Cada uma depende de um motor: transpilador
 (TypeScript), React, servidor simulado (Node), sql.js (SQL), Pyodide (Python).
+A Fase 3 é a próxima: os dois motores dela (transpilador e React no iframe) se
+apoiam no motor de página. É investimento grande o bastante para a escolha ser
+do dono do projeto — pergunte antes de começar.
 
 ## 9. Pendências do lado do usuário
 
@@ -341,7 +367,8 @@ UI e UX. Os ajudantes que as asserções de CSS colam no início (`trilhas`,
   rodou. Ela conserta o gatilho que impedia promover alguém a administrador.
 - Para virar administrador: `select public.set_user_role('SEU-EMAIL', 'admin');`
 - Conferir o aplicativo publicado num telefone de verdade — inclusive um
-  exercício de código, que agora depende do editor servido pela Vercel.
+  exercício de código, que agora depende do editor servido pela Vercel, e uma
+  aula da trilha "A Página", que renderiza a página do aluno num iframe.
 - Informar a URL pública de produção, para entrar aqui e no README.
 
 ## 10. Preferências já estabelecidas
