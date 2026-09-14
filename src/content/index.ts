@@ -76,6 +76,7 @@ import { lessonTextoLegivel } from './lessons/pagina-20-texto-legivel';
 import { lessonCorNaInterface } from './lessons/pagina-21-cor-na-interface';
 import { lessonEstadosDaTela } from './lessons/pagina-22-estados-da-tela';
 import { lessonTeclado } from './lessons/pagina-23-teclado';
+import { lessonFormulariosQueAjudam } from './lessons/pagina-24-formularios-que-ajudam';
 import { projetoImc } from './projects/js-imc';
 import { projetoConversor } from './projects/js-conversor';
 import { projetoBoletim } from './projects/js-boletim';
@@ -144,6 +145,7 @@ const lessons: Lesson[] = [
   lessonCorNaInterface,
   lessonEstadosDaTela,
   lessonTeclado,
+  lessonFormulariosQueAjudam,
 ];
 const projects: Project[] = [
   projetoImc,

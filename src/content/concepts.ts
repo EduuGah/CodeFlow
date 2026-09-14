@@ -382,4 +382,12 @@ export const concepts: Concept[] = [
     prerequisites: ['dom-delegacao', 'css-estados'],
     tags: ['pagina', 'ui', 'acessibilidade'],
   },
+  {
+    id: 'ui-formularios',
+    title: 'Formulários que ajudam',
+    summary:
+      'Pedir menos; uma coluna com rótulo em cima; type, inputmode e autocomplete; validar na hora e no lugar certos; nunca apagar o que foi digitado.',
+    prerequisites: ['dom-formularios', 'ui-hierarquia'],
+    tags: ['pagina', 'ui', 'acessibilidade'],
+  },
 ];
