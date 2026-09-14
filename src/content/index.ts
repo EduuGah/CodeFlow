@@ -71,6 +71,7 @@ import { lessonDelegacao } from './lessons/pagina-15-delegacao';
 import { lessonFormularios } from './lessons/pagina-16-formularios';
 import { lessonArmazenamento } from './lessons/pagina-17-armazenamento';
 import { lessonBuscarEDesenhar } from './lessons/pagina-18-buscar-e-desenhar';
+import { lessonHierarquia } from './lessons/pagina-19-hierarquia';
 import { projetoImc } from './projects/js-imc';
 import { projetoConversor } from './projects/js-conversor';
 import { projetoBoletim } from './projects/js-boletim';
@@ -134,6 +135,7 @@ const lessons: Lesson[] = [
   lessonFormularios,
   lessonArmazenamento,
   lessonBuscarEDesenhar,
+  lessonHierarquia,
 ];
 const projects: Project[] = [
   projetoImc,

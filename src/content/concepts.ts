@@ -342,4 +342,12 @@ export const concepts: Concept[] = [
     prerequisites: ['dom-criar', 'promises', 'http'],
     tags: ['pagina', 'dom', 'web'],
   },
+  {
+    id: 'ui-hierarquia',
+    title: 'Hierarquia visual',
+    summary:
+      'Uma ação principal por tela, títulos em escala, perto é junto, espaço no lugar de bordas, e o teste do olho semicerrado.',
+    prerequisites: ['css-tipografia', 'css-cores'],
+    tags: ['pagina', 'ui'],
+  },
 ];
