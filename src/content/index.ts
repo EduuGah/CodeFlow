@@ -62,6 +62,7 @@ import { lessonTipografia } from './lessons/pagina-06-tipografia';
 import { lessonCores } from './lessons/pagina-07-cores';
 import { lessonEstados } from './lessons/pagina-08-estados';
 import { lessonMovimento } from './lessons/pagina-09-movimento';
+import { lessonCssModerno } from './lessons/pagina-10-css-moderno';
 import { projetoImc } from './projects/js-imc';
 import { projetoConversor } from './projects/js-conversor';
 import { projetoBoletim } from './projects/js-boletim';
@@ -116,6 +117,7 @@ const lessons: Lesson[] = [
   lessonCores,
   lessonEstados,
   lessonMovimento,
+  lessonCssModerno,
 ];
 const projects: Project[] = [
   projetoImc,

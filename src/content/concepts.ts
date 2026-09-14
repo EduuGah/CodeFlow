@@ -270,4 +270,12 @@ export const concepts: Concept[] = [
     prerequisites: ['css-estados'],
     tags: ['pagina', 'css', 'acessibilidade'],
   },
+  {
+    id: 'css-moderno',
+    title: 'CSS moderno',
+    summary:
+      'clamp(), min(), propriedades lógicas, :is(), aspect-ratio, gap em tudo e o reset de cinco linhas.',
+    prerequisites: ['css-responsivo', 'css-tipografia'],
+    tags: ['pagina', 'css'],
+  },
 ];
