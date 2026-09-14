@@ -438,4 +438,12 @@ export const concepts: Concept[] = [
     prerequisites: ['ts-interfaces'],
     tags: ['typescript'],
   },
+  {
+    id: 'ts-funcoes',
+    title: 'Funções tipadas',
+    summary:
+      'Parâmetro opcional e valor padrão, retorno anotado e void, o tipo de uma função (a: A) => B como valor, e o retorno honesto com | undefined.',
+    prerequisites: ['ts-estreitar', 'funcoes'],
+    tags: ['typescript'],
+  },
 ];
