@@ -358,4 +358,12 @@ export const concepts: Concept[] = [
     prerequisites: ['css-tipografia', 'ui-hierarquia'],
     tags: ['pagina', 'ui'],
   },
+  {
+    id: 'ui-cor',
+    title: 'Cor na interface',
+    summary:
+      'Cor de estado como vocabulário, sempre com um segundo sinal; contraste nos lugares que ninguém mede; tema escuro com a marca clareada.',
+    prerequisites: ['css-cores', 'ui-hierarquia'],
+    tags: ['pagina', 'ui', 'acessibilidade'],
+  },
 ];

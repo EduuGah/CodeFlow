@@ -73,6 +73,7 @@ import { lessonArmazenamento } from './lessons/pagina-17-armazenamento';
 import { lessonBuscarEDesenhar } from './lessons/pagina-18-buscar-e-desenhar';
 import { lessonHierarquia } from './lessons/pagina-19-hierarquia';
 import { lessonTextoLegivel } from './lessons/pagina-20-texto-legivel';
+import { lessonCorNaInterface } from './lessons/pagina-21-cor-na-interface';
 import { projetoImc } from './projects/js-imc';
 import { projetoConversor } from './projects/js-conversor';
 import { projetoBoletim } from './projects/js-boletim';
@@ -138,6 +139,7 @@ const lessons: Lesson[] = [
   lessonBuscarEDesenhar,
   lessonHierarquia,
   lessonTextoLegivel,
+  lessonCorNaInterface,
 ];
 const projects: Project[] = [
   projetoImc,
