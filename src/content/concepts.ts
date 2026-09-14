@@ -398,4 +398,12 @@ export const concepts: Concept[] = [
     prerequisites: ['ui-hierarquia', 'ui-estados-tela'],
     tags: ['pagina', 'ui'],
   },
+  {
+    id: 'ui-polegar',
+    title: 'Feito para a mão',
+    summary:
+      'Alvos de 44px com espaço entre eles, a ação principal numa barra fixa no rodapé, campos com 16px, :active respondendo ao toque, e nada que só exista no hover ou no arrastar.',
+    prerequisites: ['ui-estados-tela', 'ui-formularios', 'css-responsivo'],
+    tags: ['pagina', 'ui', 'acessibilidade'],
+  },
 ];
