@@ -294,4 +294,12 @@ export const concepts: Concept[] = [
     prerequisites: ['dom'],
     tags: ['pagina', 'dom'],
   },
+  {
+    id: 'dom-classes',
+    title: 'Classes e atributos',
+    summary:
+      'classList (add, remove, toggle com condição, contains), hidden, setAttribute para aria-*, e style só para valores calculados.',
+    prerequisites: ['dom', 'css-estados'],
+    tags: ['pagina', 'dom', 'acessibilidade'],
+  },
 ];
