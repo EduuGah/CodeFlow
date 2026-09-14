@@ -83,6 +83,7 @@ import { lessonPolegar } from './lessons/pagina-26-polegar';
 import { lessonPorQueTipar } from './lessons/ts-01-por-que-tipar';
 import { lessonInferencia } from './lessons/ts-02-inferencia';
 import { lessonInterfaces } from './lessons/ts-03-interfaces';
+import { lessonEstreitar } from './lessons/ts-04-estreitar';
 import { projetoImc } from './projects/js-imc';
 import { projetoConversor } from './projects/js-conversor';
 import { projetoBoletim } from './projects/js-boletim';
@@ -157,6 +158,7 @@ const lessons: Lesson[] = [
   lessonPorQueTipar,
   lessonInferencia,
   lessonInterfaces,
+  lessonEstreitar,
 ];
 const projects: Project[] = [
   projetoImc,

@@ -430,4 +430,12 @@ export const concepts: Concept[] = [
     prerequisites: ['ts-inferencia', 'objetos'],
     tags: ['typescript'],
   },
+  {
+    id: 'ts-estreitar',
+    title: 'Estreitar',
+    summary:
+      'Uniões (A | B, literais, T | undefined) e o estreitamento por typeof, verificação de undefined, ?. e ??, e discriminante em uniões de objetos; type dá nome à união.',
+    prerequisites: ['ts-interfaces'],
+    tags: ['typescript'],
+  },
 ];
