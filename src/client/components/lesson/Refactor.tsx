@@ -3,13 +3,15 @@ import { useEffect, useState } from 'react';
 import type { LanguageId, RefactorExercise } from '../../../content/types';
 import type { ExerciseState, OnExerciseState } from '../../lib/exercise-state';
 import { avaliarRestricoes, todasCumpridas, type ResultadoDeRestricao } from '../../lib/refatorar';
-import { executeCode, type ExecutionResult } from '../../lib/sandbox';
+import { executarNaLinguagem } from '../../lib/executar';
+import type { ExecutionResult } from '../../lib/sandbox';
 import { useRecordAttempt } from '../../hooks/useRecordAttempt';
 import { useReportarEstado } from '../../hooks/useReportarEstado';
 import { IconCheck, IconClose, IconPlay } from '../ui/Icon';
 import { Card, SectionLabel } from '../ui/Card';
 import { CodeEditor } from '../ui/CodeEditor';
 import { MarkdownReader } from '../ui/MarkdownReader';
+import { ErrosDoCompilador } from './ErrosDoCompilador';
 import { ExerciseAction, ExerciseFeedback } from './ExerciseAction';
 import { HintPanel } from './HintPanel';
 
@@ -82,7 +84,12 @@ export function Refactor({
     setRodando(true);
 
     const enviado = codigo;
-    const execucao = await executeCode(enviado, exercise.tests, exercise.properties);
+    const execucao = await executarNaLinguagem({
+      language,
+      code: enviado,
+      tests: exercise.tests,
+      properties: exercise.properties,
+    });
 
     setResultado(execucao);
     setCodigoVerificado(enviado);
@@ -193,10 +200,14 @@ export function Refactor({
             </p>
           </ExerciseFeedback>
 
-          {resultado.error && (
-            <p className="rounded-lg border border-danger-200 bg-danger-50 p-4 font-mono text-sm leading-relaxed text-danger-700">
-              {resultado.error}
-            </p>
+          {resultado.compileErrors ? (
+            <ErrosDoCompilador erros={resultado.compileErrors} />
+          ) : (
+            resultado.error && (
+              <p className="rounded-lg border border-danger-200 bg-danger-50 p-4 font-mono text-sm leading-relaxed text-danger-700">
+                {resultado.error}
+              </p>
+            )
           )}
 
           {resultado.testResults.length > 0 && (

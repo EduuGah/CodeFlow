@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { LanguageId, WriteTestExercise } from '../../../content/types';
 import type { ExerciseState, OnExerciseState } from '../../lib/exercise-state';
 import { avaliarTestes, type VereditoDeTeste } from '../../lib/escrever-teste';
-import { executeCode } from '../../lib/sandbox';
+import { executarNaLinguagem } from '../../lib/executar';
 import { useRecordAttempt } from '../../hooks/useRecordAttempt';
 import { useReportarEstado } from '../../hooks/useReportarEstado';
 import { IconCheck, IconClose, IconPlay } from '../ui/Icon';
@@ -82,7 +82,7 @@ export function WriteTest({
 
     const enviado = codigo;
     const resultado = await avaliarTestes(exercise.subject, exercise.mutants, enviado, (programa) =>
-      executeCode(programa)
+      executarNaLinguagem({ language, code: programa })
     );
 
     setVeredito(resultado);

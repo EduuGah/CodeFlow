@@ -1,6 +1,7 @@
 import SandboxWorker from './sandbox.worker?worker';
 import type { WorkerRequest, WorkerResponse } from './sandbox.worker';
 import type { SandboxProperty, SandboxTest } from './sandbox-core';
+import type { ErroDeCompilacao } from './typescript-core';
 
 export type { SandboxProperty, SandboxTest };
 
@@ -18,6 +19,11 @@ export interface ExecutionResult {
   error?: string;
   /** true quando a execução estourou o tempo limite e o worker foi encerrado. */
   timedOut?: boolean;
+  /**
+   * Os erros do compilador, quando o programa é TypeScript e ele o recusou.
+   * Nesse caso nada rodou: `error` traz o texto, e esta lista traz as linhas.
+   */
+  compileErrors?: ErroDeCompilacao[];
 }
 
 /**

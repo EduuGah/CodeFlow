@@ -406,4 +406,12 @@ export const concepts: Concept[] = [
     prerequisites: ['ui-estados-tela', 'ui-formularios', 'css-responsivo'],
     tags: ['pagina', 'ui', 'acessibilidade'],
   },
+  {
+    id: 'ts-por-que',
+    title: 'Por que tipar',
+    summary:
+      'Anotações de tipo em parâmetros, variáveis e retornos; o compilador recusa antes de rodar e apaga os tipos depois; any desliga a verificação.',
+    prerequisites: ['funcoes', 'tipos-de-dados'],
+    tags: ['typescript'],
+  },
 ];

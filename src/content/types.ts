@@ -61,6 +61,22 @@ export interface Concept {
   tags: string[];
 }
 
+/**
+ * Um trecho que o compilador de TypeScript precisa aceitar ou recusar.
+ *
+ * Só existe em aula de TypeScript. É o teste que o sandbox não consegue
+ * fazer: um tipo que **impede** o uso errado se prova tentando o uso errado
+ * e cobrando a recusa — `somar('a', 1)` roda igual em JavaScript.
+ */
+export interface TypeTest {
+  /** O que o trecho prova, na frase que o aluno lê. */
+  description: string;
+  /** TypeScript acrescentado ao fim do código do aluno. */
+  code: string;
+  /** `true` quando o compilador precisa **recusar** o trecho. Padrão: precisa aceitar. */
+  rejects?: boolean;
+}
+
 /** Um caso de teste de exercício de código. */
 export interface TestCase {
   /** Frase que o aluno lê quando o teste passa. Precisa ser específica. */
@@ -116,6 +132,8 @@ export interface CodeExercise extends ExerciseBase {
    * decorando esse caso.
    */
   properties?: ExerciseProperty[];
+  /** Trechos que o compilador precisa aceitar ou recusar. Só em TypeScript. */
+  typeTests?: TypeTest[];
   /** Solução de referência, para comparação depois do envio (§31). */
   solution?: string;
 }
@@ -145,6 +163,8 @@ export interface FillBlankExercise extends ExerciseBase {
   }>;
   tests: TestCase[];
   properties?: ExerciseProperty[];
+  /** Trechos que o compilador precisa aceitar ou recusar. Só em TypeScript. */
+  typeTests?: TypeTest[];
   /** Por que a resposta funciona. Aparece depois de acertar. */
   explanation: string;
   solution?: string[];

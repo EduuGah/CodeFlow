@@ -362,6 +362,7 @@ export function Lesson() {
           <FillBlank
             exercise={passo.exercise}
             lessonId={lesson.id}
+            language={lesson.language}
             onEstado={(estado) => registrarEstado(passo.exercise.id, estado)}
           />
         )}
@@ -412,6 +413,7 @@ export function Lesson() {
           <PredictOutput
             exercise={passo.exercise}
             lessonId={lesson.id}
+            language={lesson.language}
             onEstado={(estado) => registrarEstado(passo.exercise.id, estado)}
           />
         )}

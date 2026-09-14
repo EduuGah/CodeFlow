@@ -1,6 +1,6 @@
 import { expect, test as base, type Page } from '@playwright/test';
 
-import type { Exercise } from '../src/content/types';
+import type { Exercise, LanguageId } from '../src/content/types';
 
 /**
  * Um aluno logado, sem Supabase de verdade.
@@ -275,12 +275,13 @@ export async function concluirAula(page: Page, aulaId: string): Promise<void> {
   const { getLesson } = await import('../src/content');
   const { buildLessonSteps } = await import('../src/client/lib/lesson-steps');
 
-  const passos = buildLessonSteps(getLesson(aulaId)!);
+  const aula = getLesson(aulaId)!;
+  const passos = buildLessonSteps(aula);
   await page.goto(`/lesson/${aulaId}`);
 
   for (const passo of passos) {
     if (passo.kind === 'exercise') {
-      await resolverExercicio(page, passo.exercise);
+      await resolverExercicio(page, passo.exercise, aula.language);
     }
 
     const avancar = page.getByRole('button', {
@@ -311,7 +312,11 @@ async function escreverNoEditor(page: Page, codigo: string): Promise<void> {
   }, codigo);
 }
 
-async function resolverExercicio(page: Page, exercicio: Exercise): Promise<void> {
+async function resolverExercicio(
+  page: Page,
+  exercicio: Exercise,
+  linguagem: LanguageId = 'javascript'
+): Promise<void> {
   switch (exercicio.type) {
     case 'multiple-choice': {
       await page.getByRole('radio').nth(exercicio.correctIndex).check();
@@ -325,7 +330,8 @@ async function resolverExercicio(page: Page, exercicio: Exercise): Promise<void>
         .getByRole('textbox', { name: /O que você acha que será impresso/ })
         .fill(exercicio.expectedOutput);
       await page.getByRole('button', { name: /Executar e comparar/ }).click();
-      await page.getByText('Previsão correta').waitFor({ timeout: 30_000 });
+      // Em TypeScript a primeira previsão da aula ainda carrega o compilador.
+      await page.getByText('Previsão correta').waitFor({ timeout: 60_000 });
       return;
     }
 
@@ -386,6 +392,11 @@ async function resolverExercicio(page: Page, exercicio: Exercise): Promise<void>
         // duplicaria os elementos.
         await escreverNoEditor(page, exercicio.solution);
         await page.getByRole('button', { name: /Rodar a página|Rodar de novo/ }).click();
+      } else if (linguagem === 'typescript') {
+        // Em TypeScript a solução também é o programa inteiro: o compilador
+        // recusa a mesma função declarada duas vezes.
+        await escreverNoEditor(page, exercicio.solution);
+        await page.getByRole('button', { name: /Executar código|Executar de novo/ }).click();
       } else {
         await escreverNoEditor(page, `${exercicio.initialCode}\n${exercicio.solution}`);
         await page.getByRole('button', { name: /Executar código|Executar de novo/ }).click();

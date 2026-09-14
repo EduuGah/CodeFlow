@@ -7,6 +7,8 @@ import {
   type SandboxTest,
 } from '../client/lib/sandbox-core';
 import { rodarPaginaNoJsdom } from '../client/lib/pagina-jsdom';
+import { compilarNoNode } from '../client/lib/typescript-node';
+import { formatarErros, verificarTrechos, type TrechoDeTipo } from '../client/lib/typescript-core';
 import {
   getExercises,
   getLessonsOfTrack,
@@ -21,7 +23,7 @@ import { embaralhar, estaOrdenado } from '../client/lib/ordenar';
 import { avaliarTestes } from '../client/lib/escrever-teste';
 import { corrigirLinha, linhasNumeradas } from '../client/lib/encontrar-bug';
 import { avaliarRestricoes, todasCumpridas } from '../client/lib/refatorar';
-import type { CodeExercise, Exercise, FillBlankExercise, Lesson } from './types';
+import type { CodeExercise, Exercise, FillBlankExercise, LanguageId, Lesson } from './types';
 
 /**
  * Suíte de integridade do conteúdo.
@@ -40,36 +42,62 @@ const allExercises: Array<{ lesson: Lesson; exercise: Exercise }> = allLessons.f
   getExercises(lesson).map((exercise) => ({ lesson, exercise }))
 );
 
+/** A linguagem da aula de cada exercício — o exercício em si não a carrega. */
+const linguagemDe = new Map<Exercise, LanguageId>(
+  allExercises.map(({ lesson, exercise }) => [exercise, lesson.language])
+);
+
+const compilar = async (codigo: string) => compilarNoNode(codigo);
+
 /**
- * Roda o código no motor que o exercício declara.
+ * Roda o código no motor que o exercício declara, na linguagem da aula.
  *
  * `worker` é o sandbox de JavaScript, aqui direto no Node. `iframe` é o motor
  * de página, aqui no jsdom — o mesmo documento que o navegador do aluno
  * recebe, sem layout. Um exercício de página que dependa de layout ou de cor
  * normalizada precisa do E2E, que roda no Chromium.
+ *
+ * Em aula de TypeScript o código passa antes pelo compilador — o do pacote
+ * `typescript`, a mesma versão que o Monaco embute. Recusa vira `error`, como
+ * no navegador; aceite vira o JavaScript que entra no sandbox. Os trechos de
+ * tipo do exercício entram na mesma lista de resultados.
  */
 async function executar(
-  exercise: { runtime?: 'worker' | 'iframe' },
+  exercise: Exercise | { runtime?: 'worker' | 'iframe'; typeTests?: TrechoDeTipo[] },
   codigo: string,
   tests: SandboxTest[],
   properties: SandboxProperty[] = []
 ) {
-  if (exercise.runtime === 'iframe') {
+  const motor = exercise as { runtime?: 'worker' | 'iframe'; typeTests?: TrechoDeTipo[] };
+  if (motor.runtime === 'iframe') {
     const r = await rodarPaginaNoJsdom(codigo, tests);
     return { logs: r.logs, testResults: r.testResults, error: r.error };
   }
-  return runProgram(codigo, tests, properties);
+
+  if (linguagemDe.get(exercise as Exercise) !== 'typescript') {
+    return runProgram(codigo, tests, properties);
+  }
+
+  const { js, erros } = compilarNoNode(codigo);
+  if (erros.length > 0) return { logs: [], testResults: [], error: formatarErros(erros) };
+
+  const resultado = await runProgram(js, tests, properties);
+  if (!motor.typeTests?.length || resultado.error) return resultado;
+
+  const trechos = await verificarTrechos(compilar, codigo, motor.typeTests);
+  return { ...resultado, testResults: [...resultado.testResults, ...trechos] };
 }
 
 /**
  * O programa que a solução de referência forma.
  *
- * No Worker a solução é acrescentada ao esqueleto — ela redefine as funções.
- * Numa página isso duplicaria os elementos (dois `<h1>`), então a solução de
- * página é o documento inteiro e substitui o esqueleto.
+ * No Worker de JavaScript a solução é acrescentada ao esqueleto — ela
+ * redefine as funções. Numa página isso duplicaria os elementos (dois
+ * `<h1>`), e em TypeScript o compilador recusa a função declarada duas vezes;
+ * nos dois casos a solução é o programa inteiro e substitui o esqueleto.
  */
 function programaDaSolucao(exercise: CodeExercise): string {
-  return exercise.runtime === 'iframe'
+  return exercise.runtime === 'iframe' || linguagemDe.get(exercise) === 'typescript'
     ? (exercise.solution ?? '')
     : exercise.initialCode + '\n' + exercise.solution;
 }
@@ -259,7 +287,10 @@ describe('exercícios de código', () => {
 
       const falhas = resultado.testResults.filter((t) => !t.passed).map((t) => t.message);
       expect(falhas, 'a solução deveria passar em todos os testes').toEqual([]);
-      expect(resultado.testResults).toHaveLength(exercise.tests.length);
+      // Os trechos de tipo entram na mesma lista, depois dos testes.
+      expect(resultado.testResults).toHaveLength(
+        exercise.tests.length + (exercise.typeTests?.length ?? 0)
+      );
     }
   );
 
@@ -287,7 +318,7 @@ describe('exercícios de código', () => {
       // Uma propriedade que passa com o esqueleto não está verificando nada — e
       // seria pior que a ausência dela, porque parece cobertura.
       for (const propriedade of exercise.properties!) {
-        const resultado = await runProgram(exercise.initialCode, [], [propriedade]);
+        const resultado = await executar(exercise, exercise.initialCode, [], [propriedade]);
         const passou = resultado.testResults[0]?.passed === true;
 
         expect(passou, `a propriedade "${propriedade.description}" passa sem o aluno escrever nada`).toBe(
@@ -329,7 +360,7 @@ describe('exercícios de previsão de saída', () => {
     async (_id, exercise) => {
       if (exercise.type !== 'predict-output') throw new Error('filtro inconsistente');
 
-      const resultado = await runProgram(exercise.code, []);
+      const resultado = await executar(exercise, exercise.code, []);
 
       expect(resultado.error, 'o código do enunciado não deveria lançar erro').toBeUndefined();
       // Declarar uma saída errada aqui ensinaria algo falso ao aluno.
@@ -431,8 +462,8 @@ describe('exercícios de ordenar passos', () => {
 describe('exercícios de escrever o teste', () => {
   const escritas = allExercises.filter(({ exercise }) => exercise.type === 'write-test');
 
-  /** Roda o programa no mesmo sandbox que o navegador do aluno usa. */
-  const executar = (programa: string) => runProgram(programa, []);
+  /** Roda o programa no mesmo sandbox que o navegador do aluno usa, na linguagem da aula. */
+  const rodar = (exercise: Exercise) => (programa: string) => executar(exercise, programa, []);
 
   it.each(escritas.map(({ exercise }) => [exercise.id, exercise] as const))(
     '%s: o teste de referência aceita a implementação correta e pega todas as sabotagens',
@@ -447,7 +478,7 @@ describe('exercícios de escrever o teste', () => {
         exercise.subject,
         exercise.mutants,
         exercise.solution ?? '',
-        executar
+        rodar(exercise)
       );
 
       expect(
@@ -472,7 +503,7 @@ describe('exercícios de escrever o teste', () => {
         exercise.subject,
         exercise.mutants,
         exercise.initialCode,
-        executar
+        rodar(exercise)
       );
 
       expect(veredito.aprovado, 'o código inicial já resolve o exercício').toBe(false);
@@ -489,7 +520,7 @@ describe('exercícios de escrever o teste', () => {
       // "pega" por qualquer teste, inclusive por um arquivo vazio — e o
       // exercício passaria a aprovar quem não escreveu nada.
       for (const mutante of exercise.mutants) {
-        const sozinha = await executar(mutante.code);
+        const sozinha = await rodar(exercise)(mutante.code);
         expect(
           sozinha.error,
           `a sabotagem "${mutante.description}" nem chega a rodar`
@@ -526,7 +557,7 @@ describe('exercícios de encontrar o bug', () => {
 
       // Um "exercício de bug" cujo programa roda liso não tem o que encontrar,
       // e o aluno procuraria um defeito que não está lá.
-      const resultado = await runProgram(exercise.code, []);
+      const resultado = await executar(exercise, exercise.code, []);
       expect(resultado.error, 'o programa roda sem erro nenhum').toBeDefined();
     },
     TEST_TIMEOUT_MS * 4
@@ -544,7 +575,7 @@ describe('exercícios de encontrar o bug', () => {
 
       expect(corrigido, 'a correção é idêntica à linha original').not.toBe(exercise.code);
 
-      const resultado = await runProgram(corrigido, []);
+      const resultado = await executar(exercise, corrigido, []);
       expect(
         resultado.error,
         `com a linha ${exercise.buggyLine} corrigida o programa ainda quebra`
@@ -597,7 +628,7 @@ describe('exercícios de refatorar', () => {
       // É o que separa refatorar de consertar. Se o ponto de partida estivesse
       // quebrado, o exercício seria um `code` disfarçado — e a lição de que o
       // comportamento é o contrato se perderia.
-      const resultado = await runProgram(exercise.initialCode, exercise.tests, exercise.properties);
+      const resultado = await executar(exercise, exercise.initialCode, exercise.tests, exercise.properties);
 
       expect(resultado.error, 'o código de partida lança').toBeUndefined();
 
@@ -626,7 +657,8 @@ describe('exercícios de refatorar', () => {
 
       expect(exercise.solution, 'exercício de refatoração precisa declarar uma solução').toBeTruthy();
 
-      const resultado = await runProgram(
+      const resultado = await executar(
+        exercise,
         exercise.solution ?? '',
         exercise.tests,
         exercise.properties
@@ -662,6 +694,75 @@ describe('exercícios de refatorar', () => {
             dica.includes(linha),
             `a dica "${dica}" já traz a linha da solução`
           ).toBe(false);
+        }
+      }
+    }
+  );
+});
+
+describe('aulas de TypeScript', () => {
+  const aulasTS = allLessons.filter((lesson) => lesson.language === 'typescript');
+  const exerciciosTS = allExercises.filter(({ lesson }) => lesson.language === 'typescript');
+
+  it('trecho de tipo só existe em aula de TypeScript', () => {
+    // Em JavaScript o compilador não roda, e o trecho seria ignorado em
+    // silêncio — um teste que parece existir e não verifica nada.
+    for (const { lesson, exercise } of allExercises) {
+      if (lesson.language === 'typescript') continue;
+      if (exercise.type !== 'code' && exercise.type !== 'fill-blank') continue;
+      expect(exercise.typeTests ?? [], `${exercise.id} tem typeTests numa aula de ${lesson.language}`).toEqual([]);
+    }
+  });
+
+  it.each(exerciciosTS
+    .filter(({ exercise }) => exercise.type === 'code' || exercise.type === 'fill-blank')
+    .map(({ exercise }) => [exercise.id, exercise] as const))(
+    '%s: todo trecho que precisa ser recusado é aceito sem o trabalho do aluno',
+    async (_id, exercise) => {
+      if (exercise.type !== 'code' && exercise.type !== 'fill-blank') throw new Error('filtro inconsistente');
+
+      // Um trecho `rejects` prova que o tipo do aluno impede um uso errado. Se
+      // o esqueleto já o recusasse, a recusa não teria vindo do trabalho do
+      // aluno — e o trecho estaria testando outra coisa (um erro de sintaxe do
+      // próprio trecho, por exemplo).
+      const inicial =
+        exercise.type === 'code'
+          ? exercise.initialCode
+          : preencher(exercise.template, exercise.blanks.map(() => 'any'));
+      const { erros: doInicial } = compilarNoNode(inicial);
+      if (doInicial.length > 0) return; // o esqueleto nem compila: não há como isolar
+
+      for (const trecho of exercise.typeTests ?? []) {
+        if (!trecho.rejects) continue;
+        const { erros } = compilarNoNode(`${inicial}\n${trecho.code}`);
+        expect(
+          erros.map((e) => e.mensagem),
+          `o trecho "${trecho.description}" já é recusado com o esqueleto — a recusa não depende do aluno`
+        ).toEqual([]);
+      }
+    }
+  );
+
+  it.each(aulasTS.map((lesson) => [lesson.id, lesson] as const))(
+    '%s: todo exemplo compila — ou declara que o compilador o recusa',
+    (_id, lesson) => {
+      // Um exemplo com erro de tipo ensinaria o erro como se fosse o certo. Os
+      // exemplos que mostram uma recusa de propósito dizem isso com a marca
+      // `// @recusado` na primeira linha, e aí o CI cobra o contrário: que o
+      // compilador de fato recuse.
+      for (const bloco of lesson.blocks) {
+        if (bloco.kind !== 'example' || bloco.language !== 'typescript') continue;
+
+        const recusadoDeProposito = bloco.code.startsWith('// @recusado');
+        const { erros } = compilarNoNode(bloco.code);
+
+        if (recusadoDeProposito) {
+          expect(erros.length, `o exemplo marcado como recusado compila:\n${bloco.code}`).toBeGreaterThan(0);
+        } else {
+          expect(
+            erros.map((e) => `linha ${e.linha}: ${e.mensagem}`),
+            `o exemplo não compila:\n${bloco.code}`
+          ).toEqual([]);
         }
       }
     }

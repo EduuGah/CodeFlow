@@ -1,17 +1,19 @@
 import { useEffect, useRef, useState } from 'react';
 
-import type { FillBlankExercise } from '../../../content/types';
+import type { FillBlankExercise, LanguageId } from '../../../content/types';
+import { executarNaLinguagem } from '../../lib/executar';
 import type { ExerciseState, OnExerciseState } from '../../lib/exercise-state';
 import { dividirMolde, estaCompleto, preencher } from '../../lib/fill-blank';
 import { executarPagina } from '../../lib/pagina';
 import { SANDBOX_DO_IFRAME } from '../../lib/pagina-core';
-import { executeCode, type ExecutionResult } from '../../lib/sandbox';
+import type { ExecutionResult } from '../../lib/sandbox';
 import { useRecordAttempt } from '../../hooks/useRecordAttempt';
 import { useFocusRescue } from '../../hooks/useFocusRescue';
 import { useReportarEstado } from '../../hooks/useReportarEstado';
 import { IconCheck, IconClose, IconPlay } from '../ui/Icon';
 import { Card, SectionLabel } from '../ui/Card';
 import { MarkdownReader } from '../ui/MarkdownReader';
+import { ErrosDoCompilador } from './ErrosDoCompilador';
 import { ExerciseAction, ExerciseFeedback } from './ExerciseAction';
 import { HintPanel } from './HintPanel';
 
@@ -32,10 +34,13 @@ import { HintPanel } from './HintPanel';
 export function FillBlank({
   exercise,
   lessonId,
+  language = 'javascript',
   onEstado,
 }: {
   exercise: FillBlankExercise;
   lessonId: string;
+  /** A linguagem da aula: em TypeScript o molde preenchido passa pelo compilador. */
+  language?: LanguageId;
   /** Avisa a aula em que ponto o exercício está. */
   onEstado?: OnExerciseState;
 }) {
@@ -102,7 +107,13 @@ export function FillBlank({
     const execucao =
       ehPagina && iframeRef.current
         ? await executarPagina(iframeRef.current, preenchido, exercise.tests)
-        : await executeCode(preenchido, exercise.tests, exercise.properties);
+        : await executarNaLinguagem({
+            language,
+            code: preenchido,
+            tests: exercise.tests,
+            properties: exercise.properties,
+            typeTests: exercise.typeTests,
+          });
     if (ehPagina) setPaginaRenderizada(true);
 
     setResultado(execucao);
@@ -233,10 +244,14 @@ export function FillBlank({
             </ExerciseFeedback>
           )}
 
-          {resultado.error && (
-            <p className="rounded-lg border border-danger-200 bg-danger-50 p-4 font-mono text-sm leading-relaxed text-danger-700">
-              {resultado.error}
-            </p>
+          {resultado.compileErrors ? (
+            <ErrosDoCompilador erros={resultado.compileErrors} />
+          ) : (
+            resultado.error && (
+              <p className="rounded-lg border border-danger-200 bg-danger-50 p-4 font-mono text-sm leading-relaxed text-danger-700">
+                {resultado.error}
+              </p>
+            )
           )}
 
           {resultado.testResults.length > 0 && (

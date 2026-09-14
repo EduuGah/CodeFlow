@@ -44,6 +44,13 @@ const propertySchema = z.object({
   runs: z.number().int().positive().max(200).optional(),
 });
 
+/** Um trecho que o compilador precisa aceitar ou recusar — só em aula de TypeScript. */
+const typeTestSchema = z.object({
+  description: z.string().min(1),
+  code: z.string().min(1, 'o trecho de tipo precisa de código'),
+  rejects: z.boolean().optional(),
+});
+
 const exerciseBase = {
   id: idSchema,
   prompt: z.string().min(1),
@@ -62,6 +69,7 @@ export const exerciseSchema = z.discriminatedUnion('type', [
     // Exercício de código sem teste daria feedback errado ao aluno (§ "testes pedagógicos").
     tests: z.array(testCaseSchema).min(1, 'exercício de código precisa de ao menos um teste'),
     properties: z.array(propertySchema).optional(),
+    typeTests: z.array(typeTestSchema).optional(),
     solution: z.string().optional(),
   }),
   z
@@ -75,6 +83,7 @@ export const exerciseSchema = z.discriminatedUnion('type', [
         .min(1, 'exercício de lacuna precisa de ao menos uma lacuna'),
       tests: z.array(testCaseSchema).min(1, 'exercício de lacuna precisa de ao menos um teste'),
       properties: z.array(propertySchema).optional(),
+      typeTests: z.array(typeTestSchema).optional(),
       explanation: z.string().min(1),
       solution: z.array(z.string()).optional(),
     })

@@ -2,9 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 
 import type { CodeExercise, LanguageId } from '../../../content/types';
 import type { ExerciseState, OnExerciseState } from '../../lib/exercise-state';
+import { executarNaLinguagem } from '../../lib/executar';
 import { executarPagina } from '../../lib/pagina';
 import { SANDBOX_DO_IFRAME } from '../../lib/pagina-core';
-import { executeCode, type ExecutionResult } from '../../lib/sandbox';
+import type { ExecutionResult } from '../../lib/sandbox';
 import { useRecordAttempt } from '../../hooks/useRecordAttempt';
 import { useReportarEstado } from '../../hooks/useReportarEstado';
 import { Button } from '../ui/Button';
@@ -12,6 +13,7 @@ import { Card, SectionLabel } from '../ui/Card';
 import { CodeEditor } from '../ui/CodeEditor';
 import { IconCheck, IconClose, IconPlay } from '../ui/Icon';
 import { MarkdownReader } from '../ui/MarkdownReader';
+import { ErrosDoCompilador } from './ErrosDoCompilador';
 import { ExerciseAction, ExerciseFeedback } from './ExerciseAction';
 import { HintPanel } from './HintPanel';
 
@@ -30,6 +32,10 @@ import { HintPanel } from './HintPanel';
  * é renderizada num `<iframe sandbox>` que fica visível entre o editor e a
  * ação — é o que o aluno quer ver —, e os testes rodam lá dentro. O resto
  * (veredito, saída, lista de testes, dicas) é o mesmo.
+ *
+ * Em aula de TypeScript há um passo antes do sandbox: o compilador. Se ele
+ * recusa, a lista de erros aparece no lugar do veredito, com linha e
+ * explicação, e nada roda.
  */
 
 interface CodeExerciseStepProps {
@@ -107,7 +113,13 @@ export function CodeExerciseStep({
     const execucao =
       ehPagina && iframeRef.current
         ? await executarPagina(iframeRef.current, enviado, exercise.tests)
-        : await executeCode(enviado, exercise.tests, exercise.properties);
+        : await executarNaLinguagem({
+            language,
+            code: enviado,
+            tests: exercise.tests,
+            properties: exercise.properties,
+            typeTests: exercise.typeTests,
+          });
     if (ehPagina) setPaginaRenderizada(true);
     setResultado(execucao);
     setCodigoVerificado(enviado);
@@ -234,6 +246,8 @@ export function CodeExerciseStep({
             <p className="rounded-lg border border-energy-200 bg-energy-50 p-4 text-sm leading-relaxed text-energy-700">
               {resultado.error}
             </p>
+          ) : resultado.compileErrors ? (
+            <ErrosDoCompilador erros={resultado.compileErrors} />
           ) : (
             resultado.error && (
               <p className="rounded-lg border border-danger-200 bg-danger-50 p-4 font-mono text-sm leading-relaxed text-danger-700">

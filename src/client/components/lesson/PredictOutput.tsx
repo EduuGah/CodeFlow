@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
-import type { PredictOutputExercise } from '../../../content/types';
+import type { LanguageId, PredictOutputExercise } from '../../../content/types';
 import type { ExerciseState, OnExerciseState } from '../../lib/exercise-state';
-import { executeCode } from '../../lib/sandbox';
+import { executarNaLinguagem } from '../../lib/executar';
 import { Card, SectionLabel } from '../ui/Card';
 import { MarkdownReader } from '../ui/MarkdownReader';
 import { ExerciseAction, ExerciseFeedback } from './ExerciseAction';
@@ -33,10 +33,13 @@ function normalizar(texto: string): string {
 export function PredictOutput({
   exercise,
   lessonId,
+  language = 'javascript',
   onEstado,
 }: {
   exercise: PredictOutputExercise;
   lessonId: string;
+  /** A linguagem da aula: em TypeScript o trecho passa pelo compilador antes de rodar. */
+  language?: LanguageId;
   /** Avisa a aula em que ponto o exercício está. Sem isto o rodapé da aula
       continuaria oferecendo "pular" a quem acabou de acertar. */
   onEstado?: OnExerciseState;
@@ -67,7 +70,7 @@ export function PredictOutput({
 
   const verificar = async () => {
     setExecutando(true);
-    const resultado = await executeCode(exercise.code);
+    const resultado = await executarNaLinguagem({ language, code: exercise.code });
     const real = resultado.error ? `Erro: ${resultado.error}` : resultado.output;
     setSaidaReal(real);
     setExecutando(false);
