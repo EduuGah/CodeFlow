@@ -414,4 +414,12 @@ export const concepts: Concept[] = [
     prerequisites: ['funcoes', 'tipos-de-dados'],
     tags: ['typescript'],
   },
+  {
+    id: 'ts-inferencia',
+    title: 'Inferência',
+    summary:
+      'O compilador deduz o tipo do valor; anotar só a fronteira (parâmetros), a lista vazia e a variável sem valor; const guarda o valor exato, let a categoria.',
+    prerequisites: ['ts-por-que'],
+    tags: ['typescript'],
+  },
 ];

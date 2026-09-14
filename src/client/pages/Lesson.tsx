@@ -349,8 +349,14 @@ export function Lesson() {
           </div>
         )}
 
+        {/* A `key` remonta o componente quando o exercício muda. Dois exercícios
+            seguidos do mesmo tipo reaproveitavam a instância: o segundo nascia
+            com a resposta do primeiro já enviada, dizia "Resposta correta" para
+            uma pergunta que ninguém respondeu, e — como o estado não mudava — a
+            aula nunca ficava sabendo dele. Ficava 5/6 para sempre. */}
         {passo.kind === 'exercise' && passo.exercise.type === 'code' && (
           <CodeExerciseStep
+            key={passo.exercise.id}
             exercise={passo.exercise}
             lessonId={lesson.id}
             language={lesson.language}
@@ -360,6 +366,7 @@ export function Lesson() {
 
         {passo.kind === 'exercise' && passo.exercise.type === 'fill-blank' && (
           <FillBlank
+            key={passo.exercise.id}
             exercise={passo.exercise}
             lessonId={lesson.id}
             language={lesson.language}
@@ -369,6 +376,7 @@ export function Lesson() {
 
         {passo.kind === 'exercise' && passo.exercise.type === 'multiple-choice' && (
           <MultipleChoice
+            key={passo.exercise.id}
             exercise={passo.exercise}
             lessonId={lesson.id}
             onEstado={(estado) => registrarEstado(passo.exercise.id, estado)}
@@ -377,6 +385,7 @@ export function Lesson() {
 
         {passo.kind === 'exercise' && passo.exercise.type === 'order-steps' && (
           <OrderSteps
+            key={passo.exercise.id}
             exercise={passo.exercise}
             lessonId={lesson.id}
             onEstado={(estado) => registrarEstado(passo.exercise.id, estado)}
@@ -385,6 +394,7 @@ export function Lesson() {
 
         {passo.kind === 'exercise' && passo.exercise.type === 'refactor' && (
           <Refactor
+            key={passo.exercise.id}
             exercise={passo.exercise}
             lessonId={lesson.id}
             language={lesson.language}
@@ -394,6 +404,7 @@ export function Lesson() {
 
         {passo.kind === 'exercise' && passo.exercise.type === 'find-bug' && (
           <FindBug
+            key={passo.exercise.id}
             exercise={passo.exercise}
             lessonId={lesson.id}
             onEstado={(estado) => registrarEstado(passo.exercise.id, estado)}
@@ -402,6 +413,7 @@ export function Lesson() {
 
         {passo.kind === 'exercise' && passo.exercise.type === 'write-test' && (
           <WriteTest
+            key={passo.exercise.id}
             exercise={passo.exercise}
             lessonId={lesson.id}
             language={lesson.language}
@@ -411,6 +423,7 @@ export function Lesson() {
 
         {passo.kind === 'exercise' && passo.exercise.type === 'predict-output' && (
           <PredictOutput
+            key={passo.exercise.id}
             exercise={passo.exercise}
             lessonId={lesson.id}
             language={lesson.language}
