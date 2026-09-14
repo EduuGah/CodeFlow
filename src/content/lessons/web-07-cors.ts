@@ -365,6 +365,51 @@ console.log(mesmaOrigem('http://x.com:3000', 'http://x.com:4000'));   // false`,
       },
     },
     {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-web-7-ordenar-preflight',
+        type: 'order-steps',
+        prompt:
+          'Uma página em `https://app.com` faz `fetch("https://api.com/pedidos", { method: "DELETE" })`. Coloque na ordem o que acontece.',
+        concepts: ['cors', 'http'],
+        difficulty: 'intermediario',
+        tags: ['web', 'cors'],
+        steps: [
+          {
+            id: 'origem',
+            text: 'O navegador compara a origem da página com a da URL e vê que são diferentes',
+            ordem: 1,
+          },
+          {
+            id: 'options',
+            text: 'Como `DELETE` não é um pedido simples, o navegador envia antes um `OPTIONS` com `Origin` e `Access-Control-Request-Method`',
+            ordem: 2,
+          },
+          {
+            id: 'permite',
+            text: 'O servidor responde ao `OPTIONS` com `Access-Control-Allow-Origin` e `Access-Control-Allow-Methods`',
+            ordem: 3,
+          },
+          {
+            id: 'confere',
+            text: 'O navegador confere se a origem e o método estão permitidos',
+            ordem: 4,
+          },
+          {
+            id: 'real',
+            text: 'Só então o `DELETE` de verdade é enviado, e a resposta dele chega ao JavaScript',
+            ordem: 5,
+          },
+        ],
+        explanation:
+          'A verificação prévia existe porque um `DELETE` não pode ser "desfeito" se o servidor não quisesse recebê-lo: o navegador pergunta antes, com um pedido inofensivo. Repare em quem decide cada coisa. O servidor **declara** o que permite; o navegador **aplica**. É por isso que a correção de um erro de CORS está sempre no servidor — e é por isso que ver o pedido chegar lá e a resposta ser bloqueada não é contradição: o bloqueio acontece no passo de conferência, do lado de cá.',
+        hints: [
+          'Antes de mandar um pedido que altera dados, o navegador manda outro tipo de pedido.',
+          'Quem declara o que é permitido, e quem confere?',
+        ],
+      },
+    },
+    {
       kind: 'summary',
       markdown: `CORS não é um erro do seu código: é o navegador obedecendo à **política de mesma origem**, que existe para um site qualquer não conseguir ler a resposta do seu banco usando os seus cookies. Origem é **protocolo + host + porta**, e os três precisam bater — daí front na 3000 e API na 8080 serem origens diferentes. O pedido normalmente **chega** ao servidor; o que o navegador descarta é a resposta, quando falta o cabeçalho \`Access-Control-Allow-Origin\`. Por isso a correção é sempre do lado do servidor, ou num proxy que faça tudo sair da mesma origem. E CORS **não protege o servidor**: um script fora do navegador ignora a regra por completo — quem protege o servidor é a autenticação. Pedidos fora do comum ainda disparam um \`OPTIONS\` antes, e uma API que ignora esse método funciona pela metade de um jeito que parece aleatório.`,
     },

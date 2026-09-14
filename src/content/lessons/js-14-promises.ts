@@ -391,6 +391,38 @@ precoTotal(['pao', 'leite']).then((t) => console.log(t)); // esperado: 16`,
       },
     },
     {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-js-14-achar-return',
+        type: 'find-bug',
+        prompt:
+          'Este programa quebra com `TypeError: Cannot read properties of undefined (reading \'then\')`.\n\nAponte a linha onde o defeito está.',
+        concepts: ['promises', 'funcoes'],
+        difficulty: 'intermediario',
+        tags: ['javascript', 'promises', 'depuracao'],
+        code: `function buscarPedido(id) {
+  new Promise(function (resolve) {
+    resolve({ id: id, total: 80 });
+  });
+}
+
+buscarPedido(1).then(function (pedido) {
+  console.log("Total: " + pedido.total);
+});`,
+        buggyLine: 2,
+        fix: '  return new Promise(function (resolve) {',
+        symptomLine: 7,
+        symptomFeedback:
+          'É aqui que o erro aparece: `.then` foi chamado em `undefined`. Mas esta linha está certa em esperar uma promise — é o que `buscarPedido` deveria devolver. Olhe dentro da função e procure a palavra que faz uma função devolver alguma coisa.',
+        explanation:
+          'A promise é criada, mas não é **devolvida**: sem `return`, `buscarPedido` termina e entrega `undefined`, como qualquer função sem `return`. A promise existe, resolve, e ninguém consegue alcançá-la.\n\nÉ o mesmo `return` perdido da aula de callbacks, em roupa nova. Uma função que "devolve uma promise" precisa, literalmente, de `return` na frente do `new Promise` — ou ser `async`, que faz isso por você.',
+        hints: [
+          'O que uma função devolve quando não tem `return`?',
+          'A promise é criada. Ela é entregue a quem chamou `buscarPedido`?',
+        ],
+      },
+    },
+    {
       kind: 'summary',
       markdown: `Uma promise é um valor que ainda não chegou, com dois destinos definidos desde o início. O que um \`.then\` devolve vira a entrada do próximo — e devolver **outra promise** faz a cadeia esperar por ela, que é o que troca a escada de callbacks por uma sequência que desce. Chaves no corpo da seta sem \`return\` entregam \`undefined\` ao passo seguinte, e é a primeira coisa a conferir quando um \`.then\` recebe algo inesperado. Um erro em qualquer etapa pula direto para o \`.catch\`, então o tratamento deixa de se repetir em cada nível; por isso o lugar dele é no fim, já que ele só alcança o que veio antes e, depois de tratar, devolve a cadeia ao estado resolvido. Tarefas independentes vão juntas com \`Promise.all\` — e ele desiste na primeira que rejeitar.`,
     },

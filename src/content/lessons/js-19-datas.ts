@@ -329,6 +329,42 @@ console.log(diasEntre(new Date(2026, 2, 15), new Date(2026, 2, 10))); // 5`,
       },
     },
     {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-js-19-achar-mes',
+        type: 'find-bug',
+        prompt:
+          'A última linha é um teste, e ele está falhando: o Natal está sendo formatado no mês errado.\n\nAponte a linha onde o defeito está.',
+        concepts: ['datas'],
+        difficulty: 'intermediario',
+        tags: ['javascript', 'datas', 'depuracao'],
+        code: `function formatar(data) {
+  const dia = String(data.getDate()).padStart(2, "0");
+  const mes = String(data.getMonth()).padStart(2, "0");
+  const ano = data.getFullYear();
+  return dia + "/" + mes + "/" + ano;
+}
+
+const natal = new Date(2024, 11, 25);
+const texto = formatar(natal);
+
+console.log(texto);
+
+if (texto !== "25/12/2024") throw new Error('esperava "25/12/2024", veio "' + texto + '"');`,
+        buggyLine: 3,
+        fix: '  const mes = String(data.getMonth() + 1).padStart(2, "0");',
+        symptomLine: 13,
+        symptomFeedback:
+          'O teste só confere o resultado, e ele está certo em reclamar: saiu "25/11/2024". O dia e o ano estão certos; o mês está um a menos. Volte à linha que produz o mês.',
+        explanation:
+          '`getMonth()` devolve o mês contando de **zero**: janeiro é 0, dezembro é 11. É o que faz `new Date(2024, 11, 25)` ser 25 de dezembro — e é o que faz um mês lido direto sair um a menos ao ser mostrado. Somar 1 na hora de **exibir** é o conserto; o valor interno continua como está.\n\nÉ o erro de um dia da aula, em versão de um mês: a data está certa na memória e errada na tela.',
+        hints: [
+          'O dia e o ano saíram certos. Só o mês está errado — errado por quanto?',
+          'Como `getMonth()` conta os meses?',
+        ],
+      },
+    },
+    {
       kind: 'summary',
       markdown: `O mês vai de 0 a 11, e só o mês. \`getDate\` é o dia do mês, \`getDay\` é o dia da semana. Texto sem hora é lido como UTC e texto com hora é lido no fuso local — daí o erro de um dia que some quando o programador testa na máquina dele. A regra que evita quase tudo: guarde em UTC no formato ISO, mostre com \`toLocaleDateString\`, e para uma data sem hora transporte o texto \`"AAAA-MM-DD"\` montando as partes localmente na hora de usar. Para comparar, lembre que \`===\` entre datas é sempre falso: use \`getTime()\` quando a pergunta for sobre o instante, e descarte a hora quando ela for sobre o dia.`,
     },

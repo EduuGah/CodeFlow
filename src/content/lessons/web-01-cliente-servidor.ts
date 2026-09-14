@@ -349,6 +349,44 @@ console.log(separarUrl("https://x.com/a?b=1"));`,
       },
     },
     {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-web-1-ordenar-pedido',
+        type: 'order-steps',
+        prompt:
+          'Você digita `https://loja.com/produtos` e aperta Enter. Coloque na ordem o que acontece até a página aparecer.',
+        concepts: ['cliente-servidor'],
+        difficulty: 'iniciante',
+        tags: ['web', 'cliente-servidor'],
+        steps: [
+          {
+            id: 'dns',
+            text: 'O navegador descobre o endereço IP de `loja.com` perguntando ao DNS',
+            ordem: 1,
+          },
+          {
+            id: 'conexao',
+            text: 'O navegador abre uma conexão segura com esse endereço, na porta 443',
+            ordem: 2,
+          },
+          { id: 'pedido', text: 'O navegador envia o pedido: `GET /produtos`', ordem: 3 },
+          {
+            id: 'servidor',
+            text: 'O servidor monta a resposta — consulta o banco, gera o HTML',
+            ordem: 4,
+          },
+          { id: 'resposta', text: 'A resposta chega, com status, cabeçalhos e o corpo', ordem: 5 },
+          { id: 'renderiza', text: 'O navegador desenha a página a partir do corpo recebido', ordem: 6 },
+        ],
+        explanation:
+          'Nome vira endereço, endereço vira conexão, conexão carrega o pedido. Só então o servidor entra em cena — e tudo o que ele faz acontece **antes** de qualquer byte da resposta voltar. Ver a sequência inteira explica dois sintomas que todo mundo já viu: "site não encontrado" é uma falha no primeiro passo, antes de existir pedido; e a página branca que demora é o quarto passo levando tempo, com a conexão aberta esperando.',
+        hints: [
+          'O navegador precisa saber **para onde** enviar o pedido antes de poder enviá-lo.',
+          'O servidor só começa a trabalhar depois de receber alguma coisa.',
+        ],
+      },
+    },
+    {
       kind: 'summary',
       markdown: `Seu código roda em dois lugares com poderes diferentes. O **cliente** está na máquina de alguém que você não controla: tudo que chega lá pode ser lido e alterado, então ele serve para experiência — retorno rápido, formatação, esconder caminhos que não levam a lugar nenhum. O **servidor** é o único lado que decide a verdade: permissão, validação que vale, e qualquer segredo. Entre os dois está a rede, que é lenta — daí todo pedido ser assíncrono — e não confiável — daí todo pedido ter um caminho de falha. E o destino de um pedido é uma **URL**, cujas três primeiras partes (protocolo, host e porta) formam a **origem**, palavra que volta na aula sobre CORS.`,
     },

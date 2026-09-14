@@ -364,6 +364,38 @@ console.log(lerToken('nao-e-token', 1700000000000));`,
       },
     },
     {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-web-6-achar-unidade',
+        type: 'find-bug',
+        prompt:
+          'A última linha é um teste: um token que vence daqui a uma hora não pode ser dado como vencido. E está sendo.\n\nAponte a linha onde o defeito está.',
+        concepts: ['autenticacao', 'datas'],
+        difficulty: 'intermediario',
+        tags: ['web', 'tokens', 'depuracao'],
+        code: `function venceu(token) {
+  return token.exp < Date.now();
+}
+
+// "exp" em segundos desde 1970, como manda o padrão dos JWT.
+const daquiAUmaHora = Math.floor(Date.now() / 1000) + 3600;
+const token = { sub: "ana", exp: daquiAUmaHora };
+
+if (venceu(token)) throw new Error("um token que vence daqui a uma hora foi dado como vencido");`,
+        buggyLine: 2,
+        fix: '  return token.exp * 1000 < Date.now();',
+        symptomLine: 9,
+        symptomFeedback:
+          'O teste está certo: o `exp` foi montado uma hora no futuro. Se `venceu` disse que sim, a comparação dentro dela é que está errada — repare nas **unidades** dos dois lados do `<`.',
+        explanation:
+          '`exp` está em **segundos** e `Date.now()` está em **milissegundos**. Um instante daqui a uma hora, em segundos, é um número mil vezes menor do que o agora em milissegundos — então `exp < Date.now()` é verdadeiro para qualquer token, de qualquer data. Todos parecem vencidos desde sempre.\n\nÉ o erro de unidade da aula. Coloque os dois lados na mesma unidade antes de comparar — `exp * 1000`, ou `Date.now() / 1000` — e escreva a unidade no nome da variável quando puder.',
+        hints: [
+          'Os dois lados da comparação medem tempo desde 1970. Na mesma unidade?',
+          'Releia o comentário sobre `exp`, e lembre o que `Date.now()` devolve.',
+        ],
+      },
+    },
+    {
       kind: 'summary',
       markdown: `Um JWT são três partes separadas por ponto, e as duas primeiras são JSON em **base64** — que não é criptografia. Qualquer pessoa lê o conteúdo do seu token em uma linha, então nada secreto entra ali; o que a assinatura garante é que ninguém **alterou**, não que ninguém leu. O cliente pode ler o conteúdo para decidir o que mostrar, mas quem confere a assinatura e confia é o servidor, em cada pedido. O campo \`exp\` está em **segundos** enquanto \`Date.now()\` está em milissegundos, e comparar na unidade errada não dá erro — dá uma resposta errada com cara de certa. E como ninguém guarda registro do token, revogar é difícil: daí o acesso curto somado a um token de renovação separado.`,
     },

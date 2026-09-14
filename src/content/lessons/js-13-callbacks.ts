@@ -372,6 +372,40 @@ verificarIdade(20, function (erro, podeEntrar) {
       },
     },
     {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-js-13-achar-contrato',
+        type: 'find-bug',
+        prompt:
+          'Este programa quebra com `Error: Falhou: undefined` — mas nenhuma busca falhou, e a mensagem de erro nem tem conteúdo.\n\n`buscarUsuario` promete chamar o callback no padrão da aula: **erro primeiro, resultado depois**. Aponte a linha onde o defeito está.',
+        concepts: ['assincronia', 'funcoes'],
+        difficulty: 'intermediario',
+        tags: ['javascript', 'callbacks', 'depuracao'],
+        code: `function buscarUsuario(id, aoTerminar) {
+  const usuario = { id: id, nome: "Ana" };
+  aoTerminar(usuario);
+}
+
+buscarUsuario(7, function (erro, usuario) {
+  if (erro) {
+    throw new Error("Falhou: " + erro.message);
+  }
+  console.log("Encontrado: " + usuario.nome);
+});`,
+        buggyLine: 3,
+        fix: '  aoTerminar(null, usuario);',
+        symptomLine: 8,
+        symptomFeedback:
+          'É aqui que o programa lança, e o callback está fazendo o que deve: se veio um erro, avisa. O estranho é o erro não ter mensagem — porque o que chegou na vaga do erro não é um erro. Quem pôs esse valor ali foi quem **chamou** o callback.',
+        explanation:
+          'O callback espera `(erro, usuario)`, mas `buscarUsuario` o chama com um argumento só. O objeto do usuário vai parar na **primeira** vaga, a do erro, e `usuario` fica `undefined`. Como um objeto conta como verdadeiro, o `if (erro)` entra — e `erro.message` não existe, daí o "Falhou: undefined".\n\nCallback é um contrato entre quem chama e quem recebe. No padrão erro-primeiro, sucesso se avisa com `aoTerminar(null, resultado)`: o `null` está ali de propósito, ocupando a vaga do erro que não aconteceu.',
+        hints: [
+          'Conte quantos argumentos o callback espera, e quantos ele recebe na chamada.',
+          'No padrão erro-primeiro, o que vai na primeira posição quando não houve erro?',
+        ],
+      },
+    },
+    {
       kind: 'summary',
       markdown: `O JavaScript **agenda** em vez de esperar: o programa segue, e o que foi agendado roda depois que o código atual termina. A regra que prevê a ordem cabe numa frase — enquanto a pilha não esvaziar, nada sai da fila —, e é dela que vem tanto o \`setTimeout(f, 0)\` que não é "agora" quanto o laço pesado que congela a tela. Quem precisa do resultado de uma tarefa demorada usa um **callback**, e tudo que depende desse resultado acontece dentro dele: uma função não consegue retornar um valor que ainda não chegou. A convenção erro-primeiro reserva o primeiro argumento para a falha, e o \`return\` depois de tratá-la evita seguir com um valor que não existe.`,
     },

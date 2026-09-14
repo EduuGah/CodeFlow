@@ -341,6 +341,20 @@ describe('exercícios de ordenar passos', () => {
   );
 
   it.each(ordenacoes.map(({ exercise }) => [exercise.id, exercise] as const))(
+    '%s: toda crase num passo tem par',
+    async (_id, exercise) => {
+      if (exercise.type !== 'order-steps') throw new Error('filtro inconsistente');
+
+      // O passo mostra `assim` em monoespaçada. Uma crase sem par engole o
+      // resto da frase como código — e ninguém vê, porque o texto continua lá.
+      for (const passo of exercise.steps) {
+        const crases = (passo.text.match(/`/g) ?? []).length;
+        expect(crases % 2, `crase sem par em "${passo.text}"`).toBe(0);
+      }
+    }
+  );
+
+  it.each(ordenacoes.map(({ exercise }) => [exercise.id, exercise] as const))(
     '%s: a dica não entrega a ordem',
     async (_id, exercise) => {
       if (exercise.type !== 'order-steps') throw new Error('filtro inconsistente');

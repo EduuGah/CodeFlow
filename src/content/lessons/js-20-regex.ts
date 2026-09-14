@@ -297,6 +297,57 @@ console.log(extrairTelefones('ligue (11) 91234-5678 ou (21) 3456-7890'));
       },
     },
     {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-js-20-testar-cep',
+        type: 'write-test',
+        prompt:
+          'A função abaixo está **correta**: aceita um CEP no formato `12345-678`, com o hífen, e nada mais. Escreva os testes dela.\n\nUse `assert(condicao, mensagem)`. Seus testes rodam contra esta versão, onde precisam **passar**, e contra três versões com a expressão regular sabotada, onde precisam **falhar**.',
+        concepts: ['expressoes-regulares', 'casos-extremos'],
+        difficulty: 'intermediario',
+        tags: ['javascript', 'regex', 'testes'],
+        subject: `function ehCep(texto) {
+  return /^[0-9]{5}-[0-9]{3}$/.test(texto);
+}`,
+        initialCode: `// Escreva asserções sobre \`ehCep\`. Uma por linha.
+//
+// assert(ehCep("12345-678") === true, 'o formato certo é aceito');
+
+`,
+        mutants: [
+          {
+            description: 'sem as âncoras: aceita o CEP no meio de qualquer texto',
+            code: `function ehCep(texto) {
+  return /[0-9]{5}-[0-9]{3}/.test(texto);
+}`,
+          },
+          {
+            description: 'hífen opcional: aceita os oito dígitos colados',
+            code: `function ehCep(texto) {
+  return /^[0-9]{5}-?[0-9]{3}$/.test(texto);
+}`,
+          },
+          {
+            description: 'aceita qualquer quantidade de dígitos depois do hífen',
+            code: `function ehCep(texto) {
+  return /^[0-9]{5}-[0-9]+$/.test(texto);
+}`,
+          },
+        ],
+        hints: [
+          'O caso feliz passa em todas as versões, inclusive nas quebradas. O que separa a certa das erradas são os textos que ela **recusa**.',
+          'Pense em três entradas parecidas com um CEP, cada uma errada de um jeito: sobra texto em volta, falta o hífen, sobra um dígito.',
+          "assert(ehCep('12345678') === false, 'sem o hífen não vale'); assert(ehCep('cep: 12345-678') === false, 'com texto em volta não vale'); assert(ehCep('12345-6789') === false, 'quatro dígitos no fim não vale');",
+        ],
+        solution: `assert(ehCep("12345-678") === true, 'o formato certo e aceito');
+assert(ehCep("12345678") === false, 'sem o hifen nao vale');
+assert(ehCep("cep: 12345-678") === false, 'com texto em volta nao vale');
+assert(ehCep("12345-6789") === false, 'quatro digitos no fim nao vale');`,
+        explanation:
+          'Testar uma expressão regular é, sobretudo, testar o que ela **recusa**: o formato certo passa em quase qualquer versão. Cada asserção de recusa mira um pedaço da expressão — as âncoras `^` e `$` (texto em volta), o hífen obrigatório (dígitos colados), o `{3}` exato (um dígito a mais). Se você conseguiu escrever essas três, você leu a expressão regular pedaço por pedaço, que é a única forma de ler uma.',
+      },
+    },
+    {
       kind: 'summary',
       markdown: `Uma expressão regular descreve formato, não conteúdo exato. \`^\` e \`$\` são o que separa "contém" de "é", e esquecê-los é a falha de validação mais comum. \`+\` e \`*\` são gulosos até você acrescentar \`?\`. A marca \`g\` guarda onde parou, então \`test\` com \`g\` alterna entre verdadeiro e falso na mesma entrada — não misture os dois. E para estrutura aninhada, como HTML ou e-mail, a ferramenta certa é outra.`,
     },

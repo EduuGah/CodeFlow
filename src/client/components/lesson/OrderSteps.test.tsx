@@ -217,3 +217,32 @@ describe('estado reportado à aula', () => {
     expect(vistos).not.toContain('acertou');
   });
 });
+
+describe('código dentro do passo', () => {
+  const COM_CODIGO: OrderStepsExercise = {
+    ...EXERCICIO,
+    id: 'ex-com-codigo',
+    steps: [
+      { id: 'a', text: 'o nome `dobro` passa a existir', ordem: 1 },
+      { id: 'b', text: '`dobro(4)` é chamado', ordem: 2 },
+      { id: 'c', text: 'o corpo roda', ordem: 3 },
+    ],
+  };
+
+  it('o trecho entre crases vira <code>, e a crase não aparece', () => {
+    render(<OrderSteps exercise={COM_CODIGO} lessonId="aula-teste" />);
+
+    const codigo = screen.getByText('dobro(4)');
+    expect(codigo.tagName).toBe('CODE');
+    expect(document.body.textContent).not.toContain('`');
+  });
+
+  it('o rótulo do botão de mover não carrega as crases', () => {
+    render(<OrderSteps exercise={COM_CODIGO} lessonId="aula-teste" />);
+
+    // É o que o leitor de tela anuncia — e o que o E2E procura.
+    expect(
+      screen.getByRole('button', { name: 'Mover "dobro(4) é chamado" para cima' })
+    ).toBeInTheDocument();
+  });
+});

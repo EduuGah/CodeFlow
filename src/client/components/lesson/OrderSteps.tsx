@@ -2,7 +2,14 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 
 import type { OrderStepsExercise } from '../../../content/types';
 import type { ExerciseState, OnExerciseState } from '../../lib/exercise-state';
-import { embaralhar, estaOrdenado, mover, primeiroErro } from '../../lib/ordenar';
+import {
+  embaralhar,
+  estaOrdenado,
+  mover,
+  primeiroErro,
+  textoDoPasso,
+  trechosDoPasso,
+} from '../../lib/ordenar';
 import { useRecordAttempt } from '../../hooks/useRecordAttempt';
 import { useFocusRescue } from '../../hooks/useFocusRescue';
 import { useReportarEstado } from '../../hooks/useReportarEstado';
@@ -109,7 +116,7 @@ export function OrderSteps({
 
     focoPendente.current = `${passo.id}:${direcao}`;
     setArranjo(proximo);
-    setAnuncio(`${passo.text}, posição ${destino} de ${arranjo.length}`);
+    setAnuncio(`${textoDoPasso(passo.text)}, posição ${destino} de ${arranjo.length}`);
     // Mexer na ordem invalida o retorno anterior: manter "correto" na tela
     // enquanto a sequência já é outra seria mentira.
     setEnviado(false);
@@ -179,7 +186,18 @@ export function OrderSteps({
                   três linhas de mono no celular custam legibilidade sem
                   comunicar nada que o contexto já não diga. */}
               <span className="flex-1 self-center break-words py-3 pr-1 text-sm leading-relaxed text-ink">
-                {passo.text}
+                {trechosDoPasso(passo.text).map((trecho, j) =>
+                  j % 2 === 1 ? (
+                    <code
+                      key={j}
+                      className="rounded-md bg-sunken px-1.5 py-0.5 font-mono text-[0.85em]"
+                    >
+                      {trecho}
+                    </code>
+                  ) : (
+                    <span key={j}>{trecho}</span>
+                  )
+                )}
               </span>
 
               {/* 44px de altura cada, que é o mínimo para o polegar. Dois
@@ -194,7 +212,7 @@ export function OrderSteps({
                   }}
                   onClick={() => moverPasso(i, 'cima')}
                   disabled={i === 0 || travado}
-                  aria-label={`Mover "${passo.text}" para cima`}
+                  aria-label={`Mover "${textoDoPasso(passo.text)}" para cima`}
                   className="flex h-11 w-11 items-center justify-center rounded text-ink-soft transition-colors hover:bg-sunken disabled:opacity-30 disabled:hover:bg-transparent"
                 >
                   <IconChevronDown size={16} className="rotate-180" />
@@ -207,7 +225,7 @@ export function OrderSteps({
                   }}
                   onClick={() => moverPasso(i, 'baixo')}
                   disabled={i === arranjo.length - 1 || travado}
-                  aria-label={`Mover "${passo.text}" para baixo`}
+                  aria-label={`Mover "${textoDoPasso(passo.text)}" para baixo`}
                   className="flex h-11 w-11 items-center justify-center rounded text-ink-soft transition-colors hover:bg-sunken disabled:opacity-30 disabled:hover:bg-transparent"
                 >
                   <IconChevronDown size={16} />

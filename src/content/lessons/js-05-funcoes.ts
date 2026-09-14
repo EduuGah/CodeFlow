@@ -265,6 +265,47 @@ if (Math.abs(r - 1.6666666666666667) > 1e-9) throw new Error("media(1, 2, 2) dev
       },
     },
     {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-js-5-ordenar-chamada',
+        type: 'order-steps',
+        prompt:
+          'O programa abaixo tem duas linhas:\n\n~~~js\nfunction dobro(n) { return n * 2; }\nconst resultado = dobro(4);\n~~~\n\nColoque na ordem o que acontece quando ele roda.',
+        concepts: ['funcoes'],
+        difficulty: 'iniciante',
+        tags: ['javascript', 'funcoes'],
+        steps: [
+          {
+            id: 'declara',
+            text: 'A declaração é lida: o nome `dobro` passa a existir, mas o corpo dela ainda não roda',
+            ordem: 1,
+          },
+          {
+            id: 'chama',
+            text: '`dobro(4)` é chamado: o argumento 4 é copiado para o parâmetro `n`',
+            ordem: 2,
+          },
+          { id: 'corpo', text: 'O corpo roda: `n * 2` é calculado e vale 8', ordem: 3 },
+          {
+            id: 'retorna',
+            text: '`return` entrega o 8 para quem chamou e encerra a função',
+            ordem: 4,
+          },
+          {
+            id: 'atribui',
+            text: '`resultado` recebe o 8, e o programa segue para a linha seguinte',
+            ordem: 5,
+          },
+        ],
+        explanation:
+          'Declarar não é executar: o corpo de `dobro` só roda quando alguém chama. Na chamada, o argumento vira o valor do parâmetro — uma cópia, dentro da função. O `return` faz duas coisas ao mesmo tempo: devolve o valor **e** encerra a função, o que é o motivo de qualquer linha depois dele nunca rodar. E só depois disso a expressão `dobro(4)` vira o número 8 e a atribuição acontece.',
+        hints: [
+          'O que acontece com uma função que foi declarada mas ninguém chamou?',
+          'O `return` tem que acontecer antes de `resultado` ter valor — ou depois?',
+        ],
+      },
+    },
+    {
       kind: 'summary',
       markdown: `Função recebe por **parâmetros** e devolve por **\`return\`**. Se você só imprime, o valor não volta para quem chamou — e a função não pode ser combinada com outras.`,
     },

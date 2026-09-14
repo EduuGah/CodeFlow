@@ -34,12 +34,12 @@ Números lidos do catálogo, não de memória.
 | --- | --- |
 | Trilhas | 3 — Fundamentos de JavaScript (20 aulas), Lógica (3), Como a Web Funciona (8) |
 | Aulas | 31, somando 790 minutos |
-| Exercícios | 151, em 8 tipos — 35 de código, 49 de prever saída, 32 de lacuna, 26 de múltipla escolha, 3 de ordenar passos, 2 de escrever o teste, 2 de encontrar o bug, 2 de refatorar |
-| Verificação | 304 casos fixos + 58 propriedades |
+| Exercícios | 174, em 8 tipos — 49 de prever saída, 35 de código, 32 de lacuna, 26 de múltipla escolha, 14 de encontrar o bug, 9 de ordenar passos, 5 de escrever o teste, 4 de refatorar. **Toda aula tem ao menos um dos quatro tipos novos** |
+| Verificação | 321 casos fixos + 58 propriedades |
 | Projetos | 7, com 22 critérios de aceitação |
 | Conceitos | 27, com grafo de pré-requisitos |
 | Flashcards | 22 |
-| Testes | 895 de unidade + 132 de navegador |
+| Testes | 1.001 de unidade + 132 de navegador |
 | Pacote | 1.340 kB (384 kB comprimido) no chunk principal — o conteúdo vai junto; o Monaco são mais 3.360 kB (869 kB) num chunk à parte, baixado só quando o primeiro editor monta |
 
 ## 4. Decisões que não devem ser desfeitas sem motivo forte
@@ -79,7 +79,7 @@ src/content/            Aulas, exercícios, projetos, conceitos, flashcards
   types.ts              Tipos (Exercise é união discriminada por `type`)
   schema.ts             Espelhos Zod; valida na carga e falha alto em DEV
   index.ts              Única fronteira de leitura do conteúdo
-  content.test.ts       Integridade: 372 checagens sobre o catálogo
+  content.test.ts       Integridade: 504 checagens sobre o catálogo
   lessons/              Uma aula por arquivo
   tracks/               A ORDEM da trilha vive aqui, não nos arquivos de aula
 
@@ -119,7 +119,7 @@ docs/curriculo.md       Roadmap de conteúdo — fonte canônica
 
 ```bash
 npm run typecheck   # inclui e2e/ e playwright.config.ts
-npm test            # 895 testes
+npm test            # 1.001 testes
 npm run test:e2e    # 132 no navegador (antes: npx playwright install chromium)
 npm run build
 ```

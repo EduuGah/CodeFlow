@@ -334,6 +334,56 @@ console.log(montarRota(['pedidos'], { status: 'aberto', busca: undefined }));
       },
     },
     {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-web-4-testar-idempotente',
+        type: 'write-test',
+        prompt:
+          'A função abaixo está **correta**: diz se um método HTTP é idempotente — repetir o mesmo pedido não muda mais nada depois da primeira vez. Escreva os testes dela.\n\nUse `assert(condicao, mensagem)`. Seus testes rodam contra esta versão, onde precisam **passar**, e contra três versões com a tabela sabotada, onde precisam **falhar**.',
+        concepts: ['rest', 'http'],
+        difficulty: 'intermediario',
+        tags: ['web', 'rest', 'testes'],
+        subject: `function ehIdempotente(metodo) {
+  return ["GET", "HEAD", "PUT", "DELETE", "OPTIONS"].includes(metodo);
+}`,
+        initialCode: `// Escreva asserções sobre \`ehIdempotente\`. Uma por linha.
+//
+// assert(ehIdempotente("GET") === true, 'repetir um GET não muda nada');
+
+`,
+        mutants: [
+          {
+            description: 'trata PUT como não idempotente, confundindo com POST',
+            code: `function ehIdempotente(metodo) {
+  return ["GET", "HEAD", "DELETE", "OPTIONS"].includes(metodo);
+}`,
+          },
+          {
+            description: 'trata POST como idempotente',
+            code: `function ehIdempotente(metodo) {
+  return ["GET", "HEAD", "POST", "PUT", "DELETE", "OPTIONS"].includes(metodo);
+}`,
+          },
+          {
+            description: 'trata DELETE como não idempotente, porque "apagar duas vezes dá 404"',
+            code: `function ehIdempotente(metodo) {
+  return ["GET", "HEAD", "PUT", "OPTIONS"].includes(metodo);
+}`,
+          },
+        ],
+        hints: [
+          'O caso do esqueleto, `GET`, passa em todas as versões. Os métodos que separam as versões são os que dão dúvida na aula.',
+          'Um método que **cria** e um que **substitui**: qual dos dois é seguro repetir? E apagar de novo o que já foi apagado?',
+          "assert(ehIdempotente('PUT') === true, 'substituir de novo dá o mesmo estado'); assert(ehIdempotente('POST') === false, 'criar de novo cria outro'); assert(ehIdempotente('DELETE') === true, 'apagar de novo deixa apagado');",
+        ],
+        solution: `assert(ehIdempotente("PUT") === true, 'substituir de novo da o mesmo estado');
+assert(ehIdempotente("POST") === false, 'criar de novo cria outro');
+assert(ehIdempotente("DELETE") === true, 'apagar de novo deixa apagado');`,
+        explanation:
+          'As três sabotagens são os três erros mais comuns sobre idempotência, e cada asserção corrige um. `PUT` substitui: mandar a mesma substituição duas vezes deixa o mesmo estado. `POST` cria: duas vezes, dois recursos. E `DELETE` é o que mais engana — o segundo pedido pode responder `404`, mas o **estado** do servidor é o mesmo depois de um ou de dez, e é do estado que a definição fala, não do status.',
+      },
+    },
+    {
       kind: 'summary',
       markdown: `REST cabe numa frase: **o caminho nomeia uma coisa, o método diz o que fazer com ela.** Daí caem as regras — substantivo no plural, porque o verbo já está no método; hierarquia no caminho quando há posse (\`/usuarios/7/pedidos\`); e consulta para **filtrar** uma coleção, nunca para identificar um item, porque \`/pedidos/42\` é um endereço estável que dá para guardar, compartilhar e colocar em cache. Ações que não são criar/ler/alterar/apagar viram sub-recursos: pagar um pedido é criar um pagamento dentro dele. E quando nada encaixa, um caminho explicitamente fora do padrão é melhor do que torcer o resto para caber.`,
     },

@@ -307,6 +307,38 @@ console.log(somarSeguro('', 10));     // null`,
       },
     },
     {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-js-2-achar-soma-texto',
+        type: 'find-bug',
+        prompt:
+          'A última linha deste programa é um teste: ela lança um erro quando o total sai errado. E está lançando.\n\nO total deveria ser 50. Aponte a linha onde o defeito está.',
+        concepts: ['tipos-de-dados', 'operadores'],
+        difficulty: 'iniciante',
+        tags: ['javascript', 'tipos', 'depuracao'],
+        code: `// O valor veio de um campo de formulário, e campo de formulário entrega texto.
+const valorDigitado = "40";
+const frete = 10;
+
+const total = valorDigitado + frete;
+
+console.log("Total: " + total);
+
+if (total !== 50) throw new Error("esperava 50, veio " + total);`,
+        buggyLine: 5,
+        fix: 'const total = Number(valorDigitado) + frete;',
+        symptomLine: 9,
+        symptomFeedback:
+          'O teste está certo: ele só avisa que o total não é 50. Olhe o que foi impresso logo acima — "4010" não é uma soma, é uma colagem. Volte à linha que produziu esse valor.',
+        explanation:
+          '`"40"` é texto, e `+` com texto de um lado **junta** em vez de somar: `"40" + 10` vira `"4010"`. O programa não quebra ali — texto colado é um valor perfeitamente válido —, e o erro só aparece no fim, quando alguém confere o resultado.\n\nO conserto é converter antes de operar: `Number(valorDigitado) + frete`. Tudo que vem de formulário, URL ou arquivo chega como texto; converter na entrada, uma vez, evita ter que desconfiar de cada `+` depois.',
+        hints: [
+          'Leia a saída impressa antes do erro. Que número é aquele?',
+          'Um dos dois lados do `+` é texto. Qual, e de onde ele veio?',
+        ],
+      },
+    },
+    {
       kind: 'summary',
       markdown: `O tipo decide o comportamento do operador. O \`+\` junta quando um dos lados é texto, enquanto \`-\`, \`*\` e \`/\` convertem para número — por isso \`'10' - 5\` dá 5 e \`'10' + 5\` dá \`'105'\`. \`Number\` nunca lança erro: devolve \`NaN\` quando falha, e devolve \`0\` para texto vazio, que é a conversão que mais surpreende. Converta explicitamente, confira o resultado antes de usar, e compare sempre com \`===\`.`,
     },

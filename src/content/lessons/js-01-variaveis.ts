@@ -278,6 +278,37 @@ console.log(numeros.length);`,
       },
     },
     {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-js-1-achar-const',
+        type: 'find-bug',
+        prompt:
+          'Este programa quebra com `TypeError: Assignment to constant variable`.\n\nO erro aparece numa linha, mas a **decisão errada** foi tomada em outra. Aponte a linha onde o defeito está.',
+        concepts: ['variaveis'],
+        difficulty: 'iniciante',
+        tags: ['javascript', 'variaveis', 'depuracao'],
+        code: `const pontos = 0;
+const bonus = 10;
+
+console.log("Começando com " + pontos + " pontos");
+
+pontos = pontos + bonus;
+
+console.log("Agora com " + pontos + " pontos");`,
+        buggyLine: 1,
+        fix: 'let pontos = 0;',
+        symptomLine: 6,
+        symptomFeedback:
+          'É aqui que o programa para, mas esta linha está fazendo exatamente o que o programa precisa: somar o bônus aos pontos. A pergunta é por que somar não é permitido — e a resposta está em como `pontos` foi declarado, lá em cima.',
+        explanation:
+          '`pontos` é uma quantidade que **muda** durante o programa, e foi declarada com `const`, que promete o contrário. O JavaScript cumpre a promessa na primeira tentativa de troca — e é ali, na soma, que o erro aparece. Mas a soma está certa: a decisão errada foi na declaração.\n\nA regra da aula continua valendo — comece com `const` —, e este é o momento de aplicar a segunda metade dela: quando o programa exige que o valor mude, troque para `let`. É isso que faz cada `let` do seu código significar "atenção, isto varia".',
+        hints: [
+          'A mensagem de erro fala em "constant variable". Qual variável está sendo tratada como constante?',
+          'Encontre onde essa variável foi declarada e leia a palavra que veio antes do nome dela.',
+        ],
+      },
+    },
+    {
       kind: 'summary',
       markdown: `Uma variável guarda um valor para você usar depois, e o nome dela existe para quem lê o código. \`const\` promete que a etiqueta não sai da caixa; \`let\` permite trocá-la. Comece sempre com \`const\` e troque para \`let\` quando o programa exigir — assim cada \`let\` passa a avisar "atenção, isto muda". E lembre que \`const\` protege o nome, não o conteúdo: um objeto declarado com \`const\` ainda aceita ter suas propriedades alteradas.`,
     },

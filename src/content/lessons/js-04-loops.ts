@@ -253,6 +253,37 @@ console.log(somarAte(4)); // esperado: 10
       },
     },
     {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-js-4-achar-limite',
+        type: 'find-bug',
+        prompt:
+          'Este programa quebra com `TypeError: Cannot read properties of undefined (reading \'toUpperCase\')`.\n\nO erro é reportado numa linha, mas o defeito está em outra. Aponte a linha do defeito.',
+        concepts: ['loops', 'arrays'],
+        difficulty: 'iniciante',
+        tags: ['javascript', 'loops', 'depuracao'],
+        code: `const nomes = ["ana", "bia", "caio"];
+const gritados = [];
+
+for (let i = 0; i <= nomes.length; i++) {
+  gritados.push(nomes[i].toUpperCase());
+}
+
+console.log(gritados);`,
+        buggyLine: 4,
+        fix: 'for (let i = 0; i < nomes.length; i++) {',
+        symptomLine: 5,
+        symptomFeedback:
+          'É aqui que o programa para, mas esta linha funcionou três vezes antes de quebrar: "ana", "bia" e "caio" passaram por ela sem problema. Ela só quebrou quando recebeu um `i` que não existe na lista — e quem decide quais `i` existem é o laço.',
+        explanation:
+          'A lista tem 3 nomes, nas posições 0, 1 e 2. Com `i <= nomes.length`, o laço também roda com `i` igual a 3 — e `nomes[3]` é `undefined`, que não tem `toUpperCase`.\n\nÉ o erro de "um a mais" (*off-by-one*), o mais comum de todos os laços. A regra: para percorrer uma lista de `n` itens começando em 0, a condição é `i < n`, nunca `i <= n`. Ou, melhor ainda, use `for (const nome of nomes)` e deixe o JavaScript contar por você.',
+        hints: [
+          'Quantos nomes tem a lista, e quais são as posições deles?',
+          'Escreva os valores que `i` assume, um por um, até o laço parar.',
+        ],
+      },
+    },
+    {
       kind: 'summary',
       markdown: `Todo loop precisa de uma condição que **em algum momento fica falsa**. Quando usar um acumulador, declare-o antes do loop — dentro, ele reinicia a cada volta.`,
     },

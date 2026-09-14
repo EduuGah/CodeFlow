@@ -61,7 +61,7 @@ consistência visual > qualidade dos exercícios > progressão > gamificação.
 | Projetos | 7, com 22 critérios de aceitação |
 | Conceitos | 27, com grafo de pré-requisitos |
 | Flashcards | 22 |
-| Testes | 895 de unidade + 132 de navegador |
+| Testes | 1.001 de unidade + 132 de navegador |
 
 Todas as 31 aulas publicadas estão no padrão de profundidade: 300 a 830 palavras
 e de 4 a 7 exercícios em dificuldade crescente. Nenhuma está pendente de
@@ -177,7 +177,7 @@ são investimentos grandes o bastante para a escolha ser dele.
 
 ```bash
 npm run typecheck   # inclui e2e/ e playwright.config.ts
-npm test            # 895 testes
+npm test            # 1.001 testes
 npm run test:e2e    # 122 no navegador (antes: npx playwright install chromium)
 npm run build
 ```

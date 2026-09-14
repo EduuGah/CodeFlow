@@ -372,6 +372,39 @@ console.log(analisarStatus(429));`,
       },
     },
     {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-web-2-achar-separador',
+        type: 'find-bug',
+        prompt:
+          'A função lê a primeira linha de um pedido HTTP e separa o método do caminho. A última linha é um teste — e está falhando.\n\nAponte a linha onde o defeito está.',
+        concepts: ['http', 'strings'],
+        difficulty: 'iniciante',
+        tags: ['web', 'http', 'depuracao'],
+        code: `function interpretarLinha(linha) {
+  const partes = linha.split("/");
+  return { metodo: partes[0], caminho: partes[1] };
+}
+
+const pedido = interpretarLinha("GET /produtos HTTP/1.1");
+
+console.log(pedido);
+
+if (pedido.metodo !== "GET") throw new Error('esperava o método "GET", veio "' + pedido.metodo + '"');`,
+        buggyLine: 2,
+        fix: '  const partes = linha.split(" ");',
+        symptomLine: 10,
+        symptomFeedback:
+          'O teste só confere o método, e ele veio com um espaço sobrando: `"GET "`. Um espaço que sobra é sinal de que o corte foi feito no lugar errado — olhe o que a função usa como separador.',
+        explanation:
+          'A linha de pedido tem três partes separadas por **espaço**: método, caminho, versão. Cortar por `/` produz pedaços que não correspondem a nada disso — `"GET "` com espaço, `"produtos HTTP"`, `"1.1"`. O programa não quebra, porque cortar texto sempre dá certo; só o resultado é que não é o que o nome das variáveis promete.\n\nAo ler um formato, comece pela regra do formato, não pelo que parece separar as coisas à primeira vista. A regra aqui é a do HTTP: um espaço entre cada parte.',
+        hints: [
+          'Imprima `partes` e leia cada pedaço. Algum deles é exatamente `"GET"`?',
+          'Pela regra da aula, o que separa o método do caminho na primeira linha de um pedido?',
+        ],
+      },
+    },
+    {
       kind: 'summary',
       markdown: `Todo pedido HTTP é texto com uma forma fixa: linha de método e caminho, cabeçalhos, linha em branco, corpo. A resposta é igual, com um **status** no lugar do método. O método declara a intenção, e duas propriedades dele decidem o que se pode fazer: só \`GET\` é **seguro** (não muda nada, e o navegador o repete sozinho), e \`PUT\`/\`DELETE\` são **idempotentes** (repetir dá no mesmo) enquanto \`POST\` não é. No status, o primeiro dígito diz quase tudo — e a divisão entre \`4xx\` e \`5xx\` diz de quem é a culpa, que é o que decide se vale tentar de novo. Cuidado com o \`fetch\`: um \`500\` chega como resposta normal, porque para ele "deu certo" significa que a resposta chegou.`,
     },

@@ -383,6 +383,51 @@ console.log(cofre.senha);            // esperado: undefined`,
       },
     },
     {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-js-12-ordenar-contador',
+        type: 'order-steps',
+        prompt:
+          'Uma fábrica de contadores:\n\n~~~js\nfunction criarContador() {\n  let total = 0;\n  return function () {\n    total += 1;\n    return total;\n  };\n}\n\nconst contar = criarContador();\ncontar();\ncontar();\n~~~\n\nColoque na ordem o que acontece na memória enquanto isso roda.',
+        concepts: ['closures', 'escopo'],
+        difficulty: 'intermediario',
+        tags: ['javascript', 'closures'],
+        steps: [
+          {
+            id: 'escopo',
+            text: '`criarContador()` roda e cria um escopo novo, com `total` valendo 0',
+            ordem: 1,
+          },
+          {
+            id: 'fecho',
+            text: 'A função interna é criada guardando uma referência a esse escopo, e é devolvida',
+            ordem: 2,
+          },
+          {
+            id: 'sobrevive',
+            text: '`criarContador` termina, mas o escopo não é descartado: a função devolvida ainda aponta para ele',
+            ordem: 3,
+          },
+          {
+            id: 'um',
+            text: 'O primeiro `contar()` roda `total += 1` no escopo guardado: `total` passa a valer 1',
+            ordem: 4,
+          },
+          {
+            id: 'dois',
+            text: 'O segundo `contar()` encontra o mesmo escopo, com o mesmo `total`, e o leva a 2',
+            ordem: 5,
+          },
+        ],
+        explanation:
+          'O ponto inteiro está no passo do meio: quando uma função termina, o escopo dela normalmente vai embora — mas não se alguma função criada lá dentro continua viva. A função devolvida "fecha" sobre o escopo (daí *closure*), e cada chamada dela encontra o mesmo `total`, com o valor que ficou da chamada anterior. Um segundo `criarContador()` criaria outro escopo, com outro `total`: por isso dois contadores não se atrapalham.',
+        hints: [
+          'Antes de a função interna existir, o que precisa existir?',
+          'O que impede o `total` de sumir quando a fábrica termina?',
+        ],
+      },
+    },
+    {
       kind: 'summary',
       markdown: `Um território não é apagado enquanto alguma função criada nele continuar viva. Esse par — função mais território — é a **closure**, e é o que permite guardar estado privado sem variável global. A frase que resolve as dúvidas: closure captura a **variável**, não o valor — foi por isso que três closures sobre uma \`var\` de laço devolviam todas o mesmo número, e é por isso que \`let\`, criando uma variável nova a cada volta, conserta. Funções nascidas na mesma chamada compartilham o território; chamadas diferentes da mesma fábrica não compartilham nada.`,
     },

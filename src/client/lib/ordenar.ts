@@ -145,3 +145,23 @@ export function problemasDaOrdenacao(passos: PassoOrdenavel[]): string[] {
 
   return problemas;
 }
+
+/**
+ * O texto de um passo, dividido em trechos comuns e trechos de código.
+ *
+ * Os passos falam de programas, e programas têm nomes: `dobro(4)`, `total`,
+ * `.catch`. O autor marca esses nomes com crase, como no resto do conteúdo,
+ * e a tela os mostra em monoespaçada. Sem isto, a crase aparecia literalmente
+ * na frase — "o nome `dobro` passa a existir" — que é ruído justamente onde o
+ * aluno precisa ler com atenção.
+ *
+ * Os índices ímpares são código. Uma crase sem par fecha no fim da frase.
+ */
+export function trechosDoPasso(texto: string): string[] {
+  return texto.split('`');
+}
+
+/** O texto sem as crases, para rótulos, anúncios e comparações. */
+export function textoDoPasso(texto: string): string {
+  return texto.replace(/`/g, '');
+}

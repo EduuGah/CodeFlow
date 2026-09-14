@@ -465,6 +465,30 @@ if (r !== "b a") throw new Error("inverter(\\"a b\\") deveria devolver \\"b a\\"
       },
     },
     {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-logica-3-ordenar-simulacao',
+        type: 'order-steps',
+        prompt:
+          'Simule na mão:\n\n~~~js\nlet soma = 0;\nfor (const n of [3, 5]) {\n  if (n > 4) soma += n;\n}\n~~~\n\nColoque na ordem o que acontece, passo a passo, até o fim.',
+        concepts: ['simulacao', 'loops'],
+        difficulty: 'iniciante',
+        tags: ['logica', 'simulacao'],
+        steps: [
+          { id: 'zero', text: '`soma` nasce valendo 0', ordem: 1 },
+          { id: 'tres', text: '`n` vale 3; `3 > 4` é falso, e `soma` continua 0', ordem: 2 },
+          { id: 'cinco', text: '`n` vale 5; `5 > 4` é verdadeiro, e `soma` passa a 5', ordem: 3 },
+          { id: 'fim', text: 'A lista acabou: o laço termina com `soma` valendo 5', ordem: 4 },
+        ],
+        explanation:
+          'A tabela da aula, escrita em frases: uma linha por volta, com o valor de `n`, o resultado da condição e o estado de `soma` depois dela. Repare que a volta do 3 existe mesmo sem mudar nada — pular uma volta "porque não fez nada" é como se perde o fio da simulação, e é onde os erros de um-a-mais se escondem.',
+        hints: [
+          'Antes de o laço rodar, que valor `soma` tem?',
+          'Uma volta em que o `if` é falso ainda é uma volta.',
+        ],
+      },
+    },
+    {
       kind: 'summary',
       markdown: `Antes de rodar, **preveja**. Depois compare. Quando a previsão erra, você achou o ponto exato em que seu modelo mental está furado — e corrigir isso vale mais do que acertar o exercício. Simular funciona onde reler falha, porque a simulação não sabe da sua intenção: ela segue o que está escrito. Em laços longos, três voltas bastam — a primeira, a última e uma do meio. E se você consegue enunciar a **invariante**, a frase que continua verdadeira ao fim de toda volta, consegue conferir qualquer volta sem percorrer as anteriores.`,
     },

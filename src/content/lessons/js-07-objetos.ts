@@ -260,6 +260,37 @@ if (r !== "Bruno, 35 anos, cidade não informada") throw new Error("Esperado \\"
       },
     },
     {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-js-7-achar-ponto',
+        type: 'find-bug',
+        prompt:
+          'Este programa quebra com `TypeError: Cannot read properties of undefined (reading \'toUpperCase\')`.\n\nAponte a linha onde o defeito está.',
+        concepts: ['objetos'],
+        difficulty: 'iniciante',
+        tags: ['javascript', 'objetos', 'depuracao'],
+        code: `const traducoes = { ola: "hello", tchau: "bye", obrigado: "thanks" };
+
+function traduzir(palavra) {
+  const traducao = traducoes.palavra;
+  return traducao.toUpperCase();
+}
+
+console.log(traduzir("ola"));`,
+        buggyLine: 4,
+        fix: '  const traducao = traducoes[palavra];',
+        symptomLine: 5,
+        symptomFeedback:
+          'É aqui que o erro aparece, mas esta linha só recebeu `undefined` e tentou usar. A pergunta é de onde veio esse `undefined` — e ele veio da linha de cima, que procurou a tradução no lugar errado.',
+        explanation:
+          '`traducoes.palavra` procura uma propriedade chamada literalmente **"palavra"** — o ponto não lê a variável, lê o nome que vem depois dele. Como o objeto não tem essa chave, o resultado é `undefined`, sem erro nenhum; o erro só aparece na linha seguinte, quando alguém tenta chamar um método nele.\n\nQuando o nome da propriedade está numa variável, a sintaxe é a de colchetes: `traducoes[palavra]`. É a única forma de o JavaScript usar o **valor** de `palavra` como chave.',
+        hints: [
+          'O objeto tem as chaves `ola`, `tchau` e `obrigado`. Que chave a função está procurando de verdade?',
+          'Ponto e colchete não fazem a mesma coisa quando o nome da chave está numa variável.',
+        ],
+      },
+    },
+    {
       kind: 'summary',
       markdown: `Objetos guardam dados por **nome**, não por posição. Chave inexistente devolve \`undefined\` em silêncio — e o erro só estoura quando você tenta ler algo dentro desse \`undefined\`. Verifique o nível de cima antes de descer.`,
     },

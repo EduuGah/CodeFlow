@@ -363,6 +363,67 @@ console.log(lerCabecalhos(bruto));`,
       },
     },
     {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-web-3-refatorar-caixa',
+        type: 'refactor',
+        prompt:
+          'Este código **já funciona** — os testes passam antes de você tocar nele.\n\nEle lê o `Content-Type` de um objeto de cabeçalhos tentando as grafias uma por uma. Reescreva com a regra da aula: nome de cabeçalho não diferencia maiúsculas, então **normalize** em vez de enumerar.',
+        concepts: ['http', 'strings'],
+        difficulty: 'intermediario',
+        tags: ['web', 'cabecalhos', 'refatoracao'],
+        initialCode: `function tipoDoConteudo(cabecalhos) {
+  if (cabecalhos["content-type"] !== undefined) return cabecalhos["content-type"];
+  if (cabecalhos["Content-Type"] !== undefined) return cabecalhos["Content-Type"];
+  if (cabecalhos["CONTENT-TYPE"] !== undefined) return cabecalhos["CONTENT-TYPE"];
+  if (cabecalhos["Content-type"] !== undefined) return cabecalhos["Content-type"];
+  return undefined;
+}`,
+        constraints: [
+          { description: 'Normalize a caixa com toLowerCase', required: '.toLowerCase(' },
+          {
+            description: 'Sem enumerar grafias: nada de "Content-Type" com maiúsculas no código',
+            forbidden: '"Content-Type"',
+          },
+          { description: 'Nem a versão gritada', forbidden: '"CONTENT-TYPE"' },
+          { description: 'No máximo 6 linhas de código', maxLines: 6 },
+        ],
+        tests: [
+          {
+            description: 'encontra o cabeçalho em minúsculas',
+            assertion: `const r = tipoDoConteudo({ "content-type": "text/html" }); if (r !== 'text/html') throw new Error('Esperava "text/html", veio ' + JSON.stringify(r) + '.');`,
+          },
+          {
+            description: 'encontra o cabeçalho como o navegador escreve',
+            assertion: `const r = tipoDoConteudo({ "Content-Type": "application/json" }); if (r !== 'application/json') throw new Error('Esperava "application/json", veio ' + JSON.stringify(r) + '.');`,
+          },
+          {
+            description: 'encontra o cabeçalho em maiúsculas',
+            assertion: `const r = tipoDoConteudo({ "CONTENT-TYPE": "image/png" }); if (r !== 'image/png') throw new Error('Esperava "image/png", veio ' + JSON.stringify(r) + '.');`,
+            hidden: true,
+          },
+          {
+            description: 'sem o cabeçalho, devolve undefined',
+            assertion: `const r = tipoDoConteudo({ "Accept": "*/*" }); if (r !== undefined) throw new Error('Sem Content-Type o resultado precisa ser undefined, veio ' + JSON.stringify(r) + '.');`,
+            hidden: true,
+          },
+        ],
+        hints: [
+          'Quatro `if` para quatro grafias — e a quinta grafia que aparecer vai passar direto. O problema não é o número de `if`: é comparar sem normalizar.',
+          'Percorra as chaves do objeto. Para cada uma, compare a versão em minúsculas dela com o nome procurado, também em minúsculas.',
+          'function tipoDoConteudo(cabecalhos) {\n  for (const chave of Object.keys(cabecalhos)) {\n    if (chave.toLowerCase() === "content-type") return cabecalhos[chave];\n  }\n  return undefined;\n}',
+        ],
+        solution: `function tipoDoConteudo(cabecalhos) {
+  for (const chave of Object.keys(cabecalhos)) {
+    if (chave.toLowerCase() === "content-type") return cabecalhos[chave];
+  }
+  return undefined;
+}`,
+        explanation:
+          'A versão original enumera grafias, e enumerar é sempre incompleto: `Content-type`, `CONTENT-type`, `content-Type`… o HTTP aceita todas, e um cliente novo pode mandar qualquer uma. Normalizar resolve a classe inteira de casos com uma comparação só, e é o que a aula chama de "normalizar os dois lados": a chave que chegou vira minúscula, e o que se procura já está em minúscula.\n\nOs testes não mudaram — e o teste oculto de maiúsculas, que a versão antiga passava por ter um `if` dedicado, agora passa por princípio.',
+      },
+    },
+    {
       kind: 'summary',
       markdown: `Cabeçalhos são pares \`Nome: valor\` que descrevem a mensagem, e é neles que mora a maior parte dos problemas de integração. \`Content-Type\` **descreve o corpo que está indo** — não é um pedido, é um aviso —, enquanto \`Accept\` é que pede formato de resposta; confundir os dois rende um \`400\` difícil de entender. Nomes de cabeçalho não diferenciam maiúsculas, então normalize os **dois** lados antes de comparar: normalizar só um funciona no seu teste e falha em produção. E o valor de \`Content-Type\` quase sempre traz \`; charset=utf-8\` grudado, o que faz a comparação exata falhar — pergunte com \`startsWith\`.`,
     },

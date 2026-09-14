@@ -370,6 +370,80 @@ nomeDoUsuario(-1).then(console.log);  // esperado: desconhecido`,
       },
     },
     {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-js-15-refatorar-then',
+        type: 'refactor',
+        prompt:
+          'Este código **já funciona** — todos os testes passam antes de você tocar nele.\n\nReescreva `cidadeDoUsuario` com `async`/`await`, sem nenhum `.then`, mantendo os testes verdes. As tabelas e as funções `buscarUsuario` e `buscarCidade` ficam como estão: são o "servidor" deste exercício.',
+        concepts: ['promises', 'assincronia'],
+        difficulty: 'intermediario',
+        tags: ['javascript', 'async-await', 'refatoracao'],
+        initialCode: `const usuarios = { 1: { id: 1, nome: "Ana", cidadeId: 2 }, 5: { id: 5, nome: "Bia", cidadeId: 9 } };
+const cidades = { 2: { id: 2, nome: "Recife" }, 9: { id: 9, nome: "Belém" } };
+
+function buscarUsuario(id) {
+  return Promise.resolve(usuarios[id]);
+}
+
+function buscarCidade(id) {
+  return Promise.resolve(cidades[id]);
+}
+
+function cidadeDoUsuario(usuarioId) {
+  return buscarUsuario(usuarioId).then(function (usuario) {
+    return buscarCidade(usuario.cidadeId).then(function (cidade) {
+      return usuario.nome + " mora em " + cidade.nome;
+    });
+  });
+}`,
+        constraints: [
+          { description: 'Declare a função como async', required: 'async' },
+          { description: 'Espere cada resultado com await', required: 'await ' },
+          { description: 'Sem .then', forbidden: '.then(' },
+        ],
+        tests: [
+          {
+            description: 'monta a frase com o nome do usuário e o da cidade',
+            assertion: `const r = await cidadeDoUsuario(1); if (r !== 'Ana mora em Recife') throw new Error('Esperava "Ana mora em Recife", veio "' + r + '".');`,
+          },
+          {
+            description: 'busca a cidade pelo cidadeId do usuário, e não por um número fixo',
+            assertion: `const r = await cidadeDoUsuario(5); if (r !== 'Bia mora em Belém') throw new Error('Para o usuário 5 a cidade é a 9, Belém. Veio "' + r + '".');`,
+            hidden: true,
+          },
+          {
+            description: 'continua devolvendo uma promise, e não a frase pronta',
+            assertion: `const p = cidadeDoUsuario(1); if (!p || typeof p.then !== 'function') throw new Error('cidadeDoUsuario precisa devolver uma promise: quem chama vai esperar por ela.'); await p;`,
+            hidden: true,
+          },
+        ],
+        hints: [
+          'Cada `.then(function (x) {...})` é um lugar onde você esperou por um valor. `await` faz a mesma espera, sem abrir função nova.',
+          'Guarde cada resultado numa constante: primeiro o usuário, depois a cidade. A segunda busca usa um campo do primeiro resultado.',
+          'async function cidadeDoUsuario(usuarioId) {\n  const usuario = await buscarUsuario(usuarioId);\n  const cidade = await buscarCidade(usuario.cidadeId);\n  return usuario.nome + " mora em " + cidade.nome;\n}',
+        ],
+        solution: `const usuarios = { 1: { id: 1, nome: "Ana", cidadeId: 2 }, 5: { id: 5, nome: "Bia", cidadeId: 9 } };
+const cidades = { 2: { id: 2, nome: "Recife" }, 9: { id: 9, nome: "Belém" } };
+
+function buscarUsuario(id) {
+  return Promise.resolve(usuarios[id]);
+}
+
+function buscarCidade(id) {
+  return Promise.resolve(cidades[id]);
+}
+
+async function cidadeDoUsuario(usuarioId) {
+  const usuario = await buscarUsuario(usuarioId);
+  const cidade = await buscarCidade(usuario.cidadeId);
+  return usuario.nome + " mora em " + cidade.nome;
+}`,
+        explanation:
+          'As duas versões fazem o mesmo, na mesma ordem: buscam o usuário, esperam, buscam a cidade, esperam, montam a frase. A diferença é que o `.then` obriga a abrir uma função para cada espera, e a segunda espera precisa ficar **dentro** da primeira para enxergar `usuario` — daí a escada. Com `await`, as duas esperas ficam no mesmo escopo, uma embaixo da outra, e o código lê como o que ele é: uma sequência.\n\nRepare no teste oculto que continua verde: `cidadeDoUsuario` ainda devolve uma promise. `async` não tira o assíncrono da função — só tira o aninhamento.',
+      },
+    },
+    {
       kind: 'summary',
       markdown: `\`await\` pausa só a função onde está, e por isso o código assíncrono passa a se ler de cima para baixo. A função roda de forma síncrona até o primeiro \`await\` e só então devolve o controle — é isso que explica a ordem de qualquer programa assíncrono. Toda função \`async\` devolve uma promise, mesmo quando o \`return\` é um número, então quem chama precisa esperar. Falhas voltam a ser \`try/catch\`, e um bloco só cobre várias chamadas seguidas. Em laços: \`for...of\` com \`await\` espera uma de cada vez, \`Promise.all\` com \`map\` espera todas juntas, e \`forEach\` com \`async\` **não espera nada** — ele descarta a promise que permitiria esperar.`,
     },

@@ -334,6 +334,43 @@ precosDisponiveis(['pao', '', 'leite']).then(console.log); // esperado: [6, 10]`
       },
     },
     {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-js-16-ordenar-rejeicao',
+        type: 'order-steps',
+        prompt:
+          'Uma cadeia com tratamento no fim:\n\n~~~js\nbuscar()\n  .then(processar)\n  .then(salvar)\n  .catch(tratar);\n~~~\n\n`buscar()` vai **rejeitar**. Coloque na ordem o que acontece.',
+        concepts: ['promises', 'depuracao'],
+        difficulty: 'intermediario',
+        tags: ['javascript', 'promises', 'erros'],
+        steps: [
+          { id: 'pendente', text: '`buscar()` devolve uma promise ainda pendente', ordem: 1 },
+          {
+            id: 'registra',
+            text: '`processar`, `salvar` e `tratar` são registrados na cadeia, sem rodar',
+            ordem: 2,
+          },
+          { id: 'rejeita', text: 'A promise rejeita com um erro', ordem: 3 },
+          {
+            id: 'pula',
+            text: '`processar` e `salvar` são pulados: o erro atravessa os `.then` sem parar',
+            ordem: 4,
+          },
+          {
+            id: 'trata',
+            text: '`tratar` recebe o erro, e a cadeia termina resolvida com o que ele devolver',
+            ordem: 5,
+          },
+        ],
+        explanation:
+          'Registrar não é rodar: os três `.then`/`.catch` entram na cadeia no mesmo instante, antes de qualquer resposta. Quando a rejeição chega, ela procura o **primeiro** tratador de erro dali para a frente — e passa direto pelos `.then`, que só sabem tratar sucesso. É por isso que um `.catch` no fim da cadeia cobre tudo o que veio antes dele; e é por isso que um `.catch` no **meio** engole o erro e deixa o resto rodar como se nada tivesse acontecido.',
+        hints: [
+          'Os `.then` rodam na hora em que são escritos, ou só quando a promise decide?',
+          'Quem trata rejeição: `.then` ou `.catch`?',
+        ],
+      },
+    },
+    {
       kind: 'summary',
       markdown: `Uma promise sem destino é uma falha que some: ou você a espera dentro de um \`try\`, ou encadeia um \`.catch\`. O \`try/catch\` só captura o que ele **espera** — sem \`await\`, a rejeição acontece depois que o bloco já terminou. Um \`catch\` que devolve um valor de reserva esconde a diferença entre "o valor é zero" e "não consegui saber": trate o que você sabe tratar e deixe subir o resto. Repetir a chamada só ajuda quando a falha é passageira e a operação pode acontecer duas vezes sem consequência — e mesmo assim a última falha precisa subir. E escolher entre \`all\` e \`allSettled\` é decidir se uma falha isolada invalida o conjunto.`,
     },

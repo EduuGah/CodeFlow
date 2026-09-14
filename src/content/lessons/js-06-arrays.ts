@@ -255,6 +255,78 @@ console.log(maiorNota([7, 9, 4])); // esperado: 9
       },
     },
     {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-js-6-testar-media',
+        type: 'write-test',
+        prompt:
+          'A função abaixo está **correta**. Seu trabalho é escrever os testes dela.\n\nUse `assert(condicao, mensagem)` — ele lança quando a condição é falsa. Seus testes rodam contra esta versão, onde precisam **passar**, e contra três versões quebradas de propósito, onde precisam **falhar**.',
+        concepts: ['arrays', 'casos-extremos'],
+        difficulty: 'intermediario',
+        tags: ['javascript', 'arrays', 'testes'],
+        subject: `function media(notas) {
+  if (notas.length === 0) return null;
+
+  let soma = 0;
+  for (const nota of notas) {
+    soma += nota;
+  }
+  return soma / notas.length;
+}`,
+        initialCode: `// Escreva asserções sobre \`media\`. Uma por linha.
+//
+// assert(media([10, 10]) === 10, 'a média de duas notas 10 é 10');
+
+`,
+        mutants: [
+          {
+            description: 'devolve a soma em vez da média',
+            code: `function media(notas) {
+  if (notas.length === 0) return null;
+
+  let soma = 0;
+  for (const nota of notas) {
+    soma += nota;
+  }
+  return soma;
+}`,
+          },
+          {
+            description: 'divide sempre por 3, o tamanho da lista do exemplo da aula',
+            code: `function media(notas) {
+  if (notas.length === 0) return null;
+
+  let soma = 0;
+  for (const nota of notas) {
+    soma += nota;
+  }
+  return soma / 3;
+}`,
+          },
+          {
+            description: 'não trata a lista vazia, e devolve NaN em vez de null',
+            code: `function media(notas) {
+  let soma = 0;
+  for (const nota of notas) {
+    soma += nota;
+  }
+  return soma / notas.length;
+}`,
+          },
+        ],
+        hints: [
+          'Comece pelo caso normal: uma lista curta cuja média você calcula de cabeça.',
+          'Escolha uma lista cujo tamanho não seja 3, e cuja soma seja diferente da média — assim cada versão errada produz um número diferente.',
+          'Falta o caso extremo da aula: o que a função promete devolver para uma lista vazia?',
+          "assert(media([4, 8]) === 6, 'a média de 4 e 8 é 6'); assert(media([]) === null, 'lista vazia não tem média');",
+        ],
+        solution: `assert(media([4, 8]) === 6, 'a media de 4 e 8 e 6');
+assert(media([]) === null, 'lista vazia nao tem media');`,
+        explanation:
+          'Repare na escolha de `[4, 8]`: a soma é 12, a média é 6, e dividir por 3 dá 4. Três resultados diferentes para três versões — cada defeito produz um número próprio, e uma asserção só separa todos. Já `[10, 10]`, do esqueleto, também pega dois deles, mas nada diz sobre a lista vazia.\n\nÉ o que "cobertura" significa na prática: não quantas linhas o teste percorre, mas quantos defeitos ele conseguiria perceber. O caso extremo da aula de arrays — a lista vazia — entra no teste pelo mesmo motivo que entra na função: é onde as coisas quebram.',
+      },
+    },
+    {
       kind: 'summary',
       markdown: `Índices começam em **zero**, então o último é \`length - 1\` e a condição do loop é \`i < length\`. Ao procurar o maior valor, comece pelo primeiro item da lista — nunca por zero.`,
     },

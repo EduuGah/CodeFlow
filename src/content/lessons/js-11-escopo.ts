@@ -358,6 +358,39 @@ console.log(contarMaioresQue([1, 5, 9], 4)); // esperado: 2`,
       },
     },
     {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-js-11-achar-sombra',
+        type: 'find-bug',
+        prompt:
+          'Este programa quebra com `ReferenceError: Cannot access \'aprovados\' before initialization`.\n\nA variável existe: foi declarada lá em cima, com valor 0. Aponte a linha onde o defeito está.',
+        concepts: ['escopo', 'variaveis'],
+        difficulty: 'intermediario',
+        tags: ['javascript', 'escopo', 'depuracao'],
+        code: `function contarAprovados(notas) {
+  let aprovados = 0;
+
+  for (const nota of notas) {
+    if (nota >= 7) {
+      let aprovados = aprovados + 1;
+    }
+  }
+
+  return aprovados;
+}
+
+console.log(contarAprovados([8, 5, 9]));`,
+        buggyLine: 6,
+        fix: '      aprovados = aprovados + 1;',
+        explanation:
+          'O `let` dentro do `if` não atualiza a variável de cima: ele **declara uma variável nova**, com o mesmo nome, que só existe naquele bloco. E o lado direito, `aprovados + 1`, já se refere a essa nova — que ainda não recebeu valor. Daí o erro de "antes da inicialização".\n\nSem o `let`, a linha volta a ser uma atribuição à variável de fora, que é o que se queria. A regra da aula: `let` e `const` criam nomes no bloco onde aparecem. Reaproveitar um nome que já existe fora é sombreamento, e quase sempre é engano.',
+        hints: [
+          'A mensagem fala de uma variável que ainda não foi inicializada. Mas ela foi, com 0. Então de qual `aprovados` a mensagem está falando?',
+          'Procure a palavra `let` dentro do laço e pergunte o que ela faz ali.',
+        ],
+      },
+    },
+    {
       kind: 'summary',
       markdown: `As chaves \`{}\` criam um território: o que nasce dentro morre ali. De dentro se enxerga fora, nunca o contrário. O que precisa sobreviver ao loop nasce **antes** dele — e essa é a explicação de metade dos acumuladores que devolvem \`NaN\`. Antes de rodar, o JavaScript anota os nomes do território: \`function\` sobe inteira, \`var\` sobe valendo \`undefined\`, e \`let\`/\`const\` sobem reservados — daí a mensagem \`Cannot access before initialization\`, que é diferente de \`is not defined\` e aponta para outro tipo de erro. Declarar de novo um nome que já existe fora cria sombra, e não altera o de fora. Use \`const\` por padrão, \`let\` quando for reatribuir, e reconheça \`var\` sem escrevê-la.`,
     },

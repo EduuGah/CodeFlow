@@ -333,6 +333,35 @@ console.log(lerProduto('{"nome":"","preco":10}'));       // null`,
       },
     },
     {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-js-17-achar-parse',
+        type: 'find-bug',
+        prompt:
+          'Este programa quebra com `TypeError: Cannot read properties of undefined (reading \'toUpperCase\')`.\n\nA resposta do servidor tem o campo `nome`, você pode conferir. Aponte a linha onde o defeito está.',
+        concepts: ['json', 'objetos'],
+        difficulty: 'intermediario',
+        tags: ['javascript', 'json', 'depuracao'],
+        code: `// O que chegou do servidor, exatamente como chegou.
+const resposta = '{"id": 7, "nome": "Ana", "ativo": true}';
+
+const usuario = resposta;
+
+console.log(usuario.nome.toUpperCase());`,
+        buggyLine: 4,
+        fix: 'const usuario = JSON.parse(resposta);',
+        symptomLine: 6,
+        symptomFeedback:
+          'É aqui que quebra, e `usuario.nome` deveria existir — a resposta tem o campo. O detalhe é o que `usuario` é neste momento: um objeto com campos, ou um texto que **descreve** um objeto? Suba uma linha.',
+        explanation:
+          'O que chega da rede é sempre **texto**. `resposta` é uma string, e string não tem propriedade `nome` — ler `usuario.nome` devolve `undefined` em silêncio, e o erro só aparece ao tentar usar isso.\n\n`JSON.parse` é a fronteira: transforma o texto no objeto que ele descreve. Sem ele, o programa está tratando a **descrição** de um usuário como se fosse o usuário. No `console.log` os dois parecem iguais, e é por isso que a aula insiste em converter na entrada, uma vez, e nunca mais carregar texto pelo programa.',
+        hints: [
+          'Que tipo de valor `resposta` é? Olhe as aspas que envolvem tudo.',
+          'Que função transforma um texto JSON no objeto correspondente?',
+        ],
+      },
+    },
+    {
       kind: 'summary',
       markdown: `\`stringify\` transforma objeto em texto, \`parse\` traz de volta — e o texto no meio **parece** um objeto sem ser um. Funções, \`undefined\` e datas não atravessam: as duas primeiras somem em silêncio, e a terceira volta como string. É por isso que a ida e volta pelo JSON, usada como cópia profunda, cobra caro — quando a intenção é copiar, \`structuredClone\` é a ferramenta feita para isso. Todo \`parse\` de origem externa precisa de \`try/catch\`, porque você não controla o que chega. E JSON válido não é dado válido: a análise garante a forma, conferir o conteúdo continua sendo seu trabalho.`,
     },

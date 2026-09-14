@@ -1,4 +1,4 @@
-import { test as base, type Page } from '@playwright/test';
+import { expect, test as base, type Page } from '@playwright/test';
 
 import type { Exercise } from '../src/content/types';
 
@@ -239,7 +239,7 @@ export async function irAteOEditor(page: Page): Promise<void> {
   );
 }
 
-export { expect } from '@playwright/test';
+export { expect };
 
 /**
  * Aula curta, com um exercício de cada tipo que exige verificação.
@@ -340,7 +340,11 @@ async function resolverExercicio(page: Page, exercicio: Exercise): Promise<void>
     case 'order-steps': {
       // Sobe cada passo até a posição dele, um de cada vez — que é exatamente o
       // que o aluno faz. A ordem certa vem do próprio conteúdo.
-      const certa = [...exercicio.steps].sort((a, b) => a.ordem - b.ordem).map((p) => p.text);
+      // Sem as crases: a tela mostra os nomes de código em monoespaçada, e o
+      // texto que se lê de volta é o texto limpo.
+      const certa = [...exercicio.steps]
+        .sort((a, b) => a.ordem - b.ordem)
+        .map((p) => p.text.replace(/`/g, ''));
 
       const naTela = () =>
         page.locator('ol li span.flex-1').allTextContents().then((t) => t.map((x) => x.trim()));
@@ -383,7 +387,12 @@ async function resolverExercicio(page: Page, exercicio: Exercise): Promise<void>
     }
 
     case 'find-bug': {
-      await page.getByRole('radio', { name: new RegExp(`^Linha ${exercicio.buggyLine}:`) }).check();
+      // Clica na linha inteira (o <label>), como o aluno faz — e não no rádio,
+      // que é `sr-only`: um ponto de 1px em cima do número da linha, onde o
+      // Playwright encontra o número interceptando o clique e tenta para sempre.
+      const radio = page.getByRole('radio', { name: new RegExp(`^Linha ${exercicio.buggyLine}:`) });
+      await page.locator('label').filter({ has: radio }).click();
+      await expect(radio).toBeChecked();
       await page.getByRole('button', { name: /Apontar a linha|Verificar de novo/ }).click();
       await page
         .getByText(`A linha ${exercicio.buggyLine} é onde o defeito está`)

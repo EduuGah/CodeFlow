@@ -6,6 +6,8 @@ import {
   mover,
   primeiroErro,
   problemasDaOrdenacao,
+  textoDoPasso,
+  trechosDoPasso,
   type PassoOrdenavel,
 } from './ordenar';
 
@@ -160,5 +162,27 @@ describe('validação do conteúdo', () => {
   it('recusa exercício em que qualquer ordem seria aceita', () => {
     expect(problemasDaOrdenacao(passos(1, 1, 1)).join(' ')).toContain('qualquer ordem');
     expect(problemasDaOrdenacao(passos(1)).join(' ')).toContain('qualquer ordem');
+  });
+});
+
+describe('código dentro do passo', () => {
+  it('separa os trechos entre crases, com o código nos índices ímpares', () => {
+    expect(trechosDoPasso('o nome `dobro` passa a existir')).toEqual([
+      'o nome ',
+      'dobro',
+      ' passa a existir',
+    ]);
+  });
+
+  it('um passo sem crase é um trecho só', () => {
+    expect(trechosDoPasso('A promise rejeita com um erro')).toEqual([
+      'A promise rejeita com um erro',
+    ]);
+  });
+
+  it('o texto limpo é o que o leitor de tela e o rótulo do botão usam', () => {
+    expect(textoDoPasso('`dobro(4)` é chamado: o argumento 4 vai para `n`')).toBe(
+      'dobro(4) é chamado: o argumento 4 vai para n'
+    );
   });
 });

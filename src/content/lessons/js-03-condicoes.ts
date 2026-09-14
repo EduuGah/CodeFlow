@@ -305,6 +305,40 @@ console.log(classificar(-1));   // idade inválida`,
       },
     },
     {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-js-3-achar-atribuicao',
+        type: 'find-bug',
+        prompt:
+          'Este programa tem um teste no fim, e ele está falhando: um visitante está sendo tratado como administrador.\n\nAponte a linha onde o defeito está.',
+        concepts: ['condicoes', 'operadores'],
+        difficulty: 'iniciante',
+        tags: ['javascript', 'condicoes', 'depuracao'],
+        code: `function ehAdministrador(usuario) {
+  if (usuario.papel = "admin") {
+    return true;
+  }
+  return false;
+}
+
+const visitante = { nome: "Ana", papel: "visitante" };
+const resultado = ehAdministrador(visitante);
+
+if (resultado !== false) throw new Error("um visitante foi tratado como administrador");`,
+        buggyLine: 2,
+        fix: '  if (usuario.papel === "admin") {',
+        symptomLine: 11,
+        symptomFeedback:
+          'O teste só está contando o que aconteceu: `ehAdministrador` devolveu `true` para um visitante. A decisão de devolver `true` vem de dentro da função — releia a condição dela com atenção a cada caractere.',
+        explanation:
+          'Um `=` só. A linha não **compara** o papel com `"admin"`: ela **atribui** `"admin"` ao papel, e o resultado de uma atribuição é o valor atribuído — `"admin"`, que conta como verdadeiro. O `if` entra sempre, e de quebra o visitante saiu da função promovido.\n\nÉ um dos bugs mais silenciosos que existem, porque a linha parece uma comparação e o JavaScript aceita sem reclamar. Comparação é `===`, sempre com três; e se você ler um `=` sozinho dentro de um `if`, desconfie antes de qualquer outra coisa.',
+        hints: [
+          'A função devolve `true` para todo mundo. O que faz um `if` entrar sempre?',
+          'Conte os sinais de igual na condição.',
+        ],
+      },
+    },
+    {
       kind: 'summary',
       markdown: `Condições escolhem caminhos, e o JavaScript **para na primeira verdadeira** — por isso encadeamentos vão da faixa mais restritiva para a mais ampla. Compare com \`===\`, nunca com \`=\`, que atribui e faz a condição passar sempre. Qualquer valor pode ir num \`if\`: só seis são falsos, e o zero entre eles é a armadilha — quando zero é uma resposta legítima, teste \`=== undefined\` em vez de \`!valor\`.`,
     },

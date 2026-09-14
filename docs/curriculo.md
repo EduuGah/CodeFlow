@@ -24,14 +24,15 @@ Fase 7  Projeto final            ░░░░░░░░░░░░░░░�
 | | Hoje | Previsto | Feito |
 | --- | ---: | ---: | ---: |
 | Aulas | **31** | 135 | 23% |
-| Exercícios | **151** | ~700 | 22% |
+| Exercícios | **174** | ~700 | 25% |
 | Tipos de exercício | **8** | 11 | 73% |
 | Motores de execução | **1** | 7 | 14% |
 | Projetos | **7** | ~30 | 23% |
 
-**Últimas aulas concluídas**, da mais recente para a mais antiga: segurança na
-web, CORS, tokens, autenticação, REST, cabeçalhos, HTTP, cliente e servidor —
-a trilha "Como a Web Funciona" inteira.
+**Último trabalho de conteúdo** (2026-09-14): 23 exercícios novos, um por aula,
+para toda aula ter ao menos um dos quatro tipos da Fase 1 — encontrar o bug,
+ordenar passos, escrever o teste, refatorar. Antes disso: a trilha "Como a Web
+Funciona" inteira.
 
 ## Aprofundamento das aulas antigas
 
@@ -40,9 +41,11 @@ significa que o iniciante encontrava as piores. Medido, antes desta rodada: a
 aula 1 tinha 77 palavras e **um** exercício para 12 minutos. Hoje a aula mais
 curta do catálogo tem 304 palavras, e a média está em 570.
 
-O padrão novo é: 500 a 900 palavras, e cinco a seis exercícios em dificuldade
+O padrão novo é: 500 a 900 palavras, e cinco a sete exercícios em dificuldade
 crescente — múltipla escolha ou prever saída para verificar a compreensão, lacuna
-para dar a estrutura, e código do zero por último.
+para dar a estrutura, código do zero, e por fim **um dos quatro tipos de
+prática de dev** (encontrar o bug, ordenar passos, escrever o teste ou
+refatorar), que pede o conceito de um ângulo que o exercício de código não pede.
 
 ```
 Aula 1  Variáveis                ██████████  77 → 508 palavras,  1 → 5 exercícios
@@ -77,7 +80,13 @@ Aula 19 Datas                    ██████████  399 → 634 pal
 Aula 20 Expressões regulares     ██████████  435 palavras, 3 → 4 exercícios
 ```
 
-_Atualizado em 2026-09-09. Este bloco é atualizado sempre que um item muda de
+As contagens acima são da rodada de aprofundamento e ficam como registro dela.
+Em 2026-09-14 cada aula que ainda não tinha um dos quatro tipos de prática de
+dev ganhou **mais um** exercício — 23 aulas, todas menos as 8, 9, 10, 18,
+Lógica 1, Lógica 2, Web 5 e Web 8, que já tinham. Hoje nenhuma aula tem menos
+de cinco exercícios, e a mais cheia (Strings, Erros) tem oito.
+
+_Atualizado em 2026-09-14. Este bloco é atualizado sempre que um item muda de
 estado._
 
 ## Fluxo das atividades — refeito em 2026-09-09
@@ -133,9 +142,20 @@ Quatro mudanças, em ordem de impacto:
 
 Existem oito: escrever o código, múltipla escolha, prever a saída, completar a
 lacuna, ordenar os passos, escrever o teste, encontrar o bug, refatorar. Os
-quatro últimos nasceram na Fase 1 como prova de conceito — 2 ou 3 exercícios
-cada, em 8 aulas — e são independentes de motor: cabem em qualquer aula que já
-existe, e é para lá que os próximos devem ir antes de qualquer aula nova.
+quatro últimos nasceram na Fase 1 e são independentes de motor. **Toda aula
+publicada tem ao menos um deles** (2026-09-14): 14 de encontrar o bug, 9 de
+ordenar passos, 5 de escrever o teste, 4 de refatorar — 32 no total, sendo 23
+novos, um por aula que não tinha. Cada um sai do conceito da própria aula: o
+`const` reatribuído em variáveis, o `=` no `if` em condições, o `<=` no laço, o
+`getMonth()` sem `+ 1`, o `exp` em segundos contra `Date.now()` em
+milissegundos.
+
+Restrição que vale saber ao escrever mais: **encontrar o bug** exige que o
+programa lance de verdade — o CI roda o código como está e cobra um erro. Bug
+silencioso de lógica entra com um teste na última linha (`if (x !== y) throw`),
+que é também a linha do sintoma. E o sandbox silencia rejeição de promise sem
+destino, então o defeito de um exercício assíncrono precisa estourar de forma
+síncrona (`.then` em `undefined`, por exemplo).
 
 A construir, cada um preso a um motor de fase posterior: consertar a tela
 (iframe, Fase 2), consulta ao banco (sql.js, Fase 4), construir do zero
@@ -174,20 +194,20 @@ ou entra como aula conceitual. O lugar dele na contagem foi ocupado por escopo e
 closures, que a versão original tratava como uma aula só e na prática pediam duas.
 
 **Como a web funciona — 8 de 8, concluído.** Trilha própria, `track-web`, com
-32 exercícios. Nenhum deles precisa de rede: URL, status, cabeçalho e token são
+40 exercícios. Nenhum deles precisa de rede: URL, status, cabeçalho e token são
 tratados como o que de fato são — texto com estrutura —, o que deixa a trilha
 inteira caber no motor que já existe.
 
 | Aula | Assunto | Exercícios |
 | --- | --- | ---: |
-| 1 | Cliente e servidor, e as partes de uma URL | 4 |
-| 2 | HTTP: métodos, seguro e idempotente, status | 4 |
-| 3 | Cabeçalhos, e por que normalizar os dois lados | 4 |
-| 4 | REST: o caminho nomeia, o método age | 4 |
+| 1 | Cliente e servidor, e as partes de uma URL | 5 |
+| 2 | HTTP: métodos, seguro e idempotente, status | 5 |
+| 3 | Cabeçalhos, e por que normalizar os dois lados | 5 |
+| 4 | REST: o caminho nomeia, o método age | 5 |
 | 5 | Autenticação contra autorização, 401 contra 403 | 5 |
-| 6 | Tokens: base64 não é segredo, e o exp em segundos | 4 |
-| 7 | CORS: origem, verificação prévia, e onde corrigir | 4 |
-| 8 | Injeção, escape de HTML, e nunca confiar no cliente | 4 |
+| 6 | Tokens: base64 não é segredo, e o exp em segundos | 5 |
+| 7 | CORS: origem, verificação prévia, e onde corrigir | 5 |
+| 8 | Injeção, escape de HTML, e nunca confiar no cliente | 5 |
 
 **Plataforma**
 
@@ -263,11 +283,13 @@ telefone real, passagem final de acessibilidade.
 
 ## Sobre tamanho
 
-As 13 aulas de hoje levaram bastante tempo para ficar no padrão do projeto. As
-122 restantes são muitas vezes esse trabalho, e os ~675 exercícios novos são a
+As 31 aulas de hoje levaram bastante tempo para ficar no padrão do projeto. As
+104 restantes são muitas vezes esse trabalho, e os ~525 exercícios novos são a
 maior parte dele. Por isso a unidade é a fase: cada uma termina numa versão do
 produto que dá para usar. O roadmap escolhe a ordem; não promete prazo.
 
-A Fase 1 é o melhor primeiro passo por um motivo concreto: é a única que não
-precisa de motor nenhum, e é onde estão os testes por propriedade — que mudam a
-qualidade de todos os exercícios que vierem depois.
+A Fase 1 foi o primeiro passo por um motivo concreto: era a única que não
+precisava de motor nenhum, e é onde estão os testes por propriedade e os
+quatro tipos de prática de dev — que mudam a qualidade de todos os exercícios
+que vierem depois. A Fase 2 é a próxima pela mesma lógica invertida: é a
+primeira que precisa de um motor novo, e o iframe é o mais barato dos seis.
