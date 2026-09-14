@@ -74,6 +74,7 @@ import { lessonBuscarEDesenhar } from './lessons/pagina-18-buscar-e-desenhar';
 import { lessonHierarquia } from './lessons/pagina-19-hierarquia';
 import { lessonTextoLegivel } from './lessons/pagina-20-texto-legivel';
 import { lessonCorNaInterface } from './lessons/pagina-21-cor-na-interface';
+import { lessonEstadosDaTela } from './lessons/pagina-22-estados-da-tela';
 import { projetoImc } from './projects/js-imc';
 import { projetoConversor } from './projects/js-conversor';
 import { projetoBoletim } from './projects/js-boletim';
@@ -140,6 +141,7 @@ const lessons: Lesson[] = [
   lessonHierarquia,
   lessonTextoLegivel,
   lessonCorNaInterface,
+  lessonEstadosDaTela,
 ];
 const projects: Project[] = [
   projetoImc,

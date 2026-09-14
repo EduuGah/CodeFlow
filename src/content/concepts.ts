@@ -366,4 +366,12 @@ export const concepts: Concept[] = [
     prerequisites: ['css-cores', 'ui-hierarquia'],
     tags: ['pagina', 'ui', 'acessibilidade'],
   },
+  {
+    id: 'ui-estados-tela',
+    title: 'Os estados da tela',
+    summary:
+      'Carregando com esqueleto, vazio com um caminho, erro com o que houve e o que fazer, sucesso breve, e role=status para as mudanças.',
+    prerequisites: ['dom-fetch', 'ui-hierarquia'],
+    tags: ['pagina', 'ui', 'acessibilidade'],
+  },
 ];
