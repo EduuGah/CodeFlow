@@ -478,4 +478,12 @@ export const concepts: Concept[] = [
     prerequisites: ['ts-por-que', 'depuracao'],
     tags: ['typescript'],
   },
+  {
+    id: 'ts-quando',
+    title: 'Quando não tipar',
+    summary:
+      'O tipo que compra algo (erro antes de rodar, documentação, autocompletar) e o que é ruído; tipar a fronteira, a forma compartilhada e os estados; migrar um arquivo por vez, estrito, com any só nas costuras e com prazo.',
+    prerequisites: ['ts-utilitarios', 'ts-api', 'ts-erros'],
+    tags: ['typescript'],
+  },
 ];

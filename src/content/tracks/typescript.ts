@@ -18,5 +18,5 @@ export const trackTypescript: Track = {
   language: 'typescript',
   status: 'published',
   // A ordem desta lista é a progressão da trilha: é daqui que sai "próxima aula".
-  lessonIds: ['lesson-ts-1', 'lesson-ts-2', 'lesson-ts-3', 'lesson-ts-4', 'lesson-ts-5', 'lesson-ts-6', 'lesson-ts-7', 'lesson-ts-8', 'lesson-ts-9'],
+  lessonIds: ['lesson-ts-1', 'lesson-ts-2', 'lesson-ts-3', 'lesson-ts-4', 'lesson-ts-5', 'lesson-ts-6', 'lesson-ts-7', 'lesson-ts-8', 'lesson-ts-9', 'lesson-ts-10'],
 };
