@@ -75,7 +75,7 @@ test('o componente aparece no iframe, e um clique nele atualiza a tela', async (
   // A CSP vale lá dentro: nenhum script de fora, nem do próprio domínio.
   await expect(page.locator('iframe[title="Pré-visualização da página"]')).toHaveAttribute(
     'sandbox',
-    'allow-scripts allow-modals'
+    'allow-scripts allow-modals allow-forms'
   );
 });
 

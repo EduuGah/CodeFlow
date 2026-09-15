@@ -61,12 +61,18 @@ export const CSP_DA_PAGINA =
  * Atributo `sandbox` do iframe.
  *
  * `allow-scripts` sem `allow-same-origin` é o que dá a origem opaca. Sem
- * `allow-forms`, um `<form>` submetido sem `preventDefault` não navega — e
- * sem `allow-top-navigation`, nada tira o aluno da aula. `allow-modals`
- * deixa `alert()` funcionar, porque é a primeira coisa que todo iniciante
- * escreve, e vê-lo mudo seria confuso.
+ * `allow-top-navigation`, nada tira o aluno da aula. `allow-modals` deixa
+ * `alert()` funcionar, porque é a primeira coisa que todo iniciante escreve,
+ * e vê-lo mudo seria confuso.
+ *
+ * `allow-forms` entrou com a trilha de React: sem ele, o Chromium não
+ * dispara o `submit` quando a pessoa clica num botão de envio ou aperta
+ * Enter no campo — a pré-visualização ficava muda num formulário certo, e
+ * a aula diz que Enter envia. Com ele, o `submit` acontece; um formulário
+ * sem `preventDefault` navega o iframe, que é exatamente o que a página de
+ * verdade faria — e o que a aula de formulários ensina a impedir.
  */
-export const SANDBOX_DO_IFRAME = 'allow-scripts allow-modals';
+export const SANDBOX_DO_IFRAME = 'allow-scripts allow-modals allow-forms';
 
 /** Prazo para a página carregar e os testes responderem. */
 export const PRAZO_DA_PAGINA_MS = 5000;

@@ -56,7 +56,7 @@ test('a página do aluno aparece no iframe, isolada e sem rede', async ({ logado
   await expect(page.getByText('A página aparece aqui quando você rodar o código.')).toBeVisible();
 
   const iframe = page.locator('iframe[title="Pré-visualização da página"]');
-  await expect(iframe).toHaveAttribute('sandbox', 'allow-scripts allow-modals');
+  await expect(iframe).toHaveAttribute('sandbox', 'allow-scripts allow-modals allow-forms');
 
   await page.evaluate(() => {
     window.monaco!.editor

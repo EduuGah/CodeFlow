@@ -237,7 +237,21 @@ function __cfElemento(alvo, acao) {
   return el;
 }
 async function clicar(alvo) {
-  __cfElemento(alvo, 'clicar').click();
+  var el = __cfElemento(alvo, 'clicar');
+  // Um botão de envio dentro de um <form>: o clique precisa virar submit. O
+  // navegador faz isso sozinho; se por algum motivo não fizer (um sandbox
+  // sem allow-forms, um ambiente de teste), o submit é disparado à mão —
+  // uma vez só, nunca duas.
+  var form = el.closest ? el.closest('form') : null;
+  var ehEnvio = !!form && ((el.tagName === 'BUTTON' && el.type === 'submit') || (el.tagName === 'INPUT' && el.type === 'submit'));
+  var enviou = false;
+  var marcar = function () { enviou = true; };
+  if (ehEnvio) form.addEventListener('submit', marcar, true);
+  el.click();
+  if (ehEnvio) {
+    form.removeEventListener('submit', marcar, true);
+    if (!enviou) form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+  }
   await esperar();
 }
 async function digitar(alvo, texto) {
