@@ -12,6 +12,7 @@ import { AdminRoute } from './components/AdminRoute';
 import { AppShell } from './components/layout/AppShell';
 import { Home } from './pages/app/Home';
 import { Tracks } from './pages/app/Tracks';
+import { TrackDetail } from './pages/app/TrackDetail';
 import { Practice } from './pages/app/Practice';
 import { Profile } from './pages/app/Profile';
 import { AdminContent } from './pages/admin/AdminContent';
@@ -47,6 +48,7 @@ function App() {
       >
         <Route index element={<Home />} />
         <Route path="trilhas" element={<Tracks />} />
+        <Route path="trilhas/:trackId" element={<TrackDetail />} />
         <Route path="praticar" element={<Practice />} />
         <Route path="perfil" element={<Profile />} />
       </Route>

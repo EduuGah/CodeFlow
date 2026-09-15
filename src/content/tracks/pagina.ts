@@ -44,4 +44,21 @@ export const trackPagina: Track = {
     'lesson-pagina-25',
     'lesson-pagina-26',
   ],
+  sections: [
+    {
+      title: 'HTML e CSS',
+      description: 'A estrutura da página e o estilo que a veste: caixa, flexbox, grid, responsivo, tipografia, cor, estados e movimento.',
+      lessonIds: ['lesson-pagina-1', 'lesson-pagina-2', 'lesson-pagina-3', 'lesson-pagina-4', 'lesson-pagina-5', 'lesson-pagina-6', 'lesson-pagina-7', 'lesson-pagina-8', 'lesson-pagina-9', 'lesson-pagina-10'],
+    },
+    {
+      title: 'DOM e eventos',
+      description: 'O JavaScript que faz a página reagir: selecionar, criar, classes, eventos, formulários, armazenamento e dados de fora.',
+      lessonIds: ['lesson-pagina-11', 'lesson-pagina-12', 'lesson-pagina-13', 'lesson-pagina-14', 'lesson-pagina-15', 'lesson-pagina-16', 'lesson-pagina-17', 'lesson-pagina-18'],
+    },
+    {
+      title: 'UI e UX',
+      description: 'O que faz uma tela ser usável: hierarquia, texto, cor, estados, teclado, formulários, palavras e o polegar.',
+      lessonIds: ['lesson-pagina-19', 'lesson-pagina-20', 'lesson-pagina-21', 'lesson-pagina-22', 'lesson-pagina-23', 'lesson-pagina-24', 'lesson-pagina-25', 'lesson-pagina-26'],
+    },
+  ],
 };

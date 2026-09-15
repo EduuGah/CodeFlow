@@ -829,6 +829,31 @@ describe('estrutura do catálogo', () => {
   });
 });
 
+describe('blocos das trilhas', () => {
+  it('as seções de uma trilha cobrem exatamente as aulas dela, na ordem', () => {
+    // A tela da trilha lista as aulas pelas seções. Uma aula fora de todas
+    // elas sumiria da tela; uma em duas apareceria duas vezes.
+    for (const track of listTracks()) {
+      if (!track.sections) continue;
+      const emSecoes = track.sections.flatMap((s) => s.lessonIds);
+      expect(emSecoes, `${track.id}: seções × lessonIds`).toEqual(track.lessonIds);
+      for (const secao of track.sections) {
+        expect(secao.title.length, `${track.id}: seção sem título`).toBeGreaterThan(0);
+        expect(secao.description.length, `${track.id}: seção "${secao.title}" sem descrição`).toBeGreaterThan(0);
+      }
+    }
+  });
+
+  it('toda trilha com mais de oito aulas está dividida em blocos', () => {
+    // Oito aulas cabem numa tela; mais que isso, sem cabeçalhos, é a parede
+    // que a tela de trilhas tinha.
+    for (const track of listTracks()) {
+      if (track.lessonIds.length <= 8) continue;
+      expect(track.sections?.length ?? 0, `${track.id} tem ${track.lessonIds.length} aulas e nenhum bloco`).toBeGreaterThan(1);
+    }
+  });
+});
+
 describe('progressão da trilha', () => {
   const track = listTracks()[0];
   const lessons = getLessonsOfTrack(track.id);

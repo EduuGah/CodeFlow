@@ -395,6 +395,21 @@ export interface Flashcard {
   concepts: string[];
 }
 
+/**
+ * Um bloco temático dentro da trilha.
+ *
+ * Uma trilha de 26 aulas lida como uma lista só é uma parede: a pessoa não
+ * sabe onde está nem o que vem depois. As seções dão nome ao terreno — "HTML e
+ * CSS", "DOM e eventos", "UI e UX" — e cada uma é curta o bastante para caber
+ * numa tela. Juntas, na ordem, elas cobrem exatamente `lessonIds`.
+ */
+export interface TrackSection {
+  title: string;
+  /** O que o bloco ensina, em uma frase. */
+  description: string;
+  lessonIds: string[];
+}
+
 export interface Track {
   id: string;
   title: string;
@@ -402,5 +417,11 @@ export interface Track {
   language: LanguageId;
   /** Ordem pedagógica das aulas. É esta lista que define "próxima aula". */
   lessonIds: string[];
+  /**
+   * Os blocos da trilha, na ordem. Opcional: uma trilha curta é um bloco só.
+   * Quando existe, a concatenação dos `lessonIds` das seções é igual a
+   * `lessonIds` — o catálogo confere na carga.
+   */
+  sections?: TrackSection[];
   status: ContentStatus;
 }

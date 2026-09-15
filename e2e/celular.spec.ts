@@ -13,7 +13,9 @@ test.describe('celular', () => {
   test.skip(({ isMobile }) => !isMobile, 'só no projeto de celular');
 
   test('nada estoura a largura da tela', async ({ logado: page }) => {
-    for (const rota of ['/app', '/app/trilhas', '/app/praticar', '/app/perfil']) {
+    // Cinco telas em sequência, cada uma esperando os dados do aluno.
+    test.setTimeout(90_000);
+    for (const rota of ['/app', '/app/trilhas', '/app/trilhas/track-pagina', '/app/praticar', '/app/perfil']) {
       await page.goto(rota);
       await esperarConteudo(page);
 

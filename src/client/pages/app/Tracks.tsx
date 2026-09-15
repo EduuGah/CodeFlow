@@ -1,39 +1,53 @@
-import { Link } from 'react-router-dom';
+import { useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 
 import { getLessonsOfTrack, listConcepts, listProjects, listTracks } from '../../../content';
 import { DIFFICULTY_LABELS, LANGUAGE_LABELS } from '../../../content/types';
 import { useStudentData } from '../../contexts/StudentDataContext';
 import { buildPath, summarizePath } from '../../lib/path';
-import { LearningPath } from '../../components/dashboard/LearningPath';
-import { TrackBanner } from '../../components/dashboard/TrackBanner';
+import { TrackCard } from '../../components/dashboard/TrackCard';
 import { IconArrowRight, IconAward, IconProject } from '../../components/ui/Icon';
 import { cardClasses } from '../../components/ui/Card';
-import { ProgressBar } from '../../components/ui/ProgressBar';
 import { Carregando, Skeleton } from '../../components/ui/Skeleton';
 import { EmptyState } from '../../components/ui/States';
 import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 
 /**
- * Trilhas e projetos.
+ * Trilhas e projetos: a visão geral.
  *
- * Reúne o que antes estava espalhado no painel: a jornada de cada trilha e os
- * projetos práticos. Ficam juntos porque respondem à mesma pergunta — "o que
- * existe para eu estudar?" — enquanto a tela inicial responde "o que eu faço
- * agora".
+ * Responde "o que existe para eu estudar?" numa tela só: um card por trilha
+ * — com o progresso, a aula da vez e o caminho para a lista de aulas — e os
+ * projetos logo abaixo. A lista de aulas de cada trilha tem página própria
+ * (`TrackDetail`), dividida em blocos por assunto.
+ *
+ * A versão anterior desenrolava as seis trilhas inteiras aqui, uma linha do
+ * tempo atrás da outra: setenta marcos numa coluna, sem dizer de que assunto
+ * era cada trecho, e os projetos só no fim de toda essa rolagem.
  */
 export function Tracks() {
   useDocumentTitle('Trilhas');
   const { loading, completedLessons, completedProjects, mastery, attempts } = useStudentData();
 
   const conceitos = listConcepts();
+  const trilhas = listTracks();
   const projetos = listProjects();
+
+  // `/app/trilhas#projetos` vindo de outra tela: o roteador troca a página sem
+  // recarregar, e o navegador só rola para a âncora numa carga de verdade.
+  const { hash } = useLocation();
+  useEffect(() => {
+    if (loading || !hash) return;
+    document.querySelector(hash)?.scrollIntoView();
+  }, [hash, loading]);
 
   if (loading) {
     return (
       <Carregando o="as trilhas">
-        <div className="space-y-4">
-          <Skeleton className="h-28 w-full rounded-xl" />
-          <Skeleton className="h-64 w-full rounded-xl" />
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Skeleton className="h-56 w-full rounded-xl" />
+          <Skeleton className="h-56 w-full rounded-xl" />
+          <Skeleton className="h-56 w-full rounded-xl" />
+          <Skeleton className="h-56 w-full rounded-xl" />
         </div>
       </Carregando>
     );
@@ -41,44 +55,50 @@ export function Tracks() {
 
   return (
     <div className="space-y-10">
-      {/* Era a única tela do app sem título de primeiro nível. Quem navega por
-          cabeçalhos não tinha onde ancorar ao chegar. */}
       <div>
         <h1 className="text-2xl font-extrabold tracking-tight text-ink">Trilhas</h1>
         <p className="mt-1 text-sm leading-relaxed text-ink-soft">
-          Cada trilha é uma sequência; os projetos aplicam o que ela ensinou.
+          Cada trilha é uma sequência de aulas em blocos por assunto; os projetos aplicam o que
+          elas ensinaram, sem passo a passo.
         </p>
+        {/* Um atalho, porque a pergunta "onde estão os projetos?" já foi feita. */}
+        <nav aria-label="Seções desta página" className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm">
+          <a href="#trilhas" className="font-semibold text-brand-600 hover:text-brand-700">
+            {trilhas.length} trilhas
+          </a>
+          <a href="#projetos" className="font-semibold text-brand-600 hover:text-brand-700">
+            {projetos.length} projetos
+          </a>
+        </nav>
       </div>
 
-      {listTracks().map((trilha) => {
-        const caminho = buildPath(
-          getLessonsOfTrack(trilha.id),
-          completedLessons,
-          conceitos,
-          mastery,
-          attempts
-        );
-        const resumo = summarizePath(caminho);
+      <section id="trilhas" aria-labelledby="titulo-trilhas" className="scroll-mt-20">
+        <h2 id="titulo-trilhas" className="label-mono mb-3 text-ink-faint">
+          Trilhas
+        </h2>
+        <ul className="grid gap-4 sm:grid-cols-2">
+          {trilhas.map((trilha) => {
+            const caminho = buildPath(
+              getLessonsOfTrack(trilha.id),
+              completedLessons,
+              conceitos,
+              mastery,
+              attempts
+            );
+            return (
+              <li key={trilha.id}>
+                <TrackCard track={trilha} summary={summarizePath(caminho)} />
+              </li>
+            );
+          })}
+        </ul>
+      </section>
 
-        return (
-          <section key={trilha.id} className="space-y-5">
-            <TrackBanner track={trilha} summary={resumo} />
-
-            <ProgressBar
-              label="Aulas concluídas"
-              value={resumo.completed}
-              max={resumo.total}
-              showCount
-            />
-
-            <LearningPath nodes={caminho} />
-          </section>
-        );
-      })}
-
-      <section className="space-y-4">
+      <section id="projetos" aria-labelledby="titulo-projetos" className="scroll-mt-20 space-y-4">
         <div>
-          <h2 className="label-mono text-ink-faint">Projetos práticos</h2>
+          <h2 id="titulo-projetos" className="label-mono text-ink-faint">
+            Projetos práticos
+          </h2>
           <p className="mt-1 text-sm leading-relaxed text-ink-soft">
             Sem passo a passo: você recebe requisitos e critérios de aceitação, e decide como
             resolver.

@@ -30,4 +30,18 @@ export const trackJsFundamentos: Track = {
     'lesson-js-19',
     'lesson-js-20',
   ],
+  sections: [
+    {
+      title: 'Fundamentos',
+      description:
+        'Guardar valores, decidir, repetir, organizar em funções, listas e objetos — e ler um erro.',
+      lessonIds: ['lesson-js-1', 'lesson-js-2', 'lesson-js-3', 'lesson-js-4', 'lesson-js-5', 'lesson-js-6', 'lesson-js-7', 'lesson-js-8', 'lesson-js-9', 'lesson-js-10'],
+    },
+    {
+      title: 'JavaScript real',
+      description:
+        'Escopo, closures, o assíncrono de ponta a ponta, JSON, imutabilidade, datas e expressões regulares.',
+      lessonIds: ['lesson-js-11', 'lesson-js-12', 'lesson-js-13', 'lesson-js-14', 'lesson-js-15', 'lesson-js-16', 'lesson-js-17', 'lesson-js-18', 'lesson-js-19', 'lesson-js-20'],
+    },
+  ],
 };

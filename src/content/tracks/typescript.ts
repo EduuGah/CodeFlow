@@ -19,4 +19,16 @@ export const trackTypescript: Track = {
   status: 'published',
   // A ordem desta lista é a progressão da trilha: é daqui que sai "próxima aula".
   lessonIds: ['lesson-ts-1', 'lesson-ts-2', 'lesson-ts-3', 'lesson-ts-4', 'lesson-ts-5', 'lesson-ts-6', 'lesson-ts-7', 'lesson-ts-8', 'lesson-ts-9', 'lesson-ts-10'],
+  sections: [
+    {
+      title: 'Os tipos',
+      description: 'Por que tipar, o que o compilador deduz, a forma de um objeto, uniões e o contrato de uma função.',
+      lessonIds: ['lesson-ts-1', 'lesson-ts-2', 'lesson-ts-3', 'lesson-ts-4', 'lesson-ts-5'],
+    },
+    {
+      title: 'Tipos que crescem',
+      description: 'Genéricos, tipos derivados de tipos, o que vem de fora, ler os erros do compilador e saber quando não tipar.',
+      lessonIds: ['lesson-ts-6', 'lesson-ts-7', 'lesson-ts-8', 'lesson-ts-9', 'lesson-ts-10'],
+    },
+  ],
 };

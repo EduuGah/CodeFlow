@@ -235,7 +235,7 @@ export function Home() {
             Você terminou {trilha.title}. Os projetos são o próximo passo natural: eles não têm
             passo a passo, só requisitos.
           </p>
-          <Link to="/app/trilhas" className={buttonClasses({ className: 'mt-4' })}>
+          <Link to="/app/trilhas#projetos" className={buttonClasses({ className: 'mt-4' })}>
             Ver projetos
             <IconArrowRight size={17} />
           </Link>
@@ -248,7 +248,7 @@ export function Home() {
           <div className="mb-3 flex items-baseline justify-between gap-3">
             <h2 className="label-mono text-ink-faint">Seu caminho</h2>
             <Link
-              to="/app/trilhas"
+              to={`/app/trilhas/${trilha.id}`}
               className="text-sm font-semibold text-brand-600 hover:text-brand-700"
             >
               Ver a trilha inteira

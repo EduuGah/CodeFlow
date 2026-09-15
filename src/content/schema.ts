@@ -280,5 +280,14 @@ export const trackSchema = z.object({
   description: z.string().min(1),
   language: languageSchema,
   lessonIds: z.array(idSchema).min(1),
+  sections: z
+    .array(
+      z.object({
+        title: z.string().min(1),
+        description: z.string().min(1),
+        lessonIds: z.array(idSchema).min(1, 'uma seção precisa de ao menos uma aula'),
+      })
+    )
+    .optional(),
   status: statusSchema,
 });
