@@ -534,4 +534,12 @@ export const concepts: Concept[] = [
     prerequisites: ['react-efeitos', 'dom-fetch', 'ts-estreitar'],
     tags: ['react'],
   },
+  {
+    id: 'react-erros',
+    title: 'Estados de erro em React',
+    summary:
+      'O vazio como estado; a ação que falha com botão que volta (finally), texto que fica e erro local; um estado por parte da tela; catch recebe unknown; a mensagem que diz o que fazer.',
+    prerequisites: ['react-dados', 'ui-estados-tela', 'ui-texto-interface'],
+    tags: ['react'],
+  },
 ];
