@@ -446,4 +446,12 @@ export const concepts: Concept[] = [
     prerequisites: ['ts-estreitar', 'funcoes'],
     tags: ['typescript'],
   },
+  {
+    id: 'ts-genericos',
+    title: 'Genéricos',
+    summary:
+      'Parâmetro de tipo <T> em funções e interfaces, deduzido a cada chamada e preservado até a saída; restrição com extends; Array<T>, Promise<T>, Map<K, V>; tuplas.',
+    prerequisites: ['ts-funcoes'],
+    tags: ['typescript'],
+  },
 ];
