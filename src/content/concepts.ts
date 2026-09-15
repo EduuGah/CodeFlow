@@ -574,4 +574,12 @@ export const concepts: Concept[] = [
     prerequisites: ['react-composicao', 'ui-teclado'],
     tags: ['react'],
   },
+  {
+    id: 'react-render',
+    title: 'Re-render',
+    summary:
+      'Filho renderiza com o pai e isso é barato; quando pesa e foi medido: useMemo lembra um valor, memo pula o filho, useCallback mantém a função — todos por identidade; key remonta; não otimizar sem medir.',
+    prerequisites: ['react-hooks', 'react-listas'],
+    tags: ['react'],
+  },
 ];
