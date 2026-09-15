@@ -6,7 +6,7 @@ que conclui uma fase.
 
 ## Onde estamos
 
-**Fases 1 e 2 de 8 concluídas · A Página: 26 de 26 · publicado**
+**Fases 1 e 2 de 8 concluídas · Fase 3: TypeScript 10 de 10, React 0 de 14 · publicado**
 
 ```
 Fase 0  Fundamentos e lógica      ██████████████████████  13/13  pronto
@@ -14,7 +14,7 @@ Fase 1  JavaScript real          ███████████████�
         Como a web funciona      ██████████████████████   8/8  pronto
         Plataforma                ██████████████████████   7/7  pronto
 Fase 2  A página                 ██████████████████████  26/26  pronto
-Fase 3  Tipos e componentes      ░░░░░░░░░░░░░░░░░░░░░░   0/24
+Fase 3  Tipos e componentes      █████████░░░░░░░░░░░░░  10/24  TypeScript pronto
 Fase 4  Back-end e dados         ░░░░░░░░░░░░░░░░░░░░░░   0/20
 Fase 5  Profissionalização       ░░░░░░░░░░░░░░░░░░░░░░   0/19
 Fase 6  Python                   ░░░░░░░░░░░░░░░░░░░░░░   0/10
@@ -23,16 +23,16 @@ Fase 7  Projeto final            ░░░░░░░░░░░░░░░�
 
 | | Hoje | Previsto | Feito |
 | --- | ---: | ---: | ---: |
-| Aulas | **57** | 135 | 42% |
-| Exercícios | **330** | ~700 | 47% |
+| Aulas | **67** | 135 | 50% |
+| Exercícios | **389** | ~700 | 56% |
 | Tipos de exercício | **8** | 11 | 73% |
-| Motores de execução | **2** | 7 | 29% |
+| Motores de execução | **3** | 7 | 43% |
 | Projetos | **7** | ~30 | 23% |
 
-**Último trabalho** (2026-09-14): a Fase 2 inteira — o motor iframe e as 26
-aulas da trilha "A Página", 156 exercícios, 78 deles de página. No mesmo dia,
-antes: 23 exercícios novos, um por aula, para toda aula ter ao menos um dos
-quatro tipos de prática de dev.
+**Último trabalho** (2026-09-14): o motor de TypeScript — o compilador na
+frente do sandbox, sem download a mais — e a trilha "TypeScript" inteira, 10
+aulas e 59 exercícios, com o teste que só existe aqui: o trecho que o
+compilador precisa recusar. Antes disso, no mesmo dia, a Fase 2 inteira.
 
 ## Aprofundamento das aulas antigas
 
@@ -298,14 +298,50 @@ Plataforma: exercício julgado pela tela renderizada — **feito**. Mapa de
 tópicos e busca — **não feito**; é o único item da fase que ficou, e cabe em
 qualquer momento, porque não depende de motor.
 
-### Fase 3 — Tipos e componentes · 24 aulas
-Motores **2 (transpilador)** e **3 (React no iframe)**.
+### Fase 3 — Tipos e componentes · 24 aulas · EM ANDAMENTO (10 de 24)
+Motor **2: o compilador de TypeScript** — **pronto** (2026-09-14). Motor **3
+(React no iframe)** — não iniciado.
 
-- **TypeScript** (10): por que tipar, inferência, interfaces, narrowing, funções,
-  genéricos, utilitários, tipar API, erros do compilador, quando não tipar.
-- **React** (14): componentes, estado, listas, formulários, efeitos, buscar
-  dados, estados de erro, composição, contexto, hooks próprios, rotas,
-  re-render, testar componente, projeto.
+Como o motor 2 funciona, para quem for escrever as aulas: em aula com
+`language: 'typescript'`, o código do aluno passa pelo compilador antes do
+sandbox. No navegador é o worker de TypeScript que o Monaco já carrega para
+sublinhar erros, numa segunda instância só para compilar — zero bytes a mais.
+No CI é o pacote `typescript`, na mesma versão. Os dois leem as mesmas opções
+e as mesmas declarações do sandbox de `typescript-core.ts`: estrito, ES2020,
+sem módulos, sem DOM (`document` é recusado na compilação, com explicação). A
+recusa vira uma lista com linha, a mensagem original em inglês e a explicação
+em português dos erros mais comuns; nada roda. O JavaScript que sobra entra
+no mesmo sandbox, com os mesmos testes.
+
+O que só o TypeScript permite: **`typeTests`**, trechos acrescentados ao
+código do aluno que o compilador precisa aceitar ou recusar (`rejects:
+true`). Um tipo bom se prova pelo uso errado que ele impede, e `somar('2',
+3)` roda igual em JavaScript. Entram na mesma lista de resultados, e o CI
+cobra que todo trecho `rejects` seja aceito sem o trabalho do aluno — senão
+a recusa não testa nada. Exemplo (`example`) de TypeScript precisa compilar,
+ou declarar `// @recusado` na primeira linha, e aí o CI cobra a recusa.
+
+**TypeScript — 10 de 10.** Cada aula com 6 exercícios, e o find-bug com
+erro de compilação vale: o CI trata a recusa do compilador como "o programa
+quebra".
+
+| Aula | Assunto |
+| --- | --- |
+| 1 | Por que tipar: `nome: tipo`, o erro antes de rodar, tipos apagados, any |
+| 2 | Inferência: o compilador deduz do valor; anotar a fronteira, a lista vazia, a variável sem valor; const vs let |
+| 3 | Interfaces: a forma de um objeto, `?`, `readonly`, aninhadas, objeto literal sem propriedade a mais |
+| 4 | Estreitar: uniões, literais, `T \| undefined`, typeof/`?.`/`??`, discriminante |
+| 5 | Funções: opcional e padrão, retorno e void, `(a: A) => B` como valor, retorno honesto |
+| 6 | Genéricos: `<T>` deduzido e preservado, `extends`, Array/Promise/Map, tuplas |
+| 7 | Utilitários: Partial, Pick, Omit, Readonly, Record, keyof, typeof em tipo |
+| 8 | Tipar uma API: unknown na fronteira, guarda `valor is T`, `as` como asserção |
+| 9 | Erros do compilador: anatomia da mensagem, cadeia, cascata, corrigir a causa |
+| 10 | Quando não tipar: o tipo que compra algo, migrar um arquivo por vez, any com prazo |
+
+**React — 0 de 14.** Componentes, estado, listas, formulários, efeitos,
+buscar dados, estados de erro, composição, contexto, hooks próprios, rotas,
+re-render, testar componente, projeto. Depende do motor 3: React e o JSX
+transpilado dentro do iframe do motor de página.
 
 Plataforma: tutor com IA; painel do aluno.
 
@@ -337,8 +373,8 @@ telefone real, passagem final de acessibilidade.
 
 ## Sobre tamanho
 
-As 57 aulas de hoje levaram bastante tempo para ficar no padrão do projeto. As
-78 restantes são muitas vezes esse trabalho, e os ~370 exercícios novos são a
+As 67 aulas de hoje levaram bastante tempo para ficar no padrão do projeto. As
+68 restantes são muitas vezes esse trabalho, e os ~310 exercícios novos são a
 maior parte dele. Por isso a unidade é a fase: cada uma termina numa versão do
 produto que dá para usar. O roadmap escolhe a ordem; não promete prazo.
 
@@ -347,5 +383,6 @@ precisava de motor nenhum, e é onde estão os testes por propriedade e os
 quatro tipos de prática de dev — que mudam a qualidade de todos os exercícios
 que vierem depois. A Fase 2 veio em seguida pela mesma lógica invertida: era a
 primeira que precisava de um motor novo, e o iframe é o mais barato dos seis. A
-Fase 3 é a próxima porque os dois motores dela — o transpilador de TypeScript
-e o React no iframe — se apoiam no motor de página que já existe.
+Fase 3 está no meio: o compilador de TypeScript saiu quase de graça, porque o
+worker do Monaco já sabia compilar; o React no iframe é o próximo motor, e se
+apoia no motor de página que já existe.

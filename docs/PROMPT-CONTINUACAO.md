@@ -54,16 +54,16 @@ consistência visual > qualidade dos exercícios > progressão > gamificação.
 
 | | |
 | --- | --- |
-| Trilhas | 4 — Fundamentos de JavaScript (20 aulas), Lógica (3), Como a Web Funciona (8), A Página (26) |
-| Aulas | 57, somando 1.564 minutos |
-| Exercícios | 330, em 8 tipos; 78 são de página (`runtime: 'iframe'`) |
-| Verificação | 561 casos fixos + 58 testes por propriedade |
+| Trilhas | 5 — Fundamentos de JavaScript (20 aulas), Lógica (3), Como a Web Funciona (8), A Página (26), TypeScript (10) |
+| Aulas | 67, somando 1.826 minutos |
+| Exercícios | 389, em 8 tipos; 78 são de página (`runtime: 'iframe'`) e 16 têm trechos de tipo (`typeTests`) |
+| Verificação | 600 casos fixos + 58 testes por propriedade |
 | Projetos | 7, com 22 critérios de aceitação |
-| Conceitos | 53, com grafo de pré-requisitos |
+| Conceitos | 63, com grafo de pré-requisitos |
 | Flashcards | 22 |
-| Testes | 1.431 de unidade + 190 de navegador |
+| Testes | 1.618 de unidade + 214 de navegador |
 
-Todas as 57 aulas publicadas estão no padrão de profundidade: 300 a 900 palavras
+Todas as 67 aulas publicadas estão no padrão de profundidade: 300 a 900 palavras
 e de 4 a 7 exercícios em dificuldade crescente, ao menos um deles de prática de
 dev. Nenhuma está pendente de aprofundamento.
 
@@ -111,19 +111,20 @@ sondas de borda, CI com anotações legíveis, E2E em celular e desktop.
 
 ## 5. O que ESTÁ SENDO FEITO agora
 
-**Nada em andamento.** O último commit fecha a Fase 2 — as 26 aulas da trilha
-"A Página" sobre o motor de iframe —, o CI está verde, e a árvore está limpa.
-Você começa num ponto estável.
+**Fase 3 no meio.** O último commit fecha o bloco de TypeScript — o motor
+(compilador na frente do sandbox) e as 10 aulas da trilha —, o CI está verde,
+e a árvore está limpa. Você começa num ponto estável.
 
-O que acabou de ser concluído: **todo o conteúdo que cabe nos dois motores
-existentes.** O Web Worker sem DOM e o iframe isolado deram o que tinham para
-dar; o que vem agora precisa de motor novo.
+O que falta da fase: as **14 aulas de React**, que dependem do motor 3 (React
+e JSX dentro do iframe do motor de página). O transpilador já existe — o
+worker de TypeScript emite JSX com `jsx: 'react'` —; falta embutir o React
+no documento do iframe, decidir como os testes enxergam o componente
+renderizado, e escrever as aulas.
 
 ## 6. O que VAI SER FEITO — e a decisão que precisa ser tomada
 
-O projeto está em **~45%**. A porcentagem por aula (57 de 135, 42%) engana: a
-plataforma está muito mais adiantada que isso, e os motores de execução menos
-(2 de 7).
+O projeto está em **~50%**. A porcentagem por aula (67 de 135, 50%) bate com
+o resto: 3 dos 7 motores prontos, e o quarto (React) é o próximo.
 
 Há três caminhos, e eles **não são equivalentes**:
 
@@ -167,6 +168,25 @@ CSS usam em `src/content/lessons/_ajudantes-css.ts`.
 A Fase 2 está **fechada**. Ficou um item de plataforma, sem dependência de
 motor: mapa de tópicos e busca.
 
+### B2) Motor de TypeScript — FEITO em 2026-09-14
+
+- `lib/typescript-core.ts` (puro): opções do compilador, o que o sandbox
+  declara existir (`console`, temporizadores — sem DOM), formato e tradução
+  dos erros, e os trechos de tipo. `lib/typescript.ts`: segunda instância do
+  worker de TypeScript do Monaco, modelos temporários `plaintext` com URI
+  `.ts`. `lib/typescript-node.ts`: o pacote `typescript` no CI, mesma versão.
+  `lib/executar.ts`: `executarNaLinguagem()`, por onde todo componente de
+  exercício passa.
+- `typeTests` em `code` e `fill-blank`: trechos que o compilador precisa
+  aceitar ou recusar (`rejects: true`). O CI cobra que todo `rejects` seja
+  aceito sem o trabalho do aluno.
+- Trilha `track-typescript`, 10 aulas, 59 exercícios; `e2e/typescript.spec.ts`
+  conclui cada aula no Chromium.
+
+As armadilhas do worker do Monaco (registro assíncrono, um programa só para
+todos os modelos, validação de todo modelo `typescript`) estão no
+`CONTEXTO.md` §7 — cada uma custou uma rodada do E2E.
+
 ### C) Mais projetos com o motor atual — barato, sem currículo novo
 
 Existem 7 projetos e o roadmap prevê ~30. Eles usam a mecânica que já existe e
@@ -174,13 +194,13 @@ dão prática aplicada. É o caminho de menor risco e menor retorno.
 
 ### Recomendação
 
-A e B estão feitos. O que vem agora é a **Fase 3** — transpilador de
-TypeScript e React no iframe, os dois apoiados no motor de página — ou C.
-Antes de qualquer um, vale o que só o dono do projeto pode fazer: usar o
-aplicativo publicado num telefone de verdade.
+A, B e B2 estão feitos. O que vem agora é o **motor 3: React no iframe** — e
+as 14 aulas de React que fecham a Fase 3 — ou C. Antes de qualquer um, vale o
+que só o dono do projeto pode fazer: usar o aplicativo publicado num telefone
+de verdade, inclusive uma aula de TypeScript.
 
-Se o dono do projeto não indicar o caminho, pergunte antes de começar a Fase 3
-ou C — são investimentos grandes o bastante para a escolha ser dele.
+Se o dono do projeto não indicar o caminho, pergunte antes de começar o motor
+3 ou C — são investimentos grandes o bastante para a escolha ser dele.
 
 ## 7. Como trabalhar
 
@@ -188,8 +208,8 @@ ou C — são investimentos grandes o bastante para a escolha ser dele.
 
 ```bash
 npm run typecheck   # inclui e2e/ e playwright.config.ts
-npm test            # 1.431 testes
-npm run test:e2e    # 190 no navegador (antes: npx playwright install chromium)
+npm test            # 1.618 testes
+npm run test:e2e    # 214 no navegador (antes: npx playwright install chromium)
 npm run build
 ```
 

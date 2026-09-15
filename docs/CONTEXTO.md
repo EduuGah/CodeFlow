@@ -32,15 +32,15 @@ Números lidos do catálogo, não de memória.
 
 | | |
 | --- | --- |
-| Trilhas | 4 — Fundamentos de JavaScript (20 aulas), Lógica (3), Como a Web Funciona (8), A Página (26) |
-| Aulas | 57, somando 1.564 minutos |
-| Exercícios | 330, em 8 tipos — 87 de código, 49 de prever saída, 78 de múltipla escolha, 58 de lacuna, 35 de ordenar passos, 14 de encontrar o bug, 5 de escrever o teste, 4 de refatorar. 78 exercícios de página (`runtime: 'iframe'`). **Toda aula tem ao menos um dos quatro tipos de prática de dev** |
-| Verificação | 561 casos fixos + 58 propriedades |
+| Trilhas | 5 — Fundamentos de JavaScript (20 aulas), Lógica (3), Como a Web Funciona (8), A Página (26), TypeScript (10) |
+| Aulas | 67, somando 1.826 minutos |
+| Exercícios | 389, em 8 tipos — 100 de múltipla escolha, 96 de código, 66 de lacuna, 56 de prever saída, 37 de ordenar passos, 23 de encontrar o bug, 6 de refatorar, 5 de escrever o teste. 78 exercícios de página (`runtime: 'iframe'`); 16 com trechos de tipo (`typeTests`). **Toda aula tem ao menos um dos quatro tipos de prática de dev** |
+| Verificação | 600 casos fixos + 58 propriedades |
 | Projetos | 7, com 22 critérios de aceitação |
-| Conceitos | 53, com grafo de pré-requisitos |
+| Conceitos | 63, com grafo de pré-requisitos |
 | Flashcards | 22 |
-| Testes | 1.431 de unidade + 190 de navegador |
-| Pacote | 1.856 kB (518 kB comprimido) no chunk principal — o conteúdo vai junto, e a trilha da página mais os exercícios de prática de dev o fizeram crescer 500 kB; o Monaco são mais 3.362 kB (868 kB) num chunk à parte, baixado só quando o primeiro editor monta |
+| Testes | 1.618 de unidade + 214 de navegador |
+| Pacote | 1.985 kB (560 kB comprimido) no chunk principal — o conteúdo vai junto; o Monaco são mais 3.362 kB (869 kB) num chunk à parte, baixado só quando o primeiro editor monta, e o worker de TypeScript (7 MB) só quando um modelo JS/TS abre. O motor de TypeScript não acrescentou nenhum arquivo: reaproveita esse worker |
 
 ## 4. Decisões que não devem ser desfeitas sem motivo forte
 
@@ -80,6 +80,17 @@ exercício define — 404 para o resto, 30 ms de atraso para os estados de
 carregamento existirem. Nada disso alcança a rede nem o armazenamento da
 aplicação; o E2E de isolamento prova.
 
+**O TypeScript compila no worker que o Monaco já carrega.** O pacote
+`typescript` inteiro são 9 MB; o worker de TypeScript do editor já os tem, e
+sabe emitir JavaScript. O motor cria uma **segunda instância** desse worker
+só para compilar (`typescript.ts`), porque o serviço do editor enxerga todos
+os modelos como um programa só e o código do aluno colidia com a cópia da
+compilação. No CI é o pacote `typescript` no Node, na mesma versão — um teste
+confere. Opções, declarações do sandbox e o formato dos erros vivem em
+`typescript-core.ts`, puro; os dois compiladores só concordam porque leem
+dali. O JavaScript gerado entra no sandbox comum: o motor novo é só o passo
+da frente.
+
 **O sandbox é descartável.** Worker novo por execução, 3 segundos de limite,
 `terminate()` no fim. `fetch`, `XMLHttpRequest`, `WebSocket`, `importScripts`,
 `indexedDB`, `caches` e `Notification` são apagados antes de qualquer código do
@@ -93,7 +104,7 @@ src/content/            Aulas, exercícios, projetos, conceitos, flashcards
   types.ts              Tipos (Exercise é união discriminada por `type`)
   schema.ts             Espelhos Zod; valida na carga e falha alto em DEV
   index.ts              Única fronteira de leitura do conteúdo
-  content.test.ts       Integridade: 664 checagens sobre o catálogo
+  content.test.ts       Integridade: 1.082 checagens sobre o catálogo
   lessons/              Uma aula por arquivo
   tracks/               A ORDEM da trilha vive aqui, não nos arquivos de aula
 
@@ -109,6 +120,16 @@ src/client/lib/         Lógica pura e testada
                         sandbox>, espera a mensagem, cuida do prazo
   pagina-jsdom.ts       O executor do CI: mesmo documento, no jsdom. Sem
                         layout e sem cor normalizada — o E2E é o árbitro
+  typescript-core.ts    Motor de TypeScript, parte pura: opções do compilador,
+                        o que o sandbox declara existir, formato e tradução
+                        dos erros, e os trechos de tipo (typeTests)
+  typescript.ts         O compilador no navegador: segunda instância do worker
+                        de TypeScript do Monaco, modelos temporários
+  typescript-node.ts    O compilador do CI: pacote `typescript`, serviço de
+                        linguagem para não repagar as libs a cada exercício
+  executar.ts           executarNaLinguagem(): JavaScript vai direto ao
+                        sandbox; TypeScript compila antes — todo componente
+                        de exercício passa por aqui
   fill-blank.ts         Molde com lacunas: dividir, preencher, validar
   mastery.ts            Domínio por conceito, em 4 níveis
   review.ts             Repetição espaçada, Leitner [1,3,7,14,30,60] dias
@@ -140,8 +161,8 @@ docs/curriculo.md       Roadmap de conteúdo — fonte canônica
 
 ```bash
 npm run typecheck   # inclui e2e/ e playwright.config.ts
-npm test            # 1.431 testes
-npm run test:e2e    # 190 no navegador (antes: npx playwright install chromium)
+npm test            # 1.618 testes
+npm run test:e2e    # 214 no navegador (antes: npx playwright install chromium)
 npm run build
 ```
 
@@ -289,6 +310,33 @@ Cada uma custou tempo. Não repita.
   com o E2E. A versão certa conta quantas chamadas estão em voo ao mesmo
   tempo, e a sabotagem (`for await` em vez de `Promise.all`) prova que o
   teste falha quando deve.
+- **O serviço de TypeScript do Monaco se registra depois do primeiro modelo
+  TypeScript, e de forma assíncrona.** `getTypeScriptWorker()` antes disso
+  rejeita com "TypeScript not registered!", e o primeiro "prever a saída" da
+  trilha — onde nenhum editor tinha montado — travava em "Executando…". Toda
+  chamada ao compilador no navegador fica dentro de um `try` que vira erro
+  legível; o botão nunca fica preso.
+- **Todos os modelos sincronizados ao serviço do editor são um programa só.**
+  O modelo temporário da compilação e o modelo do editor, com o mesmo código,
+  viravam "Cannot redeclare block-scoped variable" um contra o outro. Por isso
+  o motor tem uma instância própria do worker, que só recebe os modelos que
+  ele cria e descarta.
+- **O serviço do editor valida todo modelo `typescript` que aparece** e o
+  sincroniza para o worker dele — e aí a função do aluno existia duas vezes
+  lá dentro, e o editor sublinhava "Duplicate function implementation" num
+  código certo. O modelo temporário da compilação é `plaintext` com URI
+  `.ts`: o worker de compilação decide pelo sufixo, o editor não o vê.
+- **`ts.createProgram` por compilação repaga as libs.** 200 ms por exercício
+  só relendo a `lib.es2020` e a cadeia atrás dela. O compilador do CI usa o
+  serviço de linguagem, como o Monaco: entre uma compilação e a seguinte só o
+  arquivo do aluno muda, e cai para 60 ms.
+- **Dois passos seguidos do mesmo tipo de exercício reaproveitavam a
+  instância do componente.** O segundo nascia com a resposta do primeiro já
+  enviada — "Resposta correta" para uma pergunta que ninguém respondeu — e,
+  como o estado derivado não mudava, a aula nunca ficava sabendo dele: 5/6
+  para sempre. Nenhuma das 57 aulas anteriores tinha dois seguidos. Cada
+  componente de exercício tem `key={exercise.id}`; o teste
+  `Lesson.passos-seguidos` prova o defeito sem a `key`.
 - **Uma prop opcional é um contrato que ninguém garante.** `onSolved` era opcional
   e dois dos quatro tipos de exercício simplesmente não a recebiam — 36 dos 78
   exercícios nunca conseguiam avisar que tinham sido resolvidos, e nenhum dos 521
@@ -355,11 +403,23 @@ sozinha. Os ajudantes que as asserções de CSS colam no início (`trilhas`,
 da plataforma ficou um item da fase: mapa de tópicos e busca — não depende de
 motor e cabe em qualquer momento.
 
-**Fases 3 a 7 — não iniciadas.** Cada uma depende de um motor: transpilador
-(TypeScript), React, servidor simulado (Node), sql.js (SQL), Pyodide (Python).
-A Fase 3 é a próxima: os dois motores dela (transpilador e React no iframe) se
-apoiam no motor de página. É investimento grande o bastante para a escolha ser
-do dono do projeto — pergunte antes de começar.
+**Fase 3 — em andamento, 10 de 24 (2026-09-14).** O motor de TypeScript
+está pronto e provado nos dois lados (pacote `typescript` no CI, worker do
+Monaco no E2E): `language: 'typescript'` na aula faz todo exercício de
+código, lacuna, prever saída, refatorar e escrever teste passar pelo
+compilador antes do sandbox, e o `find-bug` aceita erro de compilação como
+"o programa quebra". Os `typeTests` (trechos que o compilador aceita ou
+recusa) são o teste que só existe aqui. A trilha **TypeScript** tem as 10
+aulas previstas, 59 exercícios, concluídas no Chromium em celular e desktop
+(`e2e/typescript.spec.ts`, que também prova a recusa com linha e explicação
+e o editor sem marcadores falsos). Faltam as 14 aulas de React, que dependem
+do motor 3: React e JSX dentro do iframe do motor de página — o transpilador
+já existe (o worker de TypeScript emite JSX), falta o React embutido no
+documento e a aula.
+
+**Fases 4 a 7 — não iniciadas.** Cada uma depende de um motor: servidor
+simulado (Node), sql.js (SQL), Pyodide (Python). Investimentos grandes o
+bastante para a escolha ser do dono do projeto — pergunte antes de começar.
 
 ## 9. Pendências do lado do usuário
 

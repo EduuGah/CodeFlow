@@ -119,5 +119,6 @@ supabase/        Migrações SQL
 docs/context/    Visão de produto, design, pedagogia, arquitetura, roadmap
 ```
 
-Hoje: 4 trilhas, 57 aulas, 330 exercícios em 8 tipos (78 deles de página, num
-iframe isolado), 7 projetos com 22 critérios de aceitação, e 53 conceitos.
+Hoje: 5 trilhas, 67 aulas, 389 exercícios em 8 tipos (78 deles de página, num
+iframe isolado; 59 de TypeScript, com o compilador na frente do sandbox), 7
+projetos com 22 critérios de aceitação, e 63 conceitos.
