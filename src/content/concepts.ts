@@ -502,4 +502,12 @@ export const concepts: Concept[] = [
     prerequisites: ['react-componentes', 'imutabilidade'],
     tags: ['react'],
   },
+  {
+    id: 'react-listas',
+    title: 'Listas',
+    summary:
+      'map com key estável (nunca o índice numa lista que muda); acrescentar, remover e alterar como lista nova; um componente por item, com a função de remover como prop; filtrar e ordenar derivados na renderização.',
+    prerequisites: ['react-estado'],
+    tags: ['react'],
+  },
 ];
