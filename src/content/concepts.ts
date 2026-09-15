@@ -550,4 +550,12 @@ export const concepts: Concept[] = [
     prerequisites: ['react-estado', 'react-listas'],
     tags: ['react'],
   },
+  {
+    id: 'react-contexto',
+    title: 'Contexto',
+    summary:
+      'createContext, Provider e useContext para o dado de muitos em profundidades diferentes que muda pouco; valor e funções juntos; um hook que esconde o canal; quando é exagero.',
+    prerequisites: ['react-composicao'],
+    tags: ['react'],
+  },
 ];
