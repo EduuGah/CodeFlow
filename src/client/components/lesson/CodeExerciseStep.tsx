@@ -67,7 +67,8 @@ export function CodeExerciseStep({
   const [codigoVerificado, setCodigoVerificado] = useState<string | null>(null);
 
   const registrar = useRecordAttempt();
-  const ehPagina = exercise.runtime === 'iframe';
+  const ehReact = language === 'react';
+  const ehPagina = exercise.runtime === 'iframe' || ehReact;
   const iframeRef = useRef<HTMLIFrameElement>(null);
   /** A página já foi renderizada ao menos uma vez neste exercício. */
   const [paginaRenderizada, setPaginaRenderizada] = useState(false);
@@ -112,7 +113,7 @@ export function CodeExerciseStep({
     const enviado = code;
     const execucao =
       ehPagina && iframeRef.current
-        ? await executarPagina(iframeRef.current, enviado, exercise.tests)
+        ? await executarPagina(iframeRef.current, enviado, exercise.tests, { react: ehReact })
         : await executarNaLinguagem({
             language,
             code: enviado,
@@ -171,7 +172,7 @@ export function CodeExerciseStep({
       {ehPagina && (
         <Card padding="none" className="overflow-hidden">
           <div className="flex items-center justify-between border-b border-line px-4 py-2">
-            <SectionLabel as="p">Página</SectionLabel>
+            <SectionLabel as="p">{ehReact ? 'Componente' : 'Página'}</SectionLabel>
             {paginaRenderizada && (
               <span className="text-xs text-ink-faint">como o navegador mostra</span>
             )}
@@ -188,7 +189,9 @@ export function CodeExerciseStep({
             />
             {!paginaRenderizada && (
               <div className="absolute inset-0 flex items-center justify-center bg-canvas px-6 text-center text-sm text-ink-faint">
-                A página aparece aqui quando você rodar o código.
+                {ehReact
+                  ? 'O componente aparece aqui quando você rodar o código.'
+                  : 'A página aparece aqui quando você rodar o código.'}
               </div>
             )}
           </div>
@@ -198,13 +201,17 @@ export function CodeExerciseStep({
       <ExerciseAction onClick={executar} disabled={rodando} carregando={rodando}>
         {!rodando && <IconPlay size={18} />}
         {rodando
-          ? ehPagina
-            ? 'Rodando a página…'
-            : 'Executando…'
+          ? ehReact
+            ? 'Rodando o componente…'
+            : ehPagina
+              ? 'Rodando a página…'
+              : 'Executando…'
           : resultado === null
-            ? ehPagina
-              ? 'Rodar a página'
-              : 'Executar código'
+            ? ehReact
+              ? 'Rodar o componente'
+              : ehPagina
+                ? 'Rodar a página'
+                : 'Executar código'
             : ehPagina
               ? 'Rodar de novo'
               : 'Executar de novo'}

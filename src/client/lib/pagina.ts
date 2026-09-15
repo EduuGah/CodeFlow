@@ -4,8 +4,61 @@ import {
   PRAZO_DA_PAGINA_MS,
   SANDBOX_DO_IFRAME,
 } from './pagina-core';
+import { montarDocumentoReact } from './react-core';
 import type { ExecutionResult } from './sandbox';
 import type { SandboxTest } from './sandbox-core';
+import { formatarErros } from './typescript-core';
+
+export interface OpcoesDaPagina {
+  /** O código é um componente em TSX: compila e monta com o React embutido. */
+  react?: boolean;
+}
+
+/**
+ * O documento a escrever no iframe — ou os erros do compilador, em React.
+ *
+ * O compilador e as bibliotecas do React entram por `import()`: um
+ * exercício de HTML nunca baixa nenhum dos dois.
+ */
+async function prepararDocumento(
+  codigoDoAluno: string,
+  tests: SandboxTest[],
+  opcoes: OpcoesDaPagina
+): Promise<{ documento: string } | { erro: ExecutionResult }> {
+  if (!opcoes.react) return { documento: montarDocumento(codigoDoAluno, tests) };
+
+  let compilacao;
+  try {
+    const [{ compilarNoNavegador }, { BIBLIOTECAS_DO_REACT }] = await Promise.all([
+      import('./typescript'),
+      import('./react-umd'),
+    ]);
+    compilacao = await compilarNoNavegador(codigoDoAluno, { jsx: true });
+    if (compilacao.erros.length > 0) {
+      return {
+        erro: {
+          output: '',
+          logs: [],
+          testResults: [],
+          error: formatarErros(compilacao.erros),
+          compileErrors: compilacao.erros,
+        },
+      };
+    }
+    return { documento: montarDocumentoReact(compilacao.js, tests, BIBLIOTECAS_DO_REACT) };
+  } catch (erro) {
+    return {
+      erro: {
+        output: '',
+        logs: [],
+        testResults: [],
+        error: `O compilador não carregou — ele vem junto com o editor. Confira a conexão e tente rodar de novo. (${
+          erro instanceof Error ? erro.message : String(erro)
+        })`,
+      },
+    };
+  }
+}
 
 /**
  * Executa a página do aluno num `<iframe sandbox>` e resolve com o resultado.
@@ -24,11 +77,16 @@ import type { SandboxTest } from './sandbox-core';
  * processo próprio (o Chrome faz isso) a aula continua respondendo enquanto
  * isso; nos que não isolam, é o prazo que salva a aba.
  */
-export function executarPagina(
+export async function executarPagina(
   iframe: HTMLIFrameElement,
   codigoDoAluno: string,
-  tests: SandboxTest[]
+  tests: SandboxTest[],
+  opcoes: OpcoesDaPagina = {}
 ): Promise<ExecutionResult> {
+  const preparado = await prepararDocumento(codigoDoAluno, tests, opcoes);
+  if ('erro' in preparado) return preparado.erro;
+  const { documento } = preparado;
+
   return new Promise((resolve) => {
     let encerrado = false;
 
@@ -72,6 +130,6 @@ export function executarPagina(
     // O atributo precisa estar no lugar ANTES do documento: mudar `sandbox`
     // depois só vale para a próxima navegação.
     iframe.setAttribute('sandbox', SANDBOX_DO_IFRAME);
-    iframe.srcdoc = montarDocumento(codigoDoAluno, tests);
+    iframe.srcdoc = documento;
   });
 }

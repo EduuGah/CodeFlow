@@ -79,7 +79,8 @@ export function FillBlank({
 
   // Trocar de exercício reaproveita o componente: sem isto as respostas
   // anteriores continuariam nos campos.
-  const ehPagina = exercise.runtime === 'iframe';
+  const ehReact = language === 'react';
+  const ehPagina = exercise.runtime === 'iframe' || ehReact;
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [paginaRenderizada, setPaginaRenderizada] = useState(false);
 
@@ -106,7 +107,7 @@ export function FillBlank({
     const preenchido = preencher(exercise.template, respostas);
     const execucao =
       ehPagina && iframeRef.current
-        ? await executarPagina(iframeRef.current, preenchido, exercise.tests)
+        ? await executarPagina(iframeRef.current, preenchido, exercise.tests, { react: ehReact })
         : await executarNaLinguagem({
             language,
             code: preenchido,
@@ -185,7 +186,7 @@ export function FillBlank({
       {ehPagina && (
         <Card padding="none" className="overflow-hidden">
           <div className="flex items-center justify-between border-b border-line px-4 py-2">
-            <SectionLabel as="p">Página</SectionLabel>
+            <SectionLabel as="p">{ehReact ? 'Componente' : 'Página'}</SectionLabel>
             {paginaRenderizada && (
               <span className="text-xs text-ink-faint">como o navegador mostra</span>
             )}
@@ -199,7 +200,9 @@ export function FillBlank({
             />
             {!paginaRenderizada && (
               <div className="absolute inset-0 flex items-center justify-center bg-canvas px-6 text-center text-sm text-ink-faint">
-                A página aparece aqui quando você verificar.
+                {ehReact
+                  ? 'O componente aparece aqui quando você verificar.'
+                  : 'A página aparece aqui quando você verificar.'}
               </div>
             )}
           </div>

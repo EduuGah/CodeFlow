@@ -69,12 +69,23 @@ async function executar(
   properties: SandboxProperty[] = []
 ) {
   const motor = exercise as { runtime?: 'worker' | 'iframe'; typeTests?: TrechoDeTipo[] };
+  const linguagem = linguagemDe.get(exercise as Exercise);
+
+  // React: o TSX compila e o componente é montado no jsdom, com o React
+  // embutido — o mesmo documento que o iframe do aluno recebe.
+  if (linguagem === 'react') {
+    const { js, erros } = compilarNoNode(codigo, { jsx: true });
+    if (erros.length > 0) return { logs: [], testResults: [], error: formatarErros(erros) };
+    const r = await rodarPaginaNoJsdom(js, tests, 8000, { react: true });
+    return { logs: r.logs, testResults: r.testResults, error: r.error };
+  }
+
   if (motor.runtime === 'iframe') {
     const r = await rodarPaginaNoJsdom(codigo, tests);
     return { logs: r.logs, testResults: r.testResults, error: r.error };
   }
 
-  if (linguagemDe.get(exercise as Exercise) !== 'typescript') {
+  if (linguagem !== 'typescript') {
     return runProgram(codigo, tests, properties);
   }
 
@@ -97,7 +108,8 @@ async function executar(
  * nos dois casos a solução é o programa inteiro e substitui o esqueleto.
  */
 function programaDaSolucao(exercise: CodeExercise): string {
-  return exercise.runtime === 'iframe' || linguagemDe.get(exercise) === 'typescript'
+  const linguagem = linguagemDe.get(exercise);
+  return exercise.runtime === 'iframe' || linguagem === 'typescript' || linguagem === 'react'
     ? (exercise.solution ?? '')
     : exercise.initialCode + '\n' + exercise.solution;
 }
@@ -701,8 +713,24 @@ describe('exercícios de refatorar', () => {
 });
 
 describe('aulas de TypeScript', () => {
-  const aulasTS = allLessons.filter((lesson) => lesson.language === 'typescript');
+  const aulasTS = allLessons.filter(
+    (lesson) => lesson.language === 'typescript' || lesson.language === 'react'
+  );
   const exerciciosTS = allExercises.filter(({ lesson }) => lesson.language === 'typescript');
+
+  it('aula de React só usa os tipos de exercício que o motor de componente roda', () => {
+    // Prever a saída, refatorar e escrever o teste rodam no sandbox de Worker,
+    // que não tem DOM nem React. Um exercício desses numa aula de React
+    // compilaria o TSX e quebraria ao rodar — no aluno, não no CI.
+    const permitidos = new Set(['code', 'fill-blank', 'multiple-choice', 'order-steps', 'find-bug']);
+    for (const { lesson, exercise } of allExercises) {
+      if (lesson.language !== 'react') continue;
+      expect(permitidos.has(exercise.type), `${exercise.id} é do tipo ${exercise.type}, que o motor de React não roda`).toBe(true);
+      if (exercise.type === 'code' || exercise.type === 'fill-blank') {
+        expect(exercise.runtime, `${exercise.id}: em aula de React o motor é implícito; não declare runtime`).toBeUndefined();
+      }
+    }
+  });
 
   it('trecho de tipo só existe em aula de TypeScript', () => {
     // Em JavaScript o compilador não roda, e o trecho seria ignorado em
@@ -751,10 +779,11 @@ describe('aulas de TypeScript', () => {
       // `// @recusado` na primeira linha, e aí o CI cobra o contrário: que o
       // compilador de fato recuse.
       for (const bloco of lesson.blocks) {
-        if (bloco.kind !== 'example' || bloco.language !== 'typescript') continue;
+        if (bloco.kind !== 'example') continue;
+        if (bloco.language !== 'typescript' && bloco.language !== 'tsx') continue;
 
         const recusadoDeProposito = bloco.code.startsWith('// @recusado');
-        const { erros } = compilarNoNode(bloco.code);
+        const { erros } = compilarNoNode(bloco.code, { jsx: bloco.language === 'tsx' });
 
         if (recusadoDeProposito) {
           expect(erros.length, `o exemplo marcado como recusado compila:\n${bloco.code}`).toBeGreaterThan(0);

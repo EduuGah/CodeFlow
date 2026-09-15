@@ -58,6 +58,12 @@ export const OPCOES_DO_COMPILADOR = {
   noEmitOnError: false,
   /** O JavaScript gerado é executado, nunca lido; sem comentários ele fica menor. */
   removeComments: true,
+  /**
+   * `JsxEmit.React`: JSX vira `React.createElement`, que existe como global
+   * no iframe do motor de React. Só vale para arquivos `.tsx`; um `.ts` com
+   * `<div>` continua sendo erro de sintaxe, como deve.
+   */
+  jsx: 2,
 } as const;
 
 /**
@@ -105,8 +111,19 @@ export interface Compilacao {
   erros: ErroDeCompilacao[];
 }
 
+/**
+ * O que muda entre um programa de TypeScript e um componente de React.
+ *
+ * Com `jsx`, o arquivo é `.tsx` (o analisador aceita `<div>`) e as
+ * declarações do React entram no programa — e só aí: em aula de TypeScript
+ * puro, `document` continua não existindo, porque o worker não o tem.
+ */
+export interface OpcoesDeCompilacao {
+  jsx?: boolean;
+}
+
 /** Uma função que compila TypeScript — a do Monaco ou a do Node. */
-export type Compilador = (codigo: string) => Promise<Compilacao>;
+export type Compilador = (codigo: string, opcoes?: OpcoesDeCompilacao) => Promise<Compilacao>;
 
 /**
  * Um trecho que o compilador precisa aceitar ou recusar, depois do código
@@ -488,12 +505,13 @@ export function formatarErros(erros: ErroDeCompilacao[]): string {
 export async function verificarTrechos(
   compilar: Compilador,
   codigo: string,
-  trechos: TrechoDeTipo[]
+  trechos: TrechoDeTipo[],
+  opcoes?: OpcoesDeCompilacao
 ): Promise<ResultadoDeTrecho[]> {
   const resultados: ResultadoDeTrecho[] = [];
 
   for (const trecho of trechos) {
-    const { erros } = await compilar(`${codigo}\n${trecho.code}`);
+    const { erros } = await compilar(`${codigo}\n${trecho.code}`, opcoes);
     const recusou = erros.length > 0;
 
     if (trecho.rejects) {

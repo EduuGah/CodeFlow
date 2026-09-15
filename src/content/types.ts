@@ -19,7 +19,7 @@ export type Difficulty = 'iniciante' | 'intermediario' | 'avancado';
  * tanto para rotular o conteúdo quanto para configurar o editor.
  * Só JavaScript tem conteúdo hoje; os demais estão previstos no roadmap (§287).
  */
-export type LanguageId = 'javascript' | 'typescript' | 'python' | 'sql' | 'html';
+export type LanguageId = 'javascript' | 'typescript' | 'react' | 'python' | 'sql' | 'html';
 
 /**
  * Onde o código do aluno roda.
@@ -44,6 +44,8 @@ export const DIFFICULTY_LABELS: Record<Difficulty, string> = {
 export const LANGUAGE_LABELS: Record<LanguageId, string> = {
   javascript: 'JavaScript',
   typescript: 'TypeScript',
+  /** TSX: TypeScript com JSX, compilado e montado com o React embutido no iframe. */
+  react: 'React',
   python: 'Python',
   sql: 'SQL',
   html: 'HTML',

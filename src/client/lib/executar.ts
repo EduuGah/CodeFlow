@@ -41,6 +41,18 @@ export async function executarNaLinguagem({
   properties = [],
   typeTests = [],
 }: Execucao): Promise<ExecutionResult> {
+  if (language === 'react') {
+    // Um componente só roda no iframe do motor de página (`executarPagina`,
+    // com `react: true`). Chegar aqui é um exercício de tipo errado numa
+    // aula de React — o CI recusa esse conteúdo, mas o aluno merece uma
+    // frase e não um silêncio.
+    return {
+      output: '',
+      logs: [],
+      testResults: [],
+      error: 'Este exercício é de React e precisa do motor de componente; avise que ele está numa aula de React com um tipo que não roda lá.',
+    };
+  }
   if (language !== 'typescript') return executeCode(code, tests, properties);
 
   const compilar = await compiladorDoNavegador();

@@ -1,6 +1,8 @@
 import { JSDOM, VirtualConsole } from 'jsdom';
 
 import { interpretarMensagem, montarDocumento, type ResultadoDaPagina } from './pagina-core';
+import { montarDocumentoReact } from './react-core';
+import { BIBLIOTECAS_DO_REACT } from './react-umd';
 import type { SandboxTest } from './sandbox-core';
 
 /**
@@ -23,14 +25,20 @@ import type { SandboxTest } from './sandbox-core';
 export function rodarPaginaNoJsdom(
   codigoDoAluno: string,
   tests: SandboxTest[],
-  prazoMs = 8000
+  prazoMs = 8000,
+  { react = false }: { react?: boolean } = {}
 ): Promise<ResultadoDaPagina> {
   return new Promise((resolve, reject) => {
     // O console do aluno já é capturado dentro da página; o do jsdom só
     // repetiria tudo no terminal do teste.
     const virtualConsole = new VirtualConsole();
 
-    const dom = new JSDOM(montarDocumento(codigoDoAluno, tests), {
+    // Em React, `codigoDoAluno` já é o JavaScript compilado do TSX.
+    const documento = react
+      ? montarDocumentoReact(codigoDoAluno, tests, BIBLIOTECAS_DO_REACT)
+      : montarDocumento(codigoDoAluno, tests);
+
+    const dom = new JSDOM(documento, {
       runScripts: 'dangerously',
       virtualConsole,
       pretendToBeVisual: true,

@@ -6,12 +6,14 @@ import {
 import TsWorker from 'monaco-editor/languages/features/typescript/ts.worker?worker';
 
 import { monaco } from './monaco';
+import { ARQUIVO_DE_DECLARACOES_DO_REACT, DECLARACOES_DO_REACT } from './react-core';
 import {
   ARQUIVO_DE_DECLARACOES,
   DECLARACOES_DO_SANDBOX,
   OPCOES_DO_COMPILADOR,
   montarErro,
   type Compilacao,
+  type OpcoesDeCompilacao,
 } from './typescript-core';
 
 /**
@@ -47,28 +49,76 @@ typescriptDefaults.setCompilerOptions({
 });
 typescriptDefaults.addExtraLib(DECLARACOES_DO_SANDBOX, `file:///${ARQUIVO_DE_DECLARACOES}`);
 
-let cliente: monaco.editor.MonacoWebWorker<TypeScriptWorker> | null = null;
+const URI_DAS_DECLARACOES_DO_REACT = `file:///${ARQUIVO_DE_DECLARACOES_DO_REACT}`;
+
+let usosDoReact = 0;
+let declaracoesDoReact: { dispose(): void } | null = null;
+
+/**
+ * Liga as declarações do React no serviço do editor enquanto uma aula de
+ * React estiver aberta, e devolve a função que as desliga.
+ *
+ * O editor sublinha com o mesmo serviço para todos os modelos, então as
+ * declarações são globais nele: com elas sempre ligadas, `document` deixaria
+ * de ser sublinhado em aula de TypeScript puro — onde o corretor o recusa.
+ * Ligar e desligar por aula mantém o editor e o corretor dizendo a mesma
+ * coisa nos dois tipos de aula. Conta usos, porque uma tela pode ter dois
+ * editores.
+ */
+export function ativarReact(): () => void {
+  usosDoReact += 1;
+  declaracoesDoReact ??= typescriptDefaults.addExtraLib(
+    DECLARACOES_DO_REACT,
+    URI_DAS_DECLARACOES_DO_REACT
+  );
+  return () => {
+    usosDoReact -= 1;
+    if (usosDoReact === 0) {
+      declaracoesDoReact?.dispose();
+      declaracoesDoReact = null;
+    }
+  };
+}
+
+const clientes: Record<'ts' | 'react', monaco.editor.MonacoWebWorker<TypeScriptWorker> | null> = {
+  ts: null,
+  react: null,
+};
 
 /**
  * A instância de compilação, criada na primeira vez e mantida.
+ *
+ * São duas: a de TypeScript puro e a de React, que tem as declarações do
+ * React e do DOM do iframe a mais. Num só worker as declarações valeriam
+ * para os dois, e `document` compilaria em aula de TypeScript.
  *
  * A dança de mensagens ("ignore", depois os dados de criação) é a que o
  * próprio Monaco faz em `WorkerManager` — o worker de TypeScript espera
  * exatamente isso antes de responder ao protocolo do `createWebWorker`.
  */
-function compilador(): monaco.editor.MonacoWebWorker<TypeScriptWorker> {
-  if (cliente) return cliente;
+function compilador(comReact: boolean): monaco.editor.MonacoWebWorker<TypeScriptWorker> {
+  const chave = comReact ? 'react' : 'ts';
+  const existente = clientes[chave];
+  if (existente) return existente;
+
+  const extraLibs: Record<string, { content: string; version: number }> = {
+    [`file:///${ARQUIVO_DE_DECLARACOES}`]: { content: DECLARACOES_DO_SANDBOX, version: 1 },
+  };
+  if (comReact) {
+    extraLibs[URI_DAS_DECLARACOES_DO_REACT] = { content: DECLARACOES_DO_REACT, version: 1 };
+  }
 
   const worker = new TsWorker();
   worker.postMessage('ignore');
   worker.postMessage({
     compilerOptions: typescriptDefaults.getCompilerOptions(),
-    extraLibs: typescriptDefaults.getExtraLibs(),
+    extraLibs,
     customWorkerPath: undefined,
     inlayHintsOptions: {},
   });
 
-  cliente = monaco.editor.createWebWorker<TypeScriptWorker>({ worker, keepIdleModels: true });
+  const cliente = monaco.editor.createWebWorker<TypeScriptWorker>({ worker, keepIdleModels: true });
+  clientes[chave] = cliente;
   return cliente;
 }
 
@@ -89,13 +139,16 @@ let contador = 0;
  * código certo. O worker de compilação não olha a linguagem do modelo: decide
  * pelo `.ts` no fim da URI.
  */
-export async function compilarNoNavegador(codigo: string): Promise<Compilacao> {
+export async function compilarNoNavegador(
+  codigo: string,
+  { jsx = false }: OpcoesDeCompilacao = {}
+): Promise<Compilacao> {
   contador += 1;
-  const uri = monaco.Uri.parse(`inmemory://codeflow/compilacao-${contador}.ts`);
+  const uri = monaco.Uri.parse(`inmemory://codeflow/compilacao-${contador}.${jsx ? 'tsx' : 'ts'}`);
   const modelo = monaco.editor.createModel(codigo, 'plaintext', uri);
 
   try {
-    const worker = await compilador().withSyncedResources([uri]);
+    const worker = await compilador(jsx).withSyncedResources([uri]);
     const nome = uri.toString();
 
     const [sintaxe, semantica] = await Promise.all([

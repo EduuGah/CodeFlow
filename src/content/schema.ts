@@ -14,7 +14,7 @@ import { problemasDaRefatoracao } from '../client/lib/refatorar';
 
 const statusSchema = z.enum(['draft', 'published', 'archived']);
 const difficultySchema = z.enum(['iniciante', 'intermediario', 'avancado']);
-const languageSchema = z.enum(['javascript', 'typescript', 'python', 'sql', 'html']);
+const languageSchema = z.enum(['javascript', 'typescript', 'react', 'python', 'sql', 'html']);
 const runtimeSchema = z.enum(['worker', 'iframe']).optional();
 const idSchema = z.string().min(1).regex(/^[a-z0-9-]+$/, 'ids usam apenas minúsculas, números e hífen');
 

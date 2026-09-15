@@ -486,4 +486,12 @@ export const concepts: Concept[] = [
     prerequisites: ['ts-utilitarios', 'ts-api', 'ts-erros'],
     tags: ['typescript'],
   },
+  {
+    id: 'react-componentes',
+    title: 'Componentes',
+    summary:
+      'Uma função que recebe props e devolve JSX; JSX vira React.createElement; nome com maiúscula, uma raiz ou fragmento, className; compor componentes pequenos.',
+    prerequisites: ['dom-criar', 'ts-interfaces'],
+    tags: ['react'],
+  },
 ];

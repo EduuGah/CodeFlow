@@ -23,6 +23,7 @@ import { trackLogica } from './tracks/logica';
 import { trackWeb } from './tracks/web';
 import { trackPagina } from './tracks/pagina';
 import { trackTypescript } from './tracks/typescript';
+import { trackReact } from './tracks/react';
 import { lessonVariaveis } from './lessons/js-01-variaveis';
 import { lessonTiposEOperadores } from './lessons/js-02-tipos-e-operadores';
 import { lessonCondicoes } from './lessons/js-03-condicoes';
@@ -90,6 +91,7 @@ import { lessonUtilitarios } from './lessons/ts-07-utilitarios';
 import { lessonTiparApi } from './lessons/ts-08-tipar-api';
 import { lessonErrosDoCompilador } from './lessons/ts-09-erros-do-compilador';
 import { lessonQuandoNaoTipar } from './lessons/ts-10-quando-nao-tipar';
+import { lessonComponentes } from './lessons/react-01-componentes';
 import { projetoImc } from './projects/js-imc';
 import { projetoConversor } from './projects/js-conversor';
 import { projetoBoletim } from './projects/js-boletim';
@@ -171,6 +173,7 @@ const lessons: Lesson[] = [
   lessonTiparApi,
   lessonErrosDoCompilador,
   lessonQuandoNaoTipar,
+  lessonComponentes,
 ];
 const projects: Project[] = [
   projetoImc,
@@ -181,7 +184,14 @@ const projects: Project[] = [
   projetoSenha,
   projetoEstoque,
 ];
-const tracks: Track[] = [trackJsFundamentos, trackLogica, trackWeb, trackPagina, trackTypescript];
+const tracks: Track[] = [
+  trackJsFundamentos,
+  trackLogica,
+  trackWeb,
+  trackPagina,
+  trackTypescript,
+  trackReact,
+];
 
 /**
  * Checagem de integridade referencial que o Zod sozinho não faz: schema garante

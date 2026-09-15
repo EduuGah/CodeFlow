@@ -66,8 +66,34 @@ const OPCOES = {
   scrollbar: { alwaysConsumeMouseWheel: false },
 } as const;
 
+/**
+ * O Monaco não tem linguagem "react": TSX é a linguagem `typescript` num
+ * arquivo `.tsx`. O `path` é o que faz o analisador aceitar `<div>`; sem
+ * ele, todo JSX seria sublinhado como erro de sintaxe.
+ */
+function linguagemDoMonaco(language: LanguageId): { language: string; path?: string } {
+  if (language === 'react') return { language: 'typescript', path: 'inmemory://codeflow/exercicio.tsx' };
+  return { language };
+}
+
 export function CodeEditor({ value, onChange, language, height }: CodeEditorProps) {
   const [estado, setEstado] = useState<Carregamento>(estadoGlobal);
+
+  // Em aula de React, as declarações do React (e do DOM do iframe) entram no
+  // serviço do editor enquanto o editor existir — e saem depois, para uma
+  // aula de TypeScript puro não ganhar um `document` que o sandbox não tem.
+  useEffect(() => {
+    if (language !== 'react' || estado !== 'pronto') return;
+    let desligar: (() => void) | null = null;
+    let ativo = true;
+    void import('../../lib/typescript').then((m) => {
+      if (ativo) desligar = m.ativarReact();
+    });
+    return () => {
+      ativo = false;
+      desligar?.();
+    };
+  }, [language, estado]);
 
   useEffect(() => {
     if (estado !== 'pendente') return;
@@ -99,10 +125,13 @@ export function CodeEditor({ value, onChange, language, height }: CodeEditorProp
     return <Esqueleto value={value} height={height} />;
   }
 
+  const monaco = linguagemDoMonaco(language);
+
   return (
     <Editor
       height={height}
-      language={language}
+      language={monaco.language}
+      path={monaco.path}
       theme="codeflow"
       value={value}
       onChange={(valor) => onChange(valor ?? '')}
