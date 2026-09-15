@@ -462,4 +462,12 @@ export const concepts: Concept[] = [
     prerequisites: ['ts-genericos'],
     tags: ['typescript'],
   },
+  {
+    id: 'ts-api',
+    title: 'Tipar o que vem de fora',
+    summary:
+      'unknown na entrada, guarda de tipo (valor is T) que confere em execução na fronteira, e o tipo só depois dela; as como asserção que não confere.',
+    prerequisites: ['ts-estreitar', 'ts-interfaces', 'json'],
+    tags: ['typescript'],
+  },
 ];
