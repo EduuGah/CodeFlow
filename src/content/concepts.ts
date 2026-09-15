@@ -590,4 +590,12 @@ export const concepts: Concept[] = [
     prerequisites: ['react-formularios', 'ui-teclado'],
     tags: ['react'],
   },
+  {
+    id: 'react-projeto',
+    title: 'Projeto em React',
+    summary:
+      'O estado desenhado antes da tela (e o que deriva, fora dele); componentes por responsabilidade; fatias verticais que deixam o aplicativo funcionando; persistir com JSON e uma guarda; o que pronto significa.',
+    prerequisites: ['react-rotas', 'react-testes', 'decomposicao'],
+    tags: ['react'],
+  },
 ];

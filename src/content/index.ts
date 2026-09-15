@@ -104,6 +104,7 @@ import { lessonHooksProprios } from './lessons/react-10-hooks-proprios';
 import { lessonRotas } from './lessons/react-11-rotas';
 import { lessonReRender } from './lessons/react-12-re-render';
 import { lessonTestavel } from './lessons/react-13-testavel';
+import { lessonProjetoReact } from './lessons/react-14-projeto';
 import { projetoImc } from './projects/js-imc';
 import { projetoConversor } from './projects/js-conversor';
 import { projetoBoletim } from './projects/js-boletim';
@@ -198,6 +199,7 @@ const lessons: Lesson[] = [
   lessonRotas,
   lessonReRender,
   lessonTestavel,
+  lessonProjetoReact,
 ];
 const projects: Project[] = [
   projetoImc,
