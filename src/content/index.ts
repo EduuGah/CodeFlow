@@ -95,6 +95,7 @@ import { lessonComponentes } from './lessons/react-01-componentes';
 import { lessonEstado } from './lessons/react-02-estado';
 import { lessonListas } from './lessons/react-03-listas';
 import { lessonFormulariosReact } from './lessons/react-04-formularios';
+import { lessonEfeitos } from './lessons/react-05-efeitos';
 import { projetoImc } from './projects/js-imc';
 import { projetoConversor } from './projects/js-conversor';
 import { projetoBoletim } from './projects/js-boletim';
@@ -180,6 +181,7 @@ const lessons: Lesson[] = [
   lessonEstado,
   lessonListas,
   lessonFormulariosReact,
+  lessonEfeitos,
 ];
 const projects: Project[] = [
   projetoImc,
@@ -236,6 +238,17 @@ function checkReferences(): string[] {
   for (const track of tracks) {
     for (const id of track.lessonIds) {
       if (!lessonIds.has(id)) problems.push(`Trilha "${track.id}" lista aula inexistente "${id}"`);
+    }
+
+    // As seções são só uma forma de ler a mesma lista: se divergirem dela, a
+    // tela da trilha esconderia ou duplicaria aulas.
+    if (track.sections) {
+      const emSecoes = track.sections.flatMap((s) => s.lessonIds);
+      if (emSecoes.join(',') !== track.lessonIds.join(',')) {
+        problems.push(
+          `Trilha "${track.id}": as seções não cobrem exatamente lessonIds, na ordem (seções: ${emSecoes.length} aulas; trilha: ${track.lessonIds.length})`
+        );
+      }
     }
   }
 

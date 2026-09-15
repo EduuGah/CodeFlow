@@ -518,4 +518,12 @@ export const concepts: Concept[] = [
     prerequisites: ['react-estado', 'dom-formularios', 'ui-formularios'],
     tags: ['react'],
   },
+  {
+    id: 'react-efeitos',
+    title: 'Efeitos',
+    summary:
+      'useEffect roda depois da tela estar no DOM, quando a lista de dependências muda; tudo o que lê vai na lista; o que cria, a limpeza desfaz; derivado não é efeito, e resposta a evento também não.',
+    prerequisites: ['react-estado', 'assincronia'],
+    tags: ['react'],
+  },
 ];

@@ -160,6 +160,16 @@ interface HTMLLabelElement extends HTMLElement {}
 interface HTMLAnchorElement extends HTMLElement { href: string }
 interface HTMLImageElement extends HTMLElement { src: string; alt: string }
 
+interface Event {
+  type: string;
+  target: any;
+  currentTarget: any;
+  preventDefault(): void;
+  stopPropagation(): void;
+}
+interface KeyboardEvent extends Event { key: string }
+interface MouseEvent extends Event { clientX: number; clientY: number }
+
 declare class FormData {
   constructor(formulario?: HTMLFormElement);
   get(nome: string): string | null;

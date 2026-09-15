@@ -406,7 +406,7 @@ async function resolverExercicio(
         await page.getByRole('button', { name: /Executar código|Executar de novo/ }).click();
       }
       // Na primeira execução da aula o compilador e o React embutido ainda estão chegando.
-      await page.getByText('Todos os testes passaram').waitFor({ timeout: 60_000 });
+      await page.getByText('Todos os testes passaram').waitFor({ timeout: 90_000 });
       return;
     }
 
