@@ -204,6 +204,8 @@ declare var window: {
   innerWidth: number;
   innerHeight: number;
   location: { hash: string; href: string };
+  /** O servidor de mentira do motor de página: caminho → dados (ou função que os devolve). */
+  __servidor: { [caminho: string]: any };
   localStorage: { getItem(chave: string): string | null; setItem(chave: string, valor: string): void; removeItem(chave: string): void };
 };
 declare var localStorage: { getItem(chave: string): string | null; setItem(chave: string, valor: string): void; removeItem(chave: string): void };
@@ -273,7 +275,11 @@ function campo(rotulo) {
   var labels = Array.prototype.slice.call(document.querySelectorAll('label'));
   for (var i = 0; i < labels.length; i++) {
     var l = labels[i];
-    var nome = (l.textContent || '').replace(/\\s+/g, ' ').trim().replace(/[:*]$/, '').trim();
+    // O texto do rótulo sem o que está dentro dos controles: um <select>
+    // dentro do <label> traz o texto das opções junto.
+    var copia = l.cloneNode(true);
+    Array.prototype.forEach.call(copia.querySelectorAll('input, textarea, select'), function (c) { c.remove(); });
+    var nome = (copia.textContent || '').replace(/\\s+/g, ' ').trim().replace(/[:*]$/, '').trim();
     if (nome !== rotulo) continue;
     var dentro = l.querySelector('input, textarea, select');
     var porFor = l.htmlFor ? document.getElementById(l.htmlFor) : null;

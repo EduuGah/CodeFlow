@@ -526,4 +526,12 @@ export const concepts: Concept[] = [
     prerequisites: ['react-estado', 'assincronia'],
     tags: ['react'],
   },
+  {
+    id: 'react-dados',
+    title: 'Buscar dados em React',
+    summary:
+      'A busca dentro do efeito com a função async chamada por void; a tela como união carregando/erro/pronto; ok conferido; a bandeira ativo que descarta a resposta atrasada; refazer por parâmetro; tentar de novo.',
+    prerequisites: ['react-efeitos', 'dom-fetch', 'ts-estreitar'],
+    tags: ['react'],
+  },
 ];

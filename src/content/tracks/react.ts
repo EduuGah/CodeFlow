@@ -18,12 +18,17 @@ export const trackReact: Track = {
   language: 'react',
   status: 'published',
   // A ordem desta lista é a progressão da trilha: é daqui que sai "próxima aula".
-  lessonIds: ['lesson-react-1', 'lesson-react-2', 'lesson-react-3', 'lesson-react-4', 'lesson-react-5'],
+  lessonIds: ['lesson-react-1', 'lesson-react-2', 'lesson-react-3', 'lesson-react-4', 'lesson-react-5', 'lesson-react-6'],
   sections: [
     {
       title: 'Fundamentos',
       description: 'Componentes, estado, listas, formulários e efeitos — o que toda tela em React usa.',
       lessonIds: ['lesson-react-1', 'lesson-react-2', 'lesson-react-3', 'lesson-react-4', 'lesson-react-5'],
+    },
+    {
+      title: 'Dados e composição',
+      description: 'Dados de fora, os estados da tela, componentes que se encaixam, contexto e hooks próprios.',
+      lessonIds: ['lesson-react-6'],
     },
   ],
 };

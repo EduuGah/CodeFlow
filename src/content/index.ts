@@ -96,6 +96,7 @@ import { lessonEstado } from './lessons/react-02-estado';
 import { lessonListas } from './lessons/react-03-listas';
 import { lessonFormulariosReact } from './lessons/react-04-formularios';
 import { lessonEfeitos } from './lessons/react-05-efeitos';
+import { lessonBuscarDados } from './lessons/react-06-buscar-dados';
 import { projetoImc } from './projects/js-imc';
 import { projetoConversor } from './projects/js-conversor';
 import { projetoBoletim } from './projects/js-boletim';
@@ -182,6 +183,7 @@ const lessons: Lesson[] = [
   lessonListas,
   lessonFormulariosReact,
   lessonEfeitos,
+  lessonBuscarDados,
 ];
 const projects: Project[] = [
   projetoImc,
