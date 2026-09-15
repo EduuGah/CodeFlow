@@ -176,7 +176,9 @@ const CAPTURA = `
  * resolve nomes pelo ambiente global do realm.
  */
 export function montarDocumento(codigoDoAluno: string, tests: SandboxTest[]): string {
-  const programaDeTestes = escaparParaScript(buildProgram('', tests, []));
+  // Em série: os testes compartilham o DOM, e um clique de um não pode
+  // atropelar o que o outro está lendo.
+  const programaDeTestes = escaparParaScript(buildProgram('', tests, [], { sequencial: true }));
 
   const corredor = `
 (function () {

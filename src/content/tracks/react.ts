@@ -18,5 +18,5 @@ export const trackReact: Track = {
   language: 'react',
   status: 'published',
   // A ordem desta lista é a progressão da trilha: é daqui que sai "próxima aula".
-  lessonIds: ['lesson-react-1'],
+  lessonIds: ['lesson-react-1', 'lesson-react-2'],
 };

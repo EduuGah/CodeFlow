@@ -160,3 +160,41 @@ describe('o compilador em modo React', () => {
     expect(compilarNoNode('document.title = "x";').erros.map((e) => e.codigo)).toEqual([2584]);
   });
 });
+
+describe('achar pelo que a pessoa lê', () => {
+  it('botao acha pelo texto e campo acha pelo rótulo, e os dois explicam quando não acham', async () => {
+    const r = await rodar(
+      `function App() {
+        const [n, setN] = React.useState('');
+        return (
+          <form>
+            <label>Nome <input value={n} onChange={(e) => setN(e.target.value)} /></label>
+            <label htmlFor="idade">Idade</label><input id="idade" />
+            <button type="button">Salvar</button>
+            <p id="eco">{n}</p>
+          </form>
+        );
+      }`,
+      [
+        {
+          description: 'campo pelo rótulo, com o input dentro ou por htmlFor',
+          assertion: `await digitar(campo('Nome'), 'Ana'); if (texto('#eco') !== 'Ana') throw new Error('eco: ' + texto('#eco')); if (campo('Idade').id !== 'idade') throw new Error('htmlFor não achou');`,
+        },
+        {
+          description: 'botao pelo texto',
+          assertion: `if (botao('Salvar').tagName !== 'BUTTON') throw new Error('não achou o botão');`,
+        },
+        {
+          description: 'quando não acha, a mensagem lista o que existe',
+          assertion: `try { botao('Enviar'); throw new Error('deveria ter lançado'); } catch (e) { if (!e.message.includes('Botões na tela: ["Salvar"]')) throw new Error('mensagem: ' + e.message); }`,
+        },
+      ]
+    );
+    expect(r.error).toBeUndefined();
+    expect(r.testResults.map((t) => t.message + (t.passed ? '' : ' ✗'))).toEqual([
+      'campo pelo rótulo, com o input dentro ou por htmlFor',
+      'botao pelo texto',
+      'quando não acha, a mensagem lista o que existe',
+    ]);
+  });
+});

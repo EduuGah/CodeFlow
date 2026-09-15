@@ -193,9 +193,11 @@ declare var window: {
   removeEventListener(tipo: string, ouvinte: (evento: any) => void): void;
   innerWidth: number;
   innerHeight: number;
+  location: { hash: string; href: string };
   localStorage: { getItem(chave: string): string | null; setItem(chave: string, valor: string): void; removeItem(chave: string): void };
 };
 declare var localStorage: { getItem(chave: string): string | null; setItem(chave: string, valor: string): void; removeItem(chave: string): void };
+declare var location: { hash: string; href: string };
 `;
 
 /** O nome do componente que o motor monta. Todo exercício de React o declara. */
@@ -209,7 +211,9 @@ export const COMPONENTE_RAIZ = 'App';
  * `digitar` usa o setter nativo de `value`: o React guarda o último valor
  * que ele mesmo escreveu e ignora um `input` cujo valor "não mudou"; o
  * setter do protótipo passa por fora dessa memória, como um teclado de
- * verdade.
+ * verdade. `botao` e `campo` acham pelo que a pessoa lê — o texto do botão,
+ * o rótulo do campo —, para os testes cobrarem a tela que o aluno vê e não
+ * um seletor que ele nunca escreveria.
  */
 export const AJUDANTES_DO_REACT = `
 function esperar(ms) {
@@ -244,6 +248,32 @@ async function enviar(alvo) {
 function texto(alvo) {
   var el = typeof alvo === 'string' ? document.querySelector(alvo) : alvo;
   return el ? (el.textContent || '').replace(/\\s+/g, ' ').trim() : null;
+}
+function botao(rotulo) {
+  var lista = Array.prototype.slice.call(document.querySelectorAll('button'));
+  var achado = lista.find(function (b) {
+    return (b.textContent || '').replace(/\\s+/g, ' ').trim() === rotulo || b.getAttribute('aria-label') === rotulo;
+  });
+  if (!achado) {
+    throw new Error('Não encontrei um botão ' + JSON.stringify(rotulo) + '. Botões na tela: ' + JSON.stringify(lista.map(function (b) { return (b.textContent || '').trim(); })));
+  }
+  return achado;
+}
+function campo(rotulo) {
+  var labels = Array.prototype.slice.call(document.querySelectorAll('label'));
+  for (var i = 0; i < labels.length; i++) {
+    var l = labels[i];
+    var nome = (l.textContent || '').replace(/\\s+/g, ' ').trim().replace(/[:*]$/, '').trim();
+    if (nome !== rotulo) continue;
+    var dentro = l.querySelector('input, textarea, select');
+    var porFor = l.htmlFor ? document.getElementById(l.htmlFor) : null;
+    if (dentro || porFor) return dentro || porFor;
+  }
+  var porAria = document.querySelector('[aria-label=' + JSON.stringify(rotulo) + ']');
+  if (porAria) return porAria;
+  var porPlaceholder = document.querySelector('[placeholder=' + JSON.stringify(rotulo) + ']');
+  if (porPlaceholder) return porPlaceholder;
+  throw new Error('Não encontrei um campo com o rótulo ' + JSON.stringify(rotulo) + ' — um <label> com esse texto ligado ao campo, ou aria-label, ou placeholder.');
 }
 function textos(seletor) {
   return Array.prototype.map.call(document.querySelectorAll(seletor), function (el) {

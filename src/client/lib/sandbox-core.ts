@@ -485,6 +485,19 @@ function expressaoDePropriedade(propriedade: SandboxProperty): string {
         })()`;
 }
 
+export interface OpcoesDoPrograma {
+  /**
+   * Roda os testes um depois do outro, e não todos ao mesmo tempo.
+   *
+   * No sandbox de Worker os testes são independentes e correm em paralelo.
+   * Numa página, todos compartilham o mesmo DOM: um teste que clica em "+1"
+   * três vezes e outro que clica em "-1" ao mesmo tempo disputam o mesmo
+   * contador, e nenhum dos dois vê o que esperava. Em série, cada teste
+   * encontra a tela como o anterior a deixou — que é como a pessoa a usa.
+   */
+  sequencial?: boolean;
+}
+
 /**
  * Monta um único corpo de função com o código do aluno seguido dos testes.
  *
@@ -496,7 +509,8 @@ function expressaoDePropriedade(propriedade: SandboxProperty): string {
 export function buildProgram(
   code: string,
   tests: SandboxTest[],
-  properties: SandboxProperty[] = []
+  properties: SandboxProperty[] = [],
+  { sequencial = false }: OpcoesDoPrograma = {}
 ): string {
   const expressoes = [...tests.map(expressaoDeTeste), ...properties.map(expressaoDePropriedade)];
 
@@ -504,10 +518,23 @@ export function buildProgram(
   // não precisa carregar o sorteio nem o encolhimento.
   const auxiliares = properties.length > 0 ? AUXILIARES : '';
 
+  // Cada expressão é uma função assíncrona que já começa a rodar ao ser
+  // avaliada; em série, elas são embrulhadas em funções para só começarem na
+  // vez de cada uma. Os parênteses depois do `return` importam: a expressão
+  // começa com quebra de linha, e `return` seguido de quebra é `return;`.
+  const corredor = sequencial
+    ? `(async function () {
+        var resultados = [];
+        var testes = [${expressoes.map((e) => `function () { return (${e}); }`).join(',')}];
+        for (var i = 0; i < testes.length; i++) resultados.push(await testes[i]());
+        return resultados;
+      })()`
+    : `Promise.all([${expressoes.join(',')}])`;
+
   return `"use strict";
 ${code}
 ;${auxiliares}
-;return Promise.all([${expressoes.join(',')}]);`;
+;return ${corredor};`;
 }
 
 /**

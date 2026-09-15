@@ -92,6 +92,7 @@ import { lessonTiparApi } from './lessons/ts-08-tipar-api';
 import { lessonErrosDoCompilador } from './lessons/ts-09-erros-do-compilador';
 import { lessonQuandoNaoTipar } from './lessons/ts-10-quando-nao-tipar';
 import { lessonComponentes } from './lessons/react-01-componentes';
+import { lessonEstado } from './lessons/react-02-estado';
 import { projetoImc } from './projects/js-imc';
 import { projetoConversor } from './projects/js-conversor';
 import { projetoBoletim } from './projects/js-boletim';
@@ -174,6 +175,7 @@ const lessons: Lesson[] = [
   lessonErrosDoCompilador,
   lessonQuandoNaoTipar,
   lessonComponentes,
+  lessonEstado,
 ];
 const projects: Project[] = [
   projetoImc,

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { MAX_LOGS, runProgram } from './sandbox-core';
+import { buildProgram, MAX_LOGS, runProgram } from './sandbox-core';
 
 /**
  * O núcleo do sandbox é o que decide se o aluno vê "aprovado" ou "reprovado".
@@ -284,5 +284,41 @@ describe('rejeição sem destino não escapa do sandbox', () => {
 
     expect(r.testResults[0].passed).toBe(false);
     expect(r.testResults[0].message).toBe('esperado');
+  });
+});
+
+describe('testes em série', () => {
+  it('rodam um depois do outro, na ordem, e cada um vê o que o anterior deixou', async () => {
+    // Em paralelo os dois começariam juntos e o segundo leria 0; em série o
+    // primeiro termina — inclusive a espera — antes de o segundo começar.
+    const programa = buildProgram(
+      'var contador = 0;',
+      [
+        {
+          description: 'primeiro',
+          assertion: 'await new Promise((r) => setTimeout(r, 30)); contador += 1;',
+        },
+        {
+          description: 'segundo',
+          assertion: 'if (contador !== 1) throw new Error("o segundo começou antes de o primeiro terminar: " + contador);',
+        },
+      ],
+      [],
+      { sequencial: true }
+    );
+    const resultados = (await new Function(programa)()) as Array<{ passed: boolean; message: string }>;
+    expect(resultados).toEqual([
+      { passed: true, message: 'primeiro' },
+      { passed: true, message: 'segundo' },
+    ]);
+  });
+
+  it('em paralelo, o padrão, os dois começam juntos', async () => {
+    const programa = buildProgram('var contador = 0;', [
+      { description: 'primeiro', assertion: 'await new Promise((r) => setTimeout(r, 30)); contador += 1;' },
+      { description: 'segundo', assertion: 'if (contador !== 0) throw new Error("esperava 0, veio " + contador);' },
+    ]);
+    const resultados = (await new Function(programa)()) as Array<{ passed: boolean }>;
+    expect(resultados.map((r) => r.passed)).toEqual([true, true]);
   });
 });

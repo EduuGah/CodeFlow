@@ -494,4 +494,12 @@ export const concepts: Concept[] = [
     prerequisites: ['dom-criar', 'ts-interfaces'],
     tags: ['react'],
   },
+  {
+    id: 'react-estado',
+    title: 'Estado',
+    summary:
+      'useState: o valor e a função que o troca; trocar redesenha; manipulador é função; nunca mutar, substituir; set com função quando depende do anterior; não guardar o derivado.',
+    prerequisites: ['react-componentes', 'imutabilidade'],
+    tags: ['react'],
+  },
 ];
