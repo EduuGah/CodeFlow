@@ -470,4 +470,12 @@ export const concepts: Concept[] = [
     prerequisites: ['ts-estreitar', 'ts-interfaces', 'json'],
     tags: ['typescript'],
   },
+  {
+    id: 'ts-erros',
+    title: 'Erros do compilador',
+    summary:
+      'A anatomia da mensagem (onde, código, o que veio, o que era esperado), a cadeia lida de baixo para cima, a cascata resolvida na causa, e por que as e any calam sem consertar.',
+    prerequisites: ['ts-por-que', 'depuracao'],
+    tags: ['typescript'],
+  },
 ];

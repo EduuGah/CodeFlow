@@ -88,6 +88,7 @@ import { lessonFuncoesTipadas } from './lessons/ts-05-funcoes';
 import { lessonGenericos } from './lessons/ts-06-genericos';
 import { lessonUtilitarios } from './lessons/ts-07-utilitarios';
 import { lessonTiparApi } from './lessons/ts-08-tipar-api';
+import { lessonErrosDoCompilador } from './lessons/ts-09-erros-do-compilador';
 import { projetoImc } from './projects/js-imc';
 import { projetoConversor } from './projects/js-conversor';
 import { projetoBoletim } from './projects/js-boletim';
@@ -167,6 +168,7 @@ const lessons: Lesson[] = [
   lessonGenericos,
   lessonUtilitarios,
   lessonTiparApi,
+  lessonErrosDoCompilador,
 ];
 const projects: Project[] = [
   projetoImc,
