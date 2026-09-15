@@ -542,4 +542,12 @@ export const concepts: Concept[] = [
     prerequisites: ['react-dados', 'ui-estados-tela', 'ui-texto-interface'],
     tags: ['react'],
   },
+  {
+    id: 'react-composicao',
+    title: 'Composição',
+    summary:
+      'children como moldura; dados descem por props e eventos sobem por funções; o componente controlado pelo pai; subir o estado para o pai comum, nunca duplicar; cortar por responsabilidade.',
+    prerequisites: ['react-estado', 'react-listas'],
+    tags: ['react'],
+  },
 ];
