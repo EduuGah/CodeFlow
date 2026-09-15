@@ -86,6 +86,7 @@ import { lessonInterfaces } from './lessons/ts-03-interfaces';
 import { lessonEstreitar } from './lessons/ts-04-estreitar';
 import { lessonFuncoesTipadas } from './lessons/ts-05-funcoes';
 import { lessonGenericos } from './lessons/ts-06-genericos';
+import { lessonUtilitarios } from './lessons/ts-07-utilitarios';
 import { projetoImc } from './projects/js-imc';
 import { projetoConversor } from './projects/js-conversor';
 import { projetoBoletim } from './projects/js-boletim';
@@ -163,6 +164,7 @@ const lessons: Lesson[] = [
   lessonEstreitar,
   lessonFuncoesTipadas,
   lessonGenericos,
+  lessonUtilitarios,
 ];
 const projects: Project[] = [
   projetoImc,

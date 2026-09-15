@@ -454,4 +454,12 @@ export const concepts: Concept[] = [
     prerequisites: ['ts-funcoes'],
     tags: ['typescript'],
   },
+  {
+    id: 'ts-utilitarios',
+    title: 'Tipos utilitários',
+    summary:
+      'Derivar um tipo de outro: Partial, Pick, Omit, Readonly, Record e keyof; typeof em posição de tipo; uma forma canônica e o resto derivado dela.',
+    prerequisites: ['ts-genericos'],
+    tags: ['typescript'],
+  },
 ];
