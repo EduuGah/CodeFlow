@@ -582,4 +582,12 @@ export const concepts: Concept[] = [
     prerequisites: ['react-hooks', 'react-listas'],
     tags: ['react'],
   },
+  {
+    id: 'react-testes',
+    title: 'Acessível e testável',
+    summary:
+      'O teste acha as coisas como a pessoa (papel, rótulo, texto, alert/status), e o que ele acha o leitor de tela anuncia; testar comportamento, nunca implementação; o DOM no efeito ou pelo ref.',
+    prerequisites: ['react-formularios', 'ui-teclado'],
+    tags: ['react'],
+  },
 ];
