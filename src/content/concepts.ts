@@ -566,4 +566,12 @@ export const concepts: Concept[] = [
     prerequisites: ['react-efeitos', 'react-contexto', 'ts-genericos'],
     tags: ['react'],
   },
+  {
+    id: 'react-rotas',
+    title: 'Rotas',
+    summary:
+      'A rota como estado e uma tela por if; o link que é <a href> com preventDefault e aria-current; parâmetros lidos do caminho, o específico antes do geral, a tela de não encontrado; o que um roteador de verdade acrescenta.',
+    prerequisites: ['react-composicao', 'ui-teclado'],
+    tags: ['react'],
+  },
 ];
