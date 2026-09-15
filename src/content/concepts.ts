@@ -558,4 +558,12 @@ export const concepts: Concept[] = [
     prerequisites: ['react-composicao'],
     tags: ['react'],
   },
+  {
+    id: 'react-hooks',
+    title: 'Hooks próprios',
+    summary:
+      'Uma função useAlgo que chama hooks: compartilha lógica, não estado; as duas regras pela ordem de chamada; quando extrair; devolver ações com nome ou uma tupla como o useState.',
+    prerequisites: ['react-efeitos', 'react-contexto', 'ts-genericos'],
+    tags: ['react'],
+  },
 ];

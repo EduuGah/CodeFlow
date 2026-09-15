@@ -100,6 +100,7 @@ import { lessonBuscarDados } from './lessons/react-06-buscar-dados';
 import { lessonEstadosDeErro } from './lessons/react-07-estados-de-erro';
 import { lessonComposicao } from './lessons/react-08-composicao';
 import { lessonContexto } from './lessons/react-09-contexto';
+import { lessonHooksProprios } from './lessons/react-10-hooks-proprios';
 import { projetoImc } from './projects/js-imc';
 import { projetoConversor } from './projects/js-conversor';
 import { projetoBoletim } from './projects/js-boletim';
@@ -190,6 +191,7 @@ const lessons: Lesson[] = [
   lessonEstadosDeErro,
   lessonComposicao,
   lessonContexto,
+  lessonHooksProprios,
 ];
 const projects: Project[] = [
   projetoImc,
