@@ -94,6 +94,7 @@ import { lessonQuandoNaoTipar } from './lessons/ts-10-quando-nao-tipar';
 import { lessonComponentes } from './lessons/react-01-componentes';
 import { lessonEstado } from './lessons/react-02-estado';
 import { lessonListas } from './lessons/react-03-listas';
+import { lessonFormulariosReact } from './lessons/react-04-formularios';
 import { projetoImc } from './projects/js-imc';
 import { projetoConversor } from './projects/js-conversor';
 import { projetoBoletim } from './projects/js-boletim';
@@ -178,6 +179,7 @@ const lessons: Lesson[] = [
   lessonComponentes,
   lessonEstado,
   lessonListas,
+  lessonFormulariosReact,
 ];
 const projects: Project[] = [
   projetoImc,

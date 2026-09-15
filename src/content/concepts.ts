@@ -510,4 +510,12 @@ export const concepts: Concept[] = [
     prerequisites: ['react-estado'],
     tags: ['react'],
   },
+  {
+    id: 'react-formularios',
+    title: 'Formulários em React',
+    summary:
+      'Campo controlado (value + onChange), onSubmit com preventDefault, erro derivado mostrado depois do onBlur, envio desabilitado enquanto inválido, muitos campos num objeto com um onChange por name.',
+    prerequisites: ['react-estado', 'dom-formularios', 'ui-formularios'],
+    tags: ['react'],
+  },
 ];
