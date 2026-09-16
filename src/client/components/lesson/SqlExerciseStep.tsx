@@ -137,6 +137,19 @@ export function SqlExerciseStep({ exercise, lessonId, onEstado }: SqlExerciseSte
               </li>
             ))}
           </ul>
+          {/* O que o exercício acrescenta ao banco antes do aluno — uma tabela
+              a mais, dados de exemplo — precisa estar à vista: ninguém consulta
+              uma tabela que não sabe que existe. */}
+          {exercise.setup && (
+            <details className="border-t border-line">
+              <summary className="cursor-pointer px-4 py-2.5 text-sm text-ink-soft hover:bg-sunken">
+                Este exercício acrescenta ao banco…
+              </summary>
+              <pre className="overflow-x-auto border-t border-line bg-editor p-4 text-xs leading-relaxed">
+                <code className="font-mono text-white/90">{exercise.setup.trim()}</code>
+              </pre>
+            </details>
+          )}
         </Card>
       )}
 

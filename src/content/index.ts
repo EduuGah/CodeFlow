@@ -112,6 +112,10 @@ import { lessonOrdenar } from './lessons/sql-03-ordenar';
 import { lessonJoin } from './lessons/sql-04-join';
 import { lessonAgregacao } from './lessons/sql-05-agregacao';
 import { lessonSubconsultas } from './lessons/sql-06-subconsultas';
+import { lessonEscrita } from './lessons/sql-07-escrita';
+import { lessonModelar } from './lessons/sql-08-modelar';
+import { lessonNormalizacao } from './lessons/sql-09-normalizacao';
+import { lessonIndices } from './lessons/sql-10-indices';
 import { projetoImc } from './projects/js-imc';
 import { projetoConversor } from './projects/js-conversor';
 import { projetoBoletim } from './projects/js-boletim';
@@ -213,6 +217,10 @@ const lessons: Lesson[] = [
   lessonJoin,
   lessonAgregacao,
   lessonSubconsultas,
+  lessonEscrita,
+  lessonModelar,
+  lessonNormalizacao,
+  lessonIndices,
 ];
 const projects: Project[] = [
   projetoImc,

@@ -128,7 +128,7 @@ FROM itens;`,
         concepts: ['sql-tabelas'],
         difficulty: 'iniciante',
         tags: ['sql', 'select'],
-        initialCode: `-- Liste as duas colunas depois do SELECT, separadas por vírgula.
+        initialCode: `-- As duas colunas, separadas por vírgula.
 SELECT
 FROM produtos;`,
         tests: [{ description: 'Devolve o nome e a categoria de cada um dos 12 produtos' }],

@@ -18,12 +18,28 @@ export const trackSql: Track = {
   language: 'sql',
   status: 'published',
   // A ordem desta lista é a progressão da trilha: é daqui que sai "próxima aula".
-  lessonIds: ['lesson-sql-1', 'lesson-sql-2', 'lesson-sql-3', 'lesson-sql-4', 'lesson-sql-5', 'lesson-sql-6'],
+  lessonIds: [
+    'lesson-sql-1',
+    'lesson-sql-2',
+    'lesson-sql-3',
+    'lesson-sql-4',
+    'lesson-sql-5',
+    'lesson-sql-6',
+    'lesson-sql-7',
+    'lesson-sql-8',
+    'lesson-sql-9',
+    'lesson-sql-10',
+  ],
   sections: [
     {
       title: 'Consultar',
       description: 'Tabelas, filtrar, ordenar, juntar tabelas, agregar e subconsultas: tudo que se pergunta a um banco.',
       lessonIds: ['lesson-sql-1', 'lesson-sql-2', 'lesson-sql-3', 'lesson-sql-4', 'lesson-sql-5', 'lesson-sql-6'],
+    },
+    {
+      title: 'Escrever e modelar',
+      description: 'Mudar os dados com segurança, desenhar as tabelas, tirar a repetição e deixar as consultas rápidas.',
+      lessonIds: ['lesson-sql-7', 'lesson-sql-8', 'lesson-sql-9', 'lesson-sql-10'],
     },
   ],
 };

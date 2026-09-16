@@ -225,7 +225,9 @@ function Esqueleto({ value, height }: { value: string; height: string }) {
       aria-busy="true"
       aria-label="Carregando o editor de código"
       style={{ height }}
-      className="overflow-hidden bg-editor py-3.5 font-mono text-sm leading-[22px]"
+      // Rola de lado como o Monaco vai rolar: uma linha longa no celular fica
+      // alcançável, em vez de cortada.
+      className="overflow-x-auto overflow-y-hidden bg-editor py-3.5 font-mono text-sm leading-[22px]"
     >
       {linhas.map((linha, i) => (
         <div key={i} className="flex">

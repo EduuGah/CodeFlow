@@ -646,4 +646,36 @@ export const concepts: Concept[] = [
     prerequisites: ['sql-agregacao'],
     tags: ['sql'],
   },
+  {
+    id: 'sql-escrita',
+    title: 'INSERT, UPDATE e DELETE',
+    summary:
+      'Inserir com a lista de colunas; alterar com SET e o WHERE que decide o alcance (sem ele, tudo); apagar respeitando a chave estrangeira; BEGIN/COMMIT/ROLLBACK para várias mudanças virarem uma.',
+    prerequisites: ['sql-join'],
+    tags: ['sql'],
+  },
+  {
+    id: 'sql-modelar',
+    title: 'CREATE TABLE e restrições',
+    summary:
+      'Tipos do SQLite; PRIMARY KEY, NOT NULL, UNIQUE, DEFAULT, CHECK e REFERENCES como regras que o banco impõe a todo programa; ON DELETE CASCADE só para o que não existe sem o pai; ALTER TABLE ADD COLUMN com DEFAULT.',
+    prerequisites: ['sql-escrita'],
+    tags: ['sql'],
+  },
+  {
+    id: 'sql-normalizacao',
+    title: 'Normalização',
+    summary:
+      'As três anomalias da repetição; cada fato num lugar só, e a coluna que fala da chave inteira; um-para-muitos e a tabela de ligação com chave composta; migrar com INSERT … SELECT DISTINCT; repetir de propósito quando são fatos diferentes no tempo.',
+    prerequisites: ['sql-modelar'],
+    tags: ['sql'],
+  },
+  {
+    id: 'sql-indices',
+    title: 'Índices',
+    summary:
+      'Varredura contra busca; o que um índice é e o que custa em escrita; a chave primária já indexada e a estrangeira não; EXPLAIN QUERY PLAN (SCAN e SEARCH); índice composto e a ordem das colunas; o que impede o uso do índice; índice único.',
+    prerequisites: ['sql-modelar'],
+    tags: ['sql'],
+  },
 ];
