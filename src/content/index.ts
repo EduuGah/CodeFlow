@@ -109,6 +109,9 @@ import { lessonProjetoReact } from './lessons/react-14-projeto';
 import { lessonTabelas } from './lessons/sql-01-tabelas';
 import { lessonWhere } from './lessons/sql-02-where';
 import { lessonOrdenar } from './lessons/sql-03-ordenar';
+import { lessonJoin } from './lessons/sql-04-join';
+import { lessonAgregacao } from './lessons/sql-05-agregacao';
+import { lessonSubconsultas } from './lessons/sql-06-subconsultas';
 import { projetoImc } from './projects/js-imc';
 import { projetoConversor } from './projects/js-conversor';
 import { projetoBoletim } from './projects/js-boletim';
@@ -207,6 +210,9 @@ const lessons: Lesson[] = [
   lessonTabelas,
   lessonWhere,
   lessonOrdenar,
+  lessonJoin,
+  lessonAgregacao,
+  lessonSubconsultas,
 ];
 const projects: Project[] = [
   projetoImc,

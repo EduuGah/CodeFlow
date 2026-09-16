@@ -18,12 +18,12 @@ export const trackSql: Track = {
   language: 'sql',
   status: 'published',
   // A ordem desta lista é a progressão da trilha: é daqui que sai "próxima aula".
-  lessonIds: ['lesson-sql-1', 'lesson-sql-2', 'lesson-sql-3'],
+  lessonIds: ['lesson-sql-1', 'lesson-sql-2', 'lesson-sql-3', 'lesson-sql-4', 'lesson-sql-5', 'lesson-sql-6'],
   sections: [
     {
       title: 'Consultar',
       description: 'Tabelas, filtrar, ordenar, juntar tabelas, agregar e subconsultas: tudo que se pergunta a um banco.',
-      lessonIds: ['lesson-sql-1', 'lesson-sql-2', 'lesson-sql-3'],
+      lessonIds: ['lesson-sql-1', 'lesson-sql-2', 'lesson-sql-3', 'lesson-sql-4', 'lesson-sql-5', 'lesson-sql-6'],
     },
   ],
 };

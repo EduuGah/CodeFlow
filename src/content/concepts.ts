@@ -622,4 +622,28 @@ export const concepts: Concept[] = [
     prerequisites: ['sql-where'],
     tags: ['sql'],
   },
+  {
+    id: 'sql-join',
+    title: 'JOIN',
+    summary:
+      'Chave estrangeira e INNER JOIN … ON; apelidos de tabela e a coluna ambígua; três ou mais tabelas seguindo as chaves; o produto cartesiano do JOIN sem ON; LEFT JOIN com IS NULL para achar quem não tem par.',
+    prerequisites: ['sql-where'],
+    tags: ['sql'],
+  },
+  {
+    id: 'sql-agregacao',
+    title: 'Agregação',
+    summary:
+      'COUNT, SUM, AVG, MIN, MAX e o NULL que elas ignoram; GROUP BY e a regra do SELECT; WHERE antes de agrupar, HAVING depois; agregação sobre JOIN e o COUNT(coluna) no LEFT JOIN.',
+    prerequisites: ['sql-join'],
+    tags: ['sql'],
+  },
+  {
+    id: 'sql-subconsultas',
+    title: 'Subconsultas e WITH',
+    summary:
+      'Uma consulta dentro da outra: como valor, como lista (IN, e a armadilha do NOT IN com NULL), correlacionada; WITH para nomear etapas e ler de cima para baixo.',
+    prerequisites: ['sql-agregacao'],
+    tags: ['sql'],
+  },
 ];
