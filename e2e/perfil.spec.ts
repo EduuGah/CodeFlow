@@ -1,11 +1,13 @@
 import { esperarConteudo, expect, test, type BancoFalso } from './fixtures';
 
 /**
- * O perfil: nome e avatar, a loja, os desafios e a aparência.
+ * O perfil e as suas páginas: nome e avatar, a loja, os desafios, as
+ * conquistas e a aparência.
  *
  * O que só o navegador prova: a compra sai do saldo na hora (sem recarregar),
  * o tema escolhido chega ao `<html>` e sobrevive à recarga, o avatar bloqueado
- * não é escolhível, e o nome novo aparece na tela inicial.
+ * não é escolhível, o nome novo aparece na tela inicial, e cada porta do
+ * perfil leva à página certa.
  */
 
 /** Um histórico de quatro dias, com 60 moedas ganhas (três aulas e um desafio, digamos). */
@@ -59,6 +61,10 @@ test('comprar sai do saldo na hora, e o congelamento fica guardado', async ({ lo
   semear(banco);
   await page.goto('/app/perfil');
   await esperarConteudo(page);
+  // A porta da loja diz o saldo e leva à página dela.
+  await page.getByRole('link', { name: /Loja/ }).click();
+  await expect(page).toHaveURL(/\/app\/perfil\/loja$/);
+  await expect(page.getByRole('heading', { level: 1, name: 'Loja' })).toBeVisible();
 
   // 30 das aulas + o que os desafios renderam: ao menos 60.
   const saldo = page.getByRole('heading', { name: /\d+ moedas/ });
@@ -86,7 +92,7 @@ test('comprar sai do saldo na hora, e o congelamento fica guardado', async ({ lo
 });
 
 test('o tema escolhido chega ao html e sobrevive à recarga', async ({ logado: page, banco }) => {
-  await page.goto('/app/perfil');
+  await page.goto('/app/perfil/aparencia');
   await esperarConteudo(page);
 
   await page.getByRole('radio', { name: /Escuro/ }).check();
@@ -127,12 +133,39 @@ test('os desafios do dia aparecem no início, e as conquistas por categoria no p
   const hoje = page.getByRole('region', { name: 'Para hoje' });
   await expect(hoje.getByRole('progressbar')).toHaveCount(2);
 
-  await page.goto('/app/perfil');
+  await page.goto('/app/perfil/conquistas');
   await esperarConteudo(page);
   for (const categoria of ['Hábitos', 'Habilidades', 'Trilhas', 'Marcos']) {
-    await expect(page.getByRole('heading', { level: 3, name: new RegExp(`^${categoria}`) })).toBeVisible();
+    await expect(page.getByRole('heading', { level: 2, name: new RegExp(`^${categoria}`) })).toBeVisible();
   }
   // Errou e resolveu o mesmo exercício: a conquista abriu.
   await expect(page.getByText('Não desistiu')).toBeVisible();
+
+  // O XP, com a partição, mora no progresso.
+  await page.goto('/app/perfil/progresso');
+  await esperarConteudo(page);
   await expect(page.getByRole('heading', { name: /\d+ XP/ })).toBeVisible();
+  await expect(page.getByText('exercícios', { exact: true })).toBeVisible();
+});
+
+test('o perfil abre com o anel do nível e uma porta por assunto', async ({ logado: page, banco }) => {
+  semear(banco);
+  await page.goto('/app/perfil');
+  await esperarConteudo(page);
+
+  const portas = page.getByRole('list', { name: 'Seções do perfil' });
+  for (const nome of ['Desafios', 'Loja', 'Conquistas', 'Aparência', 'Progresso']) {
+    await expect(portas.getByRole('link', { name: new RegExp(nome) })).toBeVisible();
+  }
+  // A porta dos desafios já diz quantos foram feitos hoje.
+  await expect(portas.getByRole('link', { name: /Desafios/ })).toContainText(/\d de \d hoje/);
+
+  await portas.getByRole('link', { name: /Desafios/ }).click();
+  await expect(page).toHaveURL(/\/app\/perfil\/desafios$/);
+  await expect(page.getByRole('heading', { level: 2, name: 'Hoje' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 2, name: 'Esta semana' })).toBeVisible();
+
+  // O caminho de volta.
+  await page.getByRole('link', { name: 'Perfil' }).first().click();
+  await expect(page).toHaveURL(/\/app\/perfil$/);
 });

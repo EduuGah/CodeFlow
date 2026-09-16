@@ -357,3 +357,147 @@ export const IconCalendarCheck = (p: IconProps) => (
     <path d="M9 14.5l2 2 4-4" />
   </Base>
 );
+
+/* -------------------------------------------------------- perfil e loja */
+
+/** Medalha: círculo com duas fitas. A conquista aberta. */
+export const IconMedal = (p: IconProps) => (
+  <Base {...p}>
+    <circle cx="12" cy="15" r="5" />
+    <path d="M9 10.5L6.5 3.5H11l1 3 1-3h4.5L15 10.5" />
+  </Base>
+);
+
+/** Troféu: os marcos grandes. */
+export const IconTrophy = (p: IconProps) => (
+  <Base {...p}>
+    <path d="M8 4h8v5a4 4 0 0 1-8 0z" />
+    <path d="M8 6H5v1.5A3 3 0 0 0 8 10.5" />
+    <path d="M16 6h3v1.5a3 3 0 0 1-3 3" />
+    <path d="M12 13v4" />
+    <path d="M9 20h6" />
+    <path d="M10 17h4" />
+  </Base>
+);
+
+/** Calendário com dias marcados: o mês inteiro. */
+export const IconCalendar = (p: IconProps) => (
+  <Base {...p}>
+    <rect x="3.5" y="5" width="17" height="15" rx="2" />
+    <path d="M3.5 9.5h17" />
+    <path d="M8 3v4" />
+    <path d="M16 3v4" />
+    <path d="M8 13.5h.01M12 13.5h.01M16 13.5h.01M8 16.5h.01M12 16.5h.01" />
+  </Base>
+);
+
+/** Lâmpada cortada: sem dica. */
+export const IconNoHint = (p: IconProps) => (
+  <Base {...p}>
+    <path d="M9.5 17.5h5" />
+    <path d="M10.5 20.5h3" />
+    <path d="M8 12.5a4.5 4.5 0 1 1 8 0c0 1.7-1.5 2.6-1.5 5h-5c0-2.4-1.5-3.3-1.5-5z" />
+    <path d="M5 4l14 14" />
+  </Base>
+);
+
+/** Bandeira no mastro: chegou ao fim de um caminho. */
+export const IconFlag = (p: IconProps) => (
+  <Base {...p}>
+    <path d="M6 21V4" />
+    <path d="M6 4h11l-2.5 4 2.5 4H6" />
+  </Base>
+);
+
+/** Camadas: vários conceitos, um sobre o outro. */
+export const IconLayers = (p: IconProps) => (
+  <Base {...p}>
+    <path d="M12 4l8 4.5-8 4.5-8-4.5z" />
+    <path d="M4 13l8 4.5 8-4.5" />
+    <path d="M4 17l8 4.5 8-4.5" />
+  </Base>
+);
+
+/** Bússola: cobriu muito chão. */
+export const IconCompass = (p: IconProps) => (
+  <Base {...p}>
+    <circle cx="12" cy="12" r="9" />
+    <path d="M15.5 8.5l-2 5-5 2 2-5z" />
+  </Base>
+);
+
+/** Um T com serifa: tipos. */
+export const IconTypes = (p: IconProps) => (
+  <Base {...p}>
+    <path d="M5 7V5h14v2" />
+    <path d="M12 5v14" />
+    <path d="M9 19h6" />
+  </Base>
+);
+
+/** Caixa dentro de caixa: um componente. */
+export const IconComponent = (p: IconProps) => (
+  <Base {...p}>
+    <rect x="3.5" y="3.5" width="17" height="17" rx="2" />
+    <rect x="8" y="8" width="8" height="8" rx="1" />
+  </Base>
+);
+
+/** Cilindro: banco de dados. */
+export const IconDatabase = (p: IconProps) => (
+  <Base {...p}>
+    <ellipse cx="12" cy="6" rx="7" ry="3" />
+    <path d="M5 6v12c0 1.7 3.1 3 7 3s7-1.3 7-3V6" />
+    <path d="M5 12c0 1.7 3.1 3 7 3s7-1.3 7-3" />
+  </Base>
+);
+
+/** Sacola: a loja. */
+export const IconShop = (p: IconProps) => (
+  <Base {...p}>
+    <path d="M5.5 8h13l1 12h-15z" />
+    <path d="M9 8V6.5a3 3 0 0 1 6 0V8" />
+  </Base>
+);
+
+/** Barras subindo: progresso. */
+export const IconChart = (p: IconProps) => (
+  <Base {...p}>
+    <path d="M4 20h16" />
+    <path d="M7 16v-4" />
+    <path d="M12 16V8" />
+    <path d="M17 16V5" />
+  </Base>
+);
+
+/** Sol: o modo claro. */
+export const IconSun = (p: IconProps) => (
+  <Base {...p}>
+    <circle cx="12" cy="12" r="4" />
+    <path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4L7 17M17 7l1.4-1.4" />
+  </Base>
+);
+
+/** Lua: o modo escuro. */
+export const IconMoon = (p: IconProps) => (
+  <Base {...p}>
+    <path d="M14 3.5a8.5 8.5 0 1 0 6.5 12A7 7 0 0 1 14 3.5z" />
+  </Base>
+);
+
+/** Tela com base: o aparelho, que decide o modo. */
+export const IconDevice = (p: IconProps) => (
+  <Base {...p}>
+    <rect x="3" y="4.5" width="18" height="12" rx="2" />
+    <path d="M12 16.5v4" />
+    <path d="M8.5 20.5h7" />
+  </Base>
+);
+
+/** Relógio: até quando vale. */
+export const IconClock = (p: IconProps) => (
+  <Base {...p}>
+    <circle cx="12" cy="12" r="8.5" />
+    <path d="M12 7.5V12l3 2" />
+  </Base>
+);

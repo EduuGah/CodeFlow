@@ -14,7 +14,12 @@ import { Home } from './pages/app/Home';
 import { Tracks } from './pages/app/Tracks';
 import { TrackDetail } from './pages/app/TrackDetail';
 import { Practice } from './pages/app/Practice';
-import { Profile } from './pages/app/Profile';
+import { Perfil } from './pages/app/perfil/Perfil';
+import { PerfilAparencia } from './pages/app/perfil/PerfilAparencia';
+import { PerfilConquistas } from './pages/app/perfil/PerfilConquistas';
+import { PerfilDesafios } from './pages/app/perfil/PerfilDesafios';
+import { PerfilLoja } from './pages/app/perfil/PerfilLoja';
+import { PerfilProgresso } from './pages/app/perfil/PerfilProgresso';
 import { AdminContent } from './pages/admin/AdminContent';
 import { AdminNewExercise } from './pages/admin/AdminNewExercise';
 
@@ -50,7 +55,14 @@ function App() {
         <Route path="trilhas" element={<Tracks />} />
         <Route path="trilhas/:trackId" element={<TrackDetail />} />
         <Route path="praticar" element={<Practice />} />
-        <Route path="perfil" element={<Profile />} />
+        {/* O perfil é uma família: cada assunto numa página, para o celular
+            não virar uma rolagem de 3 000 px. */}
+        <Route path="perfil" element={<Perfil />} />
+        <Route path="perfil/desafios" element={<PerfilDesafios />} />
+        <Route path="perfil/loja" element={<PerfilLoja />} />
+        <Route path="perfil/conquistas" element={<PerfilConquistas />} />
+        <Route path="perfil/aparencia" element={<PerfilAparencia />} />
+        <Route path="perfil/progresso" element={<PerfilProgresso />} />
       </Route>
 
       {/* Administração fora do AppShell: não é uma aba do aluno, e a barra de

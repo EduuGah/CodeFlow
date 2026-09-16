@@ -6,6 +6,7 @@ import {
   aplicarAcento,
   aplicarTema,
   ouvirSistema,
+  resolverTema,
   temaGuardado,
 } from '../lib/tema';
 
@@ -19,6 +20,8 @@ import {
  */
 interface TemaContextType {
   tema: Tema;
+  /** O que está pintado de fato: "sistema" resolvido para claro ou escuro. */
+  temaResolvido: 'claro' | 'escuro';
   acento: Acento;
   mudarTema: (tema: Tema) => void;
   mudarAcento: (acento: Acento) => void;
@@ -31,11 +34,16 @@ const TemaContext = createContext<TemaContextType | undefined>(undefined);
 export function TemaProvider({ children }: { children: React.ReactNode }) {
   const [tema, setTema] = useState<Tema>(() => temaGuardado());
   const [acento, setAcento] = useState<Acento>(() => acentoGuardado());
+  const [temaResolvido, setTemaResolvido] = useState<'claro' | 'escuro'>(() => resolverTema(tema));
 
   useEffect(() => {
     aplicarTema(tema);
+    setTemaResolvido(resolverTema(tema));
     if (tema !== 'sistema') return;
-    return ouvirSistema(() => aplicarTema('sistema'));
+    return ouvirSistema(() => {
+      aplicarTema('sistema');
+      setTemaResolvido(resolverTema('sistema'));
+    });
   }, [tema]);
 
   useEffect(() => {
@@ -48,8 +56,8 @@ export function TemaProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const valor = useMemo<TemaContextType>(
-    () => ({ tema, acento, mudarTema: setTema, mudarAcento: setAcento, adotar }),
-    [tema, acento, adotar]
+    () => ({ tema, temaResolvido, acento, mudarTema: setTema, mudarAcento: setAcento, adotar }),
+    [tema, temaResolvido, acento, adotar]
   );
 
   return <TemaContext.Provider value={valor}>{children}</TemaContext.Provider>;

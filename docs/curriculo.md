@@ -379,7 +379,8 @@ compilação ou na primeira montagem.
 Plataforma da fase — tutor com IA — **não feita**. O **painel do aluno** saiu
 em 2026-09-16, junto com a gamificação que ele precisava: perfil editável,
 moedas e loja, desafios do dia e da semana, conquistas por categoria, modo
-escuro e cores de destaque.
+escuro e cores de destaque — cada assunto numa página própria do perfil, com
+vinhetas e ícones desenhados para a plataforma.
 
 ### Fase 4 — Back-end e dados · 20 aulas
 Motores **4 (servidor simulado)** e **5 (sql.js, ~1,5 MB)**.

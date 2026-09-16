@@ -104,7 +104,10 @@ por 24 h, temas e avatares que também abrem por nível) com as compras como
 único fato guardado; desafios diários e semanais por rodízio; 30 conquistas em
 quatro categorias. **Perfil editável** (nome, avatar desenhado ou foto enviada
 ao Storage), **modo escuro** e **quatro cores de destaque**, uma cor por
-trilha.
+trilha. O perfil é uma família de páginas (`/app/perfil`, `/desafios`, `/loja`,
+`/conquistas`, `/aparencia`, `/progresso`), cada uma com a sua vinheta — os
+desenhos maiores vivem em `components/ui/Ilustracao.tsx`, na gramática dos
+ícones.
 
 ### Correções grandes já feitas — não reintroduza
 

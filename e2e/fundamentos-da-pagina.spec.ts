@@ -16,6 +16,12 @@ const TELAS = [
   { rota: '/app/trilhas', titulo: 'Trilhas' },
   { rota: '/app/praticar', titulo: 'Praticar' },
   { rota: '/app/perfil', titulo: 'Perfil' },
+  // O perfil é uma família de páginas: cada uma precisa do próprio título.
+  { rota: '/app/perfil/desafios', titulo: 'Desafios' },
+  { rota: '/app/perfil/loja', titulo: 'Loja' },
+  { rota: '/app/perfil/conquistas', titulo: 'Conquistas' },
+  { rota: '/app/perfil/aparencia', titulo: 'Aparência' },
+  { rota: '/app/perfil/progresso', titulo: 'Progresso' },
 ];
 
 test('o documento declara português', async ({ logado: page }) => {
@@ -43,6 +49,8 @@ for (const { rota, titulo } of TELAS) {
 }
 
 test('a hierarquia de cabeçalhos não pula níveis', async ({ logado: page }) => {
+  // Nove telas em sequência, cada uma esperando os dados do aluno.
+  test.setTimeout(150_000);
   const problemas: string[] = [];
 
   for (const { rota } of TELAS) {
@@ -72,6 +80,8 @@ test('a hierarquia de cabeçalhos não pula níveis', async ({ logado: page }) =
 });
 
 test('nenhuma tela mostra identificador de código ao aluno', async ({ logado: page }) => {
+  // Nove telas em sequência, cada uma esperando os dados do aluno.
+  test.setTimeout(150_000);
   const problemas: string[] = [];
 
   for (const { rota } of TELAS) {
@@ -95,6 +105,8 @@ test('nenhuma tela mostra identificador de código ao aluno', async ({ logado: p
 });
 
 test('nenhum controle chega ao aluno sem nome acessível', async ({ logado: page }) => {
+  // Nove telas em sequência, cada uma esperando os dados do aluno.
+  test.setTimeout(150_000);
   const problemas: string[] = [];
 
   for (const { rota } of TELAS) {

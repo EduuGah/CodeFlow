@@ -76,6 +76,8 @@ interface StudentData {
   achievements: ReturnType<typeof computeAchievements>;
 
   desafios: { dia: EstadoDoDesafio[]; semana: EstadoDoDesafio[] };
+  /** Quantos já foram cumpridos desde o começo, por período. */
+  desafiosCumpridos: { dia: number; semana: number };
   moedas: { ganhas: FontesDeMoedas; gastas: number; saldo: number };
   /** O dobro de XP que está valendo agora, se houver. */
   dobro: { ate: Date } | null;
@@ -220,6 +222,10 @@ export function StudentDataProvider({ children }: { children: React.ReactNode })
       level: levelFromXp(xp.total),
       achievements: computeAchievements(entradaDeJogo, concluidos),
       desafios: desafiosAtuais({ attempts, reviews, completedLessons }),
+      desafiosCumpridos: {
+        dia: concluidos.filter((d) => d.periodo === 'dia').length,
+        semana: concluidos.filter((d) => d.periodo === 'semana').length,
+      },
       moedas: { ganhas, gastas, saldo: ganhas.total - gastas },
       dobro: dobroAtivo(purchases),
       comprar,

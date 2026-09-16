@@ -58,8 +58,8 @@ Redirect URLs.
 
 ```bash
 npm run typecheck   # tipos, incluindo os testes de navegador
-npm test            # 337 testes de unidade e componente (Vitest)
-npm run test:e2e    # 62 testes de navegador (Playwright, Chromium)
+npm test            # 2.321 testes de unidade, propriedade e componente (Vitest)
+npm run test:e2e    # 300 testes de navegador (Playwright, Chromium)
 ```
 
 O E2E precisa do Chromium uma vez: `npx playwright install chromium`.

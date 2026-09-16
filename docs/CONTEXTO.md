@@ -250,9 +250,14 @@ src/client/components/  Componentes
                         mostra o código enquanto espera, cai num textarea se
                         o chunk não vier
   ui/Avatar.tsx         Os nove avatares desenhados, e a foto
-  perfil/               O perfil em partes: editar (nome, avatar, foto), a
-                        loja, os desafios, as conquistas por categoria, a
-                        aparência (modo e cor)
+  ui/Ilustracao.tsx     As vinhetas (grade 48): moedas, paleta, medalha, alvo,
+                        gráfico, floco, raio duplo e a janela em miniatura
+                        pintada na cor do tema
+  perfil/               Os corpos das páginas do perfil: editar (nome, avatar,
+                        foto), a loja, os desafios, as conquistas por
+                        categoria, a aparência (modo e cor); `icones.tsx`
+                        diz qual ícone cada conquista e desafio leva;
+                        `AnelDeNivel` e `CabecalhoDaSecao`
   lesson/               Um componente por tipo de exercício; `ExerciseAction`
                         e `ExerciseFeedback` são o botão e o retorno de todos
   lesson/SqlExerciseStep  O exercício de SQL: painel de tabelas do banco (e o
@@ -262,6 +267,11 @@ src/client/components/  Componentes
 src/client/pages/app/   Início é a aula da vez + o percurso; Trilhas é o
   TrackDetail.tsx       percurso em etapas com os projetos numa aba; uma
                         trilha inteira, em blocos por assunto
+  perfil/               Uma página por assunto: `Perfil` (cabeçalho com o anel
+                        do nível, os três números do dia e uma porta por
+                        seção), `/desafios`, `/loja`, `/conquistas`,
+                        `/aparencia`, `/progresso` (XP com a partição, barra
+                        por trilha, domínio por conceito)
 e2e/                    Playwright; `fixtures.ts` tem o dublê do Supabase
 supabase/migrations/    0001 a 0007, aplicadas em ordem (0007: perfil, loja, fotos)
 docs/curriculo.md       Roadmap de conteúdo — fonte canônica
@@ -271,8 +281,8 @@ docs/curriculo.md       Roadmap de conteúdo — fonte canônica
 
 ```bash
 npm run typecheck   # inclui e2e/ e playwright.config.ts
-npm test            # 2.104 testes
-npm run test:e2e    # 278 no navegador (antes: npx playwright install chromium)
+npm test            # 2.321 testes
+npm run test:e2e    # 300 no navegador (antes: npx playwright install chromium)
 npm run build
 ```
 
@@ -650,7 +660,10 @@ pergunte antes de começar o servidor simulado ou qualquer outra fase.
 
 - **Português** em tudo: código, comentários, commits, interface.
 - **Sem Lucide Icons.** Os ícones são SVG próprios em
-  `components/ui/Icon.tsx` — grade 24, traço 1.75, `currentColor`.
+  `components/ui/Icon.tsx` — grade 24, traço 1.75, `currentColor`. As figuras
+  maiores (abrir uma seção, apresentar um item da loja) são as vinhetas de
+  `components/ui/Ilustracao.tsx` — grade 48, traço 2, uma forma de fundo em
+  tom claro; a mesma gramática, nunca ilustração "flat" de banco de imagens.
 - **Mobile-first**, com identidade visual própria. Nada de gradiente agressivo,
   bento grid, glassmorphism, emoji na interface, roxo com preto, orbes, sparkles.
 - **Nenhum recurso falso.** Botão que não faz nada, número que não significa nada
