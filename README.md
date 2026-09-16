@@ -41,6 +41,8 @@ SQL Editor do Supabase:
 | `0003_flashcard_reviews.sql` | Histórico de revisões espaçadas |
 | `0004_user_summary.sql` | View de resumo por aluno |
 | `0005_admin.sql` | Papel de administrador e view de desempenho |
+| `0006_promote_admin.sql` | Conserta o gatilho que impedia promover alguém a administrador |
+| `0007_perfil_e_loja.sql` | Perfil editável (nome, avatar, tema), a tabela `purchases` da loja e o bucket `avatars` do Storage para a foto |
 
 Para se tornar administrador depois de entrar pela primeira vez:
 

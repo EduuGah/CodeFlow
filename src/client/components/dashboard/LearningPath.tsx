@@ -33,7 +33,7 @@ function formatarData(iso: string): string {
 
 const estilosDoMarco: Record<PathNode['state'], string> = {
   concluida: 'border-success-600 bg-success-600 text-white',
-  atual: 'border-ink bg-ink text-white ring-4 ring-ink/10',
+  atual: 'border-ink bg-ink text-canvas ring-4 ring-ink/10',
   proxima: 'border-line-strong bg-surface text-ink-faint',
 };
 

@@ -312,7 +312,7 @@ export function CodeExerciseStep({
                   variant="ghost"
                   block
                   onClick={() => setVerSolucao(true)}
-                  className="text-brand-600 hover:bg-brand-50 hover:text-brand-700"
+                  className="text-brand-700 hover:bg-brand-50 hover:text-brand-700"
                 >
                   Comparar com uma solução de referência
                 </Button>

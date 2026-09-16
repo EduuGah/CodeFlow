@@ -376,8 +376,10 @@ compilação ou na primeira montagem.
 | 13 | Acessível e testável: achar por papel e rótulo, testar comportamento, o DOM no efeito |
 | 14 | Projeto: o estado antes da tela, fatias verticais, persistência com guarda, pronto |
 
-Plataforma da fase — tutor com IA; painel do aluno — **não feita**: ficou,
-como o mapa de tópicos da Fase 2, para quando não depender de motor.
+Plataforma da fase — tutor com IA — **não feita**. O **painel do aluno** saiu
+em 2026-09-16, junto com a gamificação que ele precisava: perfil editável,
+moedas e loja, desafios do dia e da semana, conquistas por categoria, modo
+escuro e cores de destaque.
 
 ### Fase 4 — Back-end e dados · 20 aulas
 Motores **4 (servidor simulado)** e **5 (sql.js, ~1,5 MB)**.

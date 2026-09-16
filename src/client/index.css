@@ -2,6 +2,10 @@
 
 @plugin "@tailwindcss/typography";
 
+/* `dark:` segue o tema escolhido no <html>, não o sistema: quem escolheu o
+   claro num sistema escuro vê claro. */
+@custom-variant dark (&:where([data-theme="escuro"], [data-theme="escuro"] *));
+
 /**
  * Identidade visual do CodeFlow.
  *
@@ -22,7 +26,7 @@
  * A personalidade "programação" vem do uso deliberado da monoespaçada em
  * rótulos, contadores e metadados. Não de enfeite de terminal na interface.
  */
-@theme {
+@theme inline {
   /* Plus Jakarta Sans: humanista geométrica, confortável em leitura longa e com
      algarismos bem diferenciados, o que importa numa plataforma cheia de
      índices e contagens. JetBrains Mono para código e para os rótulos
@@ -30,53 +34,48 @@
   --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 
-  /* Superfícies. `canvas` é o fundo da aplicação; `surface` é o que se apoia
-     sobre ele. Nenhum dos dois é branco puro. */
-  --color-canvas: #f7f6f3;
-  --color-surface: #ffffff;
-  --color-sunken: #efede8;
-  --color-line: #e3e0d9;
-  --color-line-strong: #cfcabf;
-  /* Borda de campo e controle. Mais escura que as divisorias de proposito: a
-     WCAG exige 3:1 para o contorno que identifica um controle, enquanto uma
-     linha entre itens de lista e decoracao e nao precisa disso. */
-  --color-control: #948d7e;
+  /* Todo token de cor aponta para uma variável de `:root`. É o que permite o
+     modo escuro e as cores de destaque: os utilitários (`bg-canvas`,
+     `text-brand-700`) continuam os mesmos, e o que muda é o valor da variável
+     conforme `data-theme` e `data-accent` no <html>. */
+  --color-canvas: var(--cf-canvas);
+  --color-surface: var(--cf-surface);
+  --color-sunken: var(--cf-sunken);
+  --color-line: var(--cf-line);
+  --color-line-strong: var(--cf-line-strong);
+  --color-control: var(--cf-control);
 
-  /* Texto. O tom mais escuro puxa levemente para o verde-azulado, então casa
-     com a marca em vez de brigar com ela. */
-  --color-ink: #1c2523;
-  --color-ink-soft: #55605d;
-  --color-ink-faint: #8a938f;
+  --color-ink: var(--cf-ink);
+  --color-ink-soft: var(--cf-ink-soft);
+  --color-ink-faint: var(--cf-ink-faint);
 
-  /* Marca — teal profundo. Ação primária, foco, elementos ativos. */
-  --color-brand-50: #eef6f5;
-  --color-brand-100: #d3e8e5;
-  --color-brand-200: #a7d1cc;
-  --color-brand-400: #3f9b91;
-  --color-brand-500: #2b8078;
-  --color-brand-600: #1f6660;
-  --color-brand-700: #17514c;
-  --color-brand-900: #0d302d;
+  --color-brand-50: var(--cf-brand-50);
+  --color-brand-100: var(--cf-brand-100);
+  --color-brand-200: var(--cf-brand-200);
+  --color-brand-400: var(--cf-brand-400);
+  --color-brand-500: var(--cf-brand-500);
+  --color-brand-600: var(--cf-brand-600);
+  --color-brand-700: var(--cf-brand-700);
+  --color-brand-900: var(--cf-brand-900);
+  /* O preenchimento da ação primária em hover: sempre um tom mais escuro que
+     o 600, nos dois modos, porque o botão leva texto branco e clarear não
+     aguenta o contraste. No escuro, o 700 é cor de texto, não de fundo. */
+  --color-brand-hover: var(--cf-brand-hover);
 
-  /* Energia — âmbar. Sequência, conquista, dica. Nunca erro. */
-  --color-energy-50: #fdf5e7;
-  --color-energy-200: #f6dcab;
-  --color-energy-500: #d99422;
-  --color-energy-700: #96620f;
+  --color-energy-50: var(--cf-energy-50);
+  --color-energy-200: var(--cf-energy-200);
+  --color-energy-500: var(--cf-energy-500);
+  --color-energy-700: var(--cf-energy-700);
 
-  /* Sucesso. Distinto da marca de propósito: se o verde da ação primária fosse
-     o mesmo do acerto, o aluno não saberia se um botão é um estado. */
-  --color-success-50: #edf7ef;
-  --color-success-200: #b9e0c2;
-  --color-success-600: #2a8145;
-  --color-success-700: #226b3b;
+  --color-success-50: var(--cf-success-50);
+  --color-success-200: var(--cf-success-200);
+  --color-success-600: var(--cf-success-600);
+  --color-success-700: var(--cf-success-700);
 
-  /* Erro. Reservado a falha real de código ou de sistema — nunca a uma resposta
-     errada de exercício, que é etapa do aprendizado e usa âmbar. */
-  --color-danger-50: #fdf1ef;
-  --color-danger-200: #f4c4bb;
-  --color-danger-500: #c8503c;
-  --color-danger-700: #9a3928;
+  --color-danger-50: var(--cf-danger-50);
+  --color-danger-200: var(--cf-danger-200);
+  --color-danger-500: var(--cf-danger-500);
+  --color-danger-700: var(--cf-danger-700);
 
   /* Editor e terminal: superfície escura fixa, independente do resto. A troca de
      superfície é o que sinaliza "aqui você executa". */
@@ -90,11 +89,185 @@
   --radius-xl: 1rem;
 }
 
+/**
+ * Os valores. Modo claro em `:root`; o escuro redefine as superfícies e o
+ * texto; cada cor de destaque redefine a escala da marca — nos dois modos.
+ *
+ * A escala da marca tem papéis, não só tons: 50 e 100 são fundos de destaque
+ * (item ativo do menu, badge), 200 é borda, 400 e 500 são ícone e anel de
+ * foco, 600 é o preenchimento da ação primária (sempre com texto branco), 700
+ * é texto sobre fundo claro da marca, 900 é o texto da seleção. No escuro os
+ * papéis se mantêm: 50 vira um fundo escuro tingido, 700 vira um texto claro.
+ */
+:root {
+  color-scheme: light;
+
+  /* Superfícies. `canvas` é o fundo da aplicação; `surface` é o que se apoia
+     sobre ele. Nenhum dos dois é branco puro: pedra levemente quente. */
+  --cf-canvas: #f7f6f3;
+  --cf-surface: #ffffff;
+  --cf-sunken: #efede8;
+  --cf-line: #e3e0d9;
+  --cf-line-strong: #cfcabf;
+  /* Borda de campo e controle. Mais escura que as divisórias de propósito: a
+     WCAG exige 3:1 para o contorno que identifica um controle. */
+  --cf-control: #948d7e;
+
+  /* Texto. O tom mais escuro puxa levemente para o verde-azulado. */
+  --cf-ink: #1c2523;
+  --cf-ink-soft: #55605d;
+  --cf-ink-faint: #8a938f;
+
+  /* Marca — Floresta, o teal profundo. */
+  --cf-brand-50: #eef6f5;
+  --cf-brand-100: #d3e8e5;
+  --cf-brand-200: #a7d1cc;
+  --cf-brand-400: #3f9b91;
+  --cf-brand-500: #2b8078;
+  --cf-brand-600: #1f6660;
+  --cf-brand-700: #17514c;
+  --cf-brand-900: #0d302d;
+
+  /* Energia — âmbar. Sequência, conquista, dica. Nunca erro. */
+  --cf-energy-50: #fdf5e7;
+  --cf-energy-200: #f6dcab;
+  --cf-energy-500: #d99422;
+  --cf-energy-700: #96620f;
+
+  /* Sucesso. Distinto da marca de propósito. */
+  --cf-success-50: #edf7ef;
+  --cf-success-200: #b9e0c2;
+  --cf-success-600: #2a8145;
+  --cf-success-700: #226b3b;
+
+  /* Erro. Reservado a falha real de código ou de sistema. */
+  --cf-danger-50: #fdf1ef;
+  --cf-danger-200: #f4c4bb;
+  --cf-danger-500: #c8503c;
+  --cf-danger-700: #9a3928;
+  --cf-brand-hover: #17514c;
+}
+
+:root[data-accent="oceano"] {
+  --cf-brand-50: #eaf2fb;
+  --cf-brand-100: #cfe1f5;
+  --cf-brand-200: #a4c6ea;
+  --cf-brand-400: #3d84c9;
+  --cf-brand-500: #2b6fb0;
+  --cf-brand-600: #1f5a92;
+  --cf-brand-700: #17476f;
+  --cf-brand-900: #0d2a44;
+  --cf-brand-hover: #17476f;
+}
+
+:root[data-accent="brasa"] {
+  --cf-brand-50: #fdf0e8;
+  --cf-brand-100: #f9d8c4;
+  --cf-brand-200: #f2b28e;
+  --cf-brand-400: #d8692b;
+  --cf-brand-500: #bf5720;
+  --cf-brand-600: #a1461a;
+  --cf-brand-700: #7f3714;
+  --cf-brand-900: #4c200b;
+  --cf-brand-hover: #7f3714;
+}
+
+:root[data-accent="ameixa"] {
+  --cf-brand-50: #f5eef8;
+  --cf-brand-100: #e6d4ec;
+  --cf-brand-200: #cbaad8;
+  --cf-brand-400: #8f5aa5;
+  --cf-brand-500: #7a478f;
+  --cf-brand-600: #643876;
+  --cf-brand-700: #4f2c5d;
+  --cf-brand-900: #2f1a38;
+  --cf-brand-hover: #4f2c5d;
+}
+
+/* Modo escuro: pedra escura, levemente esverdeada como o `ink` do claro. O
+   texto não é branco puro, e as superfícies sobem de tom em vez de descer. */
+:root[data-theme="escuro"] {
+  color-scheme: dark;
+
+  --cf-canvas: #131816;
+  --cf-surface: #1b2220;
+  --cf-sunken: #222b28;
+  --cf-line: #2c3733;
+  --cf-line-strong: #3d4b46;
+  --cf-control: #6f7d78;
+
+  --cf-ink: #e8ebe9;
+  --cf-ink-soft: #b3bcb8;
+  --cf-ink-faint: #7f8a86;
+
+  --cf-brand-50: #16302c;
+  --cf-brand-100: #1d3f3a;
+  --cf-brand-200: #2b5c56;
+  --cf-brand-400: #4fb3a7;
+  --cf-brand-500: #3f9b91;
+  --cf-brand-600: #1f6660;
+  --cf-brand-700: #8fd3ca;
+  --cf-brand-900: #d3e8e5;
+
+  --cf-energy-50: #33270f;
+  --cf-energy-200: #5a4416;
+  --cf-energy-500: #e0a233;
+  --cf-energy-700: #f2c877;
+
+  --cf-success-50: #12291a;
+  --cf-success-200: #1e4a2c;
+  --cf-success-600: #2a8145;
+  --cf-success-700: #8fd9a6;
+
+  --cf-danger-50: #33191a;
+  --cf-danger-200: #5c2a26;
+  --cf-danger-500: #e06a55;
+  --cf-danger-700: #f2a496;
+  --cf-brand-hover: #2b8078;
+}
+
+:root[data-theme="escuro"][data-accent="oceano"] {
+  --cf-brand-50: #14243a;
+  --cf-brand-100: #1a3050;
+  --cf-brand-200: #244a74;
+  --cf-brand-400: #5aa0e0;
+  --cf-brand-500: #4a90d0;
+  --cf-brand-600: #2b6fb0;
+  --cf-brand-700: #9cc8f2;
+  --cf-brand-900: #cfe1f5;
+  --cf-brand-hover: #245f99;
+}
+
+:root[data-theme="escuro"][data-accent="brasa"] {
+  --cf-brand-50: #3a1f12;
+  --cf-brand-100: #4d2814;
+  --cf-brand-200: #6e3a1c;
+  --cf-brand-400: #ef8e56;
+  --cf-brand-500: #e5784a;
+  --cf-brand-600: #bf5720;
+  --cf-brand-700: #f6b48f;
+  --cf-brand-900: #f9d8c4;
+  --cf-brand-hover: #a1461a;
+}
+
+:root[data-theme="escuro"][data-accent="ameixa"] {
+  --cf-brand-50: #2a1c31;
+  --cf-brand-100: #3a2745;
+  --cf-brand-200: #543866;
+  --cf-brand-400: #c08ad4;
+  --cf-brand-500: #ad78c4;
+  --cf-brand-600: #7a478f;
+  --cf-brand-700: #d9b4e6;
+  --cf-brand-900: #e6d4ec;
+  --cf-brand-hover: #6a3d7d;
+}
+
 @layer base {
   body {
     @apply bg-canvas text-ink antialiased font-sans;
     @apply selection:bg-brand-100 selection:text-brand-900;
   }
+
 
   /* Sem ligaduras no código. A JetBrains Mono junta `===` num "≡" e `=>` numa
      seta — bonito para quem já sabe o que está ali, e um símbolo desconhecido
@@ -125,6 +298,29 @@
       transition-duration: 0.01ms !important;
       scroll-behavior: auto !important;
     }
+  }
+}
+
+@layer utilities {
+  /* O texto das aulas usa os tokens da interface, não a paleta cinza do
+     plugin: assim ele escurece e clareia junto com o resto no modo escuro. */
+  .prose {
+    --tw-prose-body: var(--cf-ink);
+    --tw-prose-headings: var(--cf-ink);
+    --tw-prose-lead: var(--cf-ink-soft);
+    --tw-prose-links: var(--cf-brand-700);
+    --tw-prose-bold: var(--cf-ink);
+    --tw-prose-counters: var(--cf-ink-faint);
+    --tw-prose-bullets: var(--cf-ink-faint);
+    --tw-prose-hr: var(--cf-line);
+    --tw-prose-quotes: var(--cf-ink-soft);
+    --tw-prose-quote-borders: var(--cf-line-strong);
+    --tw-prose-captions: var(--cf-ink-faint);
+    --tw-prose-code: var(--cf-ink);
+    --tw-prose-pre-code: rgb(255 255 255 / 0.9);
+    --tw-prose-pre-bg: #17211f;
+    --tw-prose-th-borders: var(--cf-line-strong);
+    --tw-prose-td-borders: var(--cf-line);
   }
 }
 

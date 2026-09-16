@@ -54,11 +54,38 @@ verdade — e que o esqueleto **não** passa. Um formulário gravando no banco j
 fora essas três garantias. Por isso a tela de administração **gera o módulo** para
 revisão em pull request, em vez de escrever no banco.
 
-**Quase nada é contador.** XP, nível, sequência, domínio por conceito e cartões
-vencidos são todos derivados do histórico append-only (`exercise_attempts`,
-`flashcard_reviews`). Contador desnormalizado é uma segunda fonte de verdade que
+**Quase nada é contador.** XP, nível, sequência, domínio por conceito, cartões
+vencidos, **moedas ganhas e desafios cumpridos** são todos derivados do
+histórico append-only (`exercise_attempts`, `flashcard_reviews`, e agora
+`purchases`). Contador desnormalizado é uma segunda fonte de verdade que
 diverge no primeiro erro de escrita — e ninguém descobre, porque número errado não
 quebra nada.
+
+**A economia é derivada, e a loja não vende aprendizado.** As moedas ganhas
+(`lib/economia.ts`) saem de aulas, projetos, desafios cumpridos e marcos de
+sequência; as gastas são a tabela `purchases`, append-only; o saldo é a
+diferença. O que se compra: **congelar a sequência** (um dia sem estudar não
+zera; consumido sozinho no primeiro dia perdido depois da compra —
+`lib/sequencia.ts` reconta a corrente com os congelamentos), **dobro de XP por
+24 h** (a compra é um fato com hora, e `computeXp` dobra o que aconteceu na
+janela — exercício pelo primeiro acerto, aula pelo fechamento, revisão pela
+primeira; projeto não tem hora e não dobra), e cosméticos (temas e avatares)
+que também abrem por nível. Nada compra resposta, dica nem avanço. Os
+**desafios** (`lib/desafios.ts`) são um rodízio pela data — dois por dia de
+cinco, dois por semana de seis; dias seguidos nunca repetem — e cumprir é
+receber: não há tabela de resgate. Os **níveis não têm teto**: o mínimo do
+nível *n* é `75·n·(n−1)`, e os títulos marcam faixas (Explorador… Mestre).
+
+**Tema e cor de destaque são variáveis de CSS, não classes.** Todo token de
+cor do `@theme inline` aponta para uma variável em `:root`; o modo escuro e as
+quatro cores de destaque (Floresta, Oceano, Brasa, Ameixa) só redefinem as
+variáveis conforme `data-theme` e `data-accent` no `<html>`. Os papéis da
+escala da marca se mantêm entre os modos (50/100 fundo, 600 preenchimento com
+texto branco, 700 texto sobre fundo claro, e `brand-hover` para o hover da
+ação primária — o 700 do escuro é cor de texto). A preferência mora no
+`localStorage` (o `index.html` pinta antes do React) e no perfil (vence ao
+carregar). Cada trilha tem uma cor própria (`lib/cores-das-trilhas.ts`) no
+percurso, na faixa e no cabeçalho da aula.
 
 **O avanço nunca é bloqueado.** O caminho avisa quando um pré-requisito está
 fraco; não tranca. Transformar dificuldade em parede é o oposto do objetivo.
@@ -197,6 +224,16 @@ src/client/lib/         Lógica pura e testada
   path.ts               Caminho da trilha; nunca bloqueia, só avisa
   percurso.ts           O percurso do aluno: trilhas por etapa, estado de
                         cada uma, e qual é a trilha da vez
+  economia.ts           Moedas ganhas por fonte, a loja (itens, preços, o que
+                        o nível libera), janelas de dobro de XP
+  sequencia.ts          A sequência de dias com congelamentos; as correntes
+                        da história, para os marcos valerem uma vez
+  desafios.ts           Desafios diários e semanais: rodízio, progresso,
+                        os cumpridos desde o primeiro estudo
+  perfil.ts             Perfil editável (nome, avatar, tema), compras, foto
+                        (redimensionada no navegador, Storage `avatars`)
+  tema.ts               Aplicar e guardar tema e cor de destaque
+  cores-das-trilhas.ts  Uma cor por trilha
   study.ts              Sequência, retomada, exercícios abandonados
   celebrar.ts           Confete que respeita prefers-reduced-motion
   monaco.ts             O Monaco do próprio domínio: recursos escolhidos a
@@ -212,6 +249,10 @@ src/client/components/  Componentes
   ui/CodeEditor.tsx     O editor — o único. Carrega o Monaco sob demanda,
                         mostra o código enquanto espera, cai num textarea se
                         o chunk não vier
+  ui/Avatar.tsx         Os nove avatares desenhados, e a foto
+  perfil/               O perfil em partes: editar (nome, avatar, foto), a
+                        loja, os desafios, as conquistas por categoria, a
+                        aparência (modo e cor)
   lesson/               Um componente por tipo de exercício; `ExerciseAction`
                         e `ExerciseFeedback` são o botão e o retorno de todos
   lesson/SqlExerciseStep  O exercício de SQL: painel de tabelas do banco (e o
@@ -222,7 +263,7 @@ src/client/pages/app/   Início é a aula da vez + o percurso; Trilhas é o
   TrackDetail.tsx       percurso em etapas com os projetos numa aba; uma
                         trilha inteira, em blocos por assunto
 e2e/                    Playwright; `fixtures.ts` tem o dublê do Supabase
-supabase/migrations/    0001 a 0006, aplicadas em ordem
+supabase/migrations/    0001 a 0007, aplicadas em ordem (0007: perfil, loja, fotos)
 docs/curriculo.md       Roadmap de conteúdo — fonte canônica
 ```
 
@@ -455,6 +496,25 @@ Cada uma custou tempo. Não repita.
 - **Uma verificação com ordem sem ORDER BY na referência cobraria do aluno
   uma ordem que o SQLite não garante.** O CI recusa `ordered` sem ORDER BY, e
   todo enunciado que pede ordem diz o critério de desempate.
+- **`@theme` do Tailwind v4 é estático; `@theme inline` com `var()` não é.**
+  Para o modo escuro trocar os tokens, cada `--color-x` aponta para uma
+  `--cf-x` de `:root`, e só as `--cf-` mudam. E a variante `dark:` precisa
+  ser declarada (`@custom-variant`) para seguir o atributo, não o sistema.
+- **`bg-ink` não é "fundo escuro".** No escuro, `ink` vira claro: um bloco
+  de código com `bg-ink text-white` ficava branco sobre branco. Superfície
+  escura fixa é `bg-editor`; um preenchimento "tinta" leva `text-canvas`,
+  que inverte junto.
+- **As variáveis do `prose` precisam vencer o plugin.** O `.prose` gera as
+  cores em `@layer utilities`; um override em `base` perde. As variáveis
+  `--tw-prose-*` estão em `utilities`, depois do plugin.
+- **O hover do botão primário usava o 700.** No escuro o 700 é texto claro;
+  o botão em hover virava azul-claro com texto branco. Token próprio
+  (`brand-hover`), sempre um tom mais escuro que o 600.
+- **`text-brand-600` não é texto.** No claro passava (4.6:1); no escuro o
+  600 é preenchimento e cai a 2.4:1. Texto da marca é o 700. Foi o teste
+  de contraste (`lib/contrast.test.ts`), que confere cada par nas oito
+  variantes — dois modos × quatro cores — que apontou isso, junto com o
+  verde do escuro e três cores de trilha claras demais para texto branco.
 - **Reordenar a lista solta a captura do ponteiro.** O arrastar do exercício
   de ordenar reorganiza os passos ao vivo, e reordenar é tirar o elemento do
   DOM e pô-lo de volta — o navegador libera o `setPointerCapture` nesse
@@ -571,6 +631,12 @@ pergunte antes de começar o servidor simulado ou qualquer outra fase.
 
 ## 9. Pendências do lado do usuário
 
+- **Rodar `supabase/migrations/0007_perfil_e_loja.sql` no SQL Editor.** Ela
+  acrescenta as colunas do perfil (`display_name`, `avatar`, `theme`,
+  `accent`), cria a tabela `purchases` (a loja) e o bucket `avatars` do
+  Storage com as políticas (leitura pública, escrita só na própria pasta).
+  Sem ela, salvar o perfil, comprar na loja e enviar foto falham com a
+  mensagem da tela — o resto continua funcionando.
 - Rodar `supabase/migrations/0006_promote_admin.sql` no SQL Editor, se ainda não
   rodou. Ela conserta o gatilho que impedia promover alguém a administrador.
 - Para virar administrador: `select public.set_user_role('SEU-EMAIL', 'admin');`
@@ -589,6 +655,9 @@ pergunte antes de começar o servidor simulado ou qualquer outra fase.
   bento grid, glassmorphism, emoji na interface, roxo com preto, orbes, sparkles.
 - **Nenhum recurso falso.** Botão que não faz nada, número que não significa nada
   e teste que passa vazio já foram removidos várias vezes.
+- **Modo escuro e quatro cores de destaque existem** (2026-09-16), a pedido do
+  dono do projeto — "o site está muito seco". A regra continua: cor com
+  significado; as cores extras são de destaque, não de fundo.
 - Prioridade declarada: clareza > facilidade de uso > experiência de aprendizado >
   responsividade > consistência visual > qualidade dos exercícios > progressão >
   gamificação.

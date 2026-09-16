@@ -60,7 +60,7 @@ export function TrackDetail() {
     <div className="space-y-8">
       <Link
         to="/app/trilhas"
-        className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-600 hover:text-brand-700"
+        className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-700 hover:text-brand-900"
       >
         <IconArrowLeft size={16} />
         Todas as trilhas

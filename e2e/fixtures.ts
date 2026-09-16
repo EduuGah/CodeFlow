@@ -29,6 +29,19 @@ export interface BancoFalso {
   role: 'student' | 'admin';
   completed_lessons: string[];
   completed_projects: string[];
+  /** Tentativas já registradas, para semear histórico (moedas, desafios, sequência). */
+  attempts: Array<{
+    exercise_id: string;
+    lesson_id: string;
+    concepts: string[];
+    correct: boolean;
+    hints_used: number;
+    created_at: string;
+  }>;
+  /** Compras já feitas na loja. */
+  purchases: Array<{ item: string; price: number; created_at: string }>;
+  /** O perfil editável. */
+  perfil: { display_name: string | null; avatar: string | null; theme: string | null; accent: string | null };
   /** Escritas registradas, para o teste conferir que o progresso foi salvo. */
   escritas: Array<{ tabela: string; corpo: unknown }>;
 }
@@ -138,25 +151,45 @@ async function dublarSupabase(page: Page, banco: BancoFalso) {
             role: banco.role,
             completed_lessons: banco.completed_lessons,
             completed_projects: banco.completed_projects,
+            ...banco.perfil,
           },
         ]);
       }
 
-      // upsert de progresso
+      // upsert de progresso ou de perfil
       const corpo = requisicao.postDataJSON();
       banco.escritas.push({ tabela: 'users', corpo });
 
       const linha = Array.isArray(corpo) ? corpo[0] : corpo;
       if (linha?.completed_lessons) banco.completed_lessons = linha.completed_lessons;
       if (linha?.completed_projects) banco.completed_projects = linha.completed_projects;
+      for (const campo of ['display_name', 'avatar', 'theme', 'accent'] as const) {
+        if (campo in (linha ?? {})) banco.perfil[campo] = linha[campo];
+      }
 
       return json([linha]);
     }
 
     if (caminho === '/rest/v1/exercise_attempts') {
-      if (metodo === 'GET') return json([]);
+      if (metodo === 'GET') return json(banco.attempts);
       banco.escritas.push({ tabela: 'exercise_attempts', corpo: requisicao.postDataJSON() });
       return json([], 201);
+    }
+
+    if (caminho === '/rest/v1/purchases') {
+      if (metodo === 'GET') return json(banco.purchases);
+      const corpo = requisicao.postDataJSON();
+      const linha = { ...(Array.isArray(corpo) ? corpo[0] : corpo), created_at: new Date().toISOString() };
+      banco.purchases.push({ item: linha.item, price: linha.price, created_at: linha.created_at });
+      banco.escritas.push({ tabela: 'purchases', corpo: linha });
+      return json(linha, 201);
+    }
+
+    // O envio da foto: o Storage responde o caminho, e a URL pública é montada
+    // no cliente sem requisição.
+    if (caminho.startsWith('/storage/v1/object/avatars/')) {
+      banco.escritas.push({ tabela: 'storage:avatars', corpo: { caminho, bytes: requisicao.postDataBuffer()?.length ?? 0 } });
+      return json({ Key: caminho.replace('/storage/v1/object/', '') });
     }
 
     if (caminho === '/rest/v1/flashcard_reviews') {
@@ -176,7 +209,15 @@ async function dublarSupabase(page: Page, banco: BancoFalso) {
 
 export const test = base.extend<{ banco: BancoFalso; logado: Page }>({
   banco: async ({}, use) => {
-    await use({ role: 'student', completed_lessons: [], completed_projects: [], escritas: [] });
+    await use({
+      role: 'student',
+      completed_lessons: [],
+      completed_projects: [],
+      attempts: [],
+      purchases: [],
+      perfil: { display_name: null, avatar: null, theme: null, accent: null },
+      escritas: [],
+    });
   },
 
   logado: async ({ page, banco }, use) => {

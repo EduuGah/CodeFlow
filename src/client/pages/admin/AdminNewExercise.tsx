@@ -230,7 +230,7 @@ export function AdminNewExercise() {
           <Button
             variant="ghost"
             onClick={() => atualizar({ hints: [...draft.hints, ''] })}
-            className="-ml-4 mt-1 text-brand-600 hover:text-brand-700"
+            className="-ml-4 mt-1 text-brand-700 hover:text-brand-900"
           >
             + Outra dica
           </Button>
@@ -291,7 +291,7 @@ export function AdminNewExercise() {
                 tests: [...draft.tests, { description: '', assertion: '', hidden: false }],
               })
             }
-            className="-ml-4 mt-1 text-brand-600 hover:text-brand-700"
+            className="-ml-4 mt-1 text-brand-700 hover:text-brand-900"
           >
             + Outro teste
           </Button>
@@ -386,7 +386,7 @@ export function AdminNewExercise() {
           )}
         </div>
 
-        <pre className="max-h-80 overflow-auto rounded-xl bg-ink p-4 text-xs leading-relaxed">
+        <pre className="max-h-80 overflow-auto rounded-xl bg-editor p-4 text-xs leading-relaxed">
           <code className="font-mono text-white/90">{toTypeScript(draft)}</code>
         </pre>
 

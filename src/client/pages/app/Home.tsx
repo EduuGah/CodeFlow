@@ -5,10 +5,14 @@ import { ETAPAS_DO_PERCURSO } from '../../../content/percurso';
 import { useAuth } from '../../contexts/AuthContext';
 import { useStudentData } from '../../contexts/StudentDataContext';
 import { montarPercurso, trilhaDaVez } from '../../lib/percurso';
+import { nomeParaMostrar } from '../../lib/perfil';
 import { PercursoCompacto } from '../../components/dashboard/Percurso';
+import { ListaDeDesafios } from '../../components/perfil/Desafios';
 import {
   IconArrowRight,
+  IconBolt,
   IconCheck,
+  IconCoin,
   IconPractice,
   IconReview,
   IconStreak,
@@ -53,10 +57,15 @@ export function Home() {
     cards,
     conceptsToReview,
     abandonedExercises,
+    desafios,
+    moedas,
+    dobro,
+    sequencia,
+    perfil,
   } = useStudentData();
 
-  const primeiroNome =
-    (user?.user_metadata?.full_name as string | undefined)?.split(' ')[0] ?? 'Estudante';
+  // O nome que a pessoa escolheu no perfil vence o do Google.
+  const primeiroNome = nomeParaMostrar(perfil, user).split(' ')[0];
 
   const percurso = montarPercurso(
     ETAPAS_DO_PERCURSO,
@@ -134,12 +143,31 @@ export function Home() {
           </p>
         </div>
 
-        {/* Só aparece quando existe. "0 dias" seria cobrança, não informação. */}
-        {streak > 0 && (
-          <span className="flex shrink-0 items-center gap-1.5 rounded-lg bg-energy-50 px-2.5 py-1.5 text-sm font-bold text-energy-700">
-            <IconStreak size={16} />
-            {streak} {streak === 1 ? 'dia' : 'dias'}
-          </span>
+        {/* Só aparece o que existe. "0 dias" e "0 moedas" seriam cobrança, não informação. */}
+        {!loading && (streak > 0 || moedas.saldo > 0 || dobro) && (
+          <Link to="/app/perfil" className="flex shrink-0 flex-wrap items-center gap-2" aria-label="Ver o perfil">
+            {dobro && (
+              <span className="flex items-center gap-1 rounded-lg bg-brand-50 px-2.5 py-1.5 text-sm font-bold text-brand-700">
+                <IconBolt size={15} />
+                2× XP
+              </span>
+            )}
+            {streak > 0 && (
+              <span
+                className="flex items-center gap-1.5 rounded-lg bg-energy-50 px-2.5 py-1.5 text-sm font-bold text-energy-700"
+                title={sequencia.estudouHoje ? 'Hoje já contou' : 'Estude hoje para manter'}
+              >
+                <IconStreak size={16} />
+                {streak} {streak === 1 ? 'dia' : 'dias'}
+              </span>
+            )}
+            {moedas.saldo > 0 && (
+              <span className="flex items-center gap-1.5 rounded-lg bg-energy-50 px-2.5 py-1.5 text-sm font-bold text-energy-700">
+                <IconCoin size={16} />
+                {moedas.saldo}
+              </span>
+            )}
+          </Link>
         )}
       </header>
 
@@ -159,14 +187,14 @@ export function Home() {
       ) : trilha && aulaDaVez ? (
         <Card as="section" padding="none" className="overflow-hidden" aria-labelledby="aula-da-vez">
           <div className="bg-brand-600 px-5 py-4 text-white sm:px-6">
-            <p className="label-mono text-brand-100">
+            <p className="label-mono text-white/75">
               {primeiraVez ? 'Comece por aqui' : trilha.estado === 'nao-iniciada' ? 'Próxima trilha' : 'Continuar'}
               {noDaVez ? ` · aula ${noDaVez.position} de ${trilha.resumo.total}` : ''} · {aulaDaVez.estimatedMinutes} min
             </p>
             <h2 id="aula-da-vez" className="mt-1 text-xl font-bold leading-tight sm:text-2xl">
               {aulaDaVez.title}
             </h2>
-            <p className="mt-0.5 text-sm text-brand-100">{trilha.track.title}</p>
+            <p className="mt-0.5 text-sm text-white/80">{trilha.track.title}</p>
           </div>
 
           <div className="px-5 py-5 sm:px-6">
@@ -222,7 +250,7 @@ export function Home() {
             <h2 id="titulo-percurso" className="label-mono text-ink-faint">
               Seu percurso
             </h2>
-            <Link to="/app/trilhas" className="text-sm font-semibold text-brand-600 hover:text-brand-700">
+            <Link to="/app/trilhas" className="text-sm font-semibold text-brand-700 hover:text-brand-900">
               Ver as trilhas
             </Link>
           </div>
@@ -245,13 +273,19 @@ export function Home() {
         </section>
       )}
 
-      {/* PARA HOJE — só o que tem prazo ou ficou para trás. */}
-      {!loading && paraHoje.length > 0 && (
+      {/* PARA HOJE — os desafios do dia, e o que tem prazo ou ficou para trás. */}
+      {!loading && (
         <section aria-labelledby="titulo-hoje">
-          <h2 id="titulo-hoje" className="label-mono mb-1 text-ink-faint">
-            Para hoje
-          </h2>
-          <ul className="divide-y divide-line">
+          <div className="mb-1 flex items-baseline justify-between gap-3">
+            <h2 id="titulo-hoje" className="label-mono text-ink-faint">
+              Para hoje
+            </h2>
+            <Link to="/app/perfil#titulo-desafios" className="text-sm font-semibold text-brand-700 hover:text-brand-900">
+              Desafios da semana
+            </Link>
+          </div>
+          <ListaDeDesafios desafios={desafios.dia} compacta />
+          <ul className="divide-y divide-line border-t border-line">
             {paraHoje.map(({ chave, para, Icone, texto }) => (
               <li key={chave}>
                 <Link

@@ -1,4 +1,5 @@
 import type { Track } from '../../../content/types';
+import { corDaTrilha } from '../../lib/cores-das-trilhas';
 import type { PathSummary } from '../../lib/path';
 
 /**
@@ -16,12 +17,12 @@ export function TrackBanner({ track, summary }: { track: Track; summary: PathSum
     : `${summary.total} de ${summary.total} concluídas`;
 
   return (
-    <div className="rounded-2xl bg-ink px-6 py-5 text-white">
-      <p className="label-mono text-white/55">{posicao}</p>
+    <div className="rounded-2xl px-6 py-5 text-white" style={{ background: corDaTrilha(track.id) }}>
+      <p className="label-mono text-white/70">{posicao}</p>
 
       <h2 className="mt-1 text-xl font-bold tracking-tight">{track.title}</h2>
 
-      <p className="mt-1.5 text-sm leading-relaxed text-white/75">
+      <p className="mt-1.5 text-sm leading-relaxed text-white/85">
         {summary.current
           ? summary.current.lesson.objective
           : 'Você concluiu todas as aulas desta trilha.'}

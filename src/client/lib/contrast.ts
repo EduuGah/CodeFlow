@@ -92,14 +92,41 @@ export function contrastOfHex(frente: string, fundo: string): number {
  * envelheceria em silêncio, e o teste passaria a validar uma paleta que não é
  * mais a do produto.
  */
-export function extractColorTokens(css: string): Record<string, string> {
-  const tokens: Record<string, string> = {};
-  const regex = /--color-([\w-]+):\s*(#[0-9a-fA-F]{3,8})\s*;/g;
+export interface VarianteDeTema {
+  tema?: 'claro' | 'escuro';
+  acento?: 'floresta' | 'oceano' | 'brasa' | 'ameixa';
+}
 
+/** As declarações `--cf-x: #hex` de um bloco `seletor { … }`. */
+function variaveisDoBloco(css: string, seletor: string): Record<string, string> {
+  const escapado = seletor.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const bloco = new RegExp(`${escapado}\\s*\\{([^}]*)\\}`).exec(css);
+  const tokens: Record<string, string> = {};
+  if (!bloco) return tokens;
+  const regex = /--cf-([\w-]+):\s*(#[0-9a-fA-F]{3,8})\s*;/g;
   let achado: RegExpExecArray | null;
-  while ((achado = regex.exec(css)) !== null) {
-    tokens[achado[1]] = achado[2];
+  while ((achado = regex.exec(bloco[1])) !== null) tokens[achado[1]] = achado[2];
+  return tokens;
+}
+
+/**
+ * Os tokens resolvidos para uma variante: os fixos (`--color-x: #hex`), mais
+ * as variáveis de `:root` sobrescritas, na mesma ordem do CSS, pelo bloco da
+ * cor de destaque, pelo do modo escuro e pelo dos dois juntos.
+ */
+export function extractColorTokens(css: string, { tema = 'claro', acento = 'floresta' }: VarianteDeTema = {}): Record<string, string> {
+  const tokens: Record<string, string> = {};
+  const fixos = /--color-([\w-]+):\s*(#[0-9a-fA-F]{3,8})\s*;/g;
+  let achado: RegExpExecArray | null;
+  while ((achado = fixos.exec(css)) !== null) tokens[achado[1]] = achado[2];
+
+  const camadas = [':root'];
+  if (acento !== 'floresta') camadas.push(`:root[data-accent="${acento}"]`);
+  if (tema === 'escuro') {
+    camadas.push(':root[data-theme="escuro"]');
+    if (acento !== 'floresta') camadas.push(`:root[data-theme="escuro"][data-accent="${acento}"]`);
   }
+  for (const seletor of camadas) Object.assign(tokens, variaveisDoBloco(css, seletor));
 
   return tokens;
 }

@@ -4,6 +4,19 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CodeFlow</title>
+    <script>
+      // Tema e cor de destaque antes da primeira pintura, senão a página
+      // pisca clara antes de escurecer. O mesmo que `lib/tema.ts` grava.
+      (function () {
+        try {
+          var tema = localStorage.getItem('codeflow:tema') || 'sistema';
+          var escuro = tema === 'escuro' || (tema === 'sistema' && matchMedia('(prefers-color-scheme: dark)').matches);
+          document.documentElement.dataset.theme = escuro ? 'escuro' : 'claro';
+          var acento = localStorage.getItem('codeflow:acento');
+          if (acento) document.documentElement.dataset.accent = acento;
+        } catch (e) {}
+      })();
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">

@@ -88,7 +88,7 @@ describe('SectionLabel', () => {
     expect(screen.getByRole('heading').className).toContain('text-ink-faint');
 
     rerender(<SectionLabel tone="brand">x</SectionLabel>);
-    expect(screen.getByRole('heading').className).toContain('text-brand-600');
+    expect(screen.getByRole('heading').className).toContain('text-brand-700');
     expect(screen.getByRole('heading').className).not.toContain('text-ink-faint');
   });
 });

@@ -37,7 +37,7 @@ const base =
   'motion-reduce:active:translate-y-0';
 
 const variants: Record<ButtonVariant, string> = {
-  primary: 'bg-brand-600 text-white hover:bg-brand-700',
+  primary: 'bg-brand-600 text-white hover:bg-brand-hover',
   secondary: 'bg-sunken text-ink hover:bg-line',
   outline: 'border border-line bg-surface text-ink hover:border-line-strong hover:bg-canvas',
   ghost: 'text-ink-soft hover:bg-sunken hover:text-ink',

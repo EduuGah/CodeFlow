@@ -90,7 +90,7 @@ export function SectionLabel({
 }) {
   return (
     <Tag
-      className={cn('label-mono', tone === 'brand' ? 'text-brand-600' : 'text-ink-faint', className)}
+      className={cn('label-mono', tone === 'brand' ? 'text-brand-700' : 'text-ink-faint', className)}
       {...props}
     />
   );

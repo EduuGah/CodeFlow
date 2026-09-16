@@ -83,19 +83,39 @@ function colunasCriadas(texto: string): Map<string, Set<string>> {
 const TABELAS = colunasCriadas(tudo);
 
 describe('as tabelas esperadas existem', () => {
-  it('encontra users, exercise_attempts e flashcard_reviews', () => {
+  it('encontra users, exercise_attempts, flashcard_reviews e purchases', () => {
     expect([...TABELAS.keys()].sort()).toEqual([
       'exercise_attempts',
       'flashcard_reviews',
+      'purchases',
       'users',
     ]);
   });
 
   it('users tem as colunas que a aplicação lê', () => {
     // Os nomes usados em `lib/progress.ts`.
-    for (const coluna of ['id', 'email', 'name', 'role', 'completed_lessons', 'completed_projects']) {
+    for (const coluna of [
+      'id',
+      'email',
+      'name',
+      'role',
+      'completed_lessons',
+      'completed_projects',
+      'display_name',
+      'avatar',
+      'theme',
+      'accent',
+    ]) {
       expect(TABELAS.get('users'), `users.${coluna}`).toContain(coluna);
     }
+  });
+
+  it('purchases guarda o que a economia derivada precisa', () => {
+    for (const coluna of ['user_id', 'item', 'price', 'created_at']) {
+      expect(TABELAS.get('purchases'), `purchases.${coluna}`).toContain(coluna);
+    }
+    // Compra é fato: sem policy de update nem delete.
+    expect(tudo).not.toMatch(/on public\.purchases\s+for (update|delete)/i);
   });
 
   it('exercise_attempts guarda o que a lógica derivada precisa', () => {

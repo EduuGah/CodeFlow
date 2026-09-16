@@ -10,7 +10,9 @@ import {
   extractColorTokens,
   parseHex,
   relativeLuminance,
+  type VarianteDeTema,
 } from './contrast';
+import { CORES_DAS_TRILHAS } from './cores-das-trilhas';
 
 /**
  * Contraste da paleta, verificado contra a WCAG AA.
@@ -28,9 +30,21 @@ import {
 const css = readFileSync(new URL('../index.css', import.meta.url), 'utf8');
 const cor = extractColorTokens(css);
 
+/**
+ * As oito variantes: dois modos vezes quatro cores de destaque. Todo par de
+ * texto é conferido em todas — o modo escuro é onde um token de texto claro
+ * usado como fundo passa despercebido no claro e quebra no escuro.
+ */
+const VARIANTES: Array<[string, VarianteDeTema]> = [];
+for (const tema of ['claro', 'escuro'] as const) {
+  for (const acento of ['floresta', 'oceano', 'brasa', 'ameixa'] as const) {
+    VARIANTES.push([`${tema} · ${acento}`, { tema, acento }]);
+  }
+}
+
 /** Falha cedo e com nome, em vez de comparar `undefined`. */
-function token(nome: string): string {
-  const valor = cor[nome];
+function token(nome: string, paleta: Record<string, string> = cor): string {
+  const valor = paleta[nome];
   if (!valor) throw new Error(`token --color-${nome} não encontrado em index.css`);
   return valor;
 }
@@ -99,41 +113,58 @@ const paresDeTexto: Array<[string, string, string]> = [
   ['texto secundário sobre o fundo da aplicação', 'ink-soft', 'canvas'],
   ['texto secundário sobre superfície', 'ink-soft', 'surface'],
   ['texto secundário sobre superfície rebaixada', 'ink-soft', 'sunken'],
-  ['marca sobre superfície', 'brand-600', 'surface'],
-  ['marca sobre o fundo da aplicação', 'brand-600', 'canvas'],
+  // O 600 é preenchimento; texto da marca é o 700 — no escuro, o 600 não
+  // tem contraste como texto, e foi este teste que o disse.
+  ['marca como texto sobre superfície', 'brand-700', 'surface'],
+  ['marca como texto sobre o fundo da aplicação', 'brand-700', 'canvas'],
   ['marca sobre seu próprio tom claro', 'brand-700', 'brand-50'],
   ['sucesso sobre seu tom claro', 'success-700', 'success-50'],
   ['atenção sobre seu tom claro', 'energy-700', 'energy-50'],
   ['erro sobre seu tom claro', 'danger-700', 'danger-50'],
 ];
 
-describe('texto atende AA (4.5:1)', () => {
+describe.each(VARIANTES)('texto atende AA (4.5:1) — %s', (_variante, opcoes) => {
+  const paleta = extractColorTokens(css, opcoes);
   it.each(paresDeTexto)('%s', (_nome, frente, fundo) => {
-    const razao = contrastOfHex(token(frente), token(fundo));
+    const razao = contrastOfHex(token(frente, paleta), token(fundo, paleta));
     expect(razao, `${frente} sobre ${fundo} = ${razao.toFixed(2)}:1`).toBeGreaterThanOrEqual(
       AA_TEXTO_NORMAL
     );
   });
+
+  it('o preenchimento "tinta" leva o texto da cor do fundo', () => {
+    // `bg-ink text-canvas`: no claro é escuro com texto claro; no escuro,
+    // claro com texto escuro. Foi o `text-white` fixo que quebrou no escuro.
+    const razao = contrastOfHex(token('canvas', paleta), token('ink', paleta));
+    expect(razao).toBeGreaterThanOrEqual(AA_TEXTO_NORMAL);
+  });
 });
 
-/** Branco sobre superfícies escuras — botões primários, banner, terminal. */
+/** Branco sobre superfícies escuras — botões primários, confirmação, terminal. */
 const brancoSobreEscuro: Array<[string, string]> = [
   // A ação primária é a marca, não o preto: era o teal quase não aparecer que
   // fazia a interface ser lida como cinza.
   ['ação primária', 'brand-600'],
-  ['ação primária sob o cursor', 'brand-700'],
-  ['cabeçalho da trilha', 'ink'],
+  ['ação primária sob o cursor', 'brand-hover'],
   ['confirmação', 'success-600'],
   ['terminal', 'terminal'],
   ['editor', 'editor'],
 ];
 
-describe('branco sobre superfícies escuras atende AA', () => {
+describe.each(VARIANTES)('branco sobre superfícies escuras atende AA — %s', (_variante, opcoes) => {
+  const paleta = extractColorTokens(css, opcoes);
   it.each(brancoSobreEscuro)('%s', (_nome, fundo) => {
-    const razao = contrastOfHex('#ffffff', token(fundo));
+    const razao = contrastOfHex('#ffffff', token(fundo, paleta));
     expect(razao, `branco sobre ${fundo} = ${razao.toFixed(2)}:1`).toBeGreaterThanOrEqual(
       AA_TEXTO_NORMAL
     );
+  });
+});
+
+describe('branco sobre a cor de cada trilha atende AA', () => {
+  // A faixa da trilha e o marco do percurso: preenchimento sólido, texto branco.
+  it.each(Object.entries(CORES_DAS_TRILHAS))('%s', (_id, fundo) => {
+    expect(contrastOfHex('#ffffff', fundo)).toBeGreaterThanOrEqual(AA_TEXTO_NORMAL);
   });
 });
 
@@ -145,8 +176,8 @@ describe('branco sobre superfícies escuras atende AA', () => {
  */
 describe('branco translúcido sobre superfície escura', () => {
   const casos: Array<[string, string, number, number]> = [
-    ['rótulo do cabeçalho da trilha', 'ink', 0.55, AA_TEXTO_GRANDE],
-    ['descrição do cabeçalho da trilha', 'ink', 0.75, AA_TEXTO_NORMAL],
+    ['rótulo da aula da vez', 'brand-600', 0.75, AA_TEXTO_GRANDE],
+    ['trilha da aula da vez', 'brand-600', 0.8, AA_TEXTO_NORMAL],
     ['saída do terminal', 'terminal', 0.9, AA_TEXTO_NORMAL],
     ['rótulo do terminal', 'terminal', 0.4, AA_TEXTO_GRANDE],
   ];
@@ -173,7 +204,8 @@ describe('branco translúcido sobre superfície escura', () => {
  *
  * Por isso `--color-control` existe separado de `--color-line`.
  */
-describe('componentes de interface atendem 3:1', () => {
+describe.each(VARIANTES)('componentes de interface atendem 3:1 — %s', (_variante, opcoes) => {
+  const paleta = extractColorTokens(css, opcoes);
   const casos: Array<[string, string, string]> = [
     ['borda de campo sobre superfície', 'control', 'surface'],
     ['borda de campo sobre o fundo da aplicação', 'control', 'canvas'],
@@ -182,7 +214,7 @@ describe('componentes de interface atendem 3:1', () => {
   ];
 
   it.each(casos)('%s', (_nome, frente, fundo) => {
-    const razao = contrastOfHex(token(frente), token(fundo));
+    const razao = contrastOfHex(token(frente, paleta), token(fundo, paleta));
     expect(razao, `${frente} sobre ${fundo} = ${razao.toFixed(2)}:1`).toBeGreaterThanOrEqual(
       AA_TEXTO_GRANDE
     );

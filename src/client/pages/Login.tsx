@@ -39,7 +39,7 @@ export function Login() {
     <main className="min-h-screen bg-canvas flex flex-col items-center justify-center p-4">
       <div className="w-full max-w-sm space-y-8">
         <div className="flex flex-col items-center text-center space-y-2">
-          <div className="w-12 h-12 bg-ink rounded-xl flex items-center justify-center mb-2 shadow-sm">
+          <div className="w-12 h-12 bg-brand-600 rounded-xl flex items-center justify-center mb-2 shadow-sm">
             <IconLogo size={24} className="text-white" />
           </div>
           <h1 className="text-2xl font-bold tracking-tight text-ink">Acesse o CodeFlow</h1>

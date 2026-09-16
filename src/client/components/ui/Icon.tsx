@@ -187,6 +187,63 @@ export const IconGrip = (p: IconProps) => (
   </Base>
 );
 
+/** Moeda: um círculo com um traço, sem cifrão — não é dinheiro. */
+export const IconCoin = (p: IconProps) => (
+  <Base {...p}>
+    <circle cx="12" cy="12" r="8.5" />
+    <path d="M12 8v8M9.5 10.5c0-1 1.2-1.5 2.5-1.5s2.5.5 2.5 1.5-1.2 1.5-2.5 1.5-2.5.5-2.5 1.5 1.2 1.5 2.5 1.5 2.5-.5 2.5-1.5" />
+  </Base>
+);
+
+/** Cadeado: o que ainda não abriu. */
+export const IconLock = (p: IconProps) => (
+  <Base {...p}>
+    <rect x="5" y="11" width="14" height="9" rx="2" />
+    <path d="M8 11V8a4 4 0 0 1 8 0v3" />
+  </Base>
+);
+
+/** Lápis: editar. */
+export const IconEdit = (p: IconProps) => (
+  <Base {...p}>
+    <path d="M4 20l4.5-1L19 8.5a2.1 2.1 0 0 0-3-3L5.5 16z" />
+    <path d="M13.5 8l3 3" />
+  </Base>
+);
+
+/** Floco: congelar a sequência. */
+export const IconFreeze = (p: IconProps) => (
+  <Base {...p}>
+    <path d="M12 3v18M4.2 7.5l15.6 9M4.2 16.5l15.6-9" />
+    <path d="M12 3l-2 2M12 3l2 2M12 21l-2-2M12 21l2-2" />
+  </Base>
+);
+
+/** Raio: dobro de XP. */
+export const IconBolt = (p: IconProps) => (
+  <Base {...p}>
+    <path d="M13 3L5 13h6l-1 8 8-10h-6z" />
+  </Base>
+);
+
+/** Câmera: enviar uma foto. */
+export const IconCamera = (p: IconProps) => (
+  <Base {...p}>
+    <path d="M4 8.5A1.5 1.5 0 0 1 5.5 7H8l1.5-2h5L16 7h2.5A1.5 1.5 0 0 1 20 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5z" />
+    <circle cx="12" cy="13" r="3.5" />
+  </Base>
+);
+
+/** Paleta: aparência. */
+export const IconPalette = (p: IconProps) => (
+  <Base {...p}>
+    <path d="M12 3.5a8.5 8.5 0 1 0 0 17c1.2 0 1.8-.8 1.5-1.8-.4-1.2.4-2.2 1.6-2.2H17a3.5 3.5 0 0 0 3.5-3.5A9.5 9.5 0 0 0 12 3.5z" />
+    <circle cx="8" cy="12" r="1" fill="currentColor" />
+    <circle cx="10.5" cy="8" r="1" fill="currentColor" />
+    <circle cx="15" cy="8.5" r="1" fill="currentColor" />
+  </Base>
+);
+
 export const IconPlay = (p: IconProps) => (
   <Base {...p}>
     <path d="M7 5.5l11 6.5-11 6.5V5.5z" />

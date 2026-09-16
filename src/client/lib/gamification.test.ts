@@ -6,10 +6,13 @@ import {
   computeAchievements,
   computeXp,
   levelFromXp,
-  NIVEIS,
+  tituloDoNivel,
+  xpMinimoDoNivel,
   XP,
   type GamificationInput,
 } from './gamification';
+import { desafiosDoDia, RECOMPENSA } from './desafios';
+import { listTracks } from '../../content';
 
 /**
  * O risco desta área não é bug de cálculo — é incentivo errado. Um XP que
@@ -109,7 +112,7 @@ describe('XP recompensa qualidade, não velocidade', () => {
     expect(XP.porAulaConcluida).toBeGreaterThan(XP.exercicioResolvido);
   });
 
-  it('soma as quatro fontes no total', () => {
+  it('soma as cinco fontes no total', () => {
     const xp = computeXp(
       entrada({
         attempts: [t({ exerciseId: 'a' }), t({ exerciseId: 'b' })],
@@ -123,7 +126,61 @@ describe('XP recompensa qualidade, não velocidade', () => {
     expect(xp.aulas).toBe(XP.porAulaConcluida);
     expect(xp.projetos).toBe(XP.porProjetoEntregue);
     expect(xp.revisao).toBe(XP.porCartaoRevisado);
-    expect(xp.total).toBe(xp.exercicios + xp.aulas + xp.projetos + xp.revisao);
+    expect(xp.total).toBe(xp.exercicios + xp.aulas + xp.projetos + xp.revisao + xp.desafios);
+  });
+
+  it('um desafio cumprido rende o XP dele', () => {
+    // 2026-03-10 é um dos dias em que "sem abrir dica" está sorteado: dois
+    // exercícios sem dica cumprem a meta. Lido do sorteio, não fixado.
+    const dia = desafiosDoDia('2026-03-10').find((d) => d.id === 'dia-sem-dica-2');
+    if (!dia) return; // o sorteio deste dia não tem o desafio: nada a provar aqui
+
+    const xp = computeXp(
+      entrada({ attempts: [t({ exerciseId: 'a', createdAt: '2026-03-10T13:00:00' }), t({ exerciseId: 'b', createdAt: '2026-03-10T13:05:00' })] })
+    );
+    expect(xp.desafios).toBeGreaterThanOrEqual(RECOMPENSA.dia.xp);
+  });
+});
+
+describe('dobro de XP', () => {
+  const compra = (quando: string) => ({ item: 'dobro-de-xp', price: 80, createdAt: quando });
+
+  it('o que acontece nas 24 horas depois da compra vale o dobro', () => {
+    const dentro = computeXp(
+      entrada({
+        attempts: [t({ createdAt: '2026-03-10T12:00:00.000Z' })],
+        purchases: [compra('2026-03-10T10:00:00.000Z')],
+      })
+    );
+    expect(dentro.exercicios).toBe(2 * (XP.exercicioResolvido + XP.bonusSemDica));
+    expect(dentro.dobrado).toBe(XP.exercicioResolvido + XP.bonusSemDica);
+  });
+
+  it('fora da janela, vale o de sempre — antes e depois', () => {
+    const antes = computeXp(
+      entrada({ attempts: [t({ createdAt: '2026-03-10T09:00:00.000Z' })], purchases: [compra('2026-03-10T10:00:00.000Z')] })
+    );
+    const depois = computeXp(
+      entrada({ attempts: [t({ createdAt: '2026-03-11T10:00:00.000Z' })], purchases: [compra('2026-03-10T10:00:00.000Z')] })
+    );
+    expect(antes.dobrado).toBe(0);
+    expect(depois.dobrado).toBe(0);
+  });
+
+  it('resolver de novo dentro da janela um exercício antigo não dobra nada', () => {
+    // O XP é do primeiro acerto; a janela só vale para o que rende XP nela.
+    const xp = computeXp(
+      entrada({
+        attempts: [t({ createdAt: '2026-03-01T10:00:00.000Z' }), t({ createdAt: '2026-03-10T12:00:00.000Z' })],
+        purchases: [compra('2026-03-10T10:00:00.000Z')],
+      })
+    );
+    expect(xp.dobrado).toBe(0);
+  });
+
+  it('projeto não dobra: não tem hora registrada', () => {
+    const xp = computeXp(entrada({ completedProjects: ['p1'], purchases: [compra('2026-03-10T10:00:00.000Z')] }));
+    expect(xp.projetos).toBe(XP.porProjetoEntregue);
   });
 });
 
@@ -133,33 +190,45 @@ describe('níveis', () => {
     expect(info.level).toBe(1);
     expect(info.title).toBe('Explorador');
     expect(info.xpIntoLevel).toBe(0);
+    expect(info.xpForNextLevel).toBe(150);
   });
 
   it('sobe de nível ao cruzar o limiar', () => {
-    const abaixo = levelFromXp(NIVEIS[1].minXp - 1);
-    const exato = levelFromXp(NIVEIS[1].minXp);
-
-    expect(abaixo.level).toBe(1);
-    expect(exato.level).toBe(2);
+    expect(levelFromXp(xpMinimoDoNivel(2) - 1).level).toBe(1);
+    expect(levelFromXp(xpMinimoDoNivel(2)).level).toBe(2);
+    expect(levelFromXp(xpMinimoDoNivel(10)).level).toBe(10);
   });
 
-  it('informa quanto falta para o próximo', () => {
-    const info = levelFromXp(NIVEIS[1].minXp);
-    expect(info.xpForNextLevel).toBe(NIVEIS[2].minXp - NIVEIS[1].minXp);
-    expect(info.nextTitle).toBe(NIVEIS[2].title);
+  it('informa quanto falta para o próximo, e se o título muda', () => {
+    const dois = levelFromXp(xpMinimoDoNivel(2));
+    expect(dois.xpForNextLevel).toBe(xpMinimoDoNivel(3) - xpMinimoDoNivel(2));
+    expect(dois.nextTitle).toBe('Iniciante');
+    expect(dois.proximoMudaTitulo).toBe(true);
+
+    const tres = levelFromXp(xpMinimoDoNivel(3));
+    expect(tres.proximoMudaTitulo).toBe(false);
   });
 
-  it('no último nível não promete um próximo que não existe', () => {
-    const info = levelFromXp(999999);
-    expect(info.level).toBe(NIVEIS[NIVEIS.length - 1].level);
-    expect(info.xpForNextLevel).toBeNull();
-    expect(info.nextTitle).toBeNull();
+  it('não tem teto: XP alto continua subindo de nível', () => {
+    const alto = levelFromXp(999999);
+    expect(alto.level).toBeGreaterThan(25);
+    expect(alto.title).toBe('Mestre');
+    expect(alto.xpForNextLevel).toBeGreaterThan(0);
   });
 
-  it('os limiares são crescentes', () => {
-    for (let i = 1; i < NIVEIS.length; i++) {
-      expect(NIVEIS[i].minXp).toBeGreaterThan(NIVEIS[i - 1].minXp);
+  it('cada nível pede mais XP que o anterior, e o catálogo inteiro não cabe em seis', () => {
+    for (let n = 2; n < 40; n++) {
+      expect(xpMinimoDoNivel(n + 1) - xpMinimoDoNivel(n)).toBeGreaterThan(xpMinimoDoNivel(n) - xpMinimoDoNivel(n - 1));
     }
+    // Uns 25 mil XP no catálogo de hoje: a versão anterior parava no nível 6 com 3.200.
+    expect(levelFromXp(25000).level).toBeGreaterThanOrEqual(15);
+  });
+
+  it('os títulos vêm em faixas crescentes', () => {
+    expect(tituloDoNivel(1)).toBe('Explorador');
+    expect(tituloDoNivel(4)).toBe('Iniciante');
+    expect(tituloDoNivel(12)).toBe('Desenvolvedor');
+    expect(tituloDoNivel(40)).toBe('Mestre');
   });
 });
 
@@ -175,8 +244,29 @@ describe('conquistas', () => {
 
   it('a lista de conquistas é sempre completa, com as travadas visíveis', () => {
     const todas = computeAchievements(entrada());
-    expect(todas.length).toBeGreaterThan(5);
-    expect(todas.every((a) => a.title && a.description)).toBe(true);
+    expect(todas.length).toBeGreaterThan(20);
+    expect(todas.every((a) => a.title && a.description && a.categoria)).toBe(true);
+    // Ids únicos: duas conquistas com o mesmo id se sobreporiam na tela.
+    expect(new Set(todas.map((a) => a.id)).size).toBe(todas.length);
+  });
+
+  it('as de contagem mostram o progresso, limitado à meta', () => {
+    const dez = computeAchievements(
+      entrada({ attempts: Array.from({ length: 30 }, (_, i) => t({ exerciseId: `ex-${i}` })) })
+    );
+    const autonomo = dez.find((a) => a.id === 'autonomo')!;
+    expect(autonomo.unlocked).toBe(true);
+    expect(autonomo.progresso).toEqual({ atual: 10, meta: 10 });
+    const cinquenta = dez.find((a) => a.id === 'cinquenta')!;
+    expect(cinquenta.progresso).toEqual({ atual: 30, meta: 50 });
+  });
+
+  it('a conquista de trilha só abre com todas as aulas dela', () => {
+    const trilha = listTracks()[0];
+    const quase = computeAchievements(entrada({ completedLessons: trilha.lessonIds.slice(1) }));
+    expect(quase.find((a) => a.id === `trilha-${trilha.id}`)!.unlocked).toBe(false);
+    const toda = computeAchievements(entrada({ completedLessons: trilha.lessonIds }));
+    expect(toda.find((a) => a.id === `trilha-${trilha.id}`)!.unlocked).toBe(true);
   });
 
   it('errar já conta como primeiro código executado', () => {

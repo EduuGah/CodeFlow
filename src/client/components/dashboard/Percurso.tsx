@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 
 import { LANGUAGE_LABELS } from '../../../content/types';
+import { corDaTrilha } from '../../lib/cores-das-trilhas';
 import { formatarDuracao, type EtapaMontada, type TrilhaNoPercurso } from '../../lib/percurso';
 import { buttonClasses } from '../ui/Button';
 import { IconArrowRight, IconCheck } from '../ui/Icon';
@@ -19,18 +20,18 @@ import { IconArrowRight, IconCheck } from '../ui/Icon';
  * duas escalas.
  */
 
-const marco: Record<TrilhaNoPercurso['estado'] | 'atual', string> = {
-  concluida: 'border-success-600 bg-success-600 text-white',
-  atual: 'border-ink bg-ink text-white',
-  'em-andamento': 'border-brand-600 bg-surface text-brand-700',
-  'nao-iniciada': 'border-line-strong bg-surface text-ink-faint',
-};
-
+/**
+ * O marco leva a cor da trilha: cheio na trilha da vez e nas concluídas,
+ * só o contorno nas outras. É a mesma cor da faixa da trilha e do cabeçalho
+ * das aulas dela — a pessoa reconhece o assunto pela cor.
+ */
 function Marco({ trilha, atual }: { trilha: TrilhaNoPercurso; atual: boolean }) {
-  const estilo = trilha.estado === 'concluida' ? marco.concluida : atual ? marco.atual : marco[trilha.estado];
+  const cor = corDaTrilha(trilha.track.id);
+  const cheio = atual || trilha.estado === 'concluida';
   return (
     <span
-      className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 text-xs font-bold ${estilo}`}
+      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 text-xs font-bold"
+      style={cheio ? { borderColor: cor, background: cor, color: '#fff' } : { borderColor: cor, color: cor }}
       aria-hidden
     >
       {trilha.estado === 'concluida' ? <IconCheck size={15} strokeWidth={3} /> : trilha.posicao}
@@ -42,10 +43,8 @@ function Barra({ trilha }: { trilha: TrilhaNoPercurso }) {
   return (
     <span className="block h-1 w-full overflow-hidden rounded-full bg-sunken" aria-hidden>
       <span
-        className={`block h-full rounded-full ${
-          trilha.estado === 'concluida' ? 'bg-success-600' : 'bg-brand-600'
-        }`}
-        style={{ width: `${trilha.resumo.percentage}%` }}
+        className="block h-full rounded-full"
+        style={{ width: `${trilha.resumo.percentage}%`, background: corDaTrilha(trilha.track.id) }}
       />
     </span>
   );

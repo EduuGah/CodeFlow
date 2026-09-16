@@ -93,11 +93,18 @@ Todos implementados, testados, e com validação de conteúdo que roda no CI:
 ### Plataforma
 
 Autenticação com Google, progresso derivado de histórico append-only, revisão
-espaçada (Leitner), XP e níveis derivados, painel inicial que responde "onde
-estou / o que faço agora / como estou evoluindo", área de administração que
-**gera módulos TypeScript** para revisão em PR em vez de escrever no banco,
-sandbox descartável com bloqueio de rede, testes por propriedade com sementes e
-sondas de borda, CI com anotações legíveis, E2E em celular e desktop.
+espaçada (Leitner), XP e níveis derivados (sem teto), painel inicial que
+responde "o que faço agora / onde isso está no todo / como estou indo", área
+de administração que **gera módulos TypeScript** para revisão em PR em vez de
+escrever no banco, sandbox descartável com bloqueio de rede, testes por
+propriedade com sementes e sondas de borda, CI com anotações legíveis, E2E em
+celular e desktop. **Gamificação derivada** (2026-09-16): moedas ganhas por
+aulas, projetos, desafios e sequência; loja (congelar a sequência, dobro de XP
+por 24 h, temas e avatares que também abrem por nível) com as compras como
+único fato guardado; desafios diários e semanais por rodízio; 30 conquistas em
+quatro categorias. **Perfil editável** (nome, avatar desenhado ou foto enviada
+ao Storage), **modo escuro** e **quatro cores de destaque**, uma cor por
+trilha.
 
 ### Correções grandes já feitas — não reintroduza
 

@@ -13,6 +13,7 @@ import {
   type ExerciseState,
 } from '../lib/exercise-state';
 import { celebrar } from '../lib/celebrar';
+import { corDaTrilha } from '../lib/cores-das-trilhas';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { CodeExerciseStep } from '../components/lesson/CodeExerciseStep';
 import { FillBlank } from '../components/lesson/FillBlank';
@@ -248,7 +249,13 @@ export function Lesson() {
             <p className="truncate text-sm font-bold text-ink">{lesson.title}</p>
             {/* O próprio contador é a região viva: duplicá-lo num span oculto
                 faria o leitor de tela anunciar a mesma informação duas vezes. */}
-            <p className="label-mono text-ink-faint" aria-live="polite">
+            <p className="label-mono flex items-center gap-1.5 text-ink-faint" aria-live="polite">
+              {/* A cor da trilha, como no percurso: diz o assunto antes do nome. */}
+              <span
+                aria-hidden
+                className="inline-block h-2 w-2 rounded-full"
+                style={{ background: corDaTrilha(lesson.trackId) }}
+              />
               Passo {posicao + 1} de {steps.length} · {LANGUAGE_LABELS[lesson.language]}
             </p>
           </div>
@@ -276,8 +283,11 @@ export function Lesson() {
           className="h-1 w-full bg-sunken"
         >
           <div
-            className="h-full bg-brand-500 transition-[width] duration-300"
-            style={{ width: `${((posicao + 1) / steps.length) * 100}%` }}
+            className="h-full transition-[width] duration-300"
+            style={{
+              width: `${((posicao + 1) / steps.length) * 100}%`,
+              background: corDaTrilha(lesson.trackId),
+            }}
           />
         </div>
       </header>

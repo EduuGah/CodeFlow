@@ -18,7 +18,7 @@ export function LessonBlocks({ blocks, lessonId }: { blocks: LessonBlock[]; less
           case 'example':
             return (
               <figure key={index} className="space-y-2">
-                <pre className="overflow-x-auto rounded-lg bg-ink p-4 text-sm leading-relaxed">
+                <pre className="overflow-x-auto rounded-lg bg-editor p-4 text-sm leading-relaxed">
                   <code className="font-mono text-white/90">{block.code}</code>
                 </pre>
                 {block.caption && (

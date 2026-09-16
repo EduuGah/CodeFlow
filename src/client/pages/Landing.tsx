@@ -39,7 +39,7 @@ export function Landing() {
 
       <main className="flex flex-1 flex-col items-center justify-center px-4 py-16 text-center sm:px-6">
         <div className="max-w-xl space-y-6">
-          <p className="label-mono text-brand-600">Aprender programação de verdade</p>
+          <p className="label-mono text-brand-700">Aprender programação de verdade</p>
 
           <h1 className="text-3xl font-extrabold leading-tight tracking-tight text-ink sm:text-5xl">
             Você não aprende a programar lendo.
