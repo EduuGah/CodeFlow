@@ -6,7 +6,7 @@ que conclui uma fase.
 
 ## Onde estamos
 
-**Fases 1 e 2 de 8 concluídas · Fase 3: TypeScript 10 de 10, React 0 de 14 · publicado**
+**Fases 1, 2 e 3 de 8 concluídas · TypeScript 10 de 10 · React 14 de 14 · publicado**
 
 ```
 Fase 0  Fundamentos e lógica      ██████████████████████  13/13  pronto
@@ -14,7 +14,7 @@ Fase 1  JavaScript real          ███████████████�
         Como a web funciona      ██████████████████████   8/8  pronto
         Plataforma                ██████████████████████   7/7  pronto
 Fase 2  A página                 ██████████████████████  26/26  pronto
-Fase 3  Tipos e componentes      █████████░░░░░░░░░░░░░  10/24  TypeScript pronto
+Fase 3  Tipos e componentes      ██████████████████████  24/24  pronto
 Fase 4  Back-end e dados         ░░░░░░░░░░░░░░░░░░░░░░   0/20
 Fase 5  Profissionalização       ░░░░░░░░░░░░░░░░░░░░░░   0/19
 Fase 6  Python                   ░░░░░░░░░░░░░░░░░░░░░░   0/10
@@ -23,16 +23,18 @@ Fase 7  Projeto final            ░░░░░░░░░░░░░░░�
 
 | | Hoje | Previsto | Feito |
 | --- | ---: | ---: | ---: |
-| Aulas | **67** | 135 | 50% |
-| Exercícios | **389** | ~700 | 56% |
+| Aulas | **81** | 135 | 60% |
+| Exercícios | **473** | ~700 | 68% |
 | Tipos de exercício | **8** | 11 | 73% |
-| Motores de execução | **3** | 7 | 43% |
+| Motores de execução | **4** | 7 | 57% |
 | Projetos | **7** | ~30 | 23% |
 
-**Último trabalho** (2026-09-14): o motor de TypeScript — o compilador na
-frente do sandbox, sem download a mais — e a trilha "TypeScript" inteira, 10
-aulas e 59 exercícios, com o teste que só existe aqui: o trecho que o
-compilador precisa recusar. Antes disso, no mesmo dia, a Fase 2 inteira.
+**Último trabalho** (2026-09-15): o motor de React — o componente do aluno
+compilado e montado, com o React embutido, no iframe do motor de página — e
+a trilha "React" inteira, 14 aulas e 84 exercícios, com os testes usando o
+componente como a pessoa usa (clicar, digitar, enviar). A Fase 3 fechou. No
+mesmo dia, a tela de trilhas virou visão geral com cada trilha em blocos por
+assunto.
 
 ## Aprofundamento das aulas antigas
 
@@ -298,9 +300,9 @@ Plataforma: exercício julgado pela tela renderizada — **feito**. Mapa de
 tópicos e busca — **não feito**; é o único item da fase que ficou, e cabe em
 qualquer momento, porque não depende de motor.
 
-### Fase 3 — Tipos e componentes · 24 aulas · EM ANDAMENTO (10 de 24)
-Motor **2: o compilador de TypeScript** — **pronto** (2026-09-14). Motor **3
-(React no iframe)** — não iniciado.
+### Fase 3 — Tipos e componentes · 24 aulas · PRONTO (2026-09-15)
+Motor **2: o compilador de TypeScript** — **pronto** (2026-09-14). Motor **3:
+React no iframe** — **pronto** (2026-09-15).
 
 Como o motor 2 funciona, para quem for escrever as aulas: em aula com
 `language: 'typescript'`, o código do aluno passa pelo compilador antes do
@@ -338,12 +340,42 @@ quebra".
 | 9 | Erros do compilador: anatomia da mensagem, cadeia, cascata, corrigir a causa |
 | 10 | Quando não tipar: o tipo que compra algo, migrar um arquivo por vez, any com prazo |
 
-**React — 0 de 14.** Componentes, estado, listas, formulários, efeitos,
-buscar dados, estados de erro, composição, contexto, hooks próprios, rotas,
-re-render, testar componente, projeto. Depende do motor 3: React e o JSX
-transpilado dentro do iframe do motor de página.
+Como o motor 3 funciona, para quem for escrever as aulas: em aula com
+`language: 'react'`, o exercício é um componente em TSX. O compilador do
+motor 2 (com `jsx` ligado, e as declarações do React e do DOM do iframe que
+só entram aqui) verifica os tipos e emite `React.createElement`; o
+JavaScript entra no documento do motor de página com o React e o ReactDOM
+embutidos como texto (a CSP não deixa carregar nada de fora), e o componente
+**`App`** é montado com `flushSync` antes de os testes rodarem. Os testes são
+os do motor de página, em série, com ajudantes para usar o componente como a
+pessoa: `clicar`, `digitar`, `enviar`, `botao(texto)`, `campo(rótulo)`,
+`texto`, `textos`, `esperar`. O servidor de mentira (`window.__servidor`) e o
+armazenamento em memória valem aqui também. Só os tipos `code`, `fill-blank`,
+`multiple-choice`, `order-steps` e `find-bug` entram numa aula de React — os
+outros rodam no Worker, que não tem DOM.
 
-Plataforma: tutor com IA; painel do aluno.
+**React — 14 de 14.** Cada aula com 6 exercícios; o find-bug quebra em
+compilação ou na primeira montagem.
+
+| Aula | Assunto |
+| --- | --- |
+| 1 | Componentes: função que recebe props e devolve JSX; o que o JSX vira; compor |
+| 2 | Estado: useState, eventos, nunca mutar, set com função, não guardar o derivado |
+| 3 | Listas: map com key estável, acrescentar/remover/alterar como lista nova, filtro derivado |
+| 4 | Formulários: campo controlado, onSubmit, erro na hora certa, muitos campos num objeto |
+| 5 | Efeitos: useEffect, dependências, limpeza, o que não é efeito |
+| 6 | Buscar dados: async dentro do efeito, os três estados, ok, a bandeira ativo, tentar de novo |
+| 7 | Estados de erro: o vazio, a ação que falha (finally, texto que fica), erro por parte da tela |
+| 8 | Composição: children, dados descem e eventos sobem, subir o estado, controlado pelo pai |
+| 9 | Contexto: createContext/Provider/useContext, valor e funções, quando é exagero |
+| 10 | Hooks próprios: extrair lógica, compartilha lógica e não estado, as duas regras |
+| 11 | Rotas: a rota como estado, o link que não recarrega, parâmetros, não encontrado |
+| 12 | Re-render: quem renderiza, useMemo/memo/useCallback com medição, key que remonta |
+| 13 | Acessível e testável: achar por papel e rótulo, testar comportamento, o DOM no efeito |
+| 14 | Projeto: o estado antes da tela, fatias verticais, persistência com guarda, pronto |
+
+Plataforma da fase — tutor com IA; painel do aluno — **não feita**: ficou,
+como o mapa de tópicos da Fase 2, para quando não depender de motor.
 
 ### Fase 4 — Back-end e dados · 20 aulas
 Motores **4 (servidor simulado)** e **5 (sql.js, ~1,5 MB)**.
@@ -373,8 +405,8 @@ telefone real, passagem final de acessibilidade.
 
 ## Sobre tamanho
 
-As 67 aulas de hoje levaram bastante tempo para ficar no padrão do projeto. As
-68 restantes são muitas vezes esse trabalho, e os ~310 exercícios novos são a
+As 81 aulas de hoje levaram bastante tempo para ficar no padrão do projeto. As
+54 restantes são muitas vezes esse trabalho, e os ~230 exercícios novos são a
 maior parte dele. Por isso a unidade é a fase: cada uma termina numa versão do
 produto que dá para usar. O roadmap escolhe a ordem; não promete prazo.
 
@@ -383,6 +415,8 @@ precisava de motor nenhum, e é onde estão os testes por propriedade e os
 quatro tipos de prática de dev — que mudam a qualidade de todos os exercícios
 que vierem depois. A Fase 2 veio em seguida pela mesma lógica invertida: era a
 primeira que precisava de um motor novo, e o iframe é o mais barato dos seis. A
-Fase 3 está no meio: o compilador de TypeScript saiu quase de graça, porque o
-worker do Monaco já sabia compilar; o React no iframe é o próximo motor, e se
-apoia no motor de página que já existe.
+Fase 3 veio depois porque os dois motores dela se apoiaram nos anteriores: o
+compilador de TypeScript saiu quase de graça, porque o worker do Monaco já
+sabia compilar, e o React entrou no iframe do motor de página. A Fase 4 é a
+próxima, e é a primeira que precisa de um motor sem parentesco com os que
+existem: o servidor simulado (Node) e o sql.js.

@@ -32,15 +32,15 @@ Números lidos do catálogo, não de memória.
 
 | | |
 | --- | --- |
-| Trilhas | 5 — Fundamentos de JavaScript (20 aulas), Lógica (3), Como a Web Funciona (8), A Página (26), TypeScript (10) |
-| Aulas | 67, somando 1.826 minutos |
-| Exercícios | 389, em 8 tipos — 100 de múltipla escolha, 96 de código, 66 de lacuna, 56 de prever saída, 37 de ordenar passos, 23 de encontrar o bug, 6 de refatorar, 5 de escrever o teste. 78 exercícios de página (`runtime: 'iframe'`); 16 com trechos de tipo (`typeTests`). **Toda aula tem ao menos um dos quatro tipos de prática de dev** |
-| Verificação | 600 casos fixos + 58 propriedades |
+| Trilhas | 6 — Fundamentos de JavaScript (20 aulas), Lógica (3), Como a Web Funciona (8), A Página (26), TypeScript (10), React (14) |
+| Aulas | 81, somando 2.226 minutos, em blocos por assunto (`Track.sections`) |
+| Exercícios | 473, em 8 tipos — 128 de múltipla escolha, 124 de código, 80 de lacuna, 56 de prever saída, 38 de ordenar passos, 36 de encontrar o bug, 6 de refatorar, 5 de escrever o teste. 78 exercícios de página (`runtime: 'iframe'`), 42 de componente React (a aula é `language: 'react'`), 16 com trechos de tipo (`typeTests`). **Toda aula tem ao menos um dos quatro tipos de prática de dev** |
+| Verificação | 731 casos fixos + 58 propriedades |
 | Projetos | 7, com 22 critérios de aceitação |
-| Conceitos | 63, com grafo de pré-requisitos |
+| Conceitos | 77, com grafo de pré-requisitos |
 | Flashcards | 22 |
-| Testes | 1.618 de unidade + 214 de navegador |
-| Pacote | 1.985 kB (560 kB comprimido) no chunk principal — o conteúdo vai junto; o Monaco são mais 3.362 kB (869 kB) num chunk à parte, baixado só quando o primeiro editor monta, e o worker de TypeScript (7 MB) só quando um modelo JS/TS abre. O motor de TypeScript não acrescentou nenhum arquivo: reaproveita esse worker |
+| Testes | 1.860 de unidade + 252 de navegador |
+| Pacote | 2.261 kB (631 kB comprimido) no chunk principal — o conteúdo vai junto; o Monaco são mais 3.362 kB (869 kB) num chunk à parte, baixado só quando o primeiro editor monta, e o worker de TypeScript (7 MB) só quando um modelo JS/TS abre. O motor de TypeScript não acrescentou arquivo; o de React acrescentou um chunk de 143 kB (47 kB) com o React e o ReactDOM como texto, baixado só por um exercício de React |
 
 ## 4. Decisões que não devem ser desfeitas sem motivo forte
 
@@ -91,6 +91,18 @@ confere. Opções, declarações do sandbox e o formato dos erros vivem em
 dali. O JavaScript gerado entra no sandbox comum: o motor novo é só o passo
 da frente.
 
+**O React do aluno roda dentro do iframe do motor de página, embutido.** O
+componente em TSX passa pelo compilador do motor 2 com `jsx` ligado — com
+declarações do React e do DOM escritas à mão em `react-core.ts`, que só
+entram em aula de React (em TypeScript puro, `document` continua recusado) —
+e o JavaScript vai para o documento do iframe junto com o texto dos builds
+UMD do React 18 (o `exports` do react-dom não expõe a pasta `umd`; o import é
+pelo caminho, com `?raw`). `App` é montado com `flushSync`. Os testes de
+página rodam **em série** (`buildProgram` com `sequencial`), porque
+compartilham o DOM. O iframe tem `allow-forms`: sem ele o Chromium não
+dispara o `submit` no clique nem no Enter, e a pré-visualização ficava muda
+num formulário certo.
+
 **O sandbox é descartável.** Worker novo por execução, 3 segundos de limite,
 `terminate()` no fim. `fetch`, `XMLHttpRequest`, `WebSocket`, `importScripts`,
 `indexedDB`, `caches` e `Notification` são apagados antes de qualquer código do
@@ -130,6 +142,12 @@ src/client/lib/         Lógica pura e testada
   executar.ts           executarNaLinguagem(): JavaScript vai direto ao
                         sandbox; TypeScript compila antes — todo componente
                         de exercício passa por aqui
+  react-core.ts         Motor de React, parte pura: as declarações do React e
+                        do DOM para o compilador, o documento com o React
+                        embutido e a montagem de App, e os ajudantes dos
+                        testes (clicar, digitar, enviar, botao, campo…)
+  react-umd.ts          O React e o ReactDOM como texto (?raw), num chunk
+                        próprio que só um exercício de React baixa
   fill-blank.ts         Molde com lacunas: dividir, preencher, validar
   mastery.ts            Domínio por conceito, em 4 níveis
   review.ts             Repetição espaçada, Leitner [1,3,7,14,30,60] dias
@@ -152,6 +170,10 @@ src/client/components/  Componentes
                         o chunk não vier
   lesson/               Um componente por tipo de exercício; `ExerciseAction`
                         e `ExerciseFeedback` são o botão e o retorno de todos
+  dashboard/TrackCard   Uma trilha na visão geral: progresso, a aula da vez,
+                        "Continuar" e "Ver as aulas"
+src/client/pages/app/   Trilhas é a visão geral (cards + projetos);
+  TrackDetail.tsx       uma trilha inteira, em blocos por assunto
 e2e/                    Playwright; `fixtures.ts` tem o dublê do Supabase
 supabase/migrations/    0001 a 0006, aplicadas em ordem
 docs/curriculo.md       Roadmap de conteúdo — fonte canônica
@@ -161,8 +183,8 @@ docs/curriculo.md       Roadmap de conteúdo — fonte canônica
 
 ```bash
 npm run typecheck   # inclui e2e/ e playwright.config.ts
-npm test            # 1.618 testes
-npm run test:e2e    # 214 no navegador (antes: npx playwright install chromium)
+npm test            # 1.860 testes
+npm run test:e2e    # 252 no navegador (antes: npx playwright install chromium)
 npm run build
 ```
 
@@ -330,6 +352,25 @@ Cada uma custou tempo. Não repita.
   só relendo a `lib.es2020` e a cadeia atrás dela. O compilador do CI usa o
   serviço de linguagem, como o Monaco: entre uma compilação e a seguinte só o
   arquivo do aluno muda, e cai para 60 ms.
+- **Os testes de uma página rodavam todos ao mesmo tempo.** O `Promise.all`
+  do sandbox de Worker, onde os testes são independentes, servia à página —
+  até a aula de estado do React, em que o teste que clica em "+1" três vezes
+  e o que clica em "-1" disputavam o mesmo contador. `buildProgram` ganhou
+  `sequencial`; a armadilha no caminho foi `return` seguido de quebra de
+  linha, que é `return;` — os resultados vinham nulos até os parênteses.
+- **Mudar o hash num iframe de `srcdoc` recarrega o documento no Chromium.**
+  A aula de rotas ia usar `location.hash`; a sonda no navegador mostrou o
+  componente sumindo no primeiro clique (no jsdom funciona). A rota vive no
+  estado, e a aula diz o que a barra de endereço acrescentaria.
+- **Sem `allow-forms`, o Chromium não dispara o `submit` no clique do botão
+  nem no Enter.** Os testes de página sempre despacharam o evento à mão, e
+  por isso ninguém viu que a pré-visualização ficava muda num formulário
+  certo. O sandbox ganhou `allow-forms`; um formulário sem `preventDefault`
+  passa a navegar o iframe, como a página de verdade faria.
+- **`window.X = 0` num exercício de React é erro de tipo**, porque o `window`
+  declarado para o compilador não tem índice. Um contador que o teste
+  precisa ler é `let contador = 0` no topo do script: o motor de página
+  resolve `let` e `const` do topo a partir dos testes.
 - **Dois passos seguidos do mesmo tipo de exercício reaproveitavam a
   instância do componente.** O segundo nascia com a resposta do primeiro já
   enviada — "Resposta correta" para uma pergunta que ninguém respondeu — e,
@@ -337,6 +378,15 @@ Cada uma custou tempo. Não repita.
   para sempre. Nenhuma das 57 aulas anteriores tinha dois seguidos. Cada
   componente de exercício tem `key={exercise.id}`; o teste
   `Lesson.passos-seguidos` prova o defeito sem a `key`.
+- **"O Tab pula para o botão" era o editor de contingência, não o Monaco.**
+  Quando o chunk do Monaco não chega — rede, ou uma aba aberta de antes de
+  um deploy que trocou os nomes dos arquivos — entra o `<textarea>`, e nele
+  o Tab do navegador sai do campo. As sondas no Chromium mostravam o Monaco
+  recuando direito; o relato do usuário só fazia sentido na contingência. O
+  textarea trata Tab (recua), Shift+Tab (desfaz) e Esc (solta o foco), com a
+  dica escrita embaixo; `main.tsx` recarrega uma vez por sessão no
+  `vite:preloadError`; e a falha do Monaco vai ao `console.error` — antes
+  era silenciosa, e a contingência parecia o editor normal.
 - **Uma prop opcional é um contrato que ninguém garante.** `onSolved` era opcional
   e dois dos quatro tipos de exercício simplesmente não a recebiam — 36 dos 78
   exercícios nunca conseguiam avisar que tinham sido resolvidos, e nenhum dos 521
@@ -403,23 +453,21 @@ sozinha. Os ajudantes que as asserções de CSS colam no início (`trilhas`,
 da plataforma ficou um item da fase: mapa de tópicos e busca — não depende de
 motor e cabe em qualquer momento.
 
-**Fase 3 — em andamento, 10 de 24 (2026-09-14).** O motor de TypeScript
-está pronto e provado nos dois lados (pacote `typescript` no CI, worker do
-Monaco no E2E): `language: 'typescript'` na aula faz todo exercício de
-código, lacuna, prever saída, refatorar e escrever teste passar pelo
-compilador antes do sandbox, e o `find-bug` aceita erro de compilação como
-"o programa quebra". Os `typeTests` (trechos que o compilador aceita ou
-recusa) são o teste que só existe aqui. A trilha **TypeScript** tem as 10
-aulas previstas, 59 exercícios, concluídas no Chromium em celular e desktop
-(`e2e/typescript.spec.ts`, que também prova a recusa com linha e explicação
-e o editor sem marcadores falsos). Faltam as 14 aulas de React, que dependem
-do motor 3: React e JSX dentro do iframe do motor de página — o transpilador
-já existe (o worker de TypeScript emite JSX), falta o React embutido no
-documento e a aula.
+**Fase 3 — completa (2026-09-15).** Dois motores. O de TypeScript
+(`language: 'typescript'`): o compilador antes do sandbox, nos dois lados
+(pacote `typescript` no CI, worker do Monaco no E2E), com os `typeTests` como
+o teste que só existe aqui; trilha de 10 aulas e 59 exercícios. O de React
+(`language: 'react'`): o componente em TSX compilado e montado com o React
+embutido no iframe do motor de página, testes em série que usam o componente
+como a pessoa; trilha de 14 aulas e 84 exercícios. As duas trilhas são
+concluídas no Chromium em celular e desktop (`e2e/typescript.spec.ts`,
+`e2e/react.spec.ts`). Da plataforma da fase ficou o tutor com IA e o painel
+do aluno — como o mapa de tópicos da Fase 2, não dependem de motor.
 
-**Fases 4 a 7 — não iniciadas.** Cada uma depende de um motor: servidor
-simulado (Node), sql.js (SQL), Pyodide (Python). Investimentos grandes o
-bastante para a escolha ser do dono do projeto — pergunte antes de começar.
+**Fases 4 a 7 — não iniciadas.** Cada uma depende de um motor sem parentesco
+com os que existem: servidor simulado (Node), sql.js (SQL), Pyodide (Python).
+A Fase 4 é a próxima. Investimentos grandes o bastante para a escolha ser do
+dono do projeto — pergunte antes de começar.
 
 ## 9. Pendências do lado do usuário
 
@@ -427,8 +475,9 @@ bastante para a escolha ser do dono do projeto — pergunte antes de começar.
   rodou. Ela conserta o gatilho que impedia promover alguém a administrador.
 - Para virar administrador: `select public.set_user_role('SEU-EMAIL', 'admin');`
 - Conferir o aplicativo publicado num telefone de verdade — inclusive um
-  exercício de código, que agora depende do editor servido pela Vercel, e uma
-  aula da trilha "A Página", que renderiza a página do aluno num iframe.
+  exercício de código, que agora depende do editor servido pela Vercel, uma
+  aula da trilha "A Página" (a página do aluno num iframe) e uma de React (o
+  componente montado no mesmo iframe).
 - Informar a URL pública de produção, para entrar aqui e no README.
 
 ## 10. Preferências já estabelecidas

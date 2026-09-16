@@ -54,16 +54,16 @@ consistência visual > qualidade dos exercícios > progressão > gamificação.
 
 | | |
 | --- | --- |
-| Trilhas | 5 — Fundamentos de JavaScript (20 aulas), Lógica (3), Como a Web Funciona (8), A Página (26), TypeScript (10) |
-| Aulas | 67, somando 1.826 minutos |
-| Exercícios | 389, em 8 tipos; 78 são de página (`runtime: 'iframe'`) e 16 têm trechos de tipo (`typeTests`) |
-| Verificação | 600 casos fixos + 58 testes por propriedade |
+| Trilhas | 6 — Fundamentos de JavaScript (20 aulas), Lógica (3), Como a Web Funciona (8), A Página (26), TypeScript (10), React (14) |
+| Aulas | 81, somando 2.226 minutos, em blocos por assunto |
+| Exercícios | 473, em 8 tipos; 78 são de página (`runtime: 'iframe'`), 42 de componente React, e 16 têm trechos de tipo (`typeTests`) |
+| Verificação | 731 casos fixos + 58 testes por propriedade |
 | Projetos | 7, com 22 critérios de aceitação |
-| Conceitos | 63, com grafo de pré-requisitos |
+| Conceitos | 77, com grafo de pré-requisitos |
 | Flashcards | 22 |
-| Testes | 1.618 de unidade + 214 de navegador |
+| Testes | 1.860 de unidade + 252 de navegador |
 
-Todas as 67 aulas publicadas estão no padrão de profundidade: 300 a 900 palavras
+Todas as 81 aulas publicadas estão no padrão de profundidade: 300 a 900 palavras
 e de 4 a 7 exercícios em dificuldade crescente, ao menos um deles de prática de
 dev. Nenhuma está pendente de aprofundamento.
 
@@ -111,20 +111,19 @@ sondas de borda, CI com anotações legíveis, E2E em celular e desktop.
 
 ## 5. O que ESTÁ SENDO FEITO agora
 
-**Fase 3 no meio.** O último commit fecha o bloco de TypeScript — o motor
-(compilador na frente do sandbox) e as 10 aulas da trilha —, o CI está verde,
-e a árvore está limpa. Você começa num ponto estável.
+**Nada em andamento.** O último commit fecha a Fase 3 — o motor de React e as
+14 aulas da trilha —, o CI está verde, e a árvore está limpa. Você começa num
+ponto estável.
 
-O que falta da fase: as **14 aulas de React**, que dependem do motor 3 (React
-e JSX dentro do iframe do motor de página). O transpilador já existe — o
-worker de TypeScript emite JSX com `jsx: 'react'` —; falta embutir o React
-no documento do iframe, decidir como os testes enxergam o componente
-renderizado, e escrever as aulas.
+O que acabou de ser concluído: **todo o conteúdo que cabe nos quatro motores
+existentes** (Worker, iframe, compilador de TypeScript, React no iframe). O
+que vem agora precisa de motor novo, sem parentesco com esses.
 
 ## 6. O que VAI SER FEITO — e a decisão que precisa ser tomada
 
-O projeto está em **~50%**. A porcentagem por aula (67 de 135, 50%) bate com
-o resto: 3 dos 7 motores prontos, e o quarto (React) é o próximo.
+O projeto está em **~60%**. A porcentagem por aula (81 de 135, 60%) bate com
+os motores: 4 dos 7 prontos, e os três que faltam são os mais caros (Node
+simulado, sql.js, Pyodide).
 
 Há três caminhos, e eles **não são equivalentes**:
 
@@ -187,6 +186,29 @@ As armadilhas do worker do Monaco (registro assíncrono, um programa só para
 todos os modelos, validação de todo modelo `typescript`) estão no
 `CONTEXTO.md` §7 — cada uma custou uma rodada do E2E.
 
+### B3) Motor de React — FEITO em 2026-09-15
+
+- `lib/react-core.ts` (puro): as declarações do React e do DOM do iframe
+  para o compilador (escritas à mão, só em aula de React), o documento com o
+  React e o ReactDOM embutidos como texto e a montagem de `App` com
+  `flushSync`, e os ajudantes dos testes (`clicar`, `digitar`, `enviar`,
+  `botao`, `campo`, `texto`, `textos`, `esperar`). `lib/react-umd.ts`: os
+  builds UMD importados pelo caminho com `?raw`, num chunk próprio.
+- `language: 'react'` na aula liga tudo: editor em `.tsx`, compilação com
+  `jsx`, `executarPagina` com `react: true`. O CI cobra que uma aula de React
+  só use os tipos que o motor roda.
+- Os testes de página rodam em série (`buildProgram` com `sequencial`), e o
+  iframe tem `allow-forms`.
+- Trilha `track-react`, 14 aulas, 84 exercícios; `e2e/react.spec.ts` conclui
+  cada aula no Chromium e prova o componente interativo dentro do iframe.
+
+### B4) A tela de trilhas — FEITO em 2026-09-15
+
+`/app/trilhas` é a visão geral (um card por trilha, projetos logo abaixo) e
+`/app/trilhas/:trackId` a trilha inteira em blocos por assunto
+(`Track.sections`, conferidos na carga). Veio de uma reclamação do dono do
+projeto: seis trilhas desenroladas numa coluna eram uma parede.
+
 ### C) Mais projetos com o motor atual — barato, sem currículo novo
 
 Existem 7 projetos e o roadmap prevê ~30. Eles usam a mecânica que já existe e
@@ -194,13 +216,15 @@ dão prática aplicada. É o caminho de menor risco e menor retorno.
 
 ### Recomendação
 
-A, B e B2 estão feitos. O que vem agora é o **motor 3: React no iframe** — e
-as 14 aulas de React que fecham a Fase 3 — ou C. Antes de qualquer um, vale o
-que só o dono do projeto pode fazer: usar o aplicativo publicado num telefone
-de verdade, inclusive uma aula de TypeScript.
+A, B, B2, B3 e B4 estão feitos. O que vem agora é a **Fase 4** — o servidor
+simulado (Node) e o sql.js, os dois sem parentesco com os motores que existem
+— ou C, ou os itens de plataforma que ficaram (mapa de tópicos e busca, tutor
+com IA, painel do aluno). Antes de qualquer um, vale o que só o dono do
+projeto pode fazer: usar o aplicativo publicado num telefone de verdade,
+inclusive uma aula de React.
 
-Se o dono do projeto não indicar o caminho, pergunte antes de começar o motor
-3 ou C — são investimentos grandes o bastante para a escolha ser dele.
+Se o dono do projeto não indicar o caminho, pergunte antes de começar a Fase
+4 ou C — são investimentos grandes o bastante para a escolha ser dele.
 
 ## 7. Como trabalhar
 
@@ -208,8 +232,8 @@ Se o dono do projeto não indicar o caminho, pergunte antes de começar o motor
 
 ```bash
 npm run typecheck   # inclui e2e/ e playwright.config.ts
-npm test            # 1.618 testes
-npm run test:e2e    # 214 no navegador (antes: npx playwright install chromium)
+npm test            # 1.860 testes
+npm run test:e2e    # 252 no navegador (antes: npx playwright install chromium)
 npm run build
 ```
 
