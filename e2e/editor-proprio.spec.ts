@@ -86,3 +86,43 @@ test('o editor tem a cor dos blocos de código da aula', async ({ logado: page }
   });
   expect(fundo).toBe('rgb(23, 33, 31)');
 });
+
+test('sem o Monaco, o Tab no textarea recua o código e o Esc devolve a navegação', async ({
+  logado: page,
+}) => {
+  test.setTimeout(120_000);
+
+  // O chunk do editor não chega — a rede caiu, ou o deploy trocou o nome do
+  // arquivo. Em desenvolvimento o módulo é servido pelo Vite com esse caminho.
+  await page.route('**/lib/monaco.ts*', (rota) => rota.abort('failed'));
+
+  await page.goto('/lesson/lesson-js-1');
+  const executar = page.getByRole('button', { name: 'Executar código' });
+  for (let i = 0; i < 12 && !(await executar.count()); i++) {
+    const acao = page.getByRole('button', { name: /Continuar assim mesmo|Continuar|Pular por ora/ });
+    if (!(await acao.count())) break;
+    await acao.click();
+  }
+
+  const area = page.getByRole('textbox', { name: 'Editor de código' });
+  await area.waitFor({ timeout: 30_000 });
+  await expect(page.locator('.monaco-editor')).toHaveCount(0);
+
+  // Cursor no fim do código; o Tab recua em vez de pular para o botão.
+  await area.click();
+  await page.keyboard.press('End');
+  await page.keyboard.press('Control+End');
+  const antes = await area.inputValue();
+  await page.keyboard.press('Tab');
+  await expect(area).toBeFocused();
+  await expect(area).toHaveValue(antes + '  ');
+
+  // Esc solta o foco — e aí o Tab segue para o próximo controle, como sempre.
+  await page.keyboard.press('Escape');
+  await expect(area).not.toBeFocused();
+  await page.keyboard.press('Tab');
+  await expect(area).not.toBeFocused();
+  await expect(area).toHaveValue(antes + '  ');
+  const focado = await page.evaluate(() => document.activeElement?.tagName);
+  expect(focado).not.toBe('BODY');
+});

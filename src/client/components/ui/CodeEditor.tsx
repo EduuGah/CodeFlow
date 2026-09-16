@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import Editor from '@monaco-editor/react';
 
 import type { LanguageId } from '../../../content/types';
@@ -41,11 +41,52 @@ function prepararMonaco(): Promise<void> {
     () => {
       estadoGlobal = 'pronto';
     },
-    () => {
+    (erro: unknown) => {
+      // O motivo fica no console: um chunk que não veio (rede, ou um deploy
+      // novo que trocou os nomes dos arquivos) é a causa mais comum, e sem
+      // isto a contingência parecia o comportamento normal do editor.
+      console.error('[CodeFlow] O editor de código não carregou; entra o textarea.', erro);
       estadoGlobal = 'falhou';
     }
   );
   return promessa;
+}
+
+/** Dois espaços: é o que o Monaco insere, e o que o código das aulas usa. */
+const RECUO = '  ';
+
+/**
+ * Tab no textarea de contingência insere recuo, como num editor de código.
+ *
+ * O padrão do navegador — Tab sai do campo — surpreende quem está escrevendo
+ * código: no meio de um `if`, o Tab ia parar no botão de executar. Aqui Tab
+ * recua, Shift+Tab desfaz o recuo do início da linha, e **Esc solta o foco**
+ * para o Tab seguinte navegar como sempre. É o mesmo acordo que o Monaco faz.
+ *
+ * Devolve o valor novo e a posição do cursor, ou `null` quando a tecla não é
+ * para tratar.
+ */
+export function tratarTeclaNoTextarea(
+  tecla: { key: string; shiftKey: boolean },
+  valor: string,
+  inicio: number,
+  fim: number
+): { valor: string; cursor: number } | null {
+  if (tecla.key !== 'Tab') return null;
+
+  if (!tecla.shiftKey) {
+    return { valor: valor.slice(0, inicio) + RECUO + valor.slice(fim), cursor: inicio + RECUO.length };
+  }
+
+  // Shift+Tab: tira até dois espaços do início da linha do cursor.
+  const inicioDaLinha = valor.lastIndexOf('\n', inicio - 1) + 1;
+  const linha = valor.slice(inicioDaLinha);
+  const espacos = Math.min(RECUO.length, linha.length - linha.replace(/^ +/, '').length);
+  if (espacos === 0) return { valor, cursor: inicio };
+  return {
+    valor: valor.slice(0, inicioDaLinha) + valor.slice(inicioDaLinha + espacos),
+    cursor: Math.max(inicioDaLinha, inicio - espacos),
+  };
 }
 
 const OPCOES = {
@@ -78,6 +119,16 @@ function linguagemDoMonaco(language: LanguageId): { language: string; path?: str
 
 export function CodeEditor({ value, onChange, language, height }: CodeEditorProps) {
   const [estado, setEstado] = useState<Carregamento>(estadoGlobal);
+  const areaRef = useRef<HTMLTextAreaElement>(null);
+  const idDaAjuda = useId();
+  // O cursor a restaurar depois que o valor novo passar pelo pai e voltar.
+  const cursorPendente = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (cursorPendente.current === null || !areaRef.current) return;
+    areaRef.current.setSelectionRange(cursorPendente.current, cursorPendente.current);
+    cursorPendente.current = null;
+  }, [value]);
 
   // Em aula de React, as declarações do React (e do DOM do iframe) entram no
   // serviço do editor enquanto o editor existir — e saem depois, para uma
@@ -107,17 +158,37 @@ export function CodeEditor({ value, onChange, language, height }: CodeEditorProp
   }, [estado]);
 
   if (estado === 'falhou') {
+    // A altura pedida é a do conjunto — `100%` precisa continuar valendo
+    // contra o pai, como no Monaco; a dica cabe dentro dela.
     return (
-      <textarea
-        aria-label="Editor de código"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        spellCheck={false}
-        autoCapitalize="off"
-        autoCorrect="off"
-        style={{ height }}
-        className="block w-full resize-none bg-editor p-3.5 font-mono text-sm leading-[22px] text-white/90 outline-none"
-      />
+      <div style={{ height }} className="flex flex-col">
+        <textarea
+          ref={areaRef}
+          aria-label="Editor de código"
+          aria-describedby={idDaAjuda}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') {
+              e.currentTarget.blur();
+              return;
+            }
+            const area = e.currentTarget;
+            const resultado = tratarTeclaNoTextarea(e, area.value, area.selectionStart, area.selectionEnd);
+            if (!resultado) return;
+            e.preventDefault();
+            cursorPendente.current = resultado.cursor;
+            onChange(resultado.valor);
+          }}
+          spellCheck={false}
+          autoCapitalize="off"
+          autoCorrect="off"
+          className="block min-h-0 w-full flex-1 resize-none bg-editor p-3.5 font-mono text-sm leading-[22px] text-white/90 outline-none"
+        />
+        <p id={idDaAjuda} className="mt-1.5 shrink-0 text-xs text-ink-faint">
+          Tab insere dois espaços · Esc solta o foco para navegar com Tab
+        </p>
+      </div>
     );
   }
 
