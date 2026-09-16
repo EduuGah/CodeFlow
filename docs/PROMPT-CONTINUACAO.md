@@ -45,6 +45,7 @@ consistência visual > qualidade dos exercícios > progressão > gamificação.
 - Supabase: login com Google + Postgres com RLS
 - Vitest (unidade e componente) + Playwright (navegador)
 - Monaco como editor, servido do próprio domínio num chunk sob demanda (`lib/monaco.ts`, `ui/CodeEditor.tsx`)
+- sql.js (SQLite em WebAssembly) num worker, para a trilha de SQL (`lib/sql*.ts`)
 - Repositório `EduuGah/CodeFlow`, trabalho direto no `main`, push autorizado, CI
   obrigatório a cada push
 
@@ -54,20 +55,20 @@ consistência visual > qualidade dos exercícios > progressão > gamificação.
 
 | | |
 | --- | --- |
-| Trilhas | 6 — Fundamentos de JavaScript (20 aulas), Lógica (3), Como a Web Funciona (8), A Página (26), TypeScript (10), React (14) |
-| Aulas | 81, somando 2.226 minutos, em blocos por assunto |
-| Exercícios | 473, em 8 tipos; 78 são de página (`runtime: 'iframe'`), 42 de componente React, e 16 têm trechos de tipo (`typeTests`) |
-| Verificação | 731 casos fixos + 58 testes por propriedade |
+| Trilhas | 7 — Fundamentos de JavaScript (20 aulas), Lógica (3), Como a Web Funciona (8), A Página (26), TypeScript (10), React (14), SQL e Bancos de Dados (10) |
+| Aulas | 91, somando 2.556 minutos, em blocos por assunto |
+| Exercícios | 532, em 9 tipos; 78 são de página (`runtime: 'iframe'`), 42 de componente React, 43 de SQL, e 16 têm trechos de tipo (`typeTests`) |
+| Verificação | 731 casos fixos + 58 testes por propriedade + 66 verificações de SQL |
 | Projetos | 7, com 22 critérios de aceitação |
-| Conceitos | 77, com grafo de pré-requisitos |
+| Conceitos | 87, com grafo de pré-requisitos |
 | Flashcards | 22 |
-| Testes | 1.860 de unidade + 252 de navegador |
+| Testes | 2.104 de unidade + 278 de navegador |
 
-Todas as 81 aulas publicadas estão no padrão de profundidade: 300 a 900 palavras
+Todas as 91 aulas publicadas estão no padrão de profundidade: 300 a 900 palavras
 e de 4 a 7 exercícios em dificuldade crescente, ao menos um deles de prática de
 dev. Nenhuma está pendente de aprofundamento.
 
-### Os 8 tipos de exercício
+### Os 9 tipos de exercício
 
 Todos implementados, testados, e com validação de conteúdo que roda no CI:
 
@@ -85,6 +86,9 @@ Todos implementados, testados, e com validação de conteúdo que roda no CI:
    ele nasce"
 8. **refatorar** — código que já passa nos testes, e precisa continuar passando
    depois de cumprir restrições sobre a forma
+9. **SQL** — escreve SQL contra um banco de exemplo num SQLite de verdade; a
+   correção compara as **linhas devolvidas** com as da consulta de referência
+   (ou o que ficou no banco, via uma consulta de verificação), nunca o texto
 
 ### Plataforma
 
@@ -111,19 +115,19 @@ sondas de borda, CI com anotações legíveis, E2E em celular e desktop.
 
 ## 5. O que ESTÁ SENDO FEITO agora
 
-**Nada em andamento.** O último commit fecha a Fase 3 — o motor de React e as
-14 aulas da trilha —, o CI está verde, e a árvore está limpa. Você começa num
-ponto estável.
+**Nada em andamento.** O último commit fecha a metade de SQL da Fase 4 — o
+motor 5 (sql.js) e as 10 aulas da trilha —, o CI está verde, e a árvore está
+limpa. Você começa num ponto estável.
 
-O que acabou de ser concluído: **todo o conteúdo que cabe nos quatro motores
-existentes** (Worker, iframe, compilador de TypeScript, React no iframe). O
-que vem agora precisa de motor novo, sem parentesco com esses.
+O que acabou de ser concluído: o quinto motor, e a primeira trilha em que o
+aluno não escreve JavaScript. O que falta na Fase 4 é a outra metade — o
+servidor simulado (Node) e as 10 aulas de back-end.
 
 ## 6. O que VAI SER FEITO — e a decisão que precisa ser tomada
 
-O projeto está em **~60%**. A porcentagem por aula (81 de 135, 60%) bate com
-os motores: 4 dos 7 prontos, e os três que faltam são os mais caros (Node
-simulado, sql.js, Pyodide).
+O projeto está em **~67%**. A porcentagem por aula (91 de 135, 67%) anda
+junto com os motores: 5 dos 7 prontos, e os dois que faltam são o servidor
+simulado (Node) e o Pyodide.
 
 Há três caminhos, e eles **não são equivalentes**:
 
@@ -209,6 +213,23 @@ todos os modelos, validação de todo modelo `typescript`) estão no
 (`Track.sections`, conferidos na carga). Veio de uma reclamação do dono do
 projeto: seis trilhas desenroladas numa coluna eram uma parede.
 
+### B5) Motor de SQL — FEITO em 2026-09-16
+
+- `lib/sql-core.ts` (puro): o contrato `Banco`, o adaptador do `sql.js`
+  comando a comando, o julgamento por linhas devolvidas com as frases de
+  diferença ("faltou a linha…", "na ordem errada — confira o ORDER BY"), e
+  a tradução dos erros do SQLite. `lib/sql.worker.ts`: o SQLite em
+  WebAssembly (658 kB, do próprio domínio) num worker que fica vivo entre
+  execuções e é descartado no prazo. `lib/sql.ts`: fila, aquecimento ao
+  montar, relógio a partir do `iniciou`. `lib/sql-node.ts`: o mesmo pacote
+  no CI.
+- Tipo de exercício `sql`: `database` (um de `src/content/bancos/`), `setup`
+  opcional, `tests` com `query` opcional (sem ela, compara o SELECT do aluno;
+  com ela, o que ficou no banco), `ordered`, `columns`. A referência recusada
+  pelo banco cobra a mesma recusa — é como se testam as restrições.
+- Trilha `track-sql`, 10 aulas em dois blocos, 43 exercícios de SQL;
+  `e2e/sql.spec.ts` conclui cada aula no Chromium.
+
 ### C) Mais projetos com o motor atual — barato, sem currículo novo
 
 Existem 7 projetos e o roadmap prevê ~30. Eles usam a mecânica que já existe e
@@ -216,15 +237,16 @@ dão prática aplicada. É o caminho de menor risco e menor retorno.
 
 ### Recomendação
 
-A, B, B2, B3 e B4 estão feitos. O que vem agora é a **Fase 4** — o servidor
-simulado (Node) e o sql.js, os dois sem parentesco com os motores que existem
-— ou C, ou os itens de plataforma que ficaram (mapa de tópicos e busca, tutor
-com IA, painel do aluno). Antes de qualquer um, vale o que só o dono do
-projeto pode fazer: usar o aplicativo publicado num telefone de verdade,
-inclusive uma aula de React.
+A, B, B2, B3, B4 e B5 estão feitos. O que vem agora é a **outra metade da
+Fase 4** — o servidor simulado (Node) e as 10 aulas de back-end, motor sem
+parentesco com os cinco que existem — ou C, ou os itens de plataforma que
+ficaram (mapa de tópicos e busca, tutor com IA, painel do aluno). Antes de
+qualquer um, vale o que só o dono do projeto pode fazer: usar o aplicativo
+publicado num telefone de verdade, inclusive uma aula de SQL.
 
-Se o dono do projeto não indicar o caminho, pergunte antes de começar a Fase
-4 ou C — são investimentos grandes o bastante para a escolha ser dele.
+Se o dono do projeto não indicar o caminho, pergunte antes de começar o
+servidor simulado ou C — são investimentos grandes o bastante para a escolha
+ser dele.
 
 ## 7. Como trabalhar
 
@@ -232,8 +254,8 @@ Se o dono do projeto não indicar o caminho, pergunte antes de começar a Fase
 
 ```bash
 npm run typecheck   # inclui e2e/ e playwright.config.ts
-npm test            # 1.860 testes
-npm run test:e2e    # 252 no navegador (antes: npx playwright install chromium)
+npm test            # 2.104 testes
+npm run test:e2e    # 278 no navegador (antes: npx playwright install chromium)
 npm run build
 ```
 

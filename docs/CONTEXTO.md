@@ -3,7 +3,7 @@
 Documento de retomada. Escrito para alguém — ou alguma sessão — que não viu nada
 do que veio antes e precisa continuar sem redescobrir tudo.
 
-Atualizado em 2026-09-14. **Mantenha-o atualizado no mesmo commit que muda o que
+Atualizado em 2026-09-16. **Mantenha-o atualizado no mesmo commit que muda o que
 ele descreve.** Um documento de contexto desatualizado é pior que nenhum: induz a
 decisões erradas com aparência de informação.
 
@@ -24,7 +24,8 @@ pelo usuário. CI obrigatório a cada push.
 - Express apenas para servir (tsx em dev, esbuild no build)
 - Supabase: autenticação Google + Postgres com RLS
 - Vitest (unidade e componente) + Playwright (navegador)
-- Monaco como editor — **vindo de CDN externo**, ver seção 8
+- Monaco como editor, servido do próprio domínio num chunk sob demanda
+- sql.js (SQLite em WebAssembly) para a trilha de SQL, num worker próprio
 
 ## 3. Estado atual
 
@@ -32,15 +33,15 @@ Números lidos do catálogo, não de memória.
 
 | | |
 | --- | --- |
-| Trilhas | 6 — Fundamentos de JavaScript (20 aulas), Lógica (3), Como a Web Funciona (8), A Página (26), TypeScript (10), React (14) |
-| Aulas | 81, somando 2.226 minutos, em blocos por assunto (`Track.sections`) |
-| Exercícios | 473, em 8 tipos — 128 de múltipla escolha, 124 de código, 80 de lacuna, 56 de prever saída, 38 de ordenar passos, 36 de encontrar o bug, 6 de refatorar, 5 de escrever o teste. 78 exercícios de página (`runtime: 'iframe'`), 42 de componente React (a aula é `language: 'react'`), 16 com trechos de tipo (`typeTests`). **Toda aula tem ao menos um dos quatro tipos de prática de dev** |
-| Verificação | 731 casos fixos + 58 propriedades |
+| Trilhas | 7 — Fundamentos de JavaScript (20 aulas), Lógica (3), Como a Web Funciona (8), A Página (26), TypeScript (10), React (14), SQL e Bancos de Dados (10) |
+| Aulas | 91, somando 2.556 minutos, em blocos por assunto (`Track.sections`) |
+| Exercícios | 532, em 9 tipos — 142 de múltipla escolha, 124 de código, 80 de lacuna, 56 de prever saída, 43 de SQL, 40 de ordenar passos, 36 de encontrar o bug, 6 de refatorar, 5 de escrever o teste. 78 exercícios de página (`runtime: 'iframe'`), 42 de componente React (a aula é `language: 'react'`), 16 com trechos de tipo (`typeTests`). **Toda aula tem ao menos um dos quatro tipos de prática de dev** |
+| Verificação | 731 casos fixos + 58 propriedades + 66 verificações de SQL (por linhas devolvidas) |
 | Projetos | 7, com 22 critérios de aceitação |
-| Conceitos | 77, com grafo de pré-requisitos |
+| Conceitos | 87, com grafo de pré-requisitos |
 | Flashcards | 22 |
-| Testes | 1.860 de unidade + 252 de navegador |
-| Pacote | 2.261 kB (631 kB comprimido) no chunk principal — o conteúdo vai junto; o Monaco são mais 3.362 kB (869 kB) num chunk à parte, baixado só quando o primeiro editor monta, e o worker de TypeScript (7 MB) só quando um modelo JS/TS abre. O motor de TypeScript não acrescentou arquivo; o de React acrescentou um chunk de 143 kB (47 kB) com o React e o ReactDOM como texto, baixado só por um exercício de React |
+| Testes | 2.104 de unidade + 278 de navegador |
+| Pacote | 2.385 kB (667 kB comprimido) no chunk principal — o conteúdo vai junto; o Monaco são mais 3.362 kB (869 kB) num chunk à parte, baixado só quando o primeiro editor monta, e o worker de TypeScript (7 MB) só quando um modelo JS/TS abre. O motor de TypeScript não acrescentou arquivo; o de React acrescentou um chunk de 143 kB (47 kB) com o React e o ReactDOM como texto, baixado só por um exercício de React; o de SQL acrescentou o worker (49 kB) e o SQLite em WebAssembly (658 kB), baixados só por um exercício de SQL |
 
 ## 4. Decisões que não devem ser desfeitas sem motivo forte
 
@@ -103,6 +104,24 @@ compartilham o DOM. O iframe tem `allow-forms`: sem ele o Chromium não
 dispara o `submit` no clique nem no Enter, e a pré-visualização ficava muda
 num formulário certo.
 
+**O SQL roda num SQLite de verdade, dentro de um worker que fica vivo.** O
+`sql.js` (SQLite compilado para WebAssembly, 658 kB, servido do próprio
+domínio) roda em `sql.worker.ts`; o worker é criado no primeiro exercício de
+SQL — o componente o aquece ao montar, para o primeiro "Executar" responder
+na hora — e reaproveitado, porque compilar o WebAssembly custa centenas de
+milissegundos num celular. É descartado só quando uma consulta estoura os 3
+segundos (o único jeito de interromper um `WITH RECURSIVE` sem fim). O
+julgamento é por **linhas devolvidas** (`sql-core.ts`, puro): dois bancos
+iguais recebem o SQL do aluno e o de referência, e uma consulta rodada nos
+dois — a própria do aluno, ou a `query` da verificação — precisa devolver
+as mesmas linhas. Nunca se compara o texto do SQL; a ordem só conta com
+`ordered`, o nome da coluna só com `columns`, e uma verificação em que a
+referência é **recusada** pelo banco cobra a mesma recusa do aluno — é como
+se testa NOT NULL, CHECK e chave estrangeira. Cada verificação parte de um
+banco novo, para um teste que escreve não contaminar o seguinte. O banco de
+exemplo (`bancos/loja.ts`) é recriado a cada execução, e o CI confere que o
+painel de tabelas descreve exatamente o que o SQL cria.
+
 **O sandbox é descartável.** Worker novo por execução, 3 segundos de limite,
 `terminate()` no fim. `fetch`, `XMLHttpRequest`, `WebSocket`, `importScripts`,
 `indexedDB`, `caches` e `Notification` são apagados antes de qualquer código do
@@ -114,6 +133,8 @@ exatamente o mesmo código que roda em produção.
 ```
 src/content/            Aulas, exercícios, projetos, conceitos, flashcards
   types.ts              Tipos (Exercise é união discriminada por `type`)
+  bancos/               Os bancos de exemplo da trilha de SQL (`loja`): o SQL
+                        que cria, e a descrição que o aluno lê
   schema.ts             Espelhos Zod; valida na carga e falha alto em DEV
   index.ts              Única fronteira de leitura do conteúdo
   content.test.ts       Integridade: 1.082 checagens sobre o catálogo
@@ -148,6 +169,14 @@ src/client/lib/         Lógica pura e testada
                         testes (clicar, digitar, enviar, botao, campo…)
   react-umd.ts          O React e o ReactDOM como texto (?raw), num chunk
                         próprio que só um exercício de React baixa
+  sql-core.ts           Motor de SQL, parte pura: o contrato `Banco`, o
+                        adaptador do sql.js (comando a comando, com colunas
+                        até de um SELECT vazio), o julgamento por linhas e as
+                        frases de diferença, a tradução dos erros do SQLite
+  sql.worker.ts         O SQLite em WebAssembly, num worker que fica vivo
+  sql.ts                executarSqlNoNavegador(): fila, aquecimento, prazo
+                        contado a partir do `iniciou` do worker
+  sql-node.ts           O mesmo sql.js no Node, para o CI
   fill-blank.ts         Molde com lacunas: dividir, preencher, validar
   mastery.ts            Domínio por conceito, em 4 níveis
   review.ts             Repetição espaçada, Leitner [1,3,7,14,30,60] dias
@@ -170,6 +199,8 @@ src/client/components/  Componentes
                         o chunk não vier
   lesson/               Um componente por tipo de exercício; `ExerciseAction`
                         e `ExerciseFeedback` são o botão e o retorno de todos
+  lesson/SqlExerciseStep  O exercício de SQL: painel de tabelas do banco (e o
+                        `setup` do exercício), editor, resultado em tabela
   dashboard/TrackCard   Uma trilha na visão geral: progresso, a aula da vez,
                         "Continuar" e "Ver as aulas"
 src/client/pages/app/   Trilhas é a visão geral (cards + projetos);
@@ -183,8 +214,8 @@ docs/curriculo.md       Roadmap de conteúdo — fonte canônica
 
 ```bash
 npm run typecheck   # inclui e2e/ e playwright.config.ts
-npm test            # 1.860 testes
-npm run test:e2e    # 252 no navegador (antes: npx playwright install chromium)
+npm test            # 2.104 testes
+npm run test:e2e    # 278 no navegador (antes: npx playwright install chromium)
 npm run build
 ```
 
@@ -387,6 +418,27 @@ Cada uma custou tempo. Não repita.
   dica escrita embaixo; `main.tsx` recarrega uma vez por sessão no
   `vite:preloadError`; e a falha do Monaco vai ao `console.error` — antes
   era silenciosa, e a contingência parecia o editor normal.
+- **`db.exec` do sql.js devolve nada para um SELECT sem linhas.** "A
+  consulta não devolveu nenhuma linha" e "não há SELECT" ficavam iguais, e o
+  aluno perdia as colunas de uma consulta vazia. O adaptador roda comando a
+  comando (`iterateStatements`) e lê as colunas antes do primeiro `step`.
+- **O relógio da consulta de SQL disparado no envio vencia com a thread
+  principal ocupada.** Sob carga (dois Chromium do E2E e o Monaco montando),
+  o `iniciou` e o resultado do worker chegavam juntos na fila, depois de o
+  prazo de 3 s vencer — e uma consulta de milissegundos lia "passou de 3
+  segundos". O relógio começa no `iniciou`; o resultado logo atrás na fila é
+  processado antes de ele ter chance.
+- **O otimizador do Vite só descobria o `sql.js` na primeira consulta**, e
+  recarregava a página inteira no meio do exercício. `optimizeDeps.include`.
+- **`getRowsModified` do SQLite fala do último INSERT/UPDATE/DELETE**, não
+  do último comando: depois de um CREATE TABLE ele ainda mostra o número
+  anterior. O painel só o lê quando o verbo do comando é de escrita.
+- **A tabela de Markdown estourava a largura no celular.** O `prose` não a
+  faz rolar; a primeira aula de SQL, toda tabelas, foi a primeira a ter uma
+  com quatro colunas. `MarkdownReader` embrulha `table` num `overflow-x-auto`.
+- **Uma verificação com ordem sem ORDER BY na referência cobraria do aluno
+  uma ordem que o SQLite não garante.** O CI recusa `ordered` sem ORDER BY, e
+  todo enunciado que pede ordem diz o critério de desempate.
 - **Uma prop opcional é um contrato que ninguém garante.** `onSolved` era opcional
   e dois dos quatro tipos de exercício simplesmente não a recebiam — 36 dos 78
   exercícios nunca conseguiam avisar que tinham sido resolvidos, e nenhum dos 521
@@ -464,10 +516,22 @@ concluídas no Chromium em celular e desktop (`e2e/typescript.spec.ts`,
 `e2e/react.spec.ts`). Da plataforma da fase ficou o tutor com IA e o painel
 do aluno — como o mapa de tópicos da Fase 2, não dependem de motor.
 
-**Fases 4 a 7 — não iniciadas.** Cada uma depende de um motor sem parentesco
-com os que existem: servidor simulado (Node), sql.js (SQL), Pyodide (Python).
-A Fase 4 é a próxima. Investimentos grandes o bastante para a escolha ser do
-dono do projeto — pergunte antes de começar.
+**Fase 4 — pela metade (2026-09-16).** O motor de SQL está pronto: o sql.js
+num worker, o julgamento por linhas devolvidas (`sql-core.ts`), o tipo de
+exercício `sql` com verificações por consulta própria, o banco de exemplo
+`loja` e o painel de tabelas. A trilha **SQL e Bancos de Dados** tem as 10
+aulas previstas — 6 de consulta (tabelas, WHERE, ORDER BY e expressões, JOIN,
+agregação, subconsultas e WITH) e 4 de escrita e modelagem (INSERT/UPDATE/
+DELETE e transação, CREATE TABLE e restrições, normalização, índices) — com
+43 exercícios de SQL e 66 verificações. `e2e/sql.spec.ts` conclui cada aula
+no Chromium, em celular e desktop, e prova o erro traduzido e a consulta sem
+fim interrompida. Falta a outra metade da fase: o **servidor simulado (Node)**
+e as 10 aulas de back-end — motor sem parentesco com os cinco que existem.
+Decisão do dono do projeto (2026-09-16): o SQL veio antes do Node.
+
+**Fases 5 a 7 — não iniciadas.** Pyodide (Python) é o último motor.
+Investimentos grandes o bastante para a escolha ser do dono do projeto —
+pergunte antes de começar o servidor simulado ou qualquer outra fase.
 
 ## 9. Pendências do lado do usuário
 

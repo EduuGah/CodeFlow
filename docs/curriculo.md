@@ -6,7 +6,7 @@ que conclui uma fase.
 
 ## Onde estamos
 
-**Fases 1, 2 e 3 de 8 concluídas · TypeScript 10 de 10 · React 14 de 14 · publicado**
+**Fases 1, 2 e 3 de 8 concluídas · Fase 4 pela metade: SQL 10 de 10 · publicado**
 
 ```
 Fase 0  Fundamentos e lógica      ██████████████████████  13/13  pronto
@@ -15,7 +15,7 @@ Fase 1  JavaScript real          ███████████████�
         Plataforma                ██████████████████████   7/7  pronto
 Fase 2  A página                 ██████████████████████  26/26  pronto
 Fase 3  Tipos e componentes      ██████████████████████  24/24  pronto
-Fase 4  Back-end e dados         ░░░░░░░░░░░░░░░░░░░░░░   0/20
+Fase 4  Back-end e dados         ███████████░░░░░░░░░░░  10/20  SQL pronto
 Fase 5  Profissionalização       ░░░░░░░░░░░░░░░░░░░░░░   0/19
 Fase 6  Python                   ░░░░░░░░░░░░░░░░░░░░░░   0/10
 Fase 7  Projeto final            ░░░░░░░░░░░░░░░░░░░░░░   0/5
@@ -23,18 +23,17 @@ Fase 7  Projeto final            ░░░░░░░░░░░░░░░�
 
 | | Hoje | Previsto | Feito |
 | --- | ---: | ---: | ---: |
-| Aulas | **81** | 135 | 60% |
-| Exercícios | **473** | ~700 | 68% |
-| Tipos de exercício | **8** | 11 | 73% |
-| Motores de execução | **4** | 7 | 57% |
+| Aulas | **91** | 135 | 67% |
+| Exercícios | **532** | ~700 | 76% |
+| Tipos de exercício | **9** | 11 | 82% |
+| Motores de execução | **5** | 7 | 71% |
 | Projetos | **7** | ~30 | 23% |
 
-**Último trabalho** (2026-09-15): o motor de React — o componente do aluno
-compilado e montado, com o React embutido, no iframe do motor de página — e
-a trilha "React" inteira, 14 aulas e 84 exercícios, com os testes usando o
-componente como a pessoa usa (clicar, digitar, enviar). A Fase 3 fechou. No
-mesmo dia, a tela de trilhas virou visão geral com cada trilha em blocos por
-assunto.
+**Último trabalho** (2026-09-16): o motor de SQL — o sql.js num worker, o
+exercício julgado pelas linhas devolvidas — e a trilha "SQL e Bancos de
+Dados" inteira, 10 aulas e 43 exercícios de SQL sobre o banco de uma loja.
+É a primeira trilha em que o aluno não escreve JavaScript. Metade da Fase 4;
+o dono do projeto escolheu o SQL antes do servidor simulado.
 
 ## Aprofundamento das aulas antigas
 
@@ -386,7 +385,40 @@ Motores **4 (servidor simulado)** e **5 (sql.js, ~1,5 MB)**.
 - **SQL e modelagem** (10): tabelas, SELECT/WHERE, ordenar, JOIN, agregação,
   subconsultas, escrita, modelar domínio, normalização, índices.
 
-Plataforma: exercício julgado pelo conjunto de linhas devolvido.
+Plataforma: exercício julgado pelo conjunto de linhas devolvido — **feita**.
+
+Como o motor 5 funciona, para quem for escrever mais aulas: em aula com
+`language: 'sql'`, o exercício é do tipo `sql` e aponta para um banco de
+exemplo (`database: 'loja'`, em `src/content/bancos/`), recriado a cada
+execução, mais um `setup` opcional. Cada verificação em `tests` roda uma
+consulta em dois bancos — o que recebeu o SQL do aluno e o que recebeu o de
+referência — e as linhas precisam bater: sem `query`, a consulta é o próprio
+SELECT do aluno; com `query`, é uma consulta sobre o que ficou no banco (o
+caso da escrita e da modelagem). `ordered` cobra a ordem (e exige ORDER BY na
+referência), `columns` cobra os nomes. Quando a referência é recusada pelo
+banco, o aluno precisa ser recusado também — é como se testam NOT NULL,
+CHECK, UNIQUE e chave estrangeira. Só os tipos `sql`, `multiple-choice` e
+`order-steps` entram numa aula de SQL.
+
+**SQL e modelagem — 10 de 10.** Cada aula com 6 exercícios, num banco de
+loja com quatro tabelas (clientes, produtos, pedidos, itens) e as
+irregularidades de propósito: um cliente sem pedido, um produto nunca
+vendido, e-mails vazios, um pedido cancelado, preços que mudaram.
+
+| Aula | Assunto |
+| --- | --- |
+| 1 | Tabelas: linha, coluna, tipo, chave primária; SELECT colunas FROM tabela, `*`, LIMIT |
+| 2 | WHERE: comparações e aspas simples, AND/OR/NOT, IN, BETWEEN, LIKE, IS NULL |
+| 3 | ORDER BY e LIMIT, a ordem fixa das cláusulas, expressões, AS, DISTINCT |
+| 4 | JOIN: chave estrangeira, INNER JOIN ON, apelidos e ambiguidade, três tabelas, produto cartesiano, LEFT JOIN + IS NULL |
+| 5 | Agregação: COUNT/SUM/AVG/MIN/MAX, GROUP BY, HAVING vs WHERE, COUNT(coluna) no LEFT JOIN |
+| 6 | Subconsultas: como valor, como lista (NOT IN e NULL), correlacionada; WITH |
+| 7 | INSERT, UPDATE e DELETE: o WHERE que decide o alcance, a ordem da chave estrangeira, BEGIN/COMMIT/ROLLBACK |
+| 8 | CREATE TABLE: tipos, PRIMARY KEY, NOT NULL, UNIQUE, DEFAULT, CHECK, REFERENCES, ON DELETE CASCADE, ALTER TABLE |
+| 9 | Normalização: as três anomalias, cada fato num lugar, 1:N e N:N com tabela de ligação, migrar, repetir de propósito |
+| 10 | Índices: SCAN vs SEARCH, EXPLAIN QUERY PLAN, o custo, índice composto, o que impede o índice, índice único; o relatório final |
+
+**Node e back-end — 0 de 10.** Motor 4 (servidor simulado) por fazer.
 
 ### Fase 5 — Profissionalização · 19 aulas
 Motor: **nenhum novo**. Encaixa em qualquer buraco entre as outras fases.
@@ -405,8 +437,8 @@ telefone real, passagem final de acessibilidade.
 
 ## Sobre tamanho
 
-As 81 aulas de hoje levaram bastante tempo para ficar no padrão do projeto. As
-54 restantes são muitas vezes esse trabalho, e os ~230 exercícios novos são a
+As 91 aulas de hoje levaram bastante tempo para ficar no padrão do projeto. As
+44 restantes são muitas vezes esse trabalho, e os ~170 exercícios novos são a
 maior parte dele. Por isso a unidade é a fase: cada uma termina numa versão do
 produto que dá para usar. O roadmap escolhe a ordem; não promete prazo.
 
@@ -418,5 +450,6 @@ primeira que precisava de um motor novo, e o iframe é o mais barato dos seis. A
 Fase 3 veio depois porque os dois motores dela se apoiaram nos anteriores: o
 compilador de TypeScript saiu quase de graça, porque o worker do Monaco já
 sabia compilar, e o React entrou no iframe do motor de página. A Fase 4 é a
-próxima, e é a primeira que precisa de um motor sem parentesco com os que
-existem: o servidor simulado (Node) e o sql.js.
+primeira que precisa de motores sem parentesco com os que existem: o sql.js
+entrou primeiro, por escolha do dono do projeto, e é um pacote fechado — o
+SQLite inteiro num worker; o servidor simulado (Node) é a metade que falta.
