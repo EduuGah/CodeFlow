@@ -11,6 +11,7 @@ import { compilarNoNode } from '../client/lib/typescript-node';
 import { executarSql, type AbrirBanco } from '../client/lib/sql-core';
 import { abrirBancoNoNode } from '../client/lib/sql-node';
 import { BANCOS } from './bancos';
+import { ETAPAS_DO_PERCURSO } from './percurso';
 import { formatarErros, verificarTrechos, type TrechoDeTipo } from '../client/lib/typescript-core';
 import {
   getExercises,
@@ -984,6 +985,23 @@ describe('blocos das trilhas', () => {
     for (const track of listTracks()) {
       if (track.lessonIds.length <= 8) continue;
       expect(track.sections?.length ?? 0, `${track.id} tem ${track.lessonIds.length} aulas e nenhum bloco`).toBeGreaterThan(1);
+    }
+  });
+});
+
+describe('etapas do percurso', () => {
+  it('toda trilha publicada está em exatamente uma etapa, na ordem da lista de trilhas', () => {
+    // A tela inicial e a de trilhas mostram o percurso por etapas. Uma trilha
+    // fora delas sumiria das duas telas; em duas etapas, apareceria duas vezes.
+    const noPercurso = ETAPAS_DO_PERCURSO.flatMap((e) => e.trackIds);
+    expect(noPercurso).toEqual(listTracks().map((t) => t.id));
+  });
+
+  it('cada etapa tem título e o que ela entrega', () => {
+    for (const etapa of ETAPAS_DO_PERCURSO) {
+      expect(etapa.title.length).toBeGreaterThan(2);
+      expect(etapa.description.length).toBeGreaterThan(20);
+      expect(etapa.trackIds.length).toBeGreaterThan(0);
     }
   });
 });

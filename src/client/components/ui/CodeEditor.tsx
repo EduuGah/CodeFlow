@@ -93,6 +93,9 @@ const OPCOES = {
   minimap: { enabled: false },
   fontSize: 14,
   fontFamily: "'JetBrains Mono', monospace",
+  // `===` precisa aparecer como três sinais de igual, não como "≡": quem está
+  // aprendendo a digitá-lo não pode ver um símbolo que o teclado não tem.
+  fontLigatures: false,
   lineHeight: 22,
   padding: { top: 14, bottom: 14 },
   scrollBeyondLastLine: false,

@@ -6,6 +6,7 @@ import {
   embaralhar,
   estaOrdenado,
   mover,
+  moverPara,
   primeiroErro,
   textoDoPasso,
   trechosDoPasso,
@@ -13,7 +14,7 @@ import {
 import { useRecordAttempt } from '../../hooks/useRecordAttempt';
 import { useFocusRescue } from '../../hooks/useFocusRescue';
 import { useReportarEstado } from '../../hooks/useReportarEstado';
-import { IconChevronDown } from '../ui/Icon';
+import { IconChevronDown, IconGrip } from '../ui/Icon';
 import { Card, SectionLabel } from '../ui/Card';
 import { MarkdownReader } from '../ui/MarkdownReader';
 import { ExerciseAction, ExerciseFeedback } from './ExerciseAction';
@@ -22,20 +23,28 @@ import { HintPanel } from './HintPanel';
 /**
  * Exercício de ordenar passos.
  *
- * ## Por que botões, e não arrastar
+ * ## Arrastar e setas, os dois
  *
- * Arrastar é o gesto óbvio e é a escolha errada aqui. Ele não funciona por
- * teclado sem uma implementação paralela inteira, é impreciso num dedo, e
- * disputa com a rolagem da página no celular — justamente onde a lista fica
- * mais alta que a tela.
+ * A primeira versão só tinha as setas, por três motivos reais: arrastar não
+ * funciona por teclado, é impreciso no dedo, e disputa com a rolagem da
+ * página no celular. O que ela não previu foi o aluno procurar o gesto e
+ * não encontrar — "não tem como arrastar" foi a primeira reclamação de quem
+ * usou. O gesto óbvio precisa existir.
  *
- * Dois botões por linha resolvem os três problemas de uma vez: funcionam por
- * toque, por mouse e por teclado sem nenhum caminho separado, e não competem
- * com a rolagem. O que se perde em elegância se ganha em ninguém ficar de fora.
+ * Então os dois convivem, e cada um resolve o que o outro não resolve. A
+ * pega (⋮⋮) à esquerda arrasta com mouse ou dedo — só ela tem
+ * `touch-action: none`, então o resto da linha continua rolando a página. As
+ * setas continuam para quem usa teclado ou leitor de tela, e para quem
+ * prefere precisão. Nada de HTML5 drag-and-drop: ele não dispara em toque.
  *
- * O foco acompanha o passo que se moveu. Sem isso, quem navega por teclado
- * aperta "descer" e o foco fica na posição antiga, agora ocupada por outro
- * passo — o segundo toque moveria o item errado.
+ * Durante o arrasto a lista se reorganiza ao vivo: quando o ponteiro cruza
+ * o meio de outro passo, o arrastado toma o lugar dele. Sem sombras nem
+ * transformações — o passo simplesmente muda de posição, que é o que o
+ * aluno quer ver.
+ *
+ * O foco acompanha o passo que se moveu pelas setas. Sem isso, quem navega
+ * por teclado aperta "descer" e o foco fica na posição antiga, agora ocupada
+ * por outro passo — o segundo toque moveria o item errado.
  */
 export function OrderSteps({
   exercise,
@@ -64,10 +73,22 @@ export function OrderSteps({
    * que acabou de se mexer.
    */
   const [anuncio, setAnuncio] = useState('');
+  /** O id do passo sendo arrastado, enquanto o ponteiro está apertado. */
+  const [arrastando, setArrastando] = useState<string | null>(null);
+  /**
+   * O meio de cada um dos outros passos, medido quando o arrasto começa.
+   *
+   * A lista reorganiza ao vivo, e os passos têm alturas diferentes — um de
+   * duas linhas trocado com um de uma muda todas as fronteiras. Decidir o
+   * destino contra a geometria do início, e não contra a atual, é o que
+   * impede o passo de ir e voltar no mesmo movimento.
+   */
+  const meiosNoInicio = useRef<number[]>([]);
 
   const registrar = useRecordAttempt();
   const acertou = estaOrdenado(arranjo);
   const quebra = primeiroErro(arranjo);
+  const travado = enviado && acertou;
 
   const estado: ExerciseState = enviado
     ? acertou
@@ -90,6 +111,7 @@ export function OrderSteps({
     setAnuncio('');
     setUltimaRegistrada(null);
     setDicasAbertas(0);
+    setArrastando(null);
   }, [inicial]);
 
   /**
@@ -100,12 +122,18 @@ export function OrderSteps({
    */
   const focoPendente = useRef<string | null>(null);
   const botoesRef = useRef(new Map<string, HTMLButtonElement>());
+  const itensRef = useRef(new Map<string, HTMLLIElement>());
 
   useEffect(() => {
     if (focoPendente.current === null) return;
     botoesRef.current.get(focoPendente.current)?.focus();
     focoPendente.current = null;
   });
+
+  const anunciarPosicao = (id: string, posicao: number) => {
+    const passo = arranjo.find((p) => p.id === id) ?? exercise.steps.find((p) => p.id === id);
+    if (passo) setAnuncio(`${textoDoPasso(passo.text)}, posição ${posicao} de ${arranjo.length}`);
+  };
 
   const moverPasso = (indice: number, direcao: 'cima' | 'baixo') => {
     const proximo = mover(arranjo, indice, direcao);
@@ -121,6 +149,71 @@ export function OrderSteps({
     // enquanto a sequência já é outra seria mentira.
     setEnviado(false);
   };
+
+  /**
+   * O arrasto, do ponteiro apertado até solto.
+   *
+   * A cada movimento, o destino é a posição cujo passo tem o meio abaixo do
+   * ponteiro — o primeiro que o ponteiro ainda não ultrapassou. Quando muda,
+   * a lista já reorganiza; ao soltar, não há mais nada a fazer além de
+   * anunciar onde o passo ficou.
+   */
+  const comecarArrasto = (id: string) => (evento: React.PointerEvent<HTMLElement>) => {
+    if (travado) return;
+    // Sem isto o arrasto seleciona o texto dos passos pelo caminho.
+    evento.preventDefault();
+    meiosNoInicio.current = arranjo
+      .filter((p) => p.id !== id)
+      .map((p) => itensRef.current.get(p.id)?.getBoundingClientRect())
+      .filter((caixa): caixa is DOMRect => !!caixa)
+      .map((caixa) => caixa.top + caixa.height / 2);
+    setArrastando(id);
+  };
+
+  /**
+   * Enquanto um passo está sendo arrastado, o movimento e o soltar são
+   * ouvidos na janela, não na pega.
+   *
+   * A captura de ponteiro (`setPointerCapture`) seria o jeito canônico — e
+   * foi a primeira versão. Só que a lista reorganiza ao vivo, e reordenar é
+   * tirar o elemento do documento e pô-lo de volta: o navegador solta a
+   * captura nesse instante, e o resto do movimento ia para o passo que
+   * estivesse embaixo do ponteiro. Ouvir na janela não depende de onde a
+   * pega está.
+   */
+  const arranjoRef = useRef(arranjo);
+  arranjoRef.current = arranjo;
+
+  useEffect(() => {
+    if (arrastando === null) return;
+    const id = arrastando;
+
+    const mover = (evento: PointerEvent) => {
+      // O destino é quantos dos outros passos o ponteiro já ultrapassou.
+      const para = meiosNoInicio.current.filter((meio) => evento.clientY > meio).length;
+      const de = arranjoRef.current.findIndex((p) => p.id === id);
+      if (de === -1 || de === para) return;
+      setArranjo(moverPara(arranjoRef.current, de, para));
+      setEnviado(false);
+    };
+    const soltar = () => {
+      setArrastando(null);
+      const posicao = arranjoRef.current.findIndex((p) => p.id === id) + 1;
+      anunciarPosicao(id, posicao);
+    };
+
+    window.addEventListener('pointermove', mover);
+    window.addEventListener('pointerup', soltar);
+    window.addEventListener('pointercancel', soltar);
+    return () => {
+      window.removeEventListener('pointermove', mover);
+      window.removeEventListener('pointerup', soltar);
+      window.removeEventListener('pointercancel', soltar);
+    };
+    // `anunciarPosicao` lê o arranjo do momento; o efeito só precisa renascer
+    // quando o arrasto começa ou termina.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [arrastando]);
 
   const verificar = () => {
     setEnviado(true);
@@ -138,8 +231,6 @@ export function OrderSteps({
     });
   };
 
-  const travado = enviado && acertou;
-
   return (
     <Card as="section">
       <SectionLabel tone="brand" className="mb-3">
@@ -150,8 +241,14 @@ export function OrderSteps({
         <MarkdownReader content={exercise.prompt} />
       </div>
 
-      <p className="label-mono mb-2 text-ink-faint">
-        {arranjo.length} passos · use as setas para reordenar
+      {/* A instrução diz o que "ordem" significa aqui — o primeiro em cima — e
+          como mexer. A versão anterior dizia só "use as setas", e a pessoa
+          ficava sem saber se a lista lia de cima para baixo. */}
+      <p className="mb-3 text-sm leading-relaxed text-ink-soft">
+        Os passos estão fora de ordem. Arrume-os de cima para baixo — o que acontece{' '}
+        <strong className="font-semibold text-ink">primeiro fica no topo</strong>. Arraste pela pega{' '}
+        <IconGrip size={14} className="inline-block align-[-2px] text-ink-faint" aria-hidden /> ou use as
+        setas.
       </p>
 
       {/* A região viva fica fora da lista: anunciar a lista inteira a cada
@@ -166,26 +263,46 @@ export function OrderSteps({
           // apontar o ponto é pista; dizer quais estão errados entregaria o
           // gabarito por eliminação.
           const marcado = enviado && !acertou && i === quebra;
+          const emArrasto = arrastando === passo.id;
 
           return (
             <li
               key={passo.id}
-              className={`flex items-stretch gap-2 rounded-lg border transition-colors ${
-                travado
-                  ? 'border-success-200 bg-success-50'
-                  : marcado
-                    ? 'border-energy-500 bg-energy-50'
-                    : 'border-line bg-canvas'
+              ref={(el) => {
+                if (el) itensRef.current.set(passo.id, el);
+                else itensRef.current.delete(passo.id);
+              }}
+              className={`flex items-stretch gap-1 rounded-lg border transition-colors ${
+                emArrasto
+                  ? 'border-brand-500 bg-brand-50 shadow-md'
+                  : travado
+                    ? 'border-success-200 bg-success-50'
+                    : marcado
+                      ? 'border-energy-500 bg-energy-50'
+                      : 'border-line bg-canvas'
               }`}
             >
-              <span className="label-mono flex w-8 shrink-0 items-center justify-center text-ink-faint">
+              {/* A pega: só ela captura o toque, então a página continua
+                  rolando pelo resto da linha. `touch-action: none` é o que
+                  faz o dedo arrastar em vez de rolar. */}
+              <span
+                onPointerDown={comecarArrasto(passo.id)}
+                aria-hidden
+                className={`flex w-9 shrink-0 select-none items-center justify-center rounded-l-lg text-ink-faint ${
+                  travado ? '' : 'cursor-grab touch-none hover:bg-sunken active:cursor-grabbing'
+                }`}
+              >
+                <IconGrip size={16} />
+              </span>
+
+              <span className="label-mono flex w-6 shrink-0 items-center justify-center text-ink-faint">
                 {i + 1}
               </span>
 
               {/* Fonte de leitura, e não monoespaçada: os passos são frases, e
                   três linhas de mono no celular custam legibilidade sem
                   comunicar nada que o contexto já não diga. */}
-              <span className="flex-1 self-center break-words py-3 pr-1 text-sm leading-relaxed text-ink">
+              <span className="flex-1 self-center break-words py-3 pl-1 pr-1 text-sm leading-relaxed text-ink">
                 {trechosDoPasso(passo.text).map((trecho, j) =>
                   j % 2 === 1 ? (
                     <code
@@ -202,7 +319,7 @@ export function OrderSteps({
 
               {/* 44px de altura cada, que é o mínimo para o polegar. Dois
                   empilhados deixam a linha alta — é o preço de o exercício
-                  funcionar por toque e por teclado com os mesmos controles. */}
+                  funcionar por teclado com os mesmos controles. */}
               <span className="flex shrink-0 flex-col justify-center py-1">
                 <button
                   type="button"
@@ -260,8 +377,8 @@ export function OrderSteps({
               />
             ) : (
               <p className="text-sm leading-relaxed text-ink-soft">
-                Esse passo não pode vir depois do anterior. Pergunte o que ele precisa que já
-                tenha acontecido — e mova um dos dois.
+                O passo {quebra + 1} não pode vir logo depois do passo {quebra}. Pergunte o que
+                ele precisa que já tenha acontecido — e mova um dos dois.
               </p>
             )}
           </ExerciseFeedback>

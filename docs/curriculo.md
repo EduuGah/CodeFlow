@@ -33,7 +33,10 @@ Fase 7  Projeto final            ░░░░░░░░░░░░░░░�
 exercício julgado pelas linhas devolvidas — e a trilha "SQL e Bancos de
 Dados" inteira, 10 aulas e 43 exercícios de SQL sobre o banco de uma loja.
 É a primeira trilha em que o aluno não escreve JavaScript. Metade da Fase 4;
-o dono do projeto escolheu o SQL antes do servidor simulado.
+o dono do projeto escolheu o SQL antes do servidor simulado. No mesmo dia,
+a partir do retorno dele: a tela inicial e a de trilhas viraram o percurso
+em três etapas, o exercício de ordenar ganhou arrasto, e o de escrever o
+teste passou a explicar o `assert` antes do editor.
 
 ## Aprofundamento das aulas antigas
 

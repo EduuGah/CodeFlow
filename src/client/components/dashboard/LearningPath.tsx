@@ -15,7 +15,11 @@ import { Badge } from '../ui/Badge';
  * o próprio ritmo.
  *
  * Como no resto da plataforma, nenhuma etapa é bloqueada (§280) — o que existe
- * é aviso quando os pré-requisitos estão fracos.
+ * é aviso quando os pré-requisitos estão fracos. O aviso só aparece na aula
+ * **atual**: nas que vêm depois ele é sempre verdade (ninguém praticou o que
+ * ainda não chegou), e uma trilha inteira em âmbar para quem acabou de entrar
+ * era um alarme sem informação. Na atual, ele diz o que só acontece fora de
+ * ordem — a pessoa pulou aulas, ou terminou uma sem dominar o conceito.
  *
  * `isolate` cria contexto de empilhamento próprio, então o z-index dos marcos
  * não escapa e não passa por cima do cabeçalho fixo.
@@ -41,7 +45,7 @@ export function LearningPath({ nodes }: { nodes: PathNode[] }) {
       {nodes.map((node, indice) => {
         const { lesson, state } = node;
         const ultimo = indice === nodes.length - 1;
-        const temAviso = node.shakyPrerequisites.length > 0;
+        const temAviso = state === 'atual' && node.shakyPrerequisites.length > 0;
 
         return (
           <li key={lesson.id} className="relative flex gap-4 pb-8 last:pb-0">

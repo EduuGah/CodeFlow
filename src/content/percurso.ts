@@ -1,0 +1,37 @@
+/**
+ * O percurso: as trilhas em etapas, na ordem em que uma prepara a outra.
+ *
+ * Sete trilhas numa grade não dizem por onde começar nem o que vem depois —
+ * e quem nunca programou não tem como saber que "A Página" supõe JavaScript.
+ * A ordem já existia (é a de `listTracks()`); o que faltava era nomear os
+ * degraus. Três etapas, cada uma com uma frase sobre o que ela entrega, são
+ * o mapa que a tela inicial e a de trilhas mostram.
+ *
+ * A validação do catálogo confere que toda trilha publicada está em exatamente
+ * uma etapa, e que a ordem aqui é a mesma da lista de trilhas.
+ */
+export interface EtapaDoPercurso {
+  /** Nome curto, como um capítulo. */
+  title: string;
+  /** O que a pessoa consegue fazer ao terminar a etapa. */
+  description: string;
+  trackIds: string[];
+}
+
+export const ETAPAS_DO_PERCURSO: EtapaDoPercurso[] = [
+  {
+    title: 'A base',
+    description: 'Escrever programas que decidem, repetem e resolvem problemas — e raciocinar antes de codar.',
+    trackIds: ['track-js-fundamentos', 'track-logica'],
+  },
+  {
+    title: 'A web',
+    description: 'Entender o que acontece entre o clique e a tela, e construir a página que o navegador mostra.',
+    trackIds: ['track-web', 'track-pagina'],
+  },
+  {
+    title: 'As ferramentas do trabalho',
+    description: 'O que se usa em equipe: tipos, componentes e o banco de dados por trás de tudo.',
+    trackIds: ['track-typescript', 'track-react', 'track-sql'],
+  },
+];

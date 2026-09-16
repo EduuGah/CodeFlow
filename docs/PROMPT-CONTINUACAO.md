@@ -112,6 +112,14 @@ sondas de borda, CI com anotações legíveis, E2E em celular e desktop.
 - **O resumo afirmava "progresso salvo" para quem pulou tudo.**
 - **`console.log(NaN)` mostrava `null`** — `JSON.stringify` mente sobre `NaN`,
   infinitos e `undefined`.
+- **A tela inicial só conhecia a trilha de JavaScript, e a de trilhas era uma
+  grade de cards iguais.** Hoje as duas mostram o **percurso**
+  (`content/percurso.ts`, `lib/percurso.ts`): três etapas na ordem em que uma
+  trilha prepara a outra, o ponto atual marcado, um botão só. Não volte à
+  grade.
+- **Ordenar passos só tinha setas; escrever o teste não explicava `assert`.**
+  O arrasto existe (pela pega, com as setas mantidas para teclado) e o
+  `assert` tem um painel "Como escrever um teste" antes do editor.
 
 ## 5. O que ESTÁ SENDO FEITO agora
 

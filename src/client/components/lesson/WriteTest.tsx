@@ -121,6 +121,36 @@ export function WriteTest({
         </pre>
       </div>
 
+      {/* Como o `assert` funciona, e o que "rodar meus testes" faz. Este é o
+          único tipo em que o aluno escreve a verificação, e a primeira vez que
+          ele vê `assert` é aqui — "não entendi como funciona" foi a reação
+          de quem chegou sem a explicação à vista. Fica antes do editor, sempre
+          visível, e diz as duas coisas que ele precisa: a forma de uma linha
+          e contra o que ela vai rodar. */}
+      <Card tone="sunken" padding="sm" className="text-sm leading-relaxed text-ink-soft">
+        <p className="mb-2 font-semibold text-ink">Como escrever um teste</p>
+        <p>
+          Uma linha por verificação, no formato{' '}
+          <code className="rounded-md bg-surface px-1.5 py-0.5 font-mono text-[0.9em] text-ink">
+            assert(condição, 'mensagem')
+          </code>
+          . A <strong className="font-semibold text-ink">condição</strong> é uma comparação que
+          precisa ser <strong className="font-semibold text-ink">verdadeira</strong> quando a função
+          está certa — por exemplo, chamar a função com um valor e comparar o resultado com o que
+          você espera usando <code className="font-mono text-[0.9em]">===</code>. Se a condição
+          der falso, o teste <strong className="font-semibold text-ink">falha</strong>, e a mensagem
+          é o que aparece dizendo o quê.
+        </p>
+        <p className="mt-2">
+          Ao rodar, seus testes são executados{' '}
+          <strong className="font-semibold text-ink">{exercise.mutants.length + 1} vezes</strong>:
+          uma contra a função acima, onde todos precisam passar, e uma contra cada uma de{' '}
+          {exercise.mutants.length} versões quebradas de propósito — em cada uma, ao menos um teste
+          precisa falhar. Um teste que passa em tudo, inclusive na versão quebrada, não está
+          verificando nada.
+        </p>
+      </Card>
+
       <div
         className={`overflow-hidden rounded-xl border transition-colors ${
           aprovado ? 'border-success-200' : 'border-line'

@@ -122,6 +122,18 @@ banco novo, para um teste que escreve não contaminar o seguinte. O banco de
 exemplo (`bancos/loja.ts`) é recriado a cada execução, e o CI confere que o
 painel de tabelas descreve exatamente o que o SQL cria.
 
+**A tela inicial e a de trilhas mostram o percurso, não a trilha padrão.**
+`content/percurso.ts` nomeia três etapas ("A base", "A web", "As ferramentas
+do trabalho") na ordem de `listTracks()`, e `lib/percurso.ts` monta o
+percurso do aluno — cada trilha com caminho, resumo e estado — e responde
+"em qual trilha eu estou" (`trilhaDaVez`: a da última atividade, senão a
+primeira começada, senão a primeira). A inicial é a aula da vez dessa
+trilha mais o percurso inteiro numa lista; a de trilhas é o percurso em
+etapas, uma trilha por linha, um botão só (o da trilha da vez) e os
+projetos numa aba. Veio da segunda reclamação do dono do projeto sobre as
+duas telas: a grade de sete cards iguais não dizia por onde começar, e a
+inicial só conhecia JavaScript.
+
 **O sandbox é descartável.** Worker novo por execução, 3 segundos de limite,
 `terminate()` no fim. `fetch`, `XMLHttpRequest`, `WebSocket`, `importScripts`,
 `indexedDB`, `caches` e `Notification` são apagados antes de qualquer código do
@@ -133,6 +145,7 @@ exatamente o mesmo código que roda em produção.
 ```
 src/content/            Aulas, exercícios, projetos, conceitos, flashcards
   types.ts              Tipos (Exercise é união discriminada por `type`)
+  percurso.ts           As três etapas do percurso, na ordem das trilhas
   bancos/               Os bancos de exemplo da trilha de SQL (`loja`): o SQL
                         que cria, e a descrição que o aluno lê
   schema.ts             Espelhos Zod; valida na carga e falha alto em DEV
@@ -182,6 +195,8 @@ src/client/lib/         Lógica pura e testada
   review.ts             Repetição espaçada, Leitner [1,3,7,14,30,60] dias
   gamification.ts       XP, níveis, conquistas
   path.ts               Caminho da trilha; nunca bloqueia, só avisa
+  percurso.ts           O percurso do aluno: trilhas por etapa, estado de
+                        cada uma, e qual é a trilha da vez
   study.ts              Sequência, retomada, exercícios abandonados
   celebrar.ts           Confete que respeita prefers-reduced-motion
   monaco.ts             O Monaco do próprio domínio: recursos escolhidos a
@@ -201,10 +216,11 @@ src/client/components/  Componentes
                         e `ExerciseFeedback` são o botão e o retorno de todos
   lesson/SqlExerciseStep  O exercício de SQL: painel de tabelas do banco (e o
                         `setup` do exercício), editor, resultado em tabela
-  dashboard/TrackCard   Uma trilha na visão geral: progresso, a aula da vez,
-                        "Continuar" e "Ver as aulas"
-src/client/pages/app/   Trilhas é a visão geral (cards + projetos);
-  TrackDetail.tsx       uma trilha inteira, em blocos por assunto
+  dashboard/Percurso    O percurso na tela: compacto (inicial) e detalhado
+                        (trilhas), com o marco da linha do tempo das aulas
+src/client/pages/app/   Início é a aula da vez + o percurso; Trilhas é o
+  TrackDetail.tsx       percurso em etapas com os projetos numa aba; uma
+                        trilha inteira, em blocos por assunto
 e2e/                    Playwright; `fixtures.ts` tem o dublê do Supabase
 supabase/migrations/    0001 a 0006, aplicadas em ordem
 docs/curriculo.md       Roadmap de conteúdo — fonte canônica
@@ -439,6 +455,26 @@ Cada uma custou tempo. Não repita.
 - **Uma verificação com ordem sem ORDER BY na referência cobraria do aluno
   uma ordem que o SQLite não garante.** O CI recusa `ordered` sem ORDER BY, e
   todo enunciado que pede ordem diz o critério de desempate.
+- **Reordenar a lista solta a captura do ponteiro.** O arrastar do exercício
+  de ordenar reorganiza os passos ao vivo, e reordenar é tirar o elemento do
+  DOM e pô-lo de volta — o navegador libera o `setPointerCapture` nesse
+  instante, e o resto do movimento ia para o passo que estivesse embaixo do
+  ponteiro: o passo andava uma casa e parava. Os eventos de mover e soltar
+  são ouvidos na janela enquanto dura o arrasto. E o destino é decidido
+  contra a geometria medida no início (os meios dos outros passos), não
+  contra a atual: passos de alturas diferentes trocando de lugar mudam as
+  fronteiras, e o passo ia e voltava no mesmo movimento.
+- **`touch-action: none` só na pega.** Arrastar pela linha inteira disputa
+  com a rolagem da página no celular — foi por isso que a primeira versão
+  não tinha arrasto. Na pega (⋮⋮), o dedo arrasta; no resto da linha, rola.
+- **O aviso de pré-requisito em toda aula futura era ruído.** "Supõe
+  Variáveis, que você ainda não praticou" em dezenove aulas de vinte, para
+  quem acabou de entrar: sempre verdade, nunca informação. Só a aula atual
+  avisa — é onde o aviso diz algo que só acontece fora de ordem.
+- **As ligaduras da JetBrains Mono viravam `===` num "≡".** Para quem está
+  aprendendo a digitar os três sinais, é um símbolo que o teclado não tem.
+  `font-variant-ligatures: none` em `code`, `pre` e `.font-mono`, e
+  `fontLigatures: false` no Monaco.
 - **Uma prop opcional é um contrato que ninguém garante.** `onSolved` era opcional
   e dois dos quatro tipos de exercício simplesmente não a recebiam — 36 dos 78
   exercícios nunca conseguiam avisar que tinham sido resolvidos, e nenhum dos 521

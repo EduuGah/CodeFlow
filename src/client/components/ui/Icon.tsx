@@ -175,6 +175,18 @@ export const IconChevronDown = (p: IconProps) => (
   </Base>
 );
 
+/** A pega de arrastar: duas colunas de três pontos, como num sortable. */
+export const IconGrip = (p: IconProps) => (
+  <Base {...p}>
+    <circle cx="9" cy="6" r="0.9" fill="currentColor" />
+    <circle cx="15" cy="6" r="0.9" fill="currentColor" />
+    <circle cx="9" cy="12" r="0.9" fill="currentColor" />
+    <circle cx="15" cy="12" r="0.9" fill="currentColor" />
+    <circle cx="9" cy="18" r="0.9" fill="currentColor" />
+    <circle cx="15" cy="18" r="0.9" fill="currentColor" />
+  </Base>
+);
+
 export const IconPlay = (p: IconProps) => (
   <Base {...p}>
     <path d="M7 5.5l11 6.5-11 6.5V5.5z" />

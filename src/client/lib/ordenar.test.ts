@@ -4,6 +4,7 @@ import {
   embaralhar,
   estaOrdenado,
   mover,
+  moverPara,
   primeiroErro,
   problemasDaOrdenacao,
   textoDoPasso,
@@ -139,6 +140,23 @@ describe('mover um passo', () => {
     const copia = antes.map((p) => p.id);
     mover(antes, 0, 'baixo');
     expect(antes.map((p) => p.id)).toEqual(copia);
+  });
+});
+
+describe('mover um passo para uma posição', () => {
+  it('desce empurrando os do caminho', () => {
+    expect(moverPara(passos(1, 2, 3, 4), 0, 2).map((p) => p.id)).toEqual(['p1', 'p2', 'p0', 'p3']);
+  });
+
+  it('sobe empurrando os do caminho', () => {
+    expect(moverPara(passos(1, 2, 3, 4), 3, 1).map((p) => p.id)).toEqual(['p0', 'p3', 'p1', 'p2']);
+  });
+
+  it('no mesmo lugar ou fora da lista, devolve a lista como veio', () => {
+    const antes = passos(1, 2, 3);
+    expect(moverPara(antes, 1, 1)).toBe(antes);
+    expect(moverPara(antes, 1, 3)).toBe(antes);
+    expect(moverPara(antes, -1, 0)).toBe(antes);
   });
 });
 

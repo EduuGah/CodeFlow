@@ -96,6 +96,18 @@
     @apply selection:bg-brand-100 selection:text-brand-900;
   }
 
+  /* Sem ligaduras no código. A JetBrains Mono junta `===` num "≡" e `=>` numa
+     seta — bonito para quem já sabe o que está ali, e um símbolo desconhecido
+     para quem está aprendendo a digitar `===`. O aluno precisa ver os três
+     caracteres que vai escrever. Vale para os blocos das aulas e para o texto
+     corrido; o Monaco tem a própria opção, desligada por padrão. */
+  code,
+  pre,
+  kbd,
+  .font-mono {
+    font-variant-ligatures: none;
+  }
+
   /* Foco visível e consistente em tudo que recebe teclado. Só na navegação por
      teclado, então o clique de mouse não fica poluído. */
   :focus-visible {

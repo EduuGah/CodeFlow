@@ -260,7 +260,7 @@ console.log(maiorNota([7, 9, 4])); // esperado: 9
         id: 'ex-js-6-testar-media',
         type: 'write-test',
         prompt:
-          'A função abaixo está **correta**. Seu trabalho é escrever os testes dela.\n\nUse `assert(condicao, mensagem)` — ele lança quando a condição é falsa. Seus testes rodam contra esta versão, onde precisam **passar**, e contra três versões quebradas de propósito, onde precisam **falhar**.',
+          'Até aqui a plataforma testou o seu código. Agora é o contrário: a função `media` abaixo está **correta**, e **você** escreve os testes dela.\n\nUm teste é uma linha que chama a função com um valor conhecido e afirma o resultado esperado:\n\n~~~js\nassert(media([10, 10]) === 10, \'a média de duas notas 10 é 10\');\n~~~\n\nSe a afirmação for falsa, o teste falha e a mensagem aparece. Escreva ao menos dois: um caso comum e um caso extremo (a lista vazia, que devolve `null`). Seus testes rodam contra esta versão, onde precisam **passar**, e contra três versões quebradas de propósito, onde precisam **falhar** — um teste que aceita a versão quebrada não está testando nada.',
         concepts: ['arrays', 'casos-extremos'],
         difficulty: 'intermediario',
         tags: ['javascript', 'arrays', 'testes'],

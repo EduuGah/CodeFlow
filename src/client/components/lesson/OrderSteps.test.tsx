@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -119,6 +119,84 @@ describe('reordenar', () => {
     await moverPasso(user, movido, 'baixo');
 
     expect(screen.getByRole('status')).toHaveTextContent(`${movido}, posição 2 de 3`);
+  });
+});
+
+describe('arrastar', () => {
+  /**
+   * O jsdom não tem layout: cada passo ganha uma caixa de 60px, empilhada na
+   * ordem em que está na tela. É o suficiente para o cálculo "acima do meio
+   * de quem?" ser exercitado de verdade.
+   */
+  function empilhar() {
+    const itens = screen.getAllByRole('listitem');
+    itens.forEach((li, i) => {
+      vi.spyOn(li, 'getBoundingClientRect').mockImplementation(
+        () => ({ top: i * 60, height: 60, bottom: i * 60 + 60, left: 0, right: 300, width: 300, x: 0, y: i * 60, toJSON: () => ({}) })
+      );
+    });
+  }
+
+  const pegaDe = (li: HTMLElement) => li.querySelector('.cursor-grab') as HTMLElement;
+
+  /**
+   * O jsdom não tem PointerEvent, e o `fireEvent.pointerMove` cai num Event
+   * sem `clientY`. Um MouseEvent com o nome do evento de ponteiro carrega a
+   * coordenada, e é ela que o arrasto lê.
+   */
+  const ponteiro = (tipo: 'pointerdown' | 'pointermove' | 'pointerup', el: HTMLElement, clientY: number) =>
+    fireEvent(el, new MouseEvent(tipo, { bubbles: true, clientY }));
+
+  it('soltar a pega abaixo do meio de outro passo leva o passo para lá', () => {
+    render(<OrderSteps exercise={EXERCICIO} lessonId="aula-teste" />);
+    empilhar();
+
+    const antes = ordemNaTela();
+    const primeiro = screen.getAllByRole('listitem')[0];
+    const pega = pegaDe(primeiro);
+
+    ponteiro('pointerdown', pega, 30);
+    // Passou do meio do terceiro (y = 150): vai para o fim.
+    ponteiro('pointermove', pega, 170);
+    ponteiro('pointerup', pega, 170);
+
+    expect(ordemNaTela()).toEqual([antes[1], antes[2], antes[0]]);
+    expect(screen.getByRole('status')).toHaveTextContent(`${antes[0]}, posição 3 de 3`);
+  });
+
+  it('a lista reorganiza enquanto arrasta, e voltar desfaz', () => {
+    render(<OrderSteps exercise={EXERCICIO} lessonId="aula-teste" />);
+    empilhar();
+
+    const antes = ordemNaTela();
+    const pega = pegaDe(screen.getAllByRole('listitem')[2]);
+
+    ponteiro('pointerdown', pega, 150);
+    // Acima do meio do primeiro (y = 30): o último vai para o topo.
+    ponteiro('pointermove', pega, 10);
+    expect(ordemNaTela()).toEqual([antes[2], antes[0], antes[1]]);
+
+    // A pega continua sendo a do mesmo passo (a linha mudou de lugar).
+    empilhar();
+    const pegaAgora = pegaDe(screen.getAllByRole('listitem')[0]);
+    ponteiro('pointermove', pegaAgora, 170);
+    ponteiro('pointerup', pegaAgora, 170);
+    expect(ordemNaTela()).toEqual(antes);
+  });
+
+  it('arrastar depois de errar descarta o retorno anterior', async () => {
+    const user = userEvent.setup();
+    render(<OrderSteps exercise={EXERCICIO} lessonId="aula-teste" />);
+    await user.click(screen.getByRole('button', { name: /Verificar ordem/ }));
+    expect(screen.getByText(/A ordem quebra/)).toBeInTheDocument();
+
+    empilhar();
+    const pega = pegaDe(screen.getAllByRole('listitem')[0]);
+    ponteiro('pointerdown', pega, 30);
+    ponteiro('pointermove', pega, 100);
+    ponteiro('pointerup', pega, 100);
+
+    expect(screen.queryByText(/A ordem quebra/)).not.toBeInTheDocument();
   });
 });
 

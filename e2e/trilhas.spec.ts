@@ -1,44 +1,61 @@
 import { listProjects, listTracks } from '../src/content';
+import { ETAPAS_DO_PERCURSO } from '../src/content/percurso';
 import { expect, test } from './fixtures';
 
 /**
- * A tela de trilhas, depois de deixar de ser uma parede.
+ * A tela de trilhas.
  *
- * O que motivou: seis trilhas desenroladas numa coluna só — setenta marcos
- * sem dizer de que assunto era cada trecho — e os projetos só no fim de toda
- * a rolagem. Agora a visão geral é um card por trilha e os projetos logo
- * abaixo; a lista de aulas tem página própria, em blocos por assunto.
+ * Duas versões ficaram para trás: a parede (seis trilhas desenroladas numa
+ * coluna, setenta marcos sem assunto) e a grade (sete cards iguais, dois
+ * botões cada, sem dizer por onde começar). Agora é o percurso: três etapas
+ * nomeadas, uma trilha por linha na ordem em que uma prepara a outra, um
+ * botão só — o da trilha da vez — e os projetos numa aba, a um toque.
  */
 
-test('a visão geral é um card por trilha, com os projetos logo abaixo', async ({ logado: page }) => {
+test('a visão geral é o percurso em etapas, com um botão só', async ({ logado: page }) => {
   await page.goto('/app/trilhas');
   await page.getByRole('heading', { level: 1, name: 'Trilhas' }).waitFor();
 
-  // Um card por trilha, cada um com o seu progresso e a aula da vez.
-  for (const trilha of listTracks()) {
-    const card = page.getByRole('article').filter({ hasText: trilha.title });
-    await expect(card).toHaveCount(1);
-    await expect(card.getByRole('progressbar')).toBeVisible();
-    await expect(card.getByRole('link', { name: 'Ver as aulas' })).toBeVisible();
+  // As etapas, com nome, na ordem.
+  for (const etapa of ETAPAS_DO_PERCURSO) {
+    await expect(page.getByRole('heading', { level: 2, name: new RegExp(etapa.title) })).toBeVisible();
   }
 
-  // Nenhuma lista de aulas aqui: é o que fazia a tela rolar por minutos.
-  await expect(page.locator('a[href^="/lesson/"]')).toHaveCount(listTracks().length);
+  // Toda trilha aparece, numerada e com o tamanho dela.
+  const trilhas = listTracks();
+  for (const trilha of trilhas) {
+    const linha = page.getByRole('listitem').filter({ hasText: trilha.title });
+    await expect(linha).toHaveCount(1);
+    await expect(linha).toContainText(`${trilha.lessonIds.length} aulas`);
+  }
 
-  // Os projetos estão na mesma tela, e o atalho no topo leva até eles.
-  const projetos = page.getByRole('heading', { name: 'Projetos práticos' });
-  await expect(projetos).toBeAttached();
-  await page.getByRole('link', { name: `${listProjects().length} projetos` }).click();
-  await expect(projetos).toBeInViewport();
+  // Um botão de aula na página inteira: o da trilha da vez, que para quem
+  // nunca entrou é a primeira. As outras se abrem pelo nome.
+  const aulas = page.locator('a[href^="/lesson/"]');
+  await expect(aulas).toHaveCount(1);
+  await expect(aulas).toHaveText(/Começar: 1\./);
+  await expect(page.locator('[aria-current="step"]')).toContainText(trilhas[0].title);
+});
+
+test('os projetos ficam numa aba, e a aba abre pela URL', async ({ logado: page }) => {
+  await page.goto('/app/trilhas');
+  await page.getByRole('heading', { level: 1, name: 'Trilhas' }).waitFor();
+
+  await page.getByRole('tab', { name: /Projetos/ }).click();
+  await expect(page).toHaveURL(/#projetos$/);
+  await expect(page.locator('a[href^="/project/"]')).toHaveCount(listProjects().length);
+  // A lista de trilhas saiu de cena: é uma coisa ou outra.
+  await expect(page.locator('a[href^="/lesson/"]')).toHaveCount(0);
+
+  // O link das outras telas continua valendo.
+  await page.goto('/app/trilhas#projetos');
+  await expect(page.getByRole('tab', { name: /Projetos/ })).toHaveAttribute('aria-selected', 'true');
+  await expect(page.locator('a[href^="/project/"]').first()).toBeVisible();
 });
 
 test('a página de uma trilha agrupa as aulas em blocos por assunto', async ({ logado: page }) => {
   await page.goto('/app/trilhas');
-  await page
-    .getByRole('article')
-    .filter({ hasText: 'A Página' })
-    .getByRole('link', { name: 'Ver as aulas' })
-    .click();
+  await page.getByRole('link', { name: 'A Página' }).click();
 
   await expect(page).toHaveURL(/\/app\/trilhas\/track-pagina$/);
 
@@ -53,6 +70,10 @@ test('a página de uma trilha agrupa as aulas em blocos por assunto', async ({ l
   await expect(aulas).toHaveCount(26);
   await expect(aulas.first()).toHaveAttribute('href', '/lesson/lesson-pagina-1');
   await expect(aulas.last()).toHaveAttribute('href', '/lesson/lesson-pagina-26');
+
+  // Para quem nunca entrou, nenhuma aula vem em âmbar: o aviso de
+  // pré-requisito só faz sentido fora de ordem, e aqui não há ordem quebrada.
+  await expect(page.getByText(/que você ainda não praticou/)).toHaveCount(0);
 
   // O sumário dos blocos pula direto para o assunto.
   await page.getByRole('link', { name: /UI e UX/ }).click();

@@ -105,6 +105,23 @@ export function embaralhar(passos: PassoOrdenavel[], semente: string): PassoOrde
   return [...passos].reverse();
 }
 
+/**
+ * Leva um passo de uma posição a outra, empurrando os do caminho.
+ *
+ * É o que o arrastar faz: o passo solto na terceira posição vai para a
+ * terceira, e os que estavam entre a origem e o destino andam uma casa. Fora
+ * dos limites, ou no mesmo lugar, a lista volta como veio.
+ */
+export function moverPara(passos: PassoOrdenavel[], de: number, para: number): PassoOrdenavel[] {
+  if (de === para) return passos;
+  if (de < 0 || de >= passos.length || para < 0 || para >= passos.length) return passos;
+
+  const copia = [...passos];
+  const [passo] = copia.splice(de, 1);
+  copia.splice(para, 0, passo);
+  return copia;
+}
+
 /** Move um passo uma casa para cima ou para baixo, sem sair da lista. */
 export function mover(
   passos: PassoOrdenavel[],
