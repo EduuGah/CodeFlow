@@ -316,6 +316,52 @@ export interface RefactorExercise extends ExerciseBase {
 }
 
 /**
+ * Uma verificação de exercício de SQL.
+ *
+ * O julgamento é sempre o mesmo: dois bancos iguais, um recebe o SQL do aluno
+ * e o outro o de referência, e uma consulta rodada nos dois precisa devolver
+ * as mesmas linhas. Sem `query`, a consulta é o próprio SQL do aluno — o caso
+ * comum, "escreva o SELECT". Com `query`, é uma consulta do exercício sobre o
+ * que o aluno deixou no banco — o caso da escrita: "insira o cliente" vira
+ * `SELECT nome, cidade FROM clientes`, e as linhas precisam bater.
+ *
+ * Comparar linhas, e não o texto do SQL, é o que permite aceitar qualquer
+ * consulta certa: `preco > 100` ou `100 < preco`, com ou sem apelido.
+ */
+export interface SqlTest {
+  /** Frase que o aluno lê quando a verificação passa. Precisa ser específica. */
+  description: string;
+  /** Consulta rodada nos dois bancos depois do SQL do aluno / de referência. */
+  query?: string;
+  /** A ordem das linhas importa. Só quando o enunciado pede ORDER BY. */
+  ordered?: boolean;
+  /** Os nomes das colunas também precisam bater. Só quando o enunciado pede o apelido. */
+  columns?: boolean;
+  hidden?: boolean;
+}
+
+/**
+ * Escreve SQL contra um banco de exemplo, e as linhas devolvidas precisam ser
+ * as certas.
+ *
+ * O banco vem de `src/content/bancos/` e é recriado a cada execução: o aluno
+ * pode apagar tudo que o próximo "Executar" encontra o banco inteiro de novo.
+ * `setup` é o que o exercício acrescenta antes do aluno — uma tabela vazia
+ * para preencher, um índice, uma linha a mais.
+ */
+export interface SqlExercise extends ExerciseBase {
+  type: 'sql';
+  /** Id do banco de exemplo. */
+  database: string;
+  /** SQL rodado depois do banco e antes do aluno. */
+  setup?: string;
+  initialCode: string;
+  tests: SqlTest[];
+  /** O SQL de referência: é ele que produz as linhas esperadas. Obrigatório. */
+  solution: string;
+}
+
+/**
  * União discriminada por `type`. Acrescentar um tipo novo (arrastar e soltar,
  * completar um diagrama…) é estender esta união — nenhuma página precisa saber
  * de todos os tipos, só dos que renderiza (§315).
@@ -328,6 +374,7 @@ export type Exercise =
   | OrderStepsExercise
   | PredictOutputExercise
   | RefactorExercise
+  | SqlExercise
   | WriteTestExercise;
 
 /** Blocos que compõem uma aula. Nem toda aula usa todos (§316). */

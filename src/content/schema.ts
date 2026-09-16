@@ -5,6 +5,7 @@ import { problemasDaOrdenacao } from '../client/lib/ordenar';
 import { problemasDaEscritaDeTeste } from '../client/lib/escrever-teste';
 import { problemasDoBug } from '../client/lib/encontrar-bug';
 import { problemasDaRefatoracao } from '../client/lib/refatorar';
+import { BANCOS } from './bancos';
 
 /**
  * Validação de conteúdo (§295). Roda uma vez, no carregamento, e falha alto em
@@ -218,6 +219,27 @@ export const exerciseSchema = z.discriminatedUnion('type', [
     code: z.string().min(1),
     expectedOutput: z.string(),
     explanation: z.string().min(1),
+  }),
+  z.object({
+    ...exerciseBase,
+    type: z.literal('sql'),
+    // Um banco que não existe deixaria o aluno com um editor e nenhuma tabela.
+    database: z.string().refine((id) => id in BANCOS, 'o banco de exemplo não existe'),
+    setup: z.string().min(1).optional(),
+    initialCode: z.string(),
+    tests: z
+      .array(
+        z.object({
+          description: z.string().min(1),
+          query: z.string().min(1).optional(),
+          ordered: z.boolean().optional(),
+          columns: z.boolean().optional(),
+          hidden: z.boolean().optional(),
+        })
+      )
+      .min(1, 'exercício de SQL precisa de ao menos uma verificação'),
+    // A referência não é opcional aqui: é ela que produz as linhas esperadas.
+    solution: z.string().min(1, 'exercício de SQL precisa do SQL de referência'),
   }),
 ]);
 

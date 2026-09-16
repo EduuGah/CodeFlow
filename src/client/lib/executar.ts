@@ -53,6 +53,16 @@ export async function executarNaLinguagem({
       error: 'Este exercício é de React e precisa do motor de componente; avise que ele está numa aula de React com um tipo que não roda lá.',
     };
   }
+  if (language === 'sql') {
+    // SQL roda no motor de banco (`executarSqlNoNavegador`), por um
+    // exercício de tipo próprio. O CI recusa outro tipo numa aula de SQL.
+    return {
+      output: '',
+      logs: [],
+      testResults: [],
+      error: 'Este exercício é de SQL e precisa do motor de banco; avise que ele está numa aula de SQL com um tipo que não roda lá.',
+    };
+  }
   if (language !== 'typescript') return executeCode(code, tests, properties);
 
   const compilar = await compiladorDoNavegador();

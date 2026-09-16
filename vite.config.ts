@@ -29,6 +29,13 @@ function semSourcemapNosGigantes(): Plugin {
 
 export default defineConfig({
   plugins: [react(), tailwindcss(), semSourcemapNosGigantes()],
+  optimizeDeps: {
+    // O `sql.js` só é importado pelo worker do motor de SQL, e o otimizador
+    // do Vite só o descobre na primeira execução de uma consulta — aí
+    // reempacota e **recarrega a página inteira**, no meio do exercício.
+    // Declarado aqui, ele entra no pacote de dependências logo na partida.
+    include: ['sql.js'],
+  },
   server: {
     host: '0.0.0.0',
     port: 3000,

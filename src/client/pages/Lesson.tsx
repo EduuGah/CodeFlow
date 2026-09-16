@@ -22,6 +22,7 @@ import { MultipleChoice } from '../components/lesson/MultipleChoice';
 import { OrderSteps } from '../components/lesson/OrderSteps';
 import { PredictOutput } from '../components/lesson/PredictOutput';
 import { Refactor } from '../components/lesson/Refactor';
+import { SqlExerciseStep } from '../components/lesson/SqlExerciseStep';
 import { WriteTest } from '../components/lesson/WriteTest';
 import { Button, buttonClasses } from '../components/ui/Button';
 import { Card, SectionLabel } from '../components/ui/Card';
@@ -385,6 +386,15 @@ export function Lesson() {
 
         {passo.kind === 'exercise' && passo.exercise.type === 'order-steps' && (
           <OrderSteps
+            key={passo.exercise.id}
+            exercise={passo.exercise}
+            lessonId={lesson.id}
+            onEstado={(estado) => registrarEstado(passo.exercise.id, estado)}
+          />
+        )}
+
+        {passo.kind === 'exercise' && passo.exercise.type === 'sql' && (
+          <SqlExerciseStep
             key={passo.exercise.id}
             exercise={passo.exercise}
             lessonId={lesson.id}

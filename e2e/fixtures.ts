@@ -217,7 +217,9 @@ export async function esperarConteudo(page: Page): Promise<void> {
 export async function irAteOEditor(page: Page): Promise<void> {
   // "Executar código" no sandbox de JavaScript; "Rodar a página" no motor de
   // página. Os dois são o mesmo passo para quem navega.
-  const executar = page.getByRole('button', { name: /^(Executar código|Rodar a página|Rodar o componente)$/ });
+  const executar = page.getByRole('button', {
+    name: /^(Executar código|Rodar a página|Rodar o componente|Executar consulta)$/,
+  });
 
   for (let i = 0; i < 12 && !(await executar.count()); i++) {
     const acao = page.getByRole('button', {
@@ -407,6 +409,14 @@ async function resolverExercicio(
       }
       // Na primeira execução da aula o compilador e o React embutido ainda estão chegando.
       await page.getByText('Todos os testes passaram').waitFor({ timeout: 90_000 });
+      return;
+    }
+
+    case 'sql': {
+      await escreverNoEditor(page, exercicio.solution);
+      await page.getByRole('button', { name: /Executar consulta|Executar de novo/ }).click();
+      // Na primeira execução da aula o SQLite em WebAssembly ainda está chegando.
+      await page.getByText('As linhas são as esperadas').waitFor({ timeout: 90_000 });
       return;
     }
 

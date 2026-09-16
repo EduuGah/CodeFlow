@@ -24,6 +24,7 @@ import { trackWeb } from './tracks/web';
 import { trackPagina } from './tracks/pagina';
 import { trackTypescript } from './tracks/typescript';
 import { trackReact } from './tracks/react';
+import { trackSql } from './tracks/sql';
 import { lessonVariaveis } from './lessons/js-01-variaveis';
 import { lessonTiposEOperadores } from './lessons/js-02-tipos-e-operadores';
 import { lessonCondicoes } from './lessons/js-03-condicoes';
@@ -105,6 +106,9 @@ import { lessonRotas } from './lessons/react-11-rotas';
 import { lessonReRender } from './lessons/react-12-re-render';
 import { lessonTestavel } from './lessons/react-13-testavel';
 import { lessonProjetoReact } from './lessons/react-14-projeto';
+import { lessonTabelas } from './lessons/sql-01-tabelas';
+import { lessonWhere } from './lessons/sql-02-where';
+import { lessonOrdenar } from './lessons/sql-03-ordenar';
 import { projetoImc } from './projects/js-imc';
 import { projetoConversor } from './projects/js-conversor';
 import { projetoBoletim } from './projects/js-boletim';
@@ -200,6 +204,9 @@ const lessons: Lesson[] = [
   lessonReRender,
   lessonTestavel,
   lessonProjetoReact,
+  lessonTabelas,
+  lessonWhere,
+  lessonOrdenar,
 ];
 const projects: Project[] = [
   projetoImc,
@@ -217,6 +224,7 @@ const tracks: Track[] = [
   trackPagina,
   trackTypescript,
   trackReact,
+  trackSql,
 ];
 
 /**

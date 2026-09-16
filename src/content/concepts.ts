@@ -598,4 +598,28 @@ export const concepts: Concept[] = [
     prerequisites: ['react-rotas', 'react-testes', 'decomposicao'],
     tags: ['react'],
   },
+  {
+    id: 'sql-tabelas',
+    title: 'Tabelas e SELECT',
+    summary:
+      'O banco relacional: tabela, linha, coluna, tipo e chave primária; SELECT colunas FROM tabela, o asterisco e o LIMIT; a correção por linhas devolvidas.',
+    prerequisites: ['cliente-servidor'],
+    tags: ['sql'],
+  },
+  {
+    id: 'sql-where',
+    title: 'WHERE',
+    summary:
+      'Filtrar linhas: comparações (= e <>, texto entre aspas simples), AND/OR/NOT com parênteses, IN e BETWEEN, LIKE com % e _, e o NULL que não é igual a nada — IS NULL.',
+    prerequisites: ['sql-tabelas'],
+    tags: ['sql'],
+  },
+  {
+    id: 'sql-ordenar',
+    title: 'ORDER BY e expressões',
+    summary:
+      'Ordenar por uma ou mais colunas, ASC/DESC, LIMIT com sentido; a ordem fixa das cláusulas; expressões no SELECT (aritmética, ROUND, ||), AS e o apelido no ORDER BY; DISTINCT.',
+    prerequisites: ['sql-where'],
+    tags: ['sql'],
+  },
 ];

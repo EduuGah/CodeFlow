@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
 
 import {
   runProgram,
@@ -8,6 +8,9 @@ import {
 } from '../client/lib/sandbox-core';
 import { rodarPaginaNoJsdom } from '../client/lib/pagina-jsdom';
 import { compilarNoNode } from '../client/lib/typescript-node';
+import { executarSql, type AbrirBanco } from '../client/lib/sql-core';
+import { abrirBancoNoNode } from '../client/lib/sql-node';
+import { BANCOS } from './bancos';
 import { formatarErros, verificarTrechos, type TrechoDeTipo } from '../client/lib/typescript-core';
 import {
   getExercises,
@@ -23,7 +26,7 @@ import { embaralhar, estaOrdenado } from '../client/lib/ordenar';
 import { avaliarTestes } from '../client/lib/escrever-teste';
 import { corrigirLinha, linhasNumeradas } from '../client/lib/encontrar-bug';
 import { avaliarRestricoes, todasCumpridas } from '../client/lib/refatorar';
-import type { CodeExercise, Exercise, FillBlankExercise, LanguageId, Lesson } from './types';
+import type { CodeExercise, Exercise, FillBlankExercise, LanguageId, Lesson, SqlExercise } from './types';
 
 /**
  * Suíte de integridade do conteúdo.
@@ -793,6 +796,137 @@ describe('aulas de TypeScript', () => {
             `o exemplo não compila:\n${bloco.code}`
           ).toEqual([]);
         }
+      }
+    }
+  );
+});
+
+describe('bancos de exemplo', () => {
+  let abrir: AbrirBanco;
+  beforeAll(async () => {
+    abrir = await abrirBancoNoNode();
+  });
+
+  it.each(Object.values(BANCOS).map((banco) => [banco.id, banco] as const))(
+    '%s: o painel de tabelas descreve exatamente o que o SQL cria',
+    (_id, banco) => {
+      // O painel que o aluno lê vem de `tabelas`; o banco vem de `sql`. Uma
+      // coluna descrita e não criada seria um recurso falso: a pessoa a
+      // consultaria e leria "a coluna não existe".
+      const db = abrir();
+      db.rodar(banco.sql);
+      const criadas = db.rodar("SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name");
+      const nomes = (criadas[0]?.tipo === 'tabela' ? criadas[0].values : []).map((l) => String(l[0]));
+      expect([...banco.tabelas.map((t) => t.nome)].sort()).toEqual(nomes);
+
+      for (const tabela of banco.tabelas) {
+        const info = db.rodar(`PRAGMA table_info(${tabela.nome})`);
+        const colunas = (info[0]?.tipo === 'tabela' ? info[0].values : []).map((l) => ({
+          nome: String(l[1]),
+          tipo: String(l[2]).toUpperCase(),
+        }));
+        expect(
+          tabela.colunas.map((c) => ({ nome: c.nome, tipo: c.tipo.toUpperCase() })),
+          `as colunas descritas de ${tabela.nome} não são as criadas`
+        ).toEqual(colunas);
+      }
+      db.fechar();
+    }
+  );
+});
+
+describe('exercícios de SQL', () => {
+  const sqlExercises = allExercises.filter(
+    (item): item is { lesson: Lesson; exercise: SqlExercise } => item.exercise.type === 'sql'
+  );
+
+  let abrir: AbrirBanco;
+  beforeAll(async () => {
+    abrir = await abrirBancoNoNode();
+  });
+
+  const setupDe = (exercise: SqlExercise) => `${BANCOS[exercise.database].sql}\n${exercise.setup ?? ''}`;
+
+  it('aula de SQL só usa os tipos de exercício que o motor de banco roda', () => {
+    // Os outros tipos rodam JavaScript num sandbox; um `code` numa aula de
+    // SQL mandaria o SELECT do aluno para o `new Function`.
+    const permitidos = new Set(['sql', 'multiple-choice', 'order-steps']);
+    for (const { lesson, exercise } of allExercises) {
+      if (lesson.language !== 'sql') continue;
+      expect(permitidos.has(exercise.type), `${exercise.id} é do tipo ${exercise.type}, que o motor de SQL não roda`).toBe(true);
+    }
+    for (const { lesson, exercise } of sqlExercises) {
+      expect(lesson.language, `${exercise.id} é de SQL numa aula de ${lesson.language}`).toBe('sql');
+    }
+  });
+
+  it.each(sqlExercises.map(({ exercise }) => [exercise.id, exercise] as const))(
+    '%s: a solução de referência passa em todas as verificações',
+    (_id, exercise) => {
+      const resultado = executarSql(abrir, {
+        setup: setupDe(exercise),
+        code: exercise.solution,
+        solution: exercise.solution,
+        tests: exercise.tests,
+      });
+      expect(resultado.error, 'a solução não deveria falhar').toBeUndefined();
+      expect(resultado.testResults.filter((t) => !t.passed).map((t) => t.message)).toEqual([]);
+      expect(resultado.testResults).toHaveLength(exercise.tests.length);
+
+      // Uma verificação sem consulta própria compara o SELECT do aluno com o
+      // da referência: a referência precisa devolver uma tabela, senão a
+      // comparação é entre dois nadas e passa com qualquer coisa.
+      const ultima = [...resultado.saidas].reverse().find((s) => s.tipo === 'tabela');
+      if (exercise.tests.some((t) => t.query === undefined)) {
+        expect(ultima, 'a referência não devolve tabela, e há verificação sem query').toBeDefined();
+        expect(ultima?.tipo === 'tabela' && ultima.values.length, 'a referência devolve uma tabela vazia').toBeGreaterThan(0);
+      }
+    }
+  );
+
+  it.each(sqlExercises.map(({ exercise }) => [exercise.id, exercise] as const))(
+    '%s: o SQL inicial NÃO passa (o exercício exige trabalho do aluno)',
+    (_id, exercise) => {
+      const resultado = executarSql(abrir, {
+        setup: setupDe(exercise),
+        code: exercise.initialCode,
+        solution: exercise.solution,
+        tests: exercise.tests,
+      });
+      const todosPassaram =
+        resultado.testResults.length > 0 && resultado.testResults.every((t) => t.passed);
+      expect(todosPassaram, 'o exercício está passando sem o aluno escrever nada').toBe(false);
+    }
+  );
+
+  it.each(sqlExercises.map(({ exercise }) => [exercise.id, exercise] as const))(
+    '%s: uma verificação com ordem só existe quando a referência ordena',
+    (_id, exercise) => {
+      // `ordered` sem ORDER BY na referência cobraria do aluno uma ordem que
+      // nem o SQLite garante.
+      for (const teste of exercise.tests) {
+        if (!teste.ordered) continue;
+        const sql = (teste.query ?? exercise.solution).toUpperCase();
+        expect(sql, `"${teste.description}" cobra ordem sem ORDER BY`).toContain('ORDER BY');
+      }
+    }
+  );
+
+  it.each(sqlExercises.map(({ exercise }) => [exercise.id, exercise] as const))(
+    '%s: toda mensagem de falha é escrita para o aluno',
+    (_id, exercise) => {
+      const resultado = executarSql(abrir, {
+        setup: setupDe(exercise),
+        code: exercise.initialCode,
+        solution: exercise.solution,
+        tests: exercise.tests,
+      });
+      for (const teste of resultado.testResults) {
+        if (teste.passed) continue;
+        expect(teste.message.length, 'mensagem curta demais para orientar').toBeGreaterThan(15);
+      }
+      if (resultado.error) {
+        expect(resultado.error, 'erro cru do SQLite chegando ao aluno').not.toMatch(/^near |^no such /);
       }
     }
   );
