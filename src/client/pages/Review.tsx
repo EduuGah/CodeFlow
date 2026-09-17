@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { IconCheckCircle, IconClose, IconSpinner } from '../components/ui/Icon';
+import { IconClose, IconSpinner } from '../components/ui/Icon';
 import { VinhetaCartoes } from '../components/ui/Ilustracao';
 
 import { listConcepts, listFlashcards } from '../../content';
@@ -131,8 +131,8 @@ export function Review() {
           />
         ) : terminou ? (
           <div className="max-w-md space-y-6 text-center">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-success-50 text-success-600">
-              <IconCheckCircle size={32} />
+            <div className="animar-pop mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-success-50" aria-hidden>
+              <VinhetaCartoes size={60} />
             </div>
             <div>
               <h2 className="text-2xl font-bold text-ink">Revisão concluída</h2>

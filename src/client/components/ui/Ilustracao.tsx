@@ -204,32 +204,6 @@ export const VinhetaBussola = (p: VinhetaProps) => (
   </Vinheta>
 );
 
-/** Chave: entrar. */
-export const VinhetaChave = (p: VinhetaProps) => (
-  <Vinheta {...p}>
-    <Sombra rx={15} />
-    <circle cx="16" cy="18" r="11" fill={P.dourado} />
-    <circle cx="16" cy="18" r="10" fill="none" stroke={P.douradoEscuro} strokeWidth={1.2} opacity={0.6} />
-    <circle cx="16" cy="18" r="4" fill={P.escuro} />
-    <path d="M24 25l15 15" stroke={P.douradoEscuro} strokeWidth={6} strokeLinecap="round" />
-    <path d="M24 25l15 15" stroke={P.dourado} strokeWidth={4} strokeLinecap="round" />
-    <path d="M33 34l4-4M37 38l4-4" stroke={P.dourado} strokeWidth={4} strokeLinecap="round" />
-  </Vinheta>
-);
-
-/** Foguete: começar. */
-export const VinhetaFoguete = (p: VinhetaProps) => (
-  <Vinheta {...p}>
-    <path d="M18 34l-4 8 8-4z" fill={P.dourado} />
-    <path d="M20 32l-2 6 6-2z" fill={P.laranja} />
-    <path d="M28 6c9 2 13 10 12 20l-8 8-8-8c-4-8-2-16 4-20z" fill={P.creme} />
-    <path d="M28 6c9 2 13 10 12 20l-4 4c-2-10-4-16-8-24z" fill={P.escuro} opacity={0.08} />
-    <circle cx="30" cy="18" r="4" fill={P.azul} />
-    <circle cx="30" cy="18" r="2.2" fill={P.azulClaro} />
-    <path d="M24 26l-8 2 4 6zM32 34l2 8 6-4z" fill={P.vermelho} />
-  </Vinheta>
-);
-
 /** Relógio: aulas curtas. */
 export const VinhetaRelogio = (p: VinhetaProps) => (
   <Vinheta {...p}>

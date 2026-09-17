@@ -7,9 +7,9 @@ import { DIFFICULTY_LABELS, LANGUAGE_LABELS } from '../../../content/types';
 import { useStudentData } from '../../contexts/StudentDataContext';
 import { montarPercurso, trilhaDaVez } from '../../lib/percurso';
 import { PercursoDetalhado } from '../../components/dashboard/Percurso';
-import { IconArrowRight, IconAward, IconProject } from '../../components/ui/Icon';
+import { IconArrowRight } from '../../components/ui/Icon';
 import { Carregando, Skeleton } from '../../components/ui/Skeleton';
-import { VinhetaCaixa } from '../../components/ui/Ilustracao';
+import { VinhetaCaixa, VinhetaEditor, VinhetaMedalha } from '../../components/ui/Ilustracao';
 import { EmptyState } from '../../components/ui/States';
 import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 
@@ -149,11 +149,12 @@ export function Tracks() {
                       className="-mx-2 flex items-center gap-4 rounded-lg px-2 py-3.5 transition-colors hover:bg-sunken"
                     >
                       <span
-                        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${
-                          entregue ? 'bg-success-50 text-success-700' : 'bg-sunken text-ink-soft'
+                        className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${
+                          entregue ? 'bg-success-50' : 'bg-sunken'
                         }`}
+                        aria-hidden
                       >
-                        {entregue ? <IconAward size={20} /> : <IconProject size={20} />}
+                        {entregue ? <VinhetaMedalha size={34} /> : <VinhetaEditor size={34} />}
                       </span>
 
                       <span className="min-w-0 flex-1">

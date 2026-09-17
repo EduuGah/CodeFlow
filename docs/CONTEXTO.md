@@ -253,7 +253,7 @@ src/client/components/  Componentes
                         nove por nível ou moedas), e a foto
   ui/Ilustracao.tsx     As vinhetas (grade 48, cheias, paleta `P`): moedas,
                         paleta, medalha, alvo, gráfico, floco, raio duplo,
-                        cartões, caixa, bússola, chave, foguete, relógio,
+                        cartões, caixa, bússola, relógio,
                         balão, editor, e a janela pintada na cor do tema
   ui/Emblema.tsx        O emblema de cada trilha (símbolo branco sobre a cor)
   ui/Cena.tsx           A cena da página pública: o editor digitando e o

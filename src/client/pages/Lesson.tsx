@@ -28,14 +28,11 @@ import { WriteTest } from '../components/lesson/WriteTest';
 import { Button, buttonClasses } from '../components/ui/Button';
 import { Card, SectionLabel } from '../components/ui/Card';
 import { MarkdownReader } from '../components/ui/MarkdownReader';
-import {
-  IconArrowLeft,
-  IconArrowRight,
-  IconCheck,
-  IconCheckCircle,
-  IconClose,
-  IconTarget,
-} from '../components/ui/Icon';
+import { IconArrowLeft, IconArrowRight, IconCheck, IconClose, IconCoin, IconTarget } from '../components/ui/Icon';
+import { EmblemaDaTrilha } from '../components/ui/Emblema';
+import { VinhetaMedalha } from '../components/ui/Ilustracao';
+import { MOEDAS } from '../lib/economia';
+import { XP } from '../lib/gamification';
 
 /**
  * Aula em passos.
@@ -245,15 +242,17 @@ export function Lesson() {
             <IconClose size={20} />
           </Link>
 
+          {/* O emblema da trilha, como no percurso: diz o assunto antes do nome. */}
+          <EmblemaDaTrilha trackId={lesson.trackId} size={32} className="hidden shrink-0 sm:block" />
+
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-bold text-ink">{lesson.title}</p>
             {/* O próprio contador é a região viva: duplicá-lo num span oculto
                 faria o leitor de tela anunciar a mesma informação duas vezes. */}
             <p className="label-mono flex items-center gap-1.5 text-ink-faint" aria-live="polite">
-              {/* A cor da trilha, como no percurso: diz o assunto antes do nome. */}
               <span
                 aria-hidden
-                className="inline-block h-2 w-2 rounded-full"
+                className="inline-block h-2 w-2 rounded-full sm:hidden"
                 style={{ background: corDaTrilha(lesson.trackId) }}
               />
               Passo {posicao + 1} de {steps.length} · {LANGUAGE_LABELS[lesson.language]}
@@ -324,8 +323,8 @@ export function Lesson() {
                 salvo nada. */}
             {tudoResolvido || jaConcluida ? (
               <Card tone="success" className="text-center">
-                <span className="mx-auto mb-2 flex h-11 w-11 items-center justify-center rounded-full bg-success-600 text-white">
-                  <IconCheckCircle size={24} />
+                <span className="animar-pop mx-auto mb-2 flex h-20 w-20 items-center justify-center rounded-full bg-surface" aria-hidden>
+                  <VinhetaMedalha size={56} />
                 </span>
                 <p className="font-bold text-success-700">Aula concluída</p>
                 <p className="mt-1 text-sm leading-relaxed text-ink-soft">
@@ -333,6 +332,31 @@ export function Lesson() {
                     ? 'Seu progresso foi salvo. A próxima aula continua daqui.'
                     : 'Você chegou ao fim desta trilha.'}
                 </p>
+                {/* O que a aula rendeu — os números de verdade de `XP` e
+                    `MOEDAS`, os mesmos que o perfil recalcula do histórico.
+                    Só para quem tem sessão: visitante não gera histórico. */}
+                {userId && (
+                  <ul className="mt-4 flex flex-wrap justify-center gap-2" aria-label="O que esta aula rendeu">
+                    <li
+                      className="animar-pop rounded-lg bg-surface px-3 py-1.5 text-sm font-bold text-ink"
+                      style={{ animationDelay: '0.25s' }}
+                    >
+                      +{XP.porAulaConcluida} XP
+                    </li>
+                    <li
+                      className="animar-pop flex items-center gap-1.5 rounded-lg bg-surface px-3 py-1.5 text-sm font-bold text-energy-700"
+                      style={{ animationDelay: '0.4s' }}
+                    >
+                      <IconCoin size={15} />+{MOEDAS.porAulaConcluida} moedas
+                    </li>
+                  </ul>
+                )}
+                {userId && (
+                  <p className="mt-3 text-xs leading-relaxed text-ink-faint">
+                    Cada exercício resolvido aqui já valeu {XP.exercicioResolvido} XP. Com o dobro de XP ativo, tudo isso
+                    dobra.
+                  </p>
+                )}
               </Card>
             ) : (
               <Card tone="caution">

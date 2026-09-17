@@ -72,7 +72,7 @@ export function ExerciseFeedback({
       ref={refDoBloco}
       role={anunciar ? 'status' : undefined}
       tabIndex={-1}
-      className={`rounded-lg border p-4 focus-visible:outline-none ${
+      className={`animar-pousar rounded-lg border p-4 focus-visible:outline-none ${
         acertou ? 'border-success-200 bg-success-50' : 'border-energy-200 bg-energy-50'
       }`}
     >
@@ -81,7 +81,13 @@ export function ExerciseFeedback({
           acertou ? 'text-success-700' : 'text-energy-700'
         }`}
       >
-        {acertou ? <IconCheckCircle size={18} /> : <IconCloseCircle size={18} />}
+        {/* O certo pipoca; o errado só pousa. O movimento é a recompensa,
+            e recompensa é para o acerto. */}
+        {acertou ? (
+          <IconCheckCircle size={18} className="animar-pop" />
+        ) : (
+          <IconCloseCircle size={18} />
+        )}
         {titulo ?? (acertou ? 'Resposta correta' : 'Ainda não está certo')}
       </p>
 
