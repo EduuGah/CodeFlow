@@ -6,7 +6,7 @@ que conclui uma fase.
 
 ## Onde estamos
 
-**Fases 1, 2 e 3 de 8 concluídas · Fase 4 pela metade: SQL 10 de 10 · publicado**
+**Fases 1, 2 e 3 de 8 concluídas · Fase 4: SQL 10 de 10, Node 3 de 10 · publicado**
 
 ```
 Fase 0  Fundamentos e lógica      ██████████████████████  13/13  pronto
@@ -15,7 +15,7 @@ Fase 1  JavaScript real          ███████████████�
         Plataforma                ██████████████████████   7/7  pronto
 Fase 2  A página                 ██████████████████████  26/26  pronto
 Fase 3  Tipos e componentes      ██████████████████████  24/24  pronto
-Fase 4  Back-end e dados         ███████████░░░░░░░░░░░  10/20  SQL pronto
+Fase 4  Back-end e dados         ██████████████░░░░░░░░  13/20  SQL pronto, Node começou
 Fase 5  Profissionalização       ░░░░░░░░░░░░░░░░░░░░░░   0/19
 Fase 6  Python                   ░░░░░░░░░░░░░░░░░░░░░░   0/10
 Fase 7  Projeto final            ░░░░░░░░░░░░░░░░░░░░░░   0/5
@@ -23,13 +23,19 @@ Fase 7  Projeto final            ░░░░░░░░░░░░░░░�
 
 | | Hoje | Previsto | Feito |
 | --- | ---: | ---: | ---: |
-| Aulas | **91** | 135 | 67% |
-| Exercícios | **532** | ~700 | 76% |
-| Tipos de exercício | **9** | 11 | 82% |
-| Motores de execução | **5** | 7 | 71% |
+| Aulas | **94** | 135 | 70% |
+| Exercícios | **551** | ~700 | 79% |
+| Tipos de exercício | **10** | 11 | 91% |
+| Motores de execução | **6** | 7 | 86% |
 | Projetos | **7** | ~30 | 23% |
 
-**Último trabalho** (2026-09-16): o motor de SQL — o sql.js num worker, o
+**Último trabalho** (2026-09-17): o motor 4, o **servidor simulado** — um
+Node de mentira dentro do sandbox de sempre, com um Express pequeno,
+`require` de arquivos do exercício, `process.env` e o `pedir()` dos testes
+— e as três primeiras aulas de "Node e APIs": Node fora do navegador e
+módulos, o primeiro servidor, rotas e parâmetros. O exercício `server`
+mostra os pedidos e as respostas como um cliente de API. Antes disso
+(2026-09-16): o motor de SQL — o sql.js num worker, o
 exercício julgado pelas linhas devolvidas — e a trilha "SQL e Bancos de
 Dados" inteira, 10 aulas e 43 exercícios de SQL sobre o banco de uma loja.
 É a primeira trilha em que o aluno não escreve JavaScript. Metade da Fase 4;
@@ -424,7 +430,33 @@ vendido, e-mails vazios, um pedido cancelado, preços que mudaram.
 | 9 | Normalização: as três anomalias, cada fato num lugar, 1:N e N:N com tabela de ligação, migrar, repetir de propósito |
 | 10 | Índices: SCAN vs SEARCH, EXPLAIN QUERY PLAN, o custo, índice composto, o que impede o índice, índice único; o relatório final |
 
-**Node e back-end — 0 de 10.** Motor 4 (servidor simulado) por fazer.
+**Node e APIs — 3 de 10.** Motor 4 (servidor simulado) — **pronto**
+(2026-09-17). A trilha `track-node` abre a quarta etapa do percurso, "A
+aplicação inteira".
+
+Como o motor 4 funciona, para quem for escrever mais aulas: em aula com
+`language: 'node'`, todo exercício roda no sandbox de sempre com o prelúdio
+de `servidor-core.ts` na frente — `require('express')` devolve o Express
+pequeno, `require('./x')` acha o que o exercício pôs em `arquivos`,
+`process.env` é o `env` do exercício, `module.exports` funciona, e os testes
+rodam **em série**. O exercício `server` é o `code` com `arquivos`, `env` e
+a tela de pedidos e respostas; os testes chamam `pedir(app, 'GET', '/rota',
+{ body, headers })` e leem `status`, `body` (JSON já convertido) e `texto`.
+Um exercício `server` sem `pedir` nos testes é um exercício de módulo (o
+botão diz "Executar código"). O que o Express pequeno tem: rotas com
+`:parametro`, `req.query`, `req.body` só depois de `express.json()`,
+`res.status/json/send/set`, `app.use` com prefixo, `next`, middleware de
+erro com quatro argumentos, 404 e 500 padrão, `listen` com callback
+assíncrono. O que não tem: `require` de qualquer outro pacote, disco,
+rede. O CI prova que a solução de cada `server` responde tudo, que o código
+inicial não passa, e que toda verificação com `pedir` fez o pedido.
+
+| Aula | Assunto |
+| --- | --- |
+| 1 | Node fora do navegador: o que muda, `process.env`, `module.exports`/`require`, `exports =` que não funciona |
+| 2 | O primeiro servidor: porta, `express()`, `app.get`, `req`/`res`, `res.send`/`res.json`, `listen` assíncrono |
+| 3 | Rotas e parâmetros: `req.params` (texto!), `req.query`, 404 com `return`, a ordem das rotas |
+| 4–10 | por fazer: corpo e JSON (`express.json()`, POST, 201, validação); status e erros (middleware de erro); middleware e autenticação por cabeçalho; CRUD em memória (PUT/PATCH/DELETE); assincronia no servidor (repositório `async`); configuração e segredos; projeto de API |
 
 ## O que o dono do projeto pediu em 2026-09-17
 

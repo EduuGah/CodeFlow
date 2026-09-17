@@ -564,8 +564,10 @@ export async function resolverExercicio(
 
     case 'server': {
       await escreverNoEditor(page, exercicio.solution);
-      await page.getByRole('button', { name: /Rodar o servidor|Rodar de novo/ }).click();
-      await page.getByText('O servidor respondeu tudo como esperado').waitFor({ timeout: 40_000 });
+      await page.getByRole('button', { name: /Rodar o servidor|Executar código|Rodar de novo|Executar de novo/ }).click();
+      await page
+        .getByText(/O servidor respondeu tudo como esperado|Todos os testes passaram/)
+        .waitFor({ timeout: 40_000 });
       return;
     }
 

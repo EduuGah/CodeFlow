@@ -112,6 +112,14 @@ figuras são **cheias e pintadas** (`components/ui/Ilustracao.tsx`, paleta
 editor, aulas, página, correção, cartões, percurso, projeto) na página pública,
 nas trilhas, nos projetos e na revisão — o dono do projeto gostou muito da
 primeira e pediu mais nesse estilo. Nada vem de banco de imagens e não há emoji na interface.
+**Motor 4, o servidor simulado** (2026-09-17): `servidor-core.ts` é um Node de
+mentira que roda no sandbox de sempre — `require('express')` devolve um
+Express pequeno, `require('./x')` acha os `arquivos` do exercício,
+`process.env` vem do exercício, `pedir(app, 'GET', '/rota')` é o cliente
+HTTP dos testes, que rodam em série. A trilha "Node e APIs" (`track-node`,
+linguagem `node`, exercício `server`) tem 3 de 10 aulas; as próximas estão
+listadas em `docs/curriculo.md`. O "Pular por ora" saiu: exercício sem
+resposta verificada não deixa avançar.
 **Avisos de novidade** (`lib/novidades.ts` + `layout/Novidades.tsx`): subir de
 nível, abrir conquista e cumprir desafio são avisados ao voltar ao aplicativo,
 comparando o estado derivado com o que a pessoa já viu (guardado no aparelho —

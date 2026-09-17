@@ -88,6 +88,9 @@ export function ServerExerciseStep({ exercise, lessonId, onEstado }: ServerExerc
   const registrar = useRecordAttempt();
   const arquivos = Object.entries(exercise.arquivos ?? {});
   const env = Object.entries(exercise.env ?? {});
+  // Um exercício de módulo (sem pedido HTTP nenhum) roda no mesmo Node de
+  // mentira, mas o botão não pode prometer um servidor que não existe.
+  const temServidor = exercise.tests.some((t) => t.assertion.includes('pedir('));
 
   useEffect(() => {
     setCode(exercise.initialCode);
@@ -191,7 +194,17 @@ export function ServerExerciseStep({ exercise, lessonId, onEstado }: ServerExerc
 
       <ExerciseAction onClick={executar} disabled={rodando} carregando={rodando}>
         {!rodando && <IconPlay size={18} />}
-        {rodando ? 'Subindo o servidor…' : resultado === null ? 'Rodar o servidor' : 'Rodar de novo'}
+        {rodando
+          ? temServidor
+            ? 'Subindo o servidor…'
+            : 'Executando…'
+          : resultado === null
+            ? temServidor
+              ? 'Rodar o servidor'
+              : 'Executar código'
+            : temServidor
+              ? 'Rodar de novo'
+              : 'Executar de novo'}
       </ExerciseAction>
 
       {desatualizado && (
@@ -208,16 +221,20 @@ export function ServerExerciseStep({ exercise, lessonId, onEstado }: ServerExerc
               estado={passouTudo ? 'acertou' : 'errou'}
               titulo={
                 passouTudo
-                  ? 'O servidor respondeu tudo como esperado'
+                  ? temServidor
+                    ? 'O servidor respondeu tudo como esperado'
+                    : 'Todos os testes passaram'
                   : `${falhas.length} de ${visiveis.length} ${
-                      visiveis.length === 1 ? 'pedido não veio como esperado' : 'pedidos não vieram como esperado'
+                      visiveis.length === 1 ? 'verificação falhou' : 'verificações falharam'
                     }`
               }
             >
               <p className="text-sm leading-relaxed text-ink-soft">
                 {passouTudo
-                  ? 'Cada pedido abaixo recebeu o status e o corpo que a tarefa pede — o código pode ser diferente do de referência, e não faz diferença.'
-                  : 'Compare cada pedido com a resposta que o seu servidor deu, logo abaixo. Comece pelo primeiro que falhou.'}
+                  ? 'O código pode ser diferente do de referência, e não faz diferença: o que conta é o que ele responde.'
+                  : temServidor
+                    ? 'Compare cada pedido com a resposta que o seu servidor deu, logo abaixo. Comece pelo primeiro que falhou.'
+                    : 'Cada linha abaixo diz o que era esperado. Comece pela primeira que falhou.'}
               </p>
             </ExerciseFeedback>
           )}

@@ -10,6 +10,7 @@ import { rodarPaginaNoJsdom } from '../client/lib/pagina-jsdom';
 import { compilarNoNode } from '../client/lib/typescript-node';
 import { executarSql, type AbrirBanco } from '../client/lib/sql-core';
 import { abrirBancoNoNode } from '../client/lib/sql-node';
+import { montarCodigoDoServidor } from '../client/lib/servidor-core';
 import { BANCOS } from './bancos';
 import { ETAPAS_DO_PERCURSO } from './percurso';
 import { formatarErros, verificarTrechos, type TrechoDeTipo } from '../client/lib/typescript-core';
@@ -27,7 +28,7 @@ import { embaralhar, estaOrdenado } from '../client/lib/ordenar';
 import { avaliarTestes } from '../client/lib/escrever-teste';
 import { corrigirLinha, linhasNumeradas } from '../client/lib/encontrar-bug';
 import { avaliarRestricoes, todasCumpridas } from '../client/lib/refatorar';
-import type { CodeExercise, Exercise, FillBlankExercise, LanguageId, Lesson, SqlExercise } from './types';
+import type { CodeExercise, Exercise, FillBlankExercise, LanguageId, Lesson, ServerExercise, SqlExercise } from './types';
 
 /**
  * Suíte de integridade do conteúdo.
@@ -87,6 +88,12 @@ async function executar(
   if (motor.runtime === 'iframe') {
     const r = await rodarPaginaNoJsdom(codigo, tests);
     return { logs: r.logs, testResults: r.testResults, error: r.error };
+  }
+
+  // Node: o mesmo sandbox, com o Node de mentira na frente — `require`,
+  // `process`, `module.exports` — e os testes em série.
+  if (linguagem === 'node') {
+    return runProgram(montarCodigoDoServidor(codigo), tests, properties, { sequencial: true });
   }
 
   if (linguagem !== 'typescript') {
@@ -1093,4 +1100,64 @@ ${project.referenceSolution}`,
     const semCheckpoint = projetos.filter((p) => p.checkpoints.length === 0).map((p) => p.id);
     expect(semCheckpoint).toEqual([]);
   });
+});
+
+describe('exercícios de servidor', () => {
+  const serverExercises = allExercises.filter(
+    (item): item is { lesson: Lesson; exercise: ServerExercise } => item.exercise.type === 'server'
+  );
+
+  const rodar = (exercise: ServerExercise, codigo: string) =>
+    runProgram(
+      montarCodigoDoServidor(codigo, { env: exercise.env, arquivos: exercise.arquivos }),
+      exercise.tests,
+      [],
+      { sequencial: true }
+    );
+
+  it('exercício de servidor só existe em aula de Node, e aula de Node não tem SQL', () => {
+    // Fora de uma aula de Node o editor e o motor seriam outros; e o SQL tem
+    // o motor próprio.
+    for (const { lesson, exercise } of allExercises) {
+      if (lesson.language !== 'node') continue;
+      expect(exercise.type, `${exercise.id} é de SQL numa aula de Node`).not.toBe('sql');
+    }
+    for (const { lesson, exercise } of serverExercises) {
+      expect(lesson.language, `${exercise.id} é de servidor numa aula de ${lesson.language}`).toBe('node');
+    }
+  });
+
+  it.each(serverExercises.map(({ exercise }) => [exercise.id, exercise] as const))(
+    '%s: a solução de referência responde tudo como esperado',
+    async (_id, exercise) => {
+      const resultado = await rodar(exercise, exercise.solution);
+      expect(resultado.error, 'a solução não deveria falhar').toBeUndefined();
+      expect(resultado.testResults.filter((t) => !t.passed).map((t) => t.message)).toEqual([]);
+      expect(resultado.testResults).toHaveLength(exercise.tests.length);
+      // Uma verificação que chama `pedir` precisa ter feito o pedido de fato:
+      // se nenhum pedido saiu, ela passou sem olhar o servidor.
+      const pedem = exercise.tests.filter((t) => t.assertion.includes('pedir(')).length;
+      expect((resultado.trocas ?? []).length, 'as verificações não fizeram os pedidos que dizem fazer').toBeGreaterThanOrEqual(pedem);
+    }
+  );
+
+  it.each(serverExercises.map(({ exercise }) => [exercise.id, exercise] as const))(
+    '%s: o código inicial NÃO passa (o exercício exige trabalho do aluno)',
+    async (_id, exercise) => {
+      const resultado = await rodar(exercise, exercise.initialCode);
+      const todosPassaram = resultado.testResults.length > 0 && resultado.testResults.every((t) => t.passed);
+      expect(todosPassaram, 'o exercício está passando sem o aluno escrever nada').toBe(false);
+    }
+  );
+
+  it.each(serverExercises.map(({ exercise }) => [exercise.id, exercise] as const))(
+    '%s: toda mensagem de falha diz o que era esperado',
+    async (_id, exercise) => {
+      const resultado = await rodar(exercise, exercise.initialCode);
+      for (const teste of resultado.testResults) {
+        if (teste.passed) continue;
+        expect(teste.message.length, `"${teste.message}" é curta demais para orientar`).toBeGreaterThan(15);
+      }
+    }
+  );
 });

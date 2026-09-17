@@ -117,6 +117,8 @@ const OPCOES = {
  */
 function linguagemDoMonaco(language: LanguageId): { language: string; path?: string } {
   if (language === 'react') return { language: 'typescript', path: 'inmemory://codeflow/exercicio.tsx' };
+  // Node é JavaScript: a sintaxe é a mesma, o que muda é onde roda.
+  if (language === 'node') return { language: 'javascript' };
   return { language };
 }
 

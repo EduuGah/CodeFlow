@@ -678,4 +678,28 @@ export const concepts: Concept[] = [
     prerequisites: ['sql-modelar'],
     tags: ['sql'],
   },
+  {
+    id: 'node-modulos',
+    title: 'Node e módulos',
+    summary:
+      'O JavaScript fora do navegador: sem window nem document, com process e arquivos; module.exports e require; process.env; o mesmo código que roda no Node de verdade, rodando aqui num Node de mentira.',
+    prerequisites: ['cliente-servidor', 'funcoes', 'objetos'],
+    tags: ['node'],
+  },
+  {
+    id: 'node-servidor',
+    title: 'Servidor HTTP com Express',
+    summary:
+      'O que um servidor faz: escuta numa porta, recebe pedidos, responde; express(), app.get, req e res, res.send e res.json, app.listen; o pedir() dos exercícios.',
+    prerequisites: ['node-modulos', 'http'],
+    tags: ['node'],
+  },
+  {
+    id: 'node-rotas',
+    title: 'Rotas e parâmetros',
+    summary:
+      'Uma rota por recurso; :parametro em req.params, ?chave=valor em req.query; a ordem das rotas; 404 para o que não existe; res.status.',
+    prerequisites: ['node-servidor', 'rest'],
+    tags: ['node'],
+  },
 ];

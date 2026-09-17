@@ -86,7 +86,7 @@ export function Tracks() {
         <div className="min-w-0 flex-1">
           <h1 className="text-2xl font-extrabold tracking-tight text-ink">Trilhas</h1>
           <p className="mt-1 text-sm leading-relaxed text-ink-soft">
-            {trilhas.length} trilhas em três etapas, na ordem em que uma prepara a outra. Comece pela
+            {trilhas.length} trilhas em {percurso.length} etapas, na ordem em que uma prepara a outra. Comece pela
             primeira; se já souber, pule.
             {aulasFeitas > 0 ? ` Você concluiu ${aulasFeitas} de ${aulasTotal} aulas.` : ''}
           </p>

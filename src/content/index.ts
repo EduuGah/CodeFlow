@@ -25,6 +25,7 @@ import { trackPagina } from './tracks/pagina';
 import { trackTypescript } from './tracks/typescript';
 import { trackReact } from './tracks/react';
 import { trackSql } from './tracks/sql';
+import { trackNode } from './tracks/node';
 import { lessonVariaveis } from './lessons/js-01-variaveis';
 import { lessonTiposEOperadores } from './lessons/js-02-tipos-e-operadores';
 import { lessonCondicoes } from './lessons/js-03-condicoes';
@@ -116,6 +117,9 @@ import { lessonEscrita } from './lessons/sql-07-escrita';
 import { lessonModelar } from './lessons/sql-08-modelar';
 import { lessonNormalizacao } from './lessons/sql-09-normalizacao';
 import { lessonIndices } from './lessons/sql-10-indices';
+import { lessonNodeForaDoNavegador } from './lessons/node-01-fora-do-navegador';
+import { lessonNodeServidor } from './lessons/node-02-servidor';
+import { lessonNodeRotas } from './lessons/node-03-rotas';
 import { projetoImc } from './projects/js-imc';
 import { projetoConversor } from './projects/js-conversor';
 import { projetoBoletim } from './projects/js-boletim';
@@ -221,6 +225,9 @@ const lessons: Lesson[] = [
   lessonModelar,
   lessonNormalizacao,
   lessonIndices,
+  lessonNodeForaDoNavegador,
+  lessonNodeServidor,
+  lessonNodeRotas,
 ];
 const projects: Project[] = [
   projetoImc,
@@ -239,6 +246,7 @@ const tracks: Track[] = [
   trackTypescript,
   trackReact,
   trackSql,
+  trackNode,
 ];
 
 /**

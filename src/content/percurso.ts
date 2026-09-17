@@ -34,4 +34,9 @@ export const ETAPAS_DO_PERCURSO: EtapaDoPercurso[] = [
     description: 'O que se usa em equipe: tipos, componentes e o banco de dados por trás de tudo.',
     trackIds: ['track-typescript', 'track-react', 'track-sql'],
   },
+  {
+    title: 'A aplicação inteira',
+    description: 'O servidor por trás da tela, e o que faz um projeto ser de gente grande.',
+    trackIds: ['track-node'],
+  },
 ];

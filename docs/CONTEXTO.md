@@ -156,6 +156,19 @@ banco novo, para um teste que escreve não contaminar o seguinte. O banco de
 exemplo (`bancos/loja.ts`) é recriado a cada execução, e o CI confere que o
 painel de tabelas descreve exatamente o que o SQL cria.
 
+**O servidor roda no mesmo sandbox, com um Node de mentira na frente.** O
+motor 4 (`servidor-core.ts`) é um prelúdio em JavaScript de texto que vai
+antes do código do aluno: `require` (o Express pequeno, os `arquivos` do
+exercício), `process.env`, `module.exports`, e `pedir(app, método, caminho,
+opções)` — o cliente HTTP dos testes, que registra cada troca em
+`globalThis.__cfTrocas` para a tela mostrar. O sandbox ganhou `sequencial`
+(um servidor tem estado) e devolve as `trocas`. Em aula `node`, **todo**
+tipo de exercício passa pelo prelúdio (`executar.ts` e o `executar` do CI):
+lacuna, prever a saída e código funcionam com `require` e `process`. O
+Express pequeno imita o de verdade onde o aluno vai sentir: `req.body` só
+existe depois de `express.json()`, o callback do `listen` roda depois do
+resto do arquivo, uma rota que não responde nem chama `next()` é apontada.
+
 **A tela inicial e a de trilhas mostram o percurso, não a trilha padrão.**
 `content/percurso.ts` nomeia três etapas ("A base", "A web", "As ferramentas
 do trabalho") na ordem de `listTracks()`, e `lib/percurso.ts` monta o
@@ -224,6 +237,11 @@ src/client/lib/         Lógica pura e testada
   sql.ts                executarSqlNoNavegador(): fila, aquecimento, prazo
                         contado a partir do `iniciou` do worker
   sql-node.ts           O mesmo sql.js no Node, para o CI
+  servidor-core.ts      Motor 4, o prelúdio do Node de mentira: require,
+                        process.env, module.exports, o Express pequeno e o
+                        pedir() dos testes; `montarCodigoDoServidor`
+  servidor.ts           executarServidor(): o sandbox com o prelúdio e os
+                        testes em série
   fill-blank.ts         Molde com lacunas: dividir, preencher, validar
   mastery.ts            Domínio por conceito, em 4 níveis
   review.ts             Repetição espaçada, Leitner [1,3,7,14,30,60] dias
@@ -285,6 +303,9 @@ src/client/components/  Componentes
                         e `ExerciseFeedback` são o botão e o retorno de todos
   lesson/SqlExerciseStep  O exercício de SQL: painel de tabelas do banco (e o
                         `setup` do exercício), editor, resultado em tabela
+  lesson/ServerExerciseStep  O exercício de servidor: arquivos e ambiente do
+                        exercício acima do editor, e os pedidos e respostas
+                        como um cliente de API
   dashboard/Percurso    O percurso na tela: compacto (inicial) e detalhado
                         (trilhas), com o marco da linha do tempo das aulas
 src/client/pages/app/   Início é a aula da vez + o percurso; Trilhas é o

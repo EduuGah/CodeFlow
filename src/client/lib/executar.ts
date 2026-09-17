@@ -1,5 +1,6 @@
 import type { LanguageId } from '../../content/types';
 import { executeCode, type ExecutionResult } from './sandbox';
+import { montarCodigoDoServidor } from './servidor-core';
 import type { SandboxProperty, SandboxTest } from './sandbox-core';
 import { formatarErros, verificarTrechos, type Compilador, type TrechoDeTipo } from './typescript-core';
 
@@ -62,6 +63,11 @@ export async function executarNaLinguagem({
       testResults: [],
       error: 'Este exercício é de SQL e precisa do motor de banco; avise que ele está numa aula de SQL com um tipo que não roda lá.',
     };
+  }
+  // Node: o mesmo sandbox, com o Node de mentira na frente (`require`,
+  // `process`, `module.exports`) e os testes em série.
+  if (language === 'node') {
+    return executeCode(montarCodigoDoServidor(code), tests, properties, { sequencial: true });
   }
   if (language !== 'typescript') return executeCode(code, tests, properties);
 

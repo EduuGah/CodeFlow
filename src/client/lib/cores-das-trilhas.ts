@@ -16,6 +16,7 @@ export const CORES_DAS_TRILHAS: Record<string, string> = {
   'track-typescript': '#3178c6',
   'track-react': '#157a8c',
   'track-sql': '#7a3f8a',
+  'track-node': '#35753c',
 };
 
 const PADRAO = '#55605d';

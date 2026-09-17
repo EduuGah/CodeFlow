@@ -63,6 +63,19 @@ const SIMBOLOS: Record<string, ReactNode> = {
       <circle cx="24" cy="24" r="3" fill="currentColor" stroke="none" />
     </g>
   ),
+  // Node: o hexágono, com o servidor dentro — três discos e um led.
+  'track-node': (
+    <g fill="currentColor">
+      <path d="M24 4l17 10v20L24 44 7 34V14z" opacity={0.35} />
+      <path d="M24 9l13 7.5v15L24 39l-13-7.5v-15z" />
+      <g fill="var(--emblema-fundo)">
+        <rect x="17" y="16" width="14" height="4" rx="1.5" />
+        <rect x="17" y="22" width="14" height="4" rx="1.5" />
+        <rect x="17" y="28" width="14" height="4" rx="1.5" />
+        <circle cx="19.5" cy="18" r="1" fill="currentColor" />
+      </g>
+    </g>
+  ),
   'track-sql': (
     <g fill="currentColor">
       <ellipse cx="24" cy="13" rx="13" ry="5" />

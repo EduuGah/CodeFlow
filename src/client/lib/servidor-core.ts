@@ -127,7 +127,9 @@ function __cfExpress() {
     },
     listen: function (porta, cb) {
       app.porta = porta;
-      if (typeof cb === 'function') cb();
+      // Como no Node: o callback roda depois, não na hora — um console.log
+      // logo abaixo do listen aparece antes do "ouvindo na porta".
+      if (typeof cb === 'function') setTimeout(cb, 0);
       return { close: function () {} };
     },
     porta: null,

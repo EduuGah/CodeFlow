@@ -120,8 +120,9 @@ export function Landing() {
                 As trilhas
               </h2>
               <p className="max-w-xl text-sm leading-relaxed text-ink-soft">
-                Uma prepara a outra: os fundamentos primeiro, a web depois, e as ferramentas do mercado no
-                fim. Três etapas, sete trilhas, e o seu ponto no caminho sempre à vista.
+                Uma prepara a outra: os fundamentos primeiro, a web depois, as ferramentas do mercado e,
+                no fim, a aplicação inteira. {trilhas.length} trilhas em etapas, e o seu ponto no caminho
+                sempre à vista.
               </p>
             </div>
             <CenaPercurso className="w-full max-w-xs justify-self-center md:max-w-none" />

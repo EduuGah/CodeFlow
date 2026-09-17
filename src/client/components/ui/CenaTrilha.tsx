@@ -326,6 +326,56 @@ function CenaConsulta() {
   );
 }
 
+/** Node: o servidor lê a rota, monta a resposta, e o pedido volta com o JSON. */
+function CenaApi() {
+  return (
+    <Cena>
+      <Quadro>
+        <JanelaEscura x={8} y={10} w={344} h={120} />
+        {[0, 1, 2].map((i) => (
+          <text key={i} x="26" y={58 + i * 22} fill={EDITOR.apagado} fontSize="11" fontFamily={MONO}>
+            {i + 1}
+          </text>
+        ))}
+        <text x="44" y="58" fill={P.creme} fontSize="11" fontFamily={MONO} className="animar-digitar" style={{ animationDelay: '0.2s', transformBox: 'fill-box' } as CSSProperties}>
+          app.get(<tspan fill={P.dourado}>'/aulas'</tspan>, (req, res) =&gt; {'{'}
+        </text>
+        <Barra x={60} y={71} w={40} h={10} cor={P.roxo} atraso={0.7} />
+        <Barra x={106} y={71} w={110} h={10} cor={P.azulClaro} atraso={0.85} />
+        <text x="60" y="102" fill={P.creme} fontSize="11" fontFamily={MONO} className="animar-digitar" style={{ animationDelay: '1.1s', transformBox: 'fill-box' } as CSSProperties}>
+          res.<tspan fill={P.azulClaro}>json</tspan>(aulas)
+        </text>
+
+        {/* O pedido, o servidor, a resposta. */}
+        <Pop atraso={1.8}>
+          <rect x="8" y="146" width="124" height="26" rx="13" fill="var(--color-brand-600)" />
+          <text x="70" y="163" fill={P.creme} fontSize="11" fontWeight="700" textAnchor="middle" fontFamily={MONO}>
+            GET /aulas
+          </text>
+        </Pop>
+        <path d="M136 159h44" stroke={TELA.linha} strokeWidth="3" strokeDasharray="4 5" strokeLinecap="round" />
+        <Pop atraso={2.3}>
+          <circle cx="205" cy="159" r="18" fill={EDITOR.fundo} />
+          <rect x="197" y="150" width="16" height="4" rx="1.5" fill={EDITOR.apagado} />
+          <rect x="197" y="157" width="16" height="4" rx="1.5" fill={EDITOR.apagado} />
+          <rect x="197" y="164" width="16" height="4" rx="1.5" fill={P.verde} />
+        </Pop>
+        <path d="M228 159h44" stroke={TELA.linha} strokeWidth="3" strokeDasharray="4 5" strokeLinecap="round" />
+        <Pop atraso={2.9}>
+          <rect x="276" y="140" width="76" height="40" rx="10" fill={P.verde} />
+          <text x="314" y="157" fill={P.creme} fontSize="11" fontWeight="800" textAnchor="middle" fontFamily={MONO}>
+            200
+          </text>
+          <text x="314" y="172" fill={P.creme} fontSize="10" textAnchor="middle" fontFamily={MONO}>
+            [{'{'}…{'}'}, {'{'}…{'}'}]
+          </text>
+        </Pop>
+        <rect x="8" y="192" width="180" height="7" rx="3.5" fill={TELA.linha} />
+      </Quadro>
+    </Cena>
+  );
+}
+
 const CENAS: Record<string, ComponentType> = {
   'track-js-fundamentos': CenaVariaveis,
   'track-logica': CenaLogica,
@@ -334,6 +384,7 @@ const CENAS: Record<string, ComponentType> = {
   'track-typescript': CenaTipos,
   'track-react': CenaComponente,
   'track-sql': CenaConsulta,
+  'track-node': CenaApi,
 };
 
 /** A cena de abertura da trilha, ou nada — uma trilha nova sem cena não quebra. */
