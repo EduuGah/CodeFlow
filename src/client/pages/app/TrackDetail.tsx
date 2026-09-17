@@ -6,6 +6,7 @@ import { useStudentData } from '../../contexts/StudentDataContext';
 import { buildPath, summarizePath, type PathNode } from '../../lib/path';
 import { LearningPath } from '../../components/dashboard/LearningPath';
 import { TrackBanner } from '../../components/dashboard/TrackBanner';
+import { cenaDaTrilha } from '../../components/ui/CenaTrilha';
 import { IconArrowLeft } from '../../components/ui/Icon';
 import { ProgressBar } from '../../components/ui/ProgressBar';
 import { Carregando, Skeleton } from '../../components/ui/Skeleton';
@@ -56,6 +57,8 @@ export function TrackDetail() {
     { title: 'Aulas', description: trilha.description, lessonIds: trilha.lessonIds },
   ];
 
+  const CenaDaTrilha = cenaDaTrilha(trilha.id);
+
   return (
     <div className="space-y-8">
       <Link
@@ -67,7 +70,7 @@ export function TrackDetail() {
       </Link>
 
       <div className="space-y-5">
-        <TrackBanner track={trilha} summary={resumo} />
+        <TrackBanner track={trilha} summary={resumo} cena={CenaDaTrilha ? <CenaDaTrilha /> : undefined} />
         <ProgressBar label="Aulas concluídas" value={resumo.completed} max={resumo.total} showCount />
       </div>
 

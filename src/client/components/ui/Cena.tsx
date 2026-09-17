@@ -57,11 +57,11 @@ export function Cena({ children, className = '' }: { children: ReactNode; classN
   );
 }
 
-const EDITOR = { fundo: '#1b2220', barra: '#2c3733', apagado: '#6f7d78', painel: '#12291a', verde: '#8fd9a6' };
-const TELA = { fundo: 'var(--color-surface)', linha: 'var(--color-line)', texto: 'var(--color-ink-faint)', sunken: 'var(--color-sunken)' };
-const MONO = 'ui-monospace, SFMono-Regular, Menlo, monospace';
+export const EDITOR = { fundo: '#1b2220', barra: '#2c3733', apagado: '#6f7d78', painel: '#12291a', verde: '#8fd9a6' };
+export const TELA = { fundo: 'var(--color-surface)', linha: 'var(--color-line)', texto: 'var(--color-ink-faint)', sunken: 'var(--color-sunken)' };
+export const MONO = 'ui-monospace, SFMono-Regular, Menlo, monospace';
 
-function Quadro({ children, className = '' }: { children: ReactNode; className?: string }) {
+export function Quadro({ children, className = '' }: { children: ReactNode; className?: string }) {
   return (
     <svg viewBox="0 0 360 220" className={`h-auto w-full ${className}`} aria-hidden="true" focusable="false">
       {children}
@@ -70,7 +70,7 @@ function Quadro({ children, className = '' }: { children: ReactNode; className?:
 }
 
 /** Um bloco que se digita: `animar-digitar` com o atraso pedido. */
-function Barra({
+export function Barra({
   x,
   y,
   w,
@@ -102,7 +102,7 @@ function Barra({
 }
 
 /** Algo que pipoca: `animar-pop` com o atraso pedido, a partir do centro. */
-function Pop({ atraso, children }: { atraso: number; children: ReactNode }) {
+export function Pop({ atraso, children }: { atraso: number; children: ReactNode }) {
   return (
     <g
       className="animar-pop"
@@ -114,7 +114,7 @@ function Pop({ atraso, children }: { atraso: number; children: ReactNode }) {
 }
 
 /** A janela escura do editor, com os três pontos. */
-function JanelaEscura({ x, y, w, h }: { x: number; y: number; w: number; h: number }) {
+export function JanelaEscura({ x, y, w, h }: { x: number; y: number; w: number; h: number }) {
   return (
     <g>
       <rect x={x} y={y} width={w} height={h} rx="12" fill={EDITOR.fundo} />
@@ -128,7 +128,7 @@ function JanelaEscura({ x, y, w, h }: { x: number; y: number; w: number; h: numb
 }
 
 /** A janela clara da interface. */
-function JanelaClara({ x, y, w, h }: { x: number; y: number; w: number; h: number }) {
+export function JanelaClara({ x, y, w, h }: { x: number; y: number; w: number; h: number }) {
   return (
     <g>
       <rect x={x} y={y} width={w} height={h} rx="12" fill={TELA.fundo} stroke={TELA.linha} strokeWidth="1.5" />

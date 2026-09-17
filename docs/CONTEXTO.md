@@ -264,7 +264,11 @@ src/client/components/  Componentes
   ui/Cena.tsx           As cenas (360 × 220, animadas quando entram na
                         tela): editor, aulas, página, correção, cartões, desafio,
                         percurso, projeto — na página pública, nas trilhas,
-                        nos projetos e na revisão
+                        nos projetos e na revisão; `Quadro`, `Barra`, `Pop` e
+                        as janelas são os blocos para montar novas
+  ui/CenaTrilha.tsx     Uma cena de abertura por trilha (variáveis, lógica,
+                        web, tipos, componente, consulta), na faixa da
+                        trilha; `cenaDaTrilha(id)`
   perfil/               Os corpos das páginas do perfil: editar (nome, avatar,
                         foto), a loja, os desafios, as conquistas por
                         categoria, a aparência (modo e cor); `icones.tsx`

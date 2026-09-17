@@ -86,12 +86,17 @@ test.describe('celular', () => {
   });
 
   test('o editor de código se dimensiona na tela do celular', async ({ logado: page }) => {
+    // O Monaco são 3 MB: com a máquina ocupada por outro teste, o chunk pode
+    // levar mais que os 30 s padrão só para chegar. O mesmo prazo do teste
+    // do projeto, logo abaixo.
+    test.setTimeout(90_000);
     await page.goto('/lesson/lesson-js-4');
     await esperarConteudo(page);
 
     await irAteOEditor(page);
 
     const editor = page.locator('.monaco-editor').first();
+    await editor.waitFor({ timeout: 40_000 });
     await expect(editor).toBeVisible();
 
     const caixa = (await editor.boundingBox())!;

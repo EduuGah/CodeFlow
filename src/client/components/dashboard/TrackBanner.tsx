@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react';
+
 import type { Track } from '../../../content/types';
 import { corDaTrilha } from '../../lib/cores-das-trilhas';
 import type { PathSummary } from '../../lib/path';
@@ -12,7 +14,7 @@ import { EmblemaDaTrilha } from '../ui/Emblema';
  * Sem botão decorativo. O §310 é explícito: clique que não faz nada é pior que
  * a ausência dele — e é fácil colocar um "Guia" aqui só porque o formato pede.
  */
-export function TrackBanner({ track, summary }: { track: Track; summary: PathSummary }) {
+export function TrackBanner({ track, summary, cena }: { track: Track; summary: PathSummary; cena?: ReactNode }) {
   const posicao = summary.current
     ? `Etapa ${summary.current.position} de ${summary.total}`
     : `${summary.total} de ${summary.total} concluídas`;
@@ -30,16 +32,21 @@ export function TrackBanner({ track, summary }: { track: Track; summary: PathSum
         size={140}
         className="pointer-events-none absolute right-2 -top-7 opacity-20"
       />
-      <div className="relative">
-        <p className="label-mono text-white/70">{posicao}</p>
+      <div className="relative flex items-center gap-6">
+        <div className="min-w-0 flex-1">
+          <p className="label-mono text-white/70">{posicao}</p>
 
-        <h2 className="mt-1 text-xl font-bold tracking-tight">{track.title}</h2>
+          <h2 className="mt-1 text-xl font-bold tracking-tight">{track.title}</h2>
 
-        <p className="mt-1.5 text-sm leading-relaxed text-white/85">
-          {summary.current
-            ? summary.current.lesson.objective
-            : 'Você concluiu todas as aulas desta trilha.'}
-        </p>
+          <p className="mt-1.5 text-sm leading-relaxed text-white/85">
+            {summary.current
+              ? summary.current.lesson.objective
+              : 'Você concluiu todas as aulas desta trilha.'}
+          </p>
+        </div>
+        {/* A cena de abertura da trilha: o assunto acontecendo. De md para
+            cima, ao lado; no celular, a faixa é do texto. */}
+        {cena && <div className="hidden w-64 shrink-0 md:block">{cena}</div>}
       </div>
     </div>
   );
