@@ -6,6 +6,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { getLesson } from '../../content';
 import { buildLessonSteps } from '../lib/lesson-steps';
 import { Lesson } from './Lesson';
+import { botaoDeAvanco, responderErrado } from './aula.test-utils';
 
 /**
  * Percurso da aula usando só o teclado.
@@ -28,6 +29,11 @@ vi.mock('../components/ui/CodeEditor', () => ({
 
 vi.mock('canvas-confetti', () => ({ default: vi.fn() }));
 vi.mock('../contexts/AuthContext', () => ({ useAuth: () => ({ user: null }) }));
+// Para atravessar a aula inteira é preciso responder os exercícios; os que
+// rodam código usam o sandbox, que não existe no jsdom.
+vi.mock('../lib/sandbox', () => ({
+  executeCode: () => Promise.resolve({ output: '', logs: [], testResults: [], error: null, timedOut: false }),
+}));
 
 const AULA = 'lesson-js-4';
 const passos = buildLessonSteps(getLesson(AULA)!);
@@ -43,9 +49,7 @@ function abrir() {
   );
 }
 
-function acaoPrincipal() {
-  return screen.getByRole('button', { name: /Continuar|Pular por ora/ });
-}
+const acaoPrincipal = botaoDeAvanco;
 
 /** Tabula até encontrar o elemento, ou desiste — um laço infinito seria pior. */
 async function tabularAte(
@@ -197,7 +201,11 @@ describe('todo controle alcançável tem nome', () => {
         ).toBeTruthy();
       }
 
-      if (i < passos.length - 1) await user.click(acaoPrincipal());
+      if (i < passos.length - 1) {
+        const passo = passos[i];
+        if (passo.kind === 'exercise') await responderErrado(user, passo.exercise);
+        await user.click(acaoPrincipal());
+      }
     }
   });
 });

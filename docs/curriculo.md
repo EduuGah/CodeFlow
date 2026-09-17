@@ -426,6 +426,28 @@ vendido, e-mails vazios, um pedido cancelado, preços que mudaram.
 
 **Node e back-end — 0 de 10.** Motor 4 (servidor simulado) por fazer.
 
+## O que o dono do projeto pediu em 2026-09-17
+
+Depois de uma rodada inteira de plataforma (gamificação, perfil, temas,
+figuras, cenas), a ordem foi **voltar às aulas**, com três alvos:
+
+1. **Do zero a uma aplicação completa**: página + API + banco, integrados.
+   É a Fase 4 que falta (Node e back-end, motor 4) mais o capstone da Fase
+   7 — a página que já se sabe fazer chamando a API que se vai aprender a
+   escrever, sobre o SQL que já se sabe consultar.
+2. **Uma área de engenharia**: como dividir os arquivos em pastas, boas
+   práticas, o que faz um projeto ser legível por outra pessoa. Vira uma
+   trilha própria na Fase 5 ("Engenharia: organizar um projeto"), sem motor
+   novo — módulos e `import/export`, pastas por responsabilidade, nomes,
+   funções pequenas, erros, configuração e segredos, README, revisão.
+3. **Mais linguagens**, mais adiante — Python (Fase 6) é a primeira.
+
+A ordem escolhida: motor 4 e a trilha de Node (é o pedaço que falta para a
+aplicação completa), depois a trilha de engenharia, depois o capstone.
+
+Também saiu o "Pular por ora": um exercício sem resposta verificada não deixa
+avançar; responder errado libera ("Continuar assim mesmo").
+
 ### Fase 5 — Profissionalização · 19 aulas
 Motor: **nenhum novo**. Encaixa em qualquer buraco entre as outras fases.
 

@@ -256,20 +256,16 @@ export async function esperarConteudo(page: Page): Promise<void> {
  * editor só aparece segundos depois, quando o Monaco termina de carregar.
  */
 export async function irAteOEditor(page: Page): Promise<void> {
+  // Desde que "Pular por ora" saiu, os exercícios do caminho precisam ser
+  // respondidos: o helper resolve cada um até chegar ao primeiro que abre o
+  // editor. A aula vem da URL, para quem chama não precisar repeti-la.
+  await irAteOExercicio(page, (e) => e.type === 'code' || e.type === 'sql' || e.type === 'refactor' || e.type === 'write-test');
+
   // "Executar código" no sandbox de JavaScript; "Rodar a página" no motor de
   // página. Os dois são o mesmo passo para quem navega.
   const executar = page.getByRole('button', {
-    name: /^(Executar código|Rodar a página|Rodar o componente|Executar consulta)$/,
+    name: /^(Executar código|Rodar a página|Rodar o componente|Executar consulta|Rodar os testes|Rodar meus testes)$/,
   });
-
-  for (let i = 0; i < 12 && !(await executar.count()); i++) {
-    const acao = page.getByRole('button', {
-      name: /Continuar assim mesmo|Continuar|Pular por ora/,
-    });
-    if (!(await acao.count())) break;
-    await acao.click();
-  }
-
   await executar.waitFor({ timeout: 15_000 });
   // Em desenvolvimento o Monaco são centenas de módulos servidos pelo Vite, e
   // o outro worker do Playwright disputa o mesmo servidor — com a trilha da
@@ -290,6 +286,113 @@ export async function irAteOEditor(page: Page): Promise<void> {
 }
 
 export { expect };
+
+/** O botão do rodapé que leva ao passo seguinte — liberado ou não. */
+export function botaoDeAvanco(page: Page) {
+  return page.getByRole('button', { name: /^(Continuar|Continuar assim mesmo|Responda para continuar)$/ });
+}
+
+/** A aula que está aberta, pela URL. */
+function aulaAberta(page: Page): string {
+  const id = new URL(page.url()).pathname.match(/\/lesson\/([^/]+)/)?.[1];
+  if (!id) throw new Error(`não há aula aberta em ${page.url()}`);
+  return id;
+}
+
+/**
+ * Anda pela aula aberta até o primeiro exercício que satisfaz `alvo`,
+ * resolvendo os exercícios do caminho — sem "Pular por ora", é assim que se
+ * chega a um passo no meio da aula. Para na tela do exercício alvo, sem
+ * respondê-lo.
+ */
+export async function irAteOExercicio(page: Page, alvo: (e: Exercise) => boolean): Promise<void> {
+  const { getLesson } = await import('../src/content');
+  const { buildLessonSteps } = await import('../src/client/lib/lesson-steps');
+  const aula = getLesson(aulaAberta(page))!;
+  const passos = buildLessonSteps(aula);
+  await page.getByText(/Passo 1 de/).waitFor();
+
+  for (const passo of passos) {
+    if (passo.kind === 'exercise') {
+      if (alvo(passo.exercise)) return;
+      await resolverExercicio(page, passo.exercise, aula.language);
+    }
+    await botaoDeAvanco(page).click();
+  }
+  throw new Error(`${aula.id} não tem o exercício pedido`);
+}
+
+/**
+ * Responde o exercício da tela errado, de propósito — o que um aluno que
+ * não sabe faria — para o avanço liberar sem o exercício contar como
+ * resolvido. É o oposto de `resolverExercicio`, e serve aos testes que
+ * provam que passar não é resolver.
+ */
+export async function responderErrado(page: Page, exercicio: Exercise): Promise<void> {
+  switch (exercicio.type) {
+    case 'multiple-choice': {
+      await page.getByRole('radio').nth(exercicio.correctIndex === 0 ? 1 : 0).check();
+      await page.getByRole('button', { name: 'Verificar resposta' }).click();
+      break;
+    }
+    case 'predict-output': {
+      await page.getByRole('textbox', { name: /O que você acha que será impresso/ }).fill('errado de propósito');
+      await page.getByRole('button', { name: /Executar e comparar/ }).click();
+      break;
+    }
+    case 'fill-blank': {
+      for (const campo of await page.getByRole('textbox', { name: /^Lacuna \d+ de / }).all()) {
+        await campo.fill('x');
+      }
+      await page.getByRole('button', { name: 'Verificar' }).click();
+      break;
+    }
+    case 'order-steps': {
+      await page.getByRole('button', { name: /Verificar ordem/ }).click();
+      break;
+    }
+    case 'find-bug': {
+      const linhaErrada = exercicio.buggyLine === 1 ? 2 : 1;
+      const radio = page.getByRole('radio', { name: new RegExp(`^Linha ${linhaErrada}:`) });
+      await page.locator('label').filter({ has: radio }).click();
+      await page.getByRole('button', { name: /Apontar a linha|Verificar de novo/ }).click();
+      break;
+    }
+    case 'code':
+    case 'sql':
+    case 'refactor':
+    case 'write-test':
+    case 'server': {
+      await escreverNoEditor(page, '// errado de propósito');
+      await page
+        .getByRole('button', {
+          name: /Executar código|Rodar a página|Rodar o componente|Executar consulta|Rodar os testes|Rodar meus testes|Rodar o servidor/,
+        })
+        .click();
+      break;
+    }
+    default: {
+      const tipo: never = exercicio;
+      throw new Error(`responderErrado não sabe o tipo ${(tipo as { type: string }).type}`);
+    }
+  }
+  // Errou, e o rodapé diz isso.
+  await page.getByRole('button', { name: 'Continuar assim mesmo' }).waitFor({ timeout: 90_000 });
+}
+
+/** Passa pela aula aberta inteira sem resolver nada: responde errado e segue. */
+export async function passarPelaAula(page: Page): Promise<void> {
+  const { getLesson } = await import('../src/content');
+  const { buildLessonSteps } = await import('../src/client/lib/lesson-steps');
+  const passos = buildLessonSteps(getLesson(aulaAberta(page))!);
+  await page.getByText(/Passo 1 de/).waitFor();
+
+  for (let i = 0; i < passos.length - 1; i++) {
+    const passo = passos[i];
+    if (passo.kind === 'exercise') await responderErrado(page, passo.exercise);
+    await botaoDeAvanco(page).click();
+  }
+}
 
 /**
  * Aula curta, com um exercício de cada tipo que exige verificação.
@@ -327,9 +430,7 @@ export async function concluirAula(page: Page, aulaId: string): Promise<void> {
       await resolverExercicio(page, passo.exercise, aula.language);
     }
 
-    const avancar = page.getByRole('button', {
-      name: /Continuar assim mesmo|Continuar|Pular por ora/,
-    });
+    const avancar = botaoDeAvanco(page);
     if (await avancar.count()) await avancar.click();
   }
 }
@@ -355,7 +456,7 @@ async function escreverNoEditor(page: Page, codigo: string): Promise<void> {
   }, codigo);
 }
 
-async function resolverExercicio(
+export async function resolverExercicio(
   page: Page,
   exercicio: Exercise,
   linguagem: LanguageId = 'javascript'
@@ -458,6 +559,13 @@ async function resolverExercicio(
       await page.getByRole('button', { name: /Executar consulta|Executar de novo/ }).click();
       // Na primeira execução da aula o SQLite em WebAssembly ainda está chegando.
       await page.getByText('As linhas são as esperadas').waitFor({ timeout: 90_000 });
+      return;
+    }
+
+    case 'server': {
+      await escreverNoEditor(page, exercicio.solution);
+      await page.getByRole('button', { name: /Rodar o servidor|Rodar de novo/ }).click();
+      await page.getByText('O servidor respondeu tudo como esperado').waitFor({ timeout: 40_000 });
       return;
     }
 

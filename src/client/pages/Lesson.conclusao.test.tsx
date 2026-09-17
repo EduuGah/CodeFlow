@@ -6,6 +6,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { getLesson } from '../../content';
 import { buildLessonSteps } from '../lib/lesson-steps';
 import { Lesson } from './Lesson';
+import { botaoDeAvanco, irAtePasso as andarAte } from './aula.test-utils';
 
 /**
  * O fluxo de conclusão de uma atividade, nos quatro tipos.
@@ -87,12 +88,14 @@ function abrir() {
   );
 }
 
-function botaoDeAvanco() {
-  return screen.getByRole('button', { name: /Continuar|Pular por ora|Continuar assim mesmo/ });
-}
-
+/**
+ * Chega ao passo respondendo errado o que aparecer no caminho — sem
+ * "Pular por ora", é assim que se passa por um exercício sem resolvê-lo.
+ * O sandbox dublado devolve vazio, que é "errou" em todos os tipos.
+ */
 async function irAtePasso(user: ReturnType<typeof userEvent.setup>, indice: number) {
-  for (let i = 0; i < indice; i++) await user.click(botaoDeAvanco());
+  executarMock.mockResolvedValue({ output: '', error: null, testResults: [], timedOut: false });
+  await andarAte(user, passos, indice);
 }
 
 beforeEach(() => {
@@ -106,8 +109,10 @@ describe('múltipla escolha', () => {
     abrir();
     await irAtePasso(user, passoDoTipo('multiple-choice'));
 
-    // O defeito original vivia exatamente aqui.
-    expect(botaoDeAvanco()).toHaveTextContent('Pular por ora');
+    // O defeito original vivia exatamente aqui: dizia "Pular por ora" a quem
+    // acabava de acertar. Hoje, sem resposta, o botão nem está liberado.
+    expect(botaoDeAvanco()).toHaveTextContent('Responda para continuar');
+    expect(botaoDeAvanco()).toBeDisabled();
 
     const exercicio = exercicioDoTipo('multiple-choice');
     if (exercicio.type !== 'multiple-choice') throw new Error('tipo inesperado');
@@ -149,8 +154,10 @@ describe('múltipla escolha', () => {
     expect(botaoDeAvanco()).toHaveTextContent('Continuar assim mesmo');
 
     await user.click(screen.getAllByRole('radio')[exercicio.correctIndex]);
-    // A resposta mudou e ainda não foi verificada: nada a afirmar sobre ela.
-    expect(botaoDeAvanco()).toHaveTextContent('Pular por ora');
+    // A resposta mudou e ainda não foi verificada: nada a afirmar sobre ela,
+    // e o avanço volta a esperar.
+    expect(botaoDeAvanco()).toHaveTextContent('Responda para continuar');
+    expect(botaoDeAvanco()).toBeDisabled();
   });
 });
 
@@ -169,7 +176,7 @@ describe('prever a saída', () => {
 
     abrir();
     await irAtePasso(user, passoDoTipo('predict-output'));
-    expect(botaoDeAvanco()).toHaveTextContent('Pular por ora');
+    expect(botaoDeAvanco()).toHaveTextContent('Responda para continuar');
 
     await user.type(
       screen.getByRole('textbox', { name: /O que você acha que será impresso/ }),

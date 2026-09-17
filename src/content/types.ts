@@ -19,7 +19,7 @@ export type Difficulty = 'iniciante' | 'intermediario' | 'avancado';
  * tanto para rotular o conteúdo quanto para configurar o editor.
  * Só JavaScript tem conteúdo hoje; os demais estão previstos no roadmap (§287).
  */
-export type LanguageId = 'javascript' | 'typescript' | 'react' | 'python' | 'sql' | 'html';
+export type LanguageId = 'javascript' | 'typescript' | 'react' | 'python' | 'sql' | 'html' | 'node';
 
 /**
  * Onde o código do aluno roda.
@@ -49,6 +49,8 @@ export const LANGUAGE_LABELS: Record<LanguageId, string> = {
   python: 'Python',
   sql: 'SQL',
   html: 'HTML',
+  /** JavaScript do lado do servidor: o mesmo código, rodando no Node de mentira. */
+  node: 'Node',
 };
 
 /**
@@ -366,6 +368,28 @@ export interface SqlExercise extends ExerciseBase {
  * completar um diagrama…) é estender esta união — nenhuma página precisa saber
  * de todos os tipos, só dos que renderiza (§315).
  */
+/**
+ * Escreve um servidor e ele responde a pedidos.
+ *
+ * O código é o de um Express de verdade (`require('express')`, `app.get`,
+ * `res.json`…), e roda no servidor simulado (`servidor-core.ts`): nenhuma
+ * porta abre, mas cada `pedir(app, 'GET', '/rota')` dos testes passa pelas
+ * rotas do aluno e devolve status e corpo. Os testes rodam em série, porque
+ * um servidor tem estado — o POST de um é o GET do seguinte.
+ */
+export interface ServerExercise extends ExerciseBase {
+  type: 'server';
+  initialCode: string;
+  /** JavaScript no escopo do aluno, com `pedir(app, método, caminho, opções)` à mão. */
+  tests: TestCase[];
+  /** `process.env` do exercício. */
+  env?: Record<string, string>;
+  /** Arquivos que `require('./nome')` encontra: caminho → código. */
+  arquivos?: Record<string, string>;
+  /** Solução de referência. Obrigatória: é ela que prova que o exercício é resolvível. */
+  solution: string;
+}
+
 export type Exercise =
   | CodeExercise
   | FillBlankExercise
@@ -374,6 +398,7 @@ export type Exercise =
   | OrderStepsExercise
   | PredictOutputExercise
   | RefactorExercise
+  | ServerExercise
   | SqlExercise
   | WriteTestExercise;
 

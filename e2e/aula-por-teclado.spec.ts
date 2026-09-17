@@ -1,4 +1,4 @@
-import { esperarConteudo, expect, test } from './fixtures';
+import { esperarConteudo, expect, responderErrado, test } from './fixtures';
 
 /**
  * A aula percorrida por teclado num navegador de verdade.
@@ -153,6 +153,12 @@ test('o elemento focado tem indicador visível', async ({ logado: page }) => {
 });
 
 test('a aula inteira se percorre sem mouse', async ({ logado: page }) => {
+  test.setTimeout(150_000);
+  const { getLesson } = await import('../src/content');
+  const { buildLessonSteps } = await import('../src/client/lib/lesson-steps');
+  const aula = getLesson(AULA)!;
+  const passos = buildLessonSteps(aula);
+
   await page.goto(`/lesson/${AULA}`);
 
   const contador = page.getByText(/Passo \d+ de \d+/);
@@ -161,14 +167,20 @@ test('a aula inteira se percorre sem mouse', async ({ logado: page }) => {
   const total = Number((await contador.textContent())!.match(/de (\d+)/)![1]);
   expect(total).toBeGreaterThan(1);
 
-  // Avança até o fim usando só o teclado, tabulando até a ação principal.
+  // Avança até o fim usando só o teclado, tabulando até a ação principal. Os
+  // exercícios do caminho são respondidos (errado) pelo helper — o editor é
+  // o Monaco; o que está sob prova aqui é a navegação entre passos, e o fim
+  // da aula confere que nada foi resolvido.
   for (let passo = 1; passo < total; passo++) {
+    const atual = passos[passo - 1];
+    if (atual.kind === 'exercise') await responderErrado(page, atual.exercise);
+
     const acao = page.getByRole('button', {
-      name: /Continuar assim mesmo|Continuar|Pular por ora/,
+      name: /Continuar assim mesmo|Continuar/,
     });
     await acao.waitFor();
 
-    for (let i = 0; i < 20 && !(await acao.evaluate((el) => el === document.activeElement)); i++) {
+    for (let i = 0; i < 40 && !(await acao.evaluate((el) => el === document.activeElement)); i++) {
       await page.keyboard.press('Tab');
     }
 

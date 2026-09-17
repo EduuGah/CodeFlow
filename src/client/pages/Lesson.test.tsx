@@ -6,6 +6,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { getLesson } from '../../content';
 import { buildLessonSteps } from '../lib/lesson-steps';
 import { Lesson } from './Lesson';
+import { botaoDeAvanco, irAtePasso, responderErrado } from './aula.test-utils';
 
 /**
  * Testes da navegação em passos.
@@ -25,6 +26,11 @@ vi.mock('../components/ui/CodeEditor', () => ({
 }));
 
 vi.mock('canvas-confetti', () => ({ default: vi.fn() }));
+// Atravessar a aula pede responder os exercícios; os que rodam código usam o
+// sandbox, que não existe no jsdom. Vazio é "errou" em todos.
+vi.mock('../lib/sandbox', () => ({
+  executeCode: () => Promise.resolve({ output: '', logs: [], testResults: [], error: null, timedOut: false }),
+}));
 
 // Sem sessão: o aluno segue navegando, só não gera histórico.
 vi.mock('../contexts/AuthContext', () => ({
@@ -54,7 +60,7 @@ function passoAtual() {
 }
 
 async function avancar(user: ReturnType<typeof userEvent.setup>) {
-  await user.click(screen.getByRole('button', { name: /Continuar|Pular por ora/ }));
+  await user.click(botaoDeAvanco());
 }
 
 describe('navegação entre passos', () => {
@@ -106,16 +112,16 @@ describe('navegação entre passos', () => {
     const user = userEvent.setup();
     abrirAula(AULA);
 
-    for (let i = 1; i < totalDePassos; i++) await avancar(user);
+    await irAtePasso(user, buildLessonSteps(getLesson(AULA)!), totalDePassos - 1);
 
     expect(passoAtual()).toBe(`Passo ${totalDePassos} de ${totalDePassos}`);
-    expect(screen.queryByRole('button', { name: /Continuar|Pular por ora/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Continuar|Responda para continuar/ })).not.toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Próxima aula|Voltar ao início/ })).toBeInTheDocument();
   });
 });
 
-describe('o exercício nunca prende o aluno', () => {
-  it('um exercício não resolvido ainda deixa seguir, e o botão diz isso', async () => {
+describe('o exercício pede uma resposta, mas não prende quem erra', () => {
+  it('sem resposta o avanço espera; depois de errar, libera e diz isso', async () => {
     const user = userEvent.setup();
     abrirAula(AULA);
 
@@ -123,14 +129,22 @@ describe('o exercício nunca prende o aluno', () => {
     const passos = buildLessonSteps(getLesson(AULA)!);
     const indiceDoExercicio = passos.findIndex((p) => p.kind === 'exercise');
     expect(indiceDoExercicio).toBeGreaterThan(-1);
+    const passo = passos[indiceDoExercicio];
+    if (passo.kind !== 'exercise') throw new Error('passo inesperado');
 
     for (let i = 0; i < indiceDoExercicio; i++) await avancar(user);
 
-    // Bloquear aqui transformaria dificuldade em parede (§280).
-    const botao = screen.getByRole('button', { name: 'Pular por ora' });
-    expect(botao).toBeEnabled();
-
+    // "Pular por ora" existiu aqui e saiu: sem resposta, não há para onde ir.
+    const botao = screen.getByRole('button', { name: 'Responda para continuar' });
+    expect(botao).toBeDisabled();
     await user.click(botao);
+    expect(passoAtual()).toBe(`Passo ${indiceDoExercicio + 1} de ${totalDePassos}`);
+
+    // Errar não tranca ninguém — dificuldade não vira parede (§280).
+    await responderErrado(user, passo.exercise);
+    const seguir = screen.getByRole('button', { name: 'Continuar assim mesmo' });
+    expect(seguir).toBeEnabled();
+    await user.click(seguir);
     expect(passoAtual()).toBe(`Passo ${indiceDoExercicio + 2} de ${totalDePassos}`);
   });
 });

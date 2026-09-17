@@ -1,4 +1,4 @@
-import { esperarConteudo, expect, irAteOEditor, test } from './fixtures';
+import { botaoDeAvanco, esperarConteudo, expect, irAteOEditor, responderErrado, test } from './fixtures';
 
 /**
  * O que só se vê num navegador com largura de celular.
@@ -171,6 +171,11 @@ test.describe('celular', () => {
   test('a aula não corta texto nem estoura a largura em nenhum passo', async ({
     logado: page,
   }) => {
+    test.setTimeout(150_000);
+    const { getLesson } = await import('../src/content');
+    const { buildLessonSteps } = await import('../src/client/lib/lesson-steps');
+    const passos = buildLessonSteps(getLesson('lesson-js-1')!);
+
     await page.goto('/lesson/lesson-js-1');
     await page.getByText(/Passo 1 de/).waitFor();
 
@@ -230,9 +235,10 @@ test.describe('celular', () => {
       expect(problemas.estouram, `passo ${passo}`).toEqual([]);
       expect(problemas.cortados, `passo ${passo}`).toEqual([]);
 
-      const avancar = page.getByRole('button', {
-        name: /Continuar assim mesmo|Continuar|Pular por ora/,
-      });
+      // O exercício do passo precisa de uma resposta para liberar o seguinte.
+      const atual = passos[passo - 1];
+      if (atual.kind === 'exercise') await responderErrado(page, atual.exercise);
+      const avancar = botaoDeAvanco(page);
       if (!(await avancar.count())) break;
       await avancar.click();
     }
@@ -243,7 +249,7 @@ test.describe('celular', () => {
     await page.getByText(/Passo 1 de/).waitFor();
 
     // Até a múltipla escolha, que é o passo com mais controles.
-    await page.getByRole('button', { name: /Continuar|Pular por ora/ }).click();
+    await page.getByRole('button', { name: 'Continuar' }).click();
     await page.getByRole('radio').first().waitFor();
 
     const pequenos = await page.evaluate(() => {

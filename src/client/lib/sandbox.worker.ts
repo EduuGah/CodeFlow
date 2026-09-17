@@ -29,6 +29,8 @@ export interface WorkerRequest {
   code: string;
   tests: SandboxTest[];
   properties?: SandboxProperty[];
+  /** Testes em série, para programas com estado (o servidor simulado). */
+  sequencial?: boolean;
 }
 
 /**
@@ -75,10 +77,10 @@ function lockDownGlobals(): void {
 }
 
 self.onmessage = async (event: MessageEvent<WorkerRequest>) => {
-  const { code, tests, properties } = event.data;
+  const { code, tests, properties, sequencial } = event.data;
 
   lockDownGlobals();
-  self.postMessage(await runProgram(code, tests, properties));
+  self.postMessage(await runProgram(code, tests, properties, { sequencial }));
 };
 
 // Depois de `onmessage` existir, e não antes: a mensagem com o programa pode

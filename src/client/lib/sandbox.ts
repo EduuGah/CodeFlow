@@ -2,6 +2,7 @@ import SandboxWorker from './sandbox.worker?worker';
 import type { WorkerRequest, WorkerResponse } from './sandbox.worker';
 import type { SandboxProperty, SandboxTest } from './sandbox-core';
 import type { ErroDeCompilacao } from './typescript-core';
+import type { Troca } from './servidor-core';
 
 export type { SandboxProperty, SandboxTest };
 
@@ -24,6 +25,8 @@ export interface ExecutionResult {
    * Nesse caso nada rodou: `error` traz o texto, e esta lista traz as linhas.
    */
   compileErrors?: ErroDeCompilacao[];
+  /** As trocas HTTP do servidor simulado, quando o programa é um servidor. */
+  trocas?: Troca[];
 }
 
 /**
@@ -47,6 +50,7 @@ function toResult(response: Exclude<WorkerResponse, 'pronto'>): ExecutionResult 
     logs: response.logs,
     testResults: response.testResults,
     error: response.error,
+    ...(response.trocas ? { trocas: response.trocas as Troca[] } : {}),
   };
 }
 
@@ -59,7 +63,8 @@ function toResult(response: Exclude<WorkerResponse, 'pronto'>): ExecutionResult 
 export function executeCode(
   code: string,
   testCases: SandboxTest[] = [],
-  properties: SandboxProperty[] = []
+  properties: SandboxProperty[] = [],
+  opcoes: { sequencial?: boolean } = {}
 ): Promise<ExecutionResult> {
   return new Promise((resolve) => {
     let worker: Worker;
@@ -134,7 +139,7 @@ export function executeCode(
       });
     };
 
-    const request: WorkerRequest = { code, tests: testCases, properties };
+    const request: WorkerRequest = { code, tests: testCases, properties, sequencial: opcoes.sequencial };
     worker.postMessage(request);
   });
 }

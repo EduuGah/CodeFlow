@@ -1,4 +1,4 @@
-import { expect, irAteOEditor, test } from './fixtures';
+import { expect, irAteOEditor, irAteOExercicio, test } from './fixtures';
 
 /**
  * O editor vem do próprio domínio, e funciona sem nenhuma rede além dele.
@@ -97,12 +97,7 @@ test('sem o Monaco, o Tab no textarea recua o código e o Esc devolve a navegaç
   await page.route('**/lib/monaco.ts*', (rota) => rota.abort('failed'));
 
   await page.goto('/lesson/lesson-js-1');
-  const executar = page.getByRole('button', { name: 'Executar código' });
-  for (let i = 0; i < 12 && !(await executar.count()); i++) {
-    const acao = page.getByRole('button', { name: /Continuar assim mesmo|Continuar|Pular por ora/ });
-    if (!(await acao.count())) break;
-    await acao.click();
-  }
+  await irAteOExercicio(page, (e) => e.type === 'code');
 
   const area = page.getByRole('textbox', { name: 'Editor de código' });
   await area.waitFor({ timeout: 30_000 });

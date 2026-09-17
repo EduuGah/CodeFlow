@@ -9,6 +9,7 @@ import { buildLessonSteps } from '../lib/lesson-steps';
 import {
   estaResolvido,
   pendentes,
+  avancoLiberado,
   rotuloDeAvanco,
   type ExerciseState,
 } from '../lib/exercise-state';
@@ -23,6 +24,7 @@ import { MultipleChoice } from '../components/lesson/MultipleChoice';
 import { OrderSteps } from '../components/lesson/OrderSteps';
 import { PredictOutput } from '../components/lesson/PredictOutput';
 import { Refactor } from '../components/lesson/Refactor';
+import { ServerExerciseStep } from '../components/lesson/ServerExerciseStep';
 import { SqlExerciseStep } from '../components/lesson/SqlExerciseStep';
 import { WriteTest } from '../components/lesson/WriteTest';
 import { Button, buttonClasses } from '../components/ui/Button';
@@ -219,7 +221,12 @@ export function Lesson() {
   const estadoDoPasso = passo.kind === 'exercise' ? estados.get(passo.exercise.id) : undefined;
   const resolvido = estaResolvido(estadoDoPasso);
 
-  const avancar = () => setIndice((i) => Math.min(i + 1, steps.length - 1));
+  // Num exercício sem resposta verificada o avanço não existe — nem pelo
+  // botão (desabilitado), nem por qualquer outro caminho que chame isto.
+  const avancar = () => {
+    if (passo.kind === 'exercise' && !avancoLiberado(estadoDoPasso)) return;
+    setIndice((i) => Math.min(i + 1, steps.length - 1));
+  };
   const voltar = () => setIndice((i) => Math.max(i - 1, 0));
 
   /** Leva ao primeiro exercício que ficou para trás. */
@@ -436,6 +443,15 @@ export function Lesson() {
           />
         )}
 
+        {passo.kind === 'exercise' && passo.exercise.type === 'server' && (
+          <ServerExerciseStep
+            key={passo.exercise.id}
+            exercise={passo.exercise}
+            lessonId={lesson.id}
+            onEstado={(estado) => registrarEstado(passo.exercise.id, estado)}
+          />
+        )}
+
         {passo.kind === 'exercise' && passo.exercise.type === 'refactor' && (
           <Refactor
             key={passo.exercise.id}
@@ -502,6 +518,7 @@ export function Lesson() {
             <Button
               size="lg"
               onClick={avancar}
+              disabled={passo.kind === 'exercise' && !avancoLiberado(estadoDoPasso)}
               className="flex-1"
               // Um check antes do rótulo, e não um botão verde: verde já quer
               // dizer "você acertou" no retorno do exercício, e repetir a cor

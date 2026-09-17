@@ -34,14 +34,25 @@ export function estaResolvido(estado: ExerciseState | undefined): boolean {
 }
 
 /**
+ * Avançar pede uma resposta.
+ *
+ * Qualquer resposta **verificada** libera o passo seguinte — errar não
+ * tranca ninguém, e a pessoa que não sabe pode chutar, ver a correção e
+ * seguir. O que não libera é não responder: o botão "Pular por ora" existiu
+ * e foi retirado a pedido do dono do projeto (2026-09-17), porque convidava
+ * a passar reto pelo exercício, que é onde a aula acontece.
+ */
+export function avancoLiberado(estado: ExerciseState | undefined): boolean {
+  return estado === 'acertou' || estado === 'errou';
+}
+
+/**
  * O texto do botão que leva ao próximo passo.
  *
- * A regra: o botão diz o que o clique significa **agora**, e nunca oferece
- * pular a quem já acertou. Para quem errou, "assim mesmo" é honesto — o avanço
- * continua liberado, mas a frase não finge que o exercício ficou resolvido.
- *
- * Avançar nunca é bloqueado em nenhum estado: travar transformaria dificuldade
- * em parede.
+ * A regra: o botão diz o que o clique significa **agora**. Para quem errou,
+ * "assim mesmo" é honesto — o avanço está liberado, mas a frase não finge
+ * que o exercício ficou resolvido. Para quem ainda não respondeu, o botão
+ * fica desabilitado e diz o que falta.
  */
 export function rotuloDeAvanco(estado: ExerciseState | undefined): string {
   switch (estado) {
@@ -53,7 +64,7 @@ export function rotuloDeAvanco(estado: ExerciseState | undefined): string {
     case 'respondendo':
     case 'inicial':
     case undefined:
-      return 'Pular por ora';
+      return 'Responda para continuar';
   }
 }
 

@@ -6,6 +6,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { getLesson } from '../../content';
 import { buildLessonSteps } from '../lib/lesson-steps';
 import { Lesson } from './Lesson';
+import { botaoDeAvanco, irAtePasso } from './aula.test-utils';
 
 /**
  * Dois exercícios seguidos do mesmo tipo.
@@ -31,7 +32,12 @@ vi.mock('../lib/progress', () => ({
   markLessonCompleted: () => Promise.resolve(),
   recordAttempt: () => Promise.resolve(),
 }));
-vi.mock('../lib/sandbox', () => ({ executeCode: () => Promise.resolve(null) }));
+// A aula é de TypeScript: o compilador do navegador não existe no jsdom, e
+// os exercícios do caminho (lacuna, refatorar) rodam código. Um resultado
+// vazio é "errou" em todos — o bastante para passar por eles.
+const VAZIO = { output: '', logs: [], testResults: [], error: null, timedOut: false };
+vi.mock('../lib/sandbox', () => ({ executeCode: () => Promise.resolve(VAZIO) }));
+vi.mock('../lib/executar', () => ({ executarNaLinguagem: () => Promise.resolve(VAZIO) }));
 const ALUNO = { id: 'aluno-de-teste' };
 vi.mock('../contexts/AuthContext', () => ({ useAuth: () => ({ user: ALUNO }) }));
 
@@ -55,10 +61,6 @@ function parSeguido(): number {
   throw new Error(`${AULA} não tem dois exercícios de múltipla escolha seguidos; o teste precisa de outra aula`);
 }
 
-function botaoDeAvanco() {
-  return screen.getByRole('button', { name: /Continuar|Pular por ora|Continuar assim mesmo/ });
-}
-
 describe('dois exercícios seguidos do mesmo tipo', () => {
   it('o segundo nasce limpo, e a aula conta os dois', async () => {
     const user = userEvent.setup();
@@ -71,7 +73,7 @@ describe('dois exercícios seguidos do mesmo tipo', () => {
     );
 
     const primeiro = parSeguido();
-    for (let i = 0; i < primeiro; i++) await user.click(botaoDeAvanco());
+    await irAtePasso(user, passos, primeiro);
 
     const a = passos[primeiro];
     const b = passos[primeiro + 1];
@@ -87,11 +89,12 @@ describe('dois exercícios seguidos do mesmo tipo', () => {
     expect(botaoDeAvanco()).toHaveTextContent('Continuar');
 
     // O segundo começa do zero: nada marcado, nada verificado, e o rodapé
-    // oferece pular — porque ninguém respondeu ainda.
+    // volta a esperar uma resposta — porque ninguém respondeu ainda.
     await user.click(botaoDeAvanco());
     expect(screen.queryByText('Resposta correta')).not.toBeInTheDocument();
     for (const radio of screen.getAllByRole('radio')) expect(radio).not.toBeChecked();
-    expect(botaoDeAvanco()).toHaveTextContent('Pular por ora');
+    expect(botaoDeAvanco()).toHaveTextContent('Responda para continuar');
+    expect(botaoDeAvanco()).toBeDisabled();
 
     // E responder o segundo conta para a aula: o rodapé passa a "Continuar".
     await user.click(screen.getAllByRole('radio')[b.exercise.correctIndex]);

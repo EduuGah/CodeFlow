@@ -15,7 +15,7 @@ import { BANCOS } from './bancos';
 
 const statusSchema = z.enum(['draft', 'published', 'archived']);
 const difficultySchema = z.enum(['iniciante', 'intermediario', 'avancado']);
-const languageSchema = z.enum(['javascript', 'typescript', 'react', 'python', 'sql', 'html']);
+const languageSchema = z.enum(['javascript', 'typescript', 'react', 'python', 'sql', 'html', 'node']);
 const runtimeSchema = z.enum(['worker', 'iframe']).optional();
 const idSchema = z.string().min(1).regex(/^[a-z0-9-]+$/, 'ids usam apenas minúsculas, números e hífen');
 
@@ -219,6 +219,15 @@ export const exerciseSchema = z.discriminatedUnion('type', [
     code: z.string().min(1),
     expectedOutput: z.string(),
     explanation: z.string().min(1),
+  }),
+  z.object({
+    ...exerciseBase,
+    type: z.literal('server'),
+    initialCode: z.string(),
+    tests: z.array(testCaseSchema).min(1, 'exercício de servidor precisa de ao menos uma verificação'),
+    env: z.record(z.string(), z.string()).optional(),
+    arquivos: z.record(z.string(), z.string()).optional(),
+    solution: z.string().min(1, 'exercício de servidor precisa da solução de referência'),
   }),
   z.object({
     ...exerciseBase,

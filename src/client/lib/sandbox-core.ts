@@ -49,6 +49,12 @@ export interface SandboxRunResult {
   logs: string[];
   testResults: SandboxTestResult[];
   error?: string;
+  /**
+   * As trocas HTTP do servidor simulado (`servidor-core.ts`): cada pedido
+   * dos testes e a resposta que veio. Só existe quando o programa as
+   * registrou em `globalThis.__cfTrocas`.
+   */
+  trocas?: unknown[];
 }
 
 /** Teto de logs: um laço que imprime sem parar não pode estourar a memória. */
@@ -549,10 +555,13 @@ ${code}
 export async function runProgram(
   code: string,
   tests: SandboxTest[],
-  properties: SandboxProperty[] = []
+  properties: SandboxProperty[] = [],
+  opcoes: OpcoesDoPrograma = {}
 ): Promise<SandboxRunResult> {
   const logs: string[] = [];
   let truncated = false;
+  const ambiente = globalThis as { __cfTrocas?: unknown[] };
+  delete ambiente.__cfTrocas;
 
   const capture = (...args: unknown[]) => {
     if (logs.length >= MAX_LOGS) {
@@ -582,18 +591,21 @@ export async function runProgram(
   console.error = capture;
 
   try {
-    const program = new Function(buildProgram(code, tests, properties));
+    const program = new Function(buildProgram(code, tests, properties, opcoes));
     const testResults = (await program()) as SandboxTestResult[];
 
     await esperarAgendados(() => logs.length);
 
-    return { logs, testResults };
+    const trocas = ambiente.__cfTrocas;
+    return trocas ? { logs, testResults, trocas } : { logs, testResults };
   } catch (error) {
     // Erro de sintaxe (na construção) ou de execução do código do aluno.
+    const trocas = ambiente.__cfTrocas;
     return {
       logs,
       testResults: [],
       error: error instanceof Error ? `${error.name}: ${error.message}` : String(error),
+      ...(trocas ? { trocas } : {}),
     };
   } finally {
     console.log = original.log;

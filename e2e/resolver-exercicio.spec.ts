@@ -2,7 +2,7 @@ import type { Page } from '@playwright/test';
 
 import { getLesson } from '../src/content';
 import { buildLessonSteps } from '../src/client/lib/lesson-steps';
-import { AULA_CURTA, concluirAula, expect, irAteOEditor, test } from './fixtures';
+import { AULA_CURTA, concluirAula, expect, irAteOEditor, passarPelaAula, test } from './fixtures';
 
 /**
  * Do aluno logado até a lição concluída, na aplicação de verdade.
@@ -183,15 +183,11 @@ test('o resumo não afirma conclusão de quem pulou os exercícios', async ({
   logado: page,
   banco,
 }) => {
-  const passos = buildLessonSteps(getLesson(AULA)!);
-
   await page.goto(`/lesson/${AULA}`);
 
-  for (let i = 1; i < passos.length; i++) {
-    await page
-      .getByRole('button', { name: /Continuar assim mesmo|Continuar|Pular por ora/ })
-      .click();
-  }
+  // Sem "Pular por ora", passar por um exercício é responder errado e seguir
+  // por "Continuar assim mesmo" — o que não o resolve.
+  await passarPelaAula(page);
 
   await expect(page.getByText('Aula concluída')).toHaveCount(0);
   await expect(

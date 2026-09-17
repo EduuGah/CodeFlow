@@ -1,4 +1,4 @@
-import { esperarConteudo, expect, test } from './fixtures';
+import { esperarConteudo, expect, irAteOExercicio, test } from './fixtures';
 
 /**
  * Exercício de lacuna, no navegador.
@@ -15,15 +15,10 @@ async function irAteALacuna(page: import('@playwright/test').Page) {
   await page.goto(`/lesson/${AULA}`);
   await esperarConteudo(page);
 
-  const verificar = page.getByRole('button', { name: /Verificar|Preencha todas as lacunas/ });
-
-  for (let i = 0; i < 12 && !(await verificar.count()); i++) {
-    const acao = page.getByRole('button', { name: /Continuar|Pular por ora/ });
-    if (!(await acao.count())) break;
-    await acao.click();
-  }
-
-  await verificar.waitFor({ timeout: 10_000 });
+  await irAteOExercicio(page, (e) => e.type === 'fill-blank');
+  await page
+    .getByRole('button', { name: /Verificar|Preencha todas as lacunas/ })
+    .waitFor({ timeout: 10_000 });
 }
 
 test('as lacunas viram campos dentro do código', async ({ logado: page }) => {

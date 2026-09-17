@@ -6,6 +6,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { getLesson, getLessonAfter, getLessonsOfTrack, listTracks } from '../../content';
 import { buildLessonSteps } from '../lib/lesson-steps';
 import { Lesson } from './Lesson';
+import { irAtePasso } from './aula.test-utils';
 
 /**
  * Passar de uma aula para a seguinte.
@@ -36,7 +37,9 @@ vi.mock('../lib/progress', () => ({
   recordAttempt: () => Promise.resolve(),
 }));
 
-vi.mock('../lib/sandbox', () => ({ executeCode: () => Promise.resolve(null) }));
+vi.mock('../lib/sandbox', () => ({
+  executeCode: () => Promise.resolve({ output: '', logs: [], testResults: [], error: null, timedOut: false }),
+}));
 
 vi.mock('../contexts/AuthContext', () => ({
   useAuth: () => ({ user: null }),
@@ -90,9 +93,7 @@ describe('trocar de aula', () => {
     abrir(atual);
 
     // Até o último passo da aula atual, onde mora o link para a próxima.
-    for (let i = 1; i < passosDaAtual; i++) {
-      await user.click(screen.getByRole('button', { name: /Continuar|Pular por ora/ }));
-    }
+    await irAtePasso(user, buildLessonSteps(getLesson(atual)!), passosDaAtual - 1);
 
     await user.click(screen.getByRole('link', { name: /Próxima aula/ }));
 
@@ -107,9 +108,7 @@ describe('trocar de aula', () => {
     const { atual, proxima, passosDaAtual } = parQueEncolhe();
 
     abrir(atual);
-    for (let i = 1; i < passosDaAtual; i++) {
-      await user.click(screen.getByRole('button', { name: /Continuar|Pular por ora/ }));
-    }
+    await irAtePasso(user, buildLessonSteps(getLesson(atual)!), passosDaAtual - 1);
     await user.click(screen.getByRole('link', { name: /Próxima aula/ }));
 
     // O contador de exercícios resolvidos começa zerado na aula nova.

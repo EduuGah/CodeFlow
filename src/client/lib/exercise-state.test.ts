@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { estaResolvido, pendentes, rotuloDeAvanco, type ExerciseState } from './exercise-state';
+import { avancoLiberado, estaResolvido, pendentes, rotuloDeAvanco, type ExerciseState } from './exercise-state';
 
 /**
  * O rótulo do botão de avanço é a frase que o aluno lê logo depois de agir.
@@ -20,13 +20,21 @@ describe('rótulo do botão de avanço', () => {
   });
 
   it('exercício intocado oferece pular', () => {
-    expect(rotuloDeAvanco('inicial')).toBe('Pular por ora');
-    expect(rotuloDeAvanco(undefined)).toBe('Pular por ora');
+    expect(rotuloDeAvanco('inicial')).toBe('Responda para continuar');
+    expect(rotuloDeAvanco(undefined)).toBe('Responda para continuar');
   });
 
   it('exercício em andamento ainda oferece pular, sem prometer conclusão', () => {
-    expect(rotuloDeAvanco('respondendo')).toBe('Pular por ora');
-    expect(rotuloDeAvanco('verificando')).toBe('Pular por ora');
+    expect(rotuloDeAvanco('respondendo')).toBe('Responda para continuar');
+    expect(rotuloDeAvanco('verificando')).toBe('Responda para continuar');
+  });
+
+  it('só uma resposta verificada libera o avanço — certa ou errada', () => {
+    expect(avancoLiberado('acertou')).toBe(true);
+    expect(avancoLiberado('errou')).toBe(true);
+    for (const estado of ['inicial', 'respondendo', 'verificando', undefined] as const) {
+      expect(avancoLiberado(estado), String(estado)).toBe(false);
+    }
   });
 
   it('todo estado tem rótulo — nenhum cai em vazio', () => {

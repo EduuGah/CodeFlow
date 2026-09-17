@@ -87,8 +87,15 @@ ação primária — o 700 do escuro é cor de texto). A preferência mora no
 carregar). Cada trilha tem uma cor própria (`lib/cores-das-trilhas.ts`) no
 percurso, na faixa e no cabeçalho da aula.
 
-**O avanço nunca é bloqueado.** O caminho avisa quando um pré-requisito está
-fraco; não tranca. Transformar dificuldade em parede é o oposto do objetivo.
+**Dificuldade não vira parede; mas o exercício pede uma resposta.** O
+caminho avisa quando um pré-requisito está fraco; não tranca trilha nem
+aula. Dentro da aula, um exercício sem resposta verificada não deixa avançar
+("Responda para continuar", desabilitado) — qualquer resposta libera, certa
+ou errada ("Continuar assim mesmo"). O "Pular por ora" existiu e saiu a
+pedido do dono do projeto (2026-09-17): convidava a passar reto pelo
+exercício, que é onde a aula acontece. Nos testes, "passar por um
+exercício" é responder errado: `pages/aula.test-utils.tsx` e
+`responderErrado`/`passarPelaAula`/`irAteOExercicio` em `e2e/fixtures.ts`.
 
 **A correção julga comportamento, nunca texto.** Qualquer implementação que
 funcione passa. Comparar com gabarito ensinaria a adivinhar o que o professor
