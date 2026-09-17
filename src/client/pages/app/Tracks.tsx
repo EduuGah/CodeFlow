@@ -9,6 +9,7 @@ import { montarPercurso, trilhaDaVez } from '../../lib/percurso';
 import { PercursoDetalhado } from '../../components/dashboard/Percurso';
 import { IconArrowRight } from '../../components/ui/Icon';
 import { Carregando, Skeleton } from '../../components/ui/Skeleton';
+import { CenaPercurso, CenaProjeto } from '../../components/ui/Cena';
 import { VinhetaCaixa, VinhetaEditor, VinhetaMedalha } from '../../components/ui/Ilustracao';
 import { EmptyState } from '../../components/ui/States';
 import { useDocumentTitle } from '../../hooks/useDocumentTitle';
@@ -81,13 +82,18 @@ export function Tracks() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-extrabold tracking-tight text-ink">Trilhas</h1>
-        <p className="mt-1 text-sm leading-relaxed text-ink-soft">
-          {trilhas.length} trilhas em três etapas, na ordem em que uma prepara a outra. Comece pela
-          primeira; se já souber, pule.
-          {aulasFeitas > 0 ? ` Você concluiu ${aulasFeitas} de ${aulasTotal} aulas.` : ''}
-        </p>
+      <div className="flex items-center gap-6">
+        <div className="min-w-0 flex-1">
+          <h1 className="text-2xl font-extrabold tracking-tight text-ink">Trilhas</h1>
+          <p className="mt-1 text-sm leading-relaxed text-ink-soft">
+            {trilhas.length} trilhas em três etapas, na ordem em que uma prepara a outra. Comece pela
+            primeira; se já souber, pule.
+            {aulasFeitas > 0 ? ` Você concluiu ${aulasFeitas} de ${aulasTotal} aulas.` : ''}
+          </p>
+        </div>
+        {/* O percurso desenhado: as três etapas e o ponto andando. Só de sm
+            para cima — no celular o espaço é da lista. */}
+        <CenaPercurso className="hidden w-56 shrink-0 sm:block" />
       </div>
 
       {/* Duas abas, e não uma página longa: os projetos ficam a um toque em
@@ -126,10 +132,13 @@ export function Tracks() {
           aria-labelledby="aba-projetos"
           className="space-y-4"
         >
-          <p className="text-sm leading-relaxed text-ink-soft">
-            Sem passo a passo: você recebe requisitos e critérios de aceitação, e decide como
-            resolver. A plataforma confere cada critério no seu código.
-          </p>
+          <div className="flex items-center gap-6">
+            <p className="min-w-0 flex-1 text-sm leading-relaxed text-ink-soft">
+              Sem passo a passo: você recebe requisitos e critérios de aceitação, e decide como
+              resolver. A plataforma confere cada critério no seu código.
+            </p>
+            <CenaProjeto className="hidden w-56 shrink-0 sm:block" />
+          </div>
 
           {projetos.length === 0 ? (
             <EmptyState

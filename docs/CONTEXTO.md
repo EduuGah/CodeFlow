@@ -261,8 +261,10 @@ src/client/components/  Componentes
                         cartões, caixa, bússola, relógio,
                         balão, editor, e a janela pintada na cor do tema
   ui/Emblema.tsx        O emblema de cada trilha (símbolo branco sobre a cor)
-  ui/Cena.tsx           A cena da página pública: o editor digitando e o
-                        veredito aparecendo
+  ui/Cena.tsx           As cenas (360 × 220, animadas quando entram na
+                        tela): editor, aulas, página, correção, cartões,
+                        percurso, projeto — na página pública, nas trilhas,
+                        nos projetos e na revisão
   perfil/               Os corpos das páginas do perfil: editar (nome, avatar,
                         foto), a loja, os desafios, as conquistas por
                         categoria, a aparência (modo e cor); `icones.tsx`

@@ -22,10 +22,12 @@ interface EmptyStateProps {
   icon?: React.ReactNode;
   /** Uma vinheta (`ui/Ilustracao`) no lugar do ícone: cheia, numa pastilha. */
   vinheta?: React.ReactNode;
+  /** Uma cena (`ui/Cena`) em cima do texto: quando o vazio é uma promessa. */
+  cena?: React.ReactNode;
   className?: string;
 }
 
-export function EmptyState({ title, description, action, icon, vinheta, className }: EmptyStateProps) {
+export function EmptyState({ title, description, action, icon, vinheta, cena, className }: EmptyStateProps) {
   return (
     <div
       className={cn(
@@ -33,7 +35,11 @@ export function EmptyState({ title, description, action, icon, vinheta, classNam
         className
       )}
     >
-      {vinheta ? (
+      {cena ? (
+        <div className="mb-4 w-full max-w-xs" aria-hidden>
+          {cena}
+        </div>
+      ) : vinheta ? (
         <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-sunken" aria-hidden>
           {vinheta}
         </div>

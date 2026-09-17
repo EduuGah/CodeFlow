@@ -108,8 +108,10 @@ trilha. O perfil é uma família de páginas (`/app/perfil`, `/desafios`, `/loja
 `/conquistas`, `/aparencia`, `/progresso`), cada uma com a sua vinheta. As
 figuras são **cheias e pintadas** (`components/ui/Ilustracao.tsx`, paleta
 `P`), os 19 avatares também (`ui/Avatar.tsx`), cada trilha tem um emblema
-(`ui/Emblema.tsx`) e a página pública tem uma cena desenhada do editor
-(`ui/Cena.tsx`). Nada vem de banco de imagens e não há emoji na interface.
+(`ui/Emblema.tsx`) e há sete **cenas** desenhadas e animadas (`ui/Cena.tsx`:
+editor, aulas, página, correção, cartões, percurso, projeto) na página pública,
+nas trilhas, nos projetos e na revisão — o dono do projeto gostou muito da
+primeira e pediu mais nesse estilo. Nada vem de banco de imagens e não há emoji na interface.
 **Avisos de novidade** (`lib/novidades.ts` + `layout/Novidades.tsx`): subir de
 nível, abrir conquista e cumprir desafio são avisados ao voltar ao aplicativo,
 comparando o estado derivado com o que a pessoa já viu (guardado no aparelho —

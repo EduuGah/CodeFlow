@@ -4,6 +4,7 @@ import { getConcept } from '../../../content';
 import { useStudentData } from '../../contexts/StudentDataContext';
 import { MASTERY_LABELS } from '../../lib/mastery';
 import { IconArrowRight, IconPractice } from '../../components/ui/Icon';
+import { CenaCartoes } from '../../components/ui/Cena';
 import { VinhetaCartoes, VinhetaEditor } from '../../components/ui/Ilustracao';
 import { Badge } from '../../components/ui/Badge';
 import { Card, cardClasses } from '../../components/ui/Card';
@@ -55,7 +56,7 @@ export function Practice() {
 
         {dueCards === 0 ? (
           <EmptyState
-            vinheta={<VinhetaCartoes size={52} />}
+            cena={<CenaCartoes />}
             title="Nada vencido hoje"
             description="Os cartões voltam na data em que o esquecimento começa a agir. Revisar antes da hora atrapalha mais do que ajuda."
           />
@@ -66,9 +67,11 @@ export function Practice() {
               className: 'flex items-center gap-4 transition-colors hover:border-line-strong',
             })}
           >
-            <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-energy-50" aria-hidden>
+            <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-energy-50 sm:hidden" aria-hidden>
               <VinhetaCartoes size={40} />
             </span>
+            {/* A cena do cartão virando, onde cabe; no celular, a vinheta. */}
+            <CenaCartoes className="hidden w-36 shrink-0 sm:block" />
             <span className="min-w-0 flex-1">
               {/* Vencido e novo são coisas diferentes, e o painel já separa os
                   dois. Chamar de "para revisar" 22 cartões que a pessoa nunca
