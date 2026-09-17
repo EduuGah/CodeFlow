@@ -10,6 +10,7 @@ import {
   type IconProps,
 } from '../ui/Icon';
 import { StudentDataProvider } from '../../contexts/StudentDataContext';
+import { Novidades } from './Novidades';
 
 /**
  * Estrutura de navegação do aplicativo.
@@ -148,6 +149,10 @@ export function AppShell() {
             <ItemInferior key={d.to} {...d} />
           ))}
         </nav>
+
+        {/* Os avisos de nível, conquista e desafio: só aqui, nas telas de
+            orientação — a aula é tela de foco e não recebe nada por cima. */}
+        <Novidades />
       </div>
     </StudentDataProvider>
   );

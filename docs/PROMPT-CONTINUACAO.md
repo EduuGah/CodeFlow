@@ -110,6 +110,10 @@ figuras são **cheias e pintadas** (`components/ui/Ilustracao.tsx`, paleta
 `P`), os 19 avatares também (`ui/Avatar.tsx`), cada trilha tem um emblema
 (`ui/Emblema.tsx`) e a página pública tem uma cena desenhada do editor
 (`ui/Cena.tsx`). Nada vem de banco de imagens e não há emoji na interface.
+**Avisos de novidade** (`lib/novidades.ts` + `layout/Novidades.tsx`): subir de
+nível, abrir conquista e cumprir desafio são avisados ao voltar ao aplicativo,
+comparando o estado derivado com o que a pessoa já viu (guardado no aparelho —
+o banco só guarda fatos, e "viu" não é um).
 
 ### Correções grandes já feitas — não reintroduza
 

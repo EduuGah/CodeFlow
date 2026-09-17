@@ -231,6 +231,9 @@ src/client/lib/         Lógica pura e testada
   desafios.ts           Desafios diários e semanais: rodízio, progresso,
                         os cumpridos desde o primeiro estudo
   perfil.ts             Perfil editável (nome, avatar, tema), compras, foto
+  novidades.ts          O que mudou desde a última vez que a pessoa olhou
+                        (nível, conquista, desafio), comparando o estado
+                        derivado com o visto, guardado no aparelho
                         (redimensionada no navegador, Storage `avatars`)
   tema.ts               Aplicar e guardar tema e cor de destaque
   cores-das-trilhas.ts  Uma cor por trilha
@@ -242,6 +245,8 @@ src/client/lib/         Lógica pura e testada
 
 src/client/pages/       Telas
 src/client/components/  Componentes
+  layout/Novidades.tsx  Os avisos de nível, conquista e desafio: um de cada
+                        vez, só nas telas de orientação (a aula é foco)
   ui/Button.tsx         O botão — o único. Variantes × tamanhos, `loading`,
                         ícones; `buttonClasses()` para um <Link> ser botão
   ui/Card.tsx           A superfície: tons com significado, `cardClasses()`,
