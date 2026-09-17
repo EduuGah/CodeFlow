@@ -1,8 +1,50 @@
 # CodeFlow
 
-Plataforma de ensino de programação em português. Aulas curtas em passos, código
-do aluno rodando no navegador, e correção que explica o porquê do erro — não
-apenas se acertou.
+Plataforma de ensino de programação em português, do zero até uma aplicação
+completa. Aulas curtas em passos, código do aluno rodando **dentro do
+navegador** — JavaScript, TypeScript, React, HTML/CSS, SQL e Node — e correção
+que explica o porquê do erro, não apenas se acertou.
+
+> Você não aprende a programar lendo. Aprende resolvendo.
+
+## O que tem hoje
+
+**8 trilhas, 94 aulas, 551 exercícios em 10 tipos, 7 projetos, 90 conceitos.**
+Tudo é contado do catálogo; a página pública mostra os mesmos números.
+
+| Etapa | Trilha | Linguagem | Aulas | Exercícios |
+| --- | --- | --- | ---: | ---: |
+| 1 · A base | Fundamentos de JavaScript | JavaScript | 20 | 115 |
+| 1 · A base | Lógica e Resolução de Problemas | JavaScript | 3 | 19 |
+| 2 · A web | Como a Web Funciona | JavaScript | 8 | 40 |
+| 2 · A web | A Página (HTML, CSS, DOM) | HTML | 26 | 156 |
+| 3 · As ferramentas do trabalho | TypeScript | TypeScript | 10 | 59 |
+| 3 · As ferramentas do trabalho | React | React (TSX) | 14 | 84 |
+| 3 · As ferramentas do trabalho | SQL e Bancos de Dados | SQL | 10 | 59 |
+| 4 · A aplicação inteira | Node e APIs | Node | 3 de 10 | 19 |
+
+**Os dez tipos de exercício**: escrever o código (125), múltipla escolha (146),
+prever a saída (58), completar a lacuna (81), ordenar os passos (40),
+encontrar o bug (38), escrever o teste (5), refatorar (6), consulta SQL (43)
+e servidor (9). Toda aula tem ao menos um dos quatro "de prática de dev" —
+bug, ordenar, teste, refatorar — que pedem o conceito de outro ângulo.
+
+**Os seis motores de execução**, todos no navegador, nenhum servidor no meio:
+
+| Motor | O que roda | Como |
+| --- | --- | --- |
+| Sandbox | JavaScript puro | Web Worker descartável, 3 s de limite, sem rede |
+| Página | HTML, CSS, DOM | `<iframe sandbox>` de origem opaca; os testes veem o `document` |
+| TypeScript | TypeScript | o compilador (o mesmo do editor) na frente do sandbox; os erros de tipo viram retorno |
+| React | componentes TSX | compilado e montado no iframe da página, com o React embutido |
+| SQL | consultas e modelagem | o SQLite em WebAssembly (sql.js) num worker que fica vivo; a correção compara **linhas devolvidas** |
+| Servidor | Node e Express | um Node de mentira no sandbox: `require`, `process.env`, um Express pequeno e um cliente HTTP para os testes; a tela mostra pedidos e respostas |
+
+**O que acompanha o aluno**: percurso em etapas com o ponto atual, revisão
+espaçada (Leitner), XP e níveis sem teto, sequência de dias com congelamento,
+moedas e loja (dobro de XP, temas, avatares), desafios do dia e da semana,
+30 conquistas, perfil com nome e foto, modo escuro e quatro cores de destaque,
+avisos de novidade ao voltar — tudo **derivado do histórico**, nada é contador.
 
 ## Rodando o projeto
 
@@ -31,8 +73,8 @@ visitante a leria, e ignora as políticas de RLS.
 
 ### Banco de dados
 
-As migrações estão em `supabase/migrations/` e são aplicadas em ordem, coladas no
-SQL Editor do Supabase:
+As migrações estão em `supabase/migrations/` e são aplicadas em ordem, coladas
+no SQL Editor do Supabase. Todas são idempotentes.
 
 | Arquivo | O que cria |
 | --- | --- |
@@ -43,6 +85,9 @@ SQL Editor do Supabase:
 | `0005_admin.sql` | Papel de administrador e view de desempenho |
 | `0006_promote_admin.sql` | Conserta o gatilho que impedia promover alguém a administrador |
 | `0007_perfil_e_loja.sql` | Perfil editável (nome, avatar, tema), a tabela `purchases` da loja e o bucket `avatars` do Storage para a foto |
+
+Sem a 0007, o aplicativo carrega, mas editar o perfil, comprar na loja e
+enviar foto falham — e a própria tela diz qual migração rodar.
 
 Para se tornar administrador depois de entrar pela primeira vez:
 
@@ -58,72 +103,100 @@ Redirect URLs.
 
 ```bash
 npm run typecheck   # tipos, incluindo os testes de navegador
-npm test            # 2.321 testes de unidade, propriedade e componente (Vitest)
-npm run test:e2e    # 300 testes de navegador (Playwright, Chromium)
+npm test            # 2.386 testes de unidade, propriedade e componente (Vitest)
+npm run test:e2e    # 304 testes de navegador (Playwright, Chromium, celular e desktop)
 ```
 
 O E2E precisa do Chromium uma vez: `npx playwright install chromium`.
 
-As duas suítes cobrem coisas diferentes de propósito. O Vitest usa jsdom, que não
-tem layout nem CSS — ele verifica lógica, semântica e ordem de tabulação. O
-Playwright roda num navegador de verdade e cobre o que só existe lá: barra fixa
-cobrindo o elemento focado, o editor de código conseguindo se dimensionar, o
-`:focus` de fato casando, e a preferência de menos movimento do sistema.
+As duas suítes cobrem coisas diferentes de propósito. O Vitest usa jsdom, que
+não tem layout nem CSS — ele verifica lógica, semântica e ordem de tabulação.
+O Playwright roda num navegador de verdade e cobre o que só existe lá: barra
+fixa cobrindo o elemento focado, o editor de código conseguindo se dimensionar,
+o `:focus` de fato casando, a preferência de menos movimento, o confete, e
+cada motor rodando o código do aluno num Chromium real.
 
-O CI roda tipos, testes, build e depois o E2E, a cada push e pull request.
+O conteúdo também é testado: para **cada** exercício, o CI roda a solução de
+referência no mesmo motor que o aluno usa (o sandbox no Node, o jsdom para a
+página, o compilador para TypeScript, o sql.js para SQL, o servidor simulado
+para Node) e cobra que ela passe, que o código inicial não passe, e que toda
+mensagem de falha oriente. Um exercício de "encontrar o bug" precisa de fato
+quebrar como está e parar de quebrar com a linha corrigida.
+
+O CI (`.github/workflows/ci.yml`) roda tipos, testes, build e depois o E2E, a
+cada push e pull request.
 
 ## Decisões que valem conhecer antes de mexer
 
-**O conteúdo é código, não linhas no banco.** Aulas, exercícios e projetos vivem
-em módulos TypeScript sob `src/content/`, validados por Zod no carregamento. Um
-exercício malformado quebra na hora, e o CI prova que cada exercício de código é
-resolvível rodando a solução de referência no sandbox de verdade. Um formulário
-que gravasse conteúdo direto no banco jogaria fora essas três garantias em troca
-de conveniência — por isso a tela de administração gera o módulo para revisão em
-pull request, em vez de escrever no banco.
+**O conteúdo é código, não linhas no banco.** Aulas, exercícios e projetos
+vivem em módulos TypeScript sob `src/content/`, validados por Zod no
+carregamento. Um exercício malformado quebra na hora, e o CI prova que cada um
+é resolvível. A tela de administração gera o módulo para revisão em pull
+request, em vez de escrever no banco.
 
-**O código do aluno roda num Web Worker descartável**, com limite de 3 segundos e
-`terminate()` no fim. `fetch`, `XMLHttpRequest`, `WebSocket`, `importScripts`,
-`indexedDB`, `caches` e `Notification` são apagados antes de qualquer coisa do
-aluno executar. A lógica de execução fica em `sandbox-core.ts`, sem dependência de
-navegador, para os testes exercitarem exatamente o mesmo código que roda em
-produção.
+**O código do aluno roda no navegador, isolado.** Num Web Worker descartável
+(com `fetch`, `XMLHttpRequest`, `WebSocket`, `importScripts`, `indexedDB`,
+`caches` e `Notification` apagados antes de qualquer coisa executar), num
+`<iframe sandbox>` de origem opaca, ou num worker com o SQLite. A lógica de
+execução fica em módulos puros (`sandbox-core.ts`, `pagina-core.ts`,
+`sql-core.ts`, `servidor-core.ts`), sem dependência de navegador, para os
+testes exercitarem exatamente o mesmo código que roda em produção.
 
-**Quase nada é contador.** XP, nível, sequência de estudos, domínio por conceito e
-cartões vencidos são todos derivados do histórico de tentativas e revisões, que é
-append-only. Um contador desnormalizado é uma segunda fonte de verdade que
-começa a divergir no primeiro erro de escrita.
+**Quase nada é contador.** XP, nível, moedas, sequência, desafios cumpridos,
+conquistas, domínio por conceito e cartões vencidos são derivados do histórico
+de tentativas, revisões e compras, que é append-only. Um contador
+desnormalizado é uma segunda fonte de verdade que começa a divergir no
+primeiro erro de escrita.
 
-**O avanço nunca é bloqueado.** O caminho da trilha avisa quando um pré-requisito
-está fraco, mas não tranca a porta: transformar dificuldade em parede é o oposto
-do que a plataforma existe para fazer.
+**A correção julga comportamento, nunca texto.** Qualquer implementação que
+funcione passa — com `for`, `reduce` ou recursão; com qualquer SQL que devolva
+as mesmas linhas; com qualquer servidor que responda o esperado. Testes por
+propriedade sorteiam dezenas de entradas para ninguém passar decorando o caso.
 
-## O que ainda não está pronto
+**Dificuldade não vira parede; mas o exercício pede uma resposta.** Trilha e
+aula nunca trancam. Dentro da aula, um exercício sem resposta verificada não
+deixa avançar; qualquer resposta libera, certa ou errada.
 
-- **O editor de código vem de um CDN externo** (`cdn.jsdelivr.net`) em tempo de
-  execução. Rede que bloqueie CDN deixa o aluno sem onde escrever, e não funciona
-  offline. Servir do próprio domínio exige carga sob demanda para não engordar o
-  pacote inicial.
-- **Não há tutor com IA.** A rota existia e foi removida enquanto a integração não
-  está disponível — um botão que não faz nada é pior do que sua ausência.
-- **Nada foi conferido num telefone real.** O E2E emula a viewport de um Pixel 7,
-  o que pega estouro de largura e alvos de toque pequenos, mas não substitui o
-  aparelho.
+**Sem banco de imagens, sem Lucide, sem emoji.** Ícones, vinhetas, avatares,
+emblemas de trilha e as cenas animadas são SVG desenhados no projeto, numa
+paleta só. O movimento tem motivo e respeita `prefers-reduced-motion`.
+
+**Português em tudo**: código, comentários, commits, interface, documentação.
 
 ## Estrutura
 
 ```
-src/content/     Aulas, exercícios, projetos e conceitos + schema Zod
-src/client/lib/  Lógica derivada: domínio, revisão, XP, caminho, sandbox
-src/client/      Telas, componentes e contextos
-e2e/             Testes de navegador (Playwright)
-supabase/        Migrações SQL
-docs/context/    Visão de produto, design, pedagogia, arquitetura, roadmap
+src/content/        Aulas, exercícios, projetos, conceitos, percurso + schema Zod
+  lessons/          Uma aula por arquivo (js-, logica-, web-, pagina-, ts-, react-, sql-, node-)
+  tracks/           As trilhas e a ordem das aulas
+  bancos/           Os bancos de exemplo do SQL
+src/client/lib/     Lógica derivada e os motores: sandbox, página, TypeScript,
+                    React, SQL, servidor; domínio, revisão, XP, economia, desafios
+src/client/         Telas, componentes, contextos, ícones e cenas
+e2e/                Testes de navegador (Playwright); fixtures.ts dubla o Supabase
+supabase/           Migrações SQL
+docs/               CONTEXTO.md (o mapa do projeto), curriculo.md (o roadmap),
+                    PROMPT-CONTINUACAO.md (para retomar o trabalho)
 ```
 
-Hoje: 8 trilhas, 94 aulas, 551 exercícios em 10 tipos (78 deles de página, num
-iframe isolado; 59 de TypeScript, com o compilador na frente do sandbox; 84 de
-React, com o componente montado no mesmo iframe; 43 de SQL, num SQLite de
-verdade dentro de um worker; 19 de Node, num servidor simulado que roda o
-mesmo código do Express de verdade), 7 projetos com 22 critérios de
-aceitação, e 90 conceitos.
+## Para onde vai
+
+O roadmap completo, com o estado de cada aula e o custo de cada motor, está em
+[`docs/curriculo.md`](docs/curriculo.md). Em resumo, na ordem:
+
+1. **Node e APIs, aulas 4 a 10** — corpo e JSON, status e erros, middleware e
+   autenticação, CRUD, assincronia no servidor, configuração e segredos, o
+   projeto de API. Fecha a Fase 4.
+2. **Engenharia: organizar um projeto** — módulos e pastas por
+   responsabilidade, nomes, funções pequenas, erros, configuração, README,
+   revisão de código. Com **Testes e qualidade**, **Git e equipe** e
+   **Terminal**, é a Fase 5.
+3. **Python** — a primeira linguagem nova, com o Pyodide (Fase 6).
+4. **Projeto final** — do zero a uma aplicação completa: página + API + banco,
+   com testes e publicação (Fase 7).
+5. **Mais linguagens**, uma por vez, cada uma com o motor que a roda no
+   navegador.
+
+## Licença
+
+Ainda não definida. Até lá, o código é do autor.

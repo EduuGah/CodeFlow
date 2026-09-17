@@ -16,18 +16,18 @@ Fase 1  JavaScript real          ███████████████�
 Fase 2  A página                 ██████████████████████  26/26  pronto
 Fase 3  Tipos e componentes      ██████████████████████  24/24  pronto
 Fase 4  Back-end e dados         ██████████████░░░░░░░░  13/20  SQL pronto, Node começou
-Fase 5  Profissionalização       ░░░░░░░░░░░░░░░░░░░░░░   0/19
-Fase 6  Python                   ░░░░░░░░░░░░░░░░░░░░░░   0/10
-Fase 7  Projeto final            ░░░░░░░░░░░░░░░░░░░░░░   0/5
+Fase 5  Profissionalização       ░░░░░░░░░░░░░░░░░░░░░░   0/27  engenharia, testes, git, terminal
+Fase 6  Python                   ░░░░░░░░░░░░░░░░░░░░░░   0/10  motor 6
+Fase 7  Projeto final            ░░░░░░░░░░░░░░░░░░░░░░   0/5   + 3 capstones, motor 7
 ```
 
 | | Hoje | Previsto | Feito |
 | --- | ---: | ---: | ---: |
-| Aulas | **94** | 135 | 70% |
-| Exercícios | **551** | ~700 | 79% |
-| Tipos de exercício | **10** | 11 | 91% |
-| Motores de execução | **6** | 7 | 86% |
-| Projetos | **7** | ~30 | 23% |
+| Aulas | **94** | ~150 | 63% |
+| Exercícios | **551** | ~800 | 69% |
+| Tipos de exercício | **10** | 13 | 77% |
+| Motores de execução | **6** | 8 | 75% |
+| Projetos | **7** | ~20 | 35% |
 
 **Último trabalho** (2026-09-17): o motor 4, o **servidor simulado** — um
 Node de mentira dentro do sandbox de sempre, com um Express pequeno,
@@ -480,25 +480,129 @@ aplicação completa), depois a trilha de engenharia, depois o capstone.
 Também saiu o "Pular por ora": um exercício sem resposta verificada não deixa
 avançar; responder errado libera ("Continuar assim mesmo").
 
-### Fase 5 — Profissionalização · 19 aulas
-Motor: **nenhum novo**. Encaixa em qualquer buraco entre as outras fases.
+### Fase 5 — Profissionalização · 27 aulas
+Motor: **nenhum novo**. Encaixa em qualquer buraco entre as outras fases. Foi
+o dono do projeto quem pediu a primeira trilha desta fase, em 2026-09-17:
+"uma área que explica engenharia, como dividir os arquivos em pastas, boas
+práticas".
 
-- **Testes e qualidade** (8), **Git e equipe** (6), **Terminal e ferramentas** (5).
+**Engenharia: organizar um projeto — 0 de 8.** Trilha própria,
+`track-engenharia`, em JavaScript (com `require`/`module.exports` do motor 4,
+que já sabe ler vários arquivos por exercício). O aluno recebe projetos
+pequenos já escritos e os reorganiza; a correção continua sendo por
+comportamento — os testes chamam o que cada módulo exporta — mais as
+restrições de forma do exercício de refatorar (o arquivo não pode ter mais
+que N linhas, a função tal precisa existir no módulo tal).
+
+| Aula | Assunto |
+| --- | --- |
+| 1 | Por que separar: um arquivo de 400 linhas, e o que custa achar uma coisa nele; coesão e acoplamento em palavras simples |
+| 2 | Módulos como fronteiras: o que exportar e o que esconder; `index.js` como porta de uma pasta; dependência num sentido só |
+| 3 | Pastas por responsabilidade: `rotas/`, `servicos/`, `dados/`, `util/` — e por que não por tipo de arquivo; o mesmo esqueleto para uma API e para uma página |
+| 4 | Nomes: verbos para funções, substantivos para dados, sem abreviação, sem mentira; o nome do arquivo é o nome do que ele exporta |
+| 5 | Funções pequenas e uma coisa só: extrair, parametrizar, a regra dos três; quando não extrair |
+| 6 | Erros como contrato: lançar cedo, tratar num lugar só, mensagens para quem lê; `Error` com nome |
+| 7 | Configuração e segredos: `process.env`, `.env` fora do Git, valores padrão, o que nunca vai para o repositório |
+| 8 | O projeto que outra pessoa lê: README que responde "o que é, como rodar, como testar", comentários que dizem o porquê, revisão de código como conversa |
+
+**Testes e qualidade — 0 de 8.** Vitest de verdade como assunto:
+arrange/act/assert, um teste por comportamento, nomes que viram
+documentação, dublês (`vi.fn`), testar o servidor com `pedir`, cobertura
+como pista e não como meta, o teste que pega o bug de ontem.
+
+**Git e equipe — 0 de 6.** Commit como frase, branch por assunto, pull
+request e revisão, conflito sem pânico, histórico que conta uma história,
+`.gitignore`. Sem motor: os exercícios são de ordenar, múltipla escolha e
+prever a saída sobre transcrições de terminal reais.
+
+**Terminal e ferramentas — 0 de 5.** O shell, caminhos, `npm` e o
+`package.json`, scripts, o que `npm ci` faz que `npm install` não faz,
+variáveis de ambiente no terminal. Idem: sem motor.
 
 ### Fase 6 — Python · 10 aulas
-Motor **6: Pyodide, ~10 MB**. Por último pelo peso, não pela importância.
+Motor **6: Pyodide, ~10 MB**. Por último entre os motores pelo peso, não
+pela importância — é a primeira linguagem pedida pelo dono do projeto
+("futuramente quero mais linguagens"). Carregado sob demanda, só em aula de
+Python, com aquecimento ao montar, como o SQL. A correção continua sendo por
+comportamento: os testes são `assert` em Python rodando no mesmo Pyodide.
+
+| Aula | Assunto |
+| --- | --- |
+| 1 | Python depois de JavaScript: indentação, `print`, tipos, o que muda e o que é igual |
+| 2 | Condições e laços: `if/elif/else`, `for` sobre coleções, `range`, `while` |
+| 3 | Funções: parâmetros nomeados, valores padrão, retorno múltiplo, docstring |
+| 4 | Listas e compreensões: o `map`/`filter` do Python |
+| 5 | Dicionários e conjuntos: o objeto e o `Set`, e o que muda |
+| 6 | Strings e f-strings: fatiar, formatar, `split`/`join` |
+| 7 | Erros: `try/except/finally`, exceções com nome, `raise` |
+| 8 | Classes: `__init__`, métodos, `self`, quando uma classe vale a pena |
+| 9 | Módulos e a biblioteca padrão: `import`, `json`, `datetime` |
+| 10 | Projeto: um script que lê dados, transforma e escreve um relatório |
 
 ### Fase 7 — Projeto final · 5 aulas, 3 capstones
-Front-end, API, banco, testes e publicação. O aluno sai com algo que dá para
-mostrar numa entrevista.
+Do zero a uma aplicação completa, o pedido central do dono do projeto:
+**página + API + banco, integrados**. A página que se aprendeu a fazer na
+Fase 2 chamando a API que se aprendeu a escrever na Fase 4, sobre o SQL que
+se aprendeu a consultar.
 
-Plataforma: fechar as pontas do CodeFlow — desempenho do pacote, revisão num
-telefone real, passagem final de acessibilidade.
+Plataforma: o **motor 7, a aplicação inteira** — o servidor simulado (motor
+4) e o SQLite (motor 5) no mesmo worker, e a página do motor 1 fazendo
+`fetch` para ele. É a única fase que junta motores; os três já existem, o
+trabalho é a ponte: um `fetch` de mentira dentro do iframe que entrega o
+pedido ao servidor do aluno no worker.
+
+| Aula | Assunto |
+| --- | --- |
+| 1 | O desenho antes do código: os dados, os recursos da API, as telas, a ordem de construção |
+| 2 | O banco e o acesso a ele: tabelas, o repositório que a API chama, migração |
+| 3 | A API sobre o banco: rotas, validação, erros, o contrato que a página vai usar |
+| 4 | A página sobre a API: `fetch`, estados de carregamento e erro, formulários que enviam |
+| 5 | Fechar: testes de ponta a ponta, README, publicar (Vercel + Supabase, o mesmo caminho do CodeFlow) |
+
+Os três capstones, cada um com critérios de aceitação como os projetos de
+hoje, mas em três camadas:
+
+- **Lista de tarefas com conta** — tarefas por usuário, feitas e pendentes, filtro e busca.
+- **Loja com carrinho** — o banco da trilha de SQL virando produto: catálogo, carrinho, pedido, estoque que abaixa.
+- **Blog com autenticação** — cadastro, login com token, posts só do dono, comentários.
+
+Plataforma, além do motor 7: fechar as pontas do CodeFlow — desempenho do
+pacote, revisão num telefone real, passagem final de acessibilidade.
+
+### Depois: mais linguagens
+Cada linguagem nova custa um motor que a rode no navegador, e o motor decide
+a ordem. Candidatas, com o custo conhecido hoje:
+
+| Linguagem | Motor possível | Custo | Quando |
+| --- | --- | --- | --- |
+| Python | Pyodide (CPython em WebAssembly) | ~10 MB, sob demanda | Fase 6 |
+| C# | .NET em WebAssembly (o mesmo do Blazor) | ~15 MB | depois da Fase 7 |
+| Go | TinyGo compilando para WebAssembly num worker | compilação pesada no navegador; a alternativa como serviço precisaria de um servidor, o que o projeto evita | depois da Fase 7 |
+| Java | CheerpJ ou TeaVM | ~20 MB, licença a conferir | a decidir |
+| Rust | o compilador não roda no navegador; só serviço externo | não cabe na regra "tudo no navegador" | não previsto |
+
+A regra que já valeu para SQL e Node vale para todas: **o código que o aluno
+escreve aqui é o mesmo que rodaria fora**, e a correção é por comportamento.
+Uma linguagem cujo motor exigiria um servidor no meio quebra a regra e fica
+para depois.
+
+### Tipos de exercício que faltam
+Um por fase, cada um preso ao motor dela:
+
+- **Consertar a tela** (motor 1): a página está errada, o aluno corrige o
+  CSS ou o DOM até o teste ver o que espera. Cabe na Fase 2 a qualquer
+  momento.
+- **Reorganizar o projeto** (motor 4, vários arquivos): o exercício central
+  da trilha de engenharia — mover, renomear, extrair, com testes de
+  comportamento e restrições de forma.
+- **Construir do zero** (motor 7): o capstone, com critérios de aceitação em
+  três camadas.
 
 ## Sobre tamanho
 
-As 91 aulas de hoje levaram bastante tempo para ficar no padrão do projeto. As
-44 restantes são muitas vezes esse trabalho, e os ~170 exercícios novos são a
+As 94 aulas de hoje levaram bastante tempo para ficar no padrão do projeto. As
+~55 restantes (7 de Node, 27 da Fase 5, 10 de Python, 5 do projeto final, mais
+os capstones) são muitas vezes esse trabalho, e os ~250 exercícios novos são a
 maior parte dele. Por isso a unidade é a fase: cada uma termina numa versão do
 produto que dá para usar. O roadmap escolhe a ordem; não promete prazo.
 
