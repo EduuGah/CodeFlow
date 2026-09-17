@@ -20,10 +20,12 @@ interface EmptyStateProps {
   /** A ação que resolve. Sem ela, o estado vira um beco sem saída. */
   action?: React.ReactNode;
   icon?: React.ReactNode;
+  /** Uma vinheta (`ui/Ilustracao`) no lugar do ícone: cheia, numa pastilha. */
+  vinheta?: React.ReactNode;
   className?: string;
 }
 
-export function EmptyState({ title, description, action, icon, className }: EmptyStateProps) {
+export function EmptyState({ title, description, action, icon, vinheta, className }: EmptyStateProps) {
   return (
     <div
       className={cn(
@@ -31,7 +33,13 @@ export function EmptyState({ title, description, action, icon, className }: Empt
         className
       )}
     >
-      {icon && <div className="mb-3 text-ink-faint">{icon}</div>}
+      {vinheta ? (
+        <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-sunken" aria-hidden>
+          {vinheta}
+        </div>
+      ) : (
+        icon && <div className="mb-3 text-ink-faint">{icon}</div>
+      )}
 
       <p className="font-medium text-ink">{title}</p>
 

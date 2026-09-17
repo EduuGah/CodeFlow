@@ -110,9 +110,9 @@ export function EditarPerfil({ aoFechar }: { aoFechar: () => void }) {
                   }
                   title={aberto ? preset.title : `Abre no nível ${item?.nivelQueLibera} ou na loja`}
                   onClick={() => setAvatar(id)}
-                  className={`relative rounded-full p-0.5 ring-2 ring-offset-2 ring-offset-surface transition-colors ${
+                  className={`relative rounded-full p-0.5 ring-2 ring-offset-2 ring-offset-surface transition-[transform,box-shadow] hover:-translate-y-0.5 ${
                     escolhido ? 'ring-brand-600' : 'ring-transparent hover:ring-line-strong'
-                  } disabled:opacity-40`}
+                  } disabled:opacity-40 disabled:hover:translate-y-0`}
                 >
                   <AvatarDesenhado preset={preset} size={44} />
                   {!aberto && (

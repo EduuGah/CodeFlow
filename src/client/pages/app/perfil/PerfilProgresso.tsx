@@ -5,7 +5,8 @@ import { CabecalhoDaSecao } from '../../../components/perfil/CabecalhoDaSecao';
 import { Badge, type BadgeTone } from '../../../components/ui/Badge';
 import { Card, SectionLabel } from '../../../components/ui/Card';
 import { IconBolt, IconStreak } from '../../../components/ui/Icon';
-import { VinhetaGrafico } from '../../../components/ui/Ilustracao';
+import { EmblemaDaTrilha } from '../../../components/ui/Emblema';
+import { VinhetaCaixa, VinhetaGrafico } from '../../../components/ui/Ilustracao';
 import { Carregando, Skeleton } from '../../../components/ui/Skeleton';
 import { EmptyState } from '../../../components/ui/States';
 import { useStudentData } from '../../../contexts/StudentDataContext';
@@ -121,8 +122,9 @@ export function PerfilProgresso() {
             <ul className="mt-3 space-y-3">
               {trilhas.map(({ track, completed, total, percentage }) => (
                 <li key={track.id}>
-                  <div className="mb-1 flex items-baseline justify-between gap-3 text-sm">
-                    <Link to={`/app/trilhas/${track.id}`} className="font-semibold text-ink hover:underline">
+                  <div className="mb-1 flex items-center justify-between gap-3 text-sm">
+                    <Link to={`/app/trilhas/${track.id}`} className="flex items-center gap-2 font-semibold text-ink hover:underline">
+                      <EmblemaDaTrilha trackId={track.id} size={22} />
                       {track.title}
                     </Link>
                     <span className="label-mono tabular-nums text-ink-faint">
@@ -177,6 +179,7 @@ export function PerfilProgresso() {
 
             {comHistorico.length === 0 ? (
               <EmptyState
+                vinheta={<VinhetaCaixa size={52} />}
                 title="Nada praticado ainda"
                 description="Assim que você resolver exercícios, o domínio de cada conceito aparece aqui — com as tentativas que geraram cada avaliação."
               />

@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react';
 
+import { useValorAnimado } from '../../hooks/useValorAnimado';
+
 /**
  * O anel de progresso em volta do avatar, com o nível na pastilha.
  *
@@ -23,7 +25,8 @@ export function AnelDeNivel({
   const espessura = 4;
   const raio = (size - espessura) / 2;
   const circunferencia = 2 * Math.PI * raio;
-  const cheio = Math.max(0, Math.min(1, fracao)) * circunferencia;
+  // Começa vazio e enche: é o movimento que diz "isto é progresso".
+  const cheio = useValorAnimado(Math.max(0, Math.min(1, fracao)) * circunferencia, 0);
 
   return (
     <span className="relative inline-block shrink-0" style={{ width: size, height: size }}>
@@ -45,7 +48,7 @@ export function AnelDeNivel({
           strokeWidth={espessura}
           strokeLinecap="round"
           strokeDasharray={`${cheio} ${circunferencia - cheio}`}
-          className="transition-[stroke-dasharray] duration-500"
+          className="transition-[stroke-dasharray] duration-700 ease-out"
         />
       </svg>
       <span className="absolute inset-0 flex items-center justify-center" style={{ padding: espessura + 4 }}>

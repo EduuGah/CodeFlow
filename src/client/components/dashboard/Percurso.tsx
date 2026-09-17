@@ -4,6 +4,7 @@ import { LANGUAGE_LABELS } from '../../../content/types';
 import { corDaTrilha } from '../../lib/cores-das-trilhas';
 import { formatarDuracao, type EtapaMontada, type TrilhaNoPercurso } from '../../lib/percurso';
 import { buttonClasses } from '../ui/Button';
+import { EmblemaDaTrilha } from '../ui/Emblema';
 import { IconArrowRight, IconCheck } from '../ui/Icon';
 
 /**
@@ -169,6 +170,10 @@ export function PercursoDetalhado({ etapas, atualId }: { etapas: EtapaMontada[];
                         </Link>
                       )}
                     </div>
+
+                    {/* O emblema, do lado de fora do link: a figura do assunto
+                        ao lado do nome, para a lista não ser só texto. */}
+                    <EmblemaDaTrilha trackId={trilha.track.id} size={40} className="hidden shrink-0 sm:block" />
                   </div>
                 </li>
               );

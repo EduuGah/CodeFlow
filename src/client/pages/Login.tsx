@@ -4,6 +4,7 @@ import { Button } from '../components/ui/Button';
 import { useAuth } from '../contexts/AuthContext';
 import { useState } from 'react';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
+import { AVATARES, AVATARES_LIVRES, AvatarDesenhado } from '../components/ui/Avatar';
 
 export function Login() {
   useDocumentTitle('Entrar');
@@ -83,6 +84,19 @@ export function Login() {
               Ao entrar, você concorda com nossos termos de serviço.
             </span>
           </div>
+        </div>
+
+        {/* Os avatares de verdade, os que a pessoa escolhe depois de entrar:
+            uma prévia do que é seu lá dentro, sem inventar nada. */}
+        <div className="animar-pousar flex flex-col items-center gap-3" aria-hidden>
+          <div className="flex -space-x-2">
+            {AVATARES.filter((a) => AVATARES_LIVRES.includes(a.id))
+              .slice(4, 10)
+              .map((a) => (
+                <AvatarDesenhado key={a.id} preset={a} size={40} className="ring-2 ring-canvas" />
+              ))}
+          </div>
+          <p className="text-xs text-ink-faint">Depois de entrar, escolha quem você é aqui.</p>
         </div>
       </div>
     </main>

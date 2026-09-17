@@ -9,6 +9,7 @@ import { montarPercurso, trilhaDaVez } from '../../lib/percurso';
 import { PercursoDetalhado } from '../../components/dashboard/Percurso';
 import { IconArrowRight, IconAward, IconProject } from '../../components/ui/Icon';
 import { Carregando, Skeleton } from '../../components/ui/Skeleton';
+import { VinhetaCaixa } from '../../components/ui/Ilustracao';
 import { EmptyState } from '../../components/ui/States';
 import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 
@@ -132,7 +133,7 @@ export function Tracks() {
 
           {projetos.length === 0 ? (
             <EmptyState
-              icon={<IconProject size={28} />}
+              vinheta={<VinhetaCaixa size={52} />}
               title="Nenhum projeto disponível ainda"
               description="Os projetos aparecem aqui conforme são publicados."
             />

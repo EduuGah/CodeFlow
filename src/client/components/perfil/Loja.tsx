@@ -36,8 +36,8 @@ import { VinhetaFloco, VinhetaJanela, VinhetaMoedas, VinhetaRaioDuplo } from '..
 
 /** A figura do item, na cor que ele tem. */
 function FiguraDoItem({ item }: { item: ItemDaLoja }) {
-  if (item.id === 'congelar-sequencia') return <VinhetaFloco size={56} className="text-[#2563a8]" />;
-  if (item.id === 'dobro-de-xp') return <VinhetaRaioDuplo size={56} className="text-energy-700" />;
+  if (item.id === 'congelar-sequencia') return <VinhetaFloco size={56} />;
+  if (item.id === 'dobro-de-xp') return <VinhetaRaioDuplo size={56} />;
   if (item.tipo === 'tema') {
     const acento = ACENTOS.find((a) => a.item === item.id);
     return <VinhetaJanela size={64} acento={acento?.amostra ?? '#1f6660'} escuro={false} />;
@@ -85,7 +85,7 @@ export function Loja() {
     },
     {
       titulo: 'Avatares',
-      nota: 'Os três que não vêm de graça. Escolha em editar perfil.',
+      nota: 'Os que não vêm de graça — cada um abre no nível dele, ou antes, com moedas. Escolha em editar perfil.',
       itens: ITENS.filter((i) => i.tipo === 'avatar'),
     },
   ];
@@ -192,7 +192,7 @@ export function Loja() {
         </p>
       )}
       {comprado && !erro && (
-        <p role="status" className="rounded-lg border border-success-200 bg-success-50 px-3 py-2 text-sm text-success-700">
+        <p role="status" className="animar-pousar rounded-lg border border-success-200 bg-success-50 px-3 py-2 text-sm text-success-700">
           Comprado: {ITENS.find((i) => i.id === comprado)?.title}.
           {comprado === 'congelar-sequencia' && ' Ele entra sozinho no primeiro dia sem estudo.'}
           {comprado === 'dobro-de-xp' && ` Vale a partir de agora, por ${HORAS_DE_DOBRO} horas.`}

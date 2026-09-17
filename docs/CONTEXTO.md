@@ -249,10 +249,15 @@ src/client/components/  Componentes
   ui/CodeEditor.tsx     O editor — o único. Carrega o Monaco sob demanda,
                         mostra o código enquanto espera, cai num textarea se
                         o chunk não vier
-  ui/Avatar.tsx         Os nove avatares desenhados, e a foto
-  ui/Ilustracao.tsx     As vinhetas (grade 48): moedas, paleta, medalha, alvo,
-                        gráfico, floco, raio duplo e a janela em miniatura
-                        pintada na cor do tema
+  ui/Avatar.tsx         Os dezenove avatares (formas cheias: dez de graça,
+                        nove por nível ou moedas), e a foto
+  ui/Ilustracao.tsx     As vinhetas (grade 48, cheias, paleta `P`): moedas,
+                        paleta, medalha, alvo, gráfico, floco, raio duplo,
+                        cartões, caixa, bússola, chave, foguete, relógio,
+                        balão, editor, e a janela pintada na cor do tema
+  ui/Emblema.tsx        O emblema de cada trilha (símbolo branco sobre a cor)
+  ui/Cena.tsx           A cena da página pública: o editor digitando e o
+                        veredito aparecendo
   perfil/               Os corpos das páginas do perfil: editar (nome, avatar,
                         foto), a loja, os desafios, as conquistas por
                         categoria, a aparência (modo e cor); `icones.tsx`
@@ -659,11 +664,19 @@ pergunte antes de começar o servidor simulado ou qualquer outra fase.
 ## 10. Preferências já estabelecidas
 
 - **Português** em tudo: código, comentários, commits, interface.
-- **Sem Lucide Icons.** Os ícones são SVG próprios em
-  `components/ui/Icon.tsx` — grade 24, traço 1.75, `currentColor`. As figuras
-  maiores (abrir uma seção, apresentar um item da loja) são as vinhetas de
-  `components/ui/Ilustracao.tsx` — grade 48, traço 2, uma forma de fundo em
-  tom claro; a mesma gramática, nunca ilustração "flat" de banco de imagens.
+- **Sem Lucide Icons, sem banco de imagens, sem emoji.** Os ícones são SVG
+  próprios em `components/ui/Icon.tsx` — grade 24, traço 1.75,
+  `currentColor`. As figuras maiores (abrir uma seção, item da loja, estado
+  vazio, avatar, emblema de trilha) são **formas cheias, pintadas**, numa
+  paleta fixa (`P` em `ui/Ilustracao.tsx`): o objeto em miniatura, como a
+  janela do tema. A versão de traço fino existiu e parecia clip-art; o dono
+  do projeto aprovou a janela pintada e pediu esse padrão para o resto. O
+  Flaticon serviu de referência de proporção (cabeça grande, olhos de
+  ponto), nunca de arquivo.
+- **Movimento com motivo.** Quatro animações em `index.css` (`animar-pousar`,
+  `animar-pop`, `animar-digitar`, `animar-piscar`) e o `useValorAnimado`
+  para barras e o anel encherem ao aparecer. Nada gira nem flutua em loop;
+  `prefers-reduced-motion` zera tudo.
 - **Mobile-first**, com identidade visual própria. Nada de gradiente agressivo,
   bento grid, glassmorphism, emoji na interface, roxo com preto, orbes, sparkles.
 - **Nenhum recurso falso.** Botão que não faz nada, número que não significa nada

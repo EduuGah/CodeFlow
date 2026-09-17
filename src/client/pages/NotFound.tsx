@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { buttonClasses } from '../components/ui/Button';
-import { IconArrowRight, IconAlert } from '../components/ui/Icon';
+import { IconArrowRight } from '../components/ui/Icon';
+import { VinhetaBussola } from '../components/ui/Ilustracao';
 
 /**
  * Endereço que não existe.
@@ -26,8 +27,8 @@ export function NotFound() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-canvas px-4 py-16 text-center">
-      <span className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-energy-50 text-energy-700">
-        <IconAlert size={24} />
+      <span className="animar-pop mb-5 flex h-24 w-24 items-center justify-center rounded-full bg-sunken" aria-hidden>
+        <VinhetaBussola size={64} />
       </span>
 
       <h1 className="text-2xl font-extrabold tracking-tight text-ink">Esta página não existe</h1>

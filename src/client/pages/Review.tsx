@@ -1,11 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import {
-  IconCalendarCheck,
-  IconCheckCircle,
-  IconClose,
-  IconSpinner,
-} from '../components/ui/Icon';
+import { IconCheckCircle, IconClose, IconSpinner } from '../components/ui/Icon';
+import { VinhetaCartoes } from '../components/ui/Ilustracao';
 
 import { listConcepts, listFlashcards } from '../../content';
 import { useAuth } from '../contexts/AuthContext';
@@ -124,7 +120,7 @@ export function Review() {
         {sessao.length === 0 ? (
           <EmptyState
             className="max-w-md"
-            icon={<IconCalendarCheck size={28} />}
+            vinheta={<VinhetaCartoes size={52} />}
             title="Nada para revisar hoje"
             description="Todos os cartões já foram revisados e ainda não venceram. Voltar antes da hora atrapalha mais do que ajuda — o intervalo existe para o esquecimento começar a agir."
             action={

@@ -8,6 +8,7 @@ import { montarPercurso, trilhaDaVez } from '../../lib/percurso';
 import { nomeParaMostrar } from '../../lib/perfil';
 import { PercursoCompacto } from '../../components/dashboard/Percurso';
 import { ListaDeDesafios } from '../../components/perfil/Desafios';
+import { Avatar } from '../../components/ui/Avatar';
 import {
   IconArrowRight,
   IconBolt,
@@ -20,6 +21,7 @@ import {
 } from '../../components/ui/Icon';
 import { buttonClasses } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
+import { EmblemaDaTrilha } from '../../components/ui/Emblema';
 import { Carregando, Skeleton } from '../../components/ui/Skeleton';
 import { ErrorState } from '../../components/ui/States';
 import { useDocumentTitle } from '../../hooks/useDocumentTitle';
@@ -65,7 +67,9 @@ export function Home() {
   } = useStudentData();
 
   // O nome que a pessoa escolheu no perfil vence o do Google.
-  const primeiroNome = nomeParaMostrar(perfil, user).split(' ')[0];
+  const nome = nomeParaMostrar(perfil, user);
+  const primeiroNome = nome.split(' ')[0];
+  const fotoDoGoogle = user?.user_metadata?.avatar_url as string | undefined;
 
   const percurso = montarPercurso(
     ETAPAS_DO_PERCURSO,
@@ -143,8 +147,9 @@ export function Home() {
           </p>
         </div>
 
-        {/* Só aparece o que existe. "0 dias" e "0 moedas" seriam cobrança, não informação. */}
-        {!loading && (streak > 0 || moedas.saldo > 0 || dobro) && (
+        {/* Só aparece o que existe. "0 dias" e "0 moedas" seriam cobrança, não
+            informação. O avatar aparece sempre: é a porta do perfil. */}
+        {!loading && (
           <Link to="/app/perfil" className="flex shrink-0 flex-wrap items-center gap-2" aria-label="Ver o perfil">
             {dobro && (
               <span className="flex items-center gap-1 rounded-lg bg-brand-50 px-2.5 py-1.5 text-sm font-bold text-brand-700">
@@ -167,6 +172,7 @@ export function Home() {
                 {moedas.saldo}
               </span>
             )}
+            <Avatar escolhido={perfil.avatar} fotoDoGoogle={fotoDoGoogle} nome={nome} size={40} />
           </Link>
         )}
       </header>
@@ -186,15 +192,20 @@ export function Home() {
         </Carregando>
       ) : trilha && aulaDaVez ? (
         <Card as="section" padding="none" className="overflow-hidden" aria-labelledby="aula-da-vez">
-          <div className="bg-brand-600 px-5 py-4 text-white sm:px-6">
-            <p className="label-mono text-white/75">
-              {primeiraVez ? 'Comece por aqui' : trilha.estado === 'nao-iniciada' ? 'Próxima trilha' : 'Continuar'}
-              {noDaVez ? ` · aula ${noDaVez.position} de ${trilha.resumo.total}` : ''} · {aulaDaVez.estimatedMinutes} min
-            </p>
-            <h2 id="aula-da-vez" className="mt-1 text-xl font-bold leading-tight sm:text-2xl">
-              {aulaDaVez.title}
-            </h2>
-            <p className="mt-0.5 text-sm text-white/80">{trilha.track.title}</p>
+          <div className="flex items-center gap-4 bg-brand-600 px-5 py-4 text-white sm:px-6">
+            <div className="min-w-0 flex-1">
+              <p className="label-mono text-white/75">
+                {primeiraVez ? 'Comece por aqui' : trilha.estado === 'nao-iniciada' ? 'Próxima trilha' : 'Continuar'}
+                {noDaVez ? ` · aula ${noDaVez.position} de ${trilha.resumo.total}` : ''} · {aulaDaVez.estimatedMinutes} min
+              </p>
+              <h2 id="aula-da-vez" className="mt-1 text-xl font-bold leading-tight sm:text-2xl">
+                {aulaDaVez.title}
+              </h2>
+              <p className="mt-0.5 text-sm text-white/80">{trilha.track.title}</p>
+            </div>
+            {/* O emblema da trilha: a figura do assunto no card mais importante
+                da tela, para a aula da vez ter cara, e não só texto. */}
+            <EmblemaDaTrilha trackId={trilha.track.id} size={56} className="shrink-0 ring-4 ring-white/20 rounded-full" />
           </div>
 
           <div className="px-5 py-5 sm:px-6">

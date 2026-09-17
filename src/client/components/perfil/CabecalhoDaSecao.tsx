@@ -42,7 +42,7 @@ export function CabecalhoDaSecao({
         Perfil
       </Link>
       <div className="flex items-center gap-4">
-        <span className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl ${pastilha}`} aria-hidden>
+        <span className={`animar-pop flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl ${pastilha}`} aria-hidden>
           {vinheta}
         </span>
         <div className="min-w-0 flex-1">

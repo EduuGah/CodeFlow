@@ -89,30 +89,29 @@ export const ITENS: ItemDaLoja[] = [
     tipo: 'tema',
     nivelQueLibera: 8,
   },
-  {
-    id: 'avatar-cometa',
-    title: 'Avatar Cometa',
-    description: 'Um dos avatares que só o nível ou as moedas abrem.',
-    price: 90,
-    tipo: 'avatar',
-    nivelQueLibera: 4,
-  },
-  {
-    id: 'avatar-raposa',
-    title: 'Avatar Raposa',
-    description: 'Um dos avatares que só o nível ou as moedas abrem.',
-    price: 90,
-    tipo: 'avatar',
-    nivelQueLibera: 6,
-  },
-  {
-    id: 'avatar-robo',
-    title: 'Avatar Robô',
-    description: 'Um dos avatares que só o nível ou as moedas abrem.',
-    price: 120,
-    tipo: 'avatar',
-    nivelQueLibera: 10,
-  },
+  // Os avatares que não vêm de graça, do mais barato ao mais raro. O nível
+  // que abre cada um sobe junto com o preço: quem estuda chega neles de
+  // qualquer jeito; as moedas só encurtam a espera.
+  ...(
+    [
+      ['cometa', 'Cometa', 'Uma bola de luz com o rastro.', 90, 4],
+      ['raposa', 'Raposa', 'Laranja, orelhas em pé, focinho branco.', 90, 5],
+      ['coelho', 'Coelho', 'Orelhas compridas e dois dentinhos.', 90, 5],
+      ['urso', 'Urso', 'Marrom, redondo, focinho claro.', 100, 6],
+      ['dino', 'Dino', 'Verde-água com a crista amarela.', 100, 7],
+      ['panda', 'Panda', 'Branco e preto, manchas nos olhos.', 110, 8],
+      ['robo', 'Robô', 'Cabeça de aço, olhos de led e antena.', 120, 10],
+      ['polvo', 'Polvo', 'Roxo, com os tentáculos embaixo.', 130, 12],
+      ['alien', 'Alien', 'Verde, olhos grandes e uma antena.', 150, 15],
+    ] as const
+  ).map(([id, title, description, price, nivelQueLibera]) => ({
+    id: `avatar-${id}`,
+    title: `Avatar ${title}`,
+    description,
+    price,
+    tipo: 'avatar' as const,
+    nivelQueLibera,
+  })),
 ];
 
 export function itemDaLoja(id: string): ItemDaLoja | undefined {

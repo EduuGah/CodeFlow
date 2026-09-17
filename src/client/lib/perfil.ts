@@ -10,6 +10,25 @@ import type { Purchase } from './economia';
  * derivado (`economia.ts`); o que se lê e grava aqui são as **compras**.
  */
 
+/**
+ * O banco ainda não tem a migração 0007: a tabela `purchases` ou as colunas
+ * de perfil não existem. É o erro mais provável na primeira vez que alguém
+ * abre a loja num projeto novo — e "tente de novo" não resolve, então a
+ * mensagem diz o que rodar.
+ */
+function semMigracao(error: { code?: string; message: string }): boolean {
+  return (
+    error.code === 'PGRST205' || // tabela não encontrada no schema cache
+    error.code === 'PGRST204' || // coluna não encontrada
+    error.code === '42P01' || // relation does not exist
+    error.code === '42703' || // column does not exist
+    /schema cache|does not exist/i.test(error.message)
+  );
+}
+
+const AVISO_DA_MIGRACAO =
+  'O banco ainda não tem a tabela da loja e do perfil. Rode supabase/migrations/0007_perfil_e_loja.sql no SQL Editor do Supabase.';
+
 export type Tema = 'sistema' | 'claro' | 'escuro';
 export type Acento = 'floresta' | 'oceano' | 'brasa' | 'ameixa';
 
@@ -63,7 +82,7 @@ export async function updatePerfil(
   const { error } = await supabase.from('users').upsert(linha, { onConflict: 'id' });
   if (error) {
     console.error('Falha ao salvar o perfil:', error.message);
-    return { error: 'Não foi possível salvar. Tente de novo.' };
+    return { error: semMigracao(error) ? AVISO_DA_MIGRACAO : 'Não foi possível salvar. Tente de novo.' };
   }
   return {};
 }
@@ -118,7 +137,7 @@ export async function recordPurchase(
 
   if (error) {
     console.error('Falha ao registrar compra:', error.message);
-    return { error: 'A compra não foi registrada. Tente de novo.' };
+    return { error: semMigracao(error) ? AVISO_DA_MIGRACAO : 'A compra não foi registrada. Tente de novo.' };
   }
   return { purchase: { item: data.item, price: data.price, createdAt: data.created_at } };
 }

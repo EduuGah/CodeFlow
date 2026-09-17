@@ -302,6 +302,67 @@
 }
 
 @layer utilities {
+  /**
+   * Movimento com motivo. Quatro animações, curtas, para coisas que acabaram
+   * de acontecer ou de aparecer: uma figura que pousa, uma marca de feito
+   * que pipoca, uma linha de código que é digitada, um cursor que pisca.
+   * Nada gira nem flutua em loop pela tela — isso é enfeite, não informação.
+   * Quem pediu menos movimento no sistema já tem tudo isto zerado acima.
+   */
+  @keyframes cf-pousar {
+    from {
+      opacity: 0;
+      transform: translateY(8px) scale(0.96);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @keyframes cf-pop {
+    0% {
+      opacity: 0;
+      transform: scale(0.5);
+    }
+    60% {
+      transform: scale(1.12);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  @keyframes cf-digitar {
+    from {
+      transform: scaleX(0);
+    }
+    to {
+      transform: scaleX(1);
+    }
+  }
+  @keyframes cf-piscar {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0;
+    }
+  }
+  .animar-pousar {
+    animation: cf-pousar 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+  .animar-pop {
+    animation: cf-pop 0.4s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+  .animar-digitar {
+    transform-origin: left center;
+    animation: cf-digitar 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+  .animar-piscar {
+    animation: cf-piscar 1s steps(2, start) infinite;
+  }
+
   /* O texto das aulas usa os tokens da interface, não a paleta cinza do
      plugin: assim ele escurece e clareia junto com o resto no modo escuro. */
   .prose {

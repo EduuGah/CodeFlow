@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import { getConcept } from '../../../content';
 import { useStudentData } from '../../contexts/StudentDataContext';
 import { MASTERY_LABELS } from '../../lib/mastery';
-import { IconArrowRight, IconCalendarCheck, IconPractice, IconReview } from '../../components/ui/Icon';
+import { IconArrowRight, IconPractice } from '../../components/ui/Icon';
+import { VinhetaCartoes, VinhetaEditor } from '../../components/ui/Ilustracao';
 import { Badge } from '../../components/ui/Badge';
 import { Card, cardClasses } from '../../components/ui/Card';
 import { ProgressBar } from '../../components/ui/ProgressBar';
@@ -54,7 +55,7 @@ export function Practice() {
 
         {dueCards === 0 ? (
           <EmptyState
-            icon={<IconCalendarCheck size={28} />}
+            vinheta={<VinhetaCartoes size={52} />}
             title="Nada vencido hoje"
             description="Os cartões voltam na data em que o esquecimento começa a agir. Revisar antes da hora atrapalha mais do que ajuda."
           />
@@ -65,8 +66,8 @@ export function Practice() {
               className: 'flex items-center gap-4 transition-colors hover:border-line-strong',
             })}
           >
-            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-energy-50 text-energy-700">
-              <IconReview size={22} />
+            <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-energy-50" aria-hidden>
+              <VinhetaCartoes size={40} />
             </span>
             <span className="min-w-0 flex-1">
               {/* Vencido e novo são coisas diferentes, e o painel já separa os
@@ -127,28 +128,28 @@ export function Practice() {
       <section>
         <h2 className="label-mono mb-3 text-ink-faint">Exercícios</h2>
 
-        <Card>
-          <ProgressBar
-            label="Resolvidos"
-            value={resolvidos}
-            max={totalExercises}
-            showCount
-          />
+        <Card className="flex gap-4">
+          <span className="hidden h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-sunken sm:flex" aria-hidden>
+            <VinhetaEditor size={40} />
+          </span>
+          <div className="min-w-0 flex-1">
+            <ProgressBar label="Resolvidos" value={resolvidos} max={totalExercises} showCount />
 
-          <p className="mt-4 flex items-start gap-2 text-sm leading-relaxed text-ink-soft">
-            <IconPractice size={17} className="mt-0.5 shrink-0 text-ink-faint" />
-            {pendingExercises.length === 0
-              ? 'Você resolveu todos os exercícios publicados.'
-              : `${pendingExercises.length} ainda não resolvidos. Eles vivem dentro das aulas — siga pela trilha para chegar neles.`}
-          </p>
-
-          {stats.attempts > 0 && (
-            <p className="mt-3 border-t border-line pt-3 text-sm text-ink-faint">
-              {Math.round(stats.accuracy * 100)}% de acerto em {stats.attempts}{' '}
-              {stats.attempts === 1 ? 'tentativa' : 'tentativas'} · {stats.activeDays}{' '}
-              {stats.activeDays === 1 ? 'dia de estudo' : 'dias de estudo'}
+            <p className="mt-4 flex items-start gap-2 text-sm leading-relaxed text-ink-soft">
+              <IconPractice size={17} className="mt-0.5 shrink-0 text-ink-faint" />
+              {pendingExercises.length === 0
+                ? 'Você resolveu todos os exercícios publicados.'
+                : `${pendingExercises.length} ainda não resolvidos. Eles vivem dentro das aulas — siga pela trilha para chegar neles.`}
             </p>
-          )}
+
+            {stats.attempts > 0 && (
+              <p className="mt-3 border-t border-line pt-3 text-sm text-ink-faint">
+                {Math.round(stats.accuracy * 100)}% de acerto em {stats.attempts}{' '}
+                {stats.attempts === 1 ? 'tentativa' : 'tentativas'} · {stats.activeDays}{' '}
+                {stats.activeDays === 1 ? 'dia de estudo' : 'dias de estudo'}
+              </p>
+            )}
+          </div>
         </Card>
       </section>
     </div>

@@ -1,3 +1,4 @@
+import { useValorAnimado } from '../../hooks/useValorAnimado';
 import { cn } from '../../lib/utils';
 
 interface ProgressBarProps {
@@ -19,6 +20,7 @@ interface ProgressBarProps {
 export function ProgressBar({ value, max = 100, label, showCount, className }: ProgressBarProps) {
   const limitado = Math.max(0, Math.min(value, max));
   const percentual = max === 0 ? 0 : Math.round((limitado / max) * 100);
+  const largura = useValorAnimado(percentual, 0);
 
   return (
     <div className={className}>
@@ -39,10 +41,10 @@ export function ProgressBar({ value, max = 100, label, showCount, className }: P
       >
         <div
           className={cn(
-            'h-full rounded-full transition-[width] duration-500',
+            'h-full rounded-full transition-[width] duration-700 ease-out',
             percentual === 100 ? 'bg-success-600' : 'bg-ink'
           )}
-          style={{ width: `${percentual}%` }}
+          style={{ width: `${largura}%` }}
         />
       </div>
     </div>
