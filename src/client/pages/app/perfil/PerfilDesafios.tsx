@@ -1,4 +1,5 @@
 import { CabecalhoDaSecao } from '../../../components/perfil/CabecalhoDaSecao';
+import { CenaDesafio } from '../../../components/ui/Cena';
 import { ListaDeDesafios } from '../../../components/perfil/Desafios';
 import { Card, SectionLabel } from '../../../components/ui/Card';
 import { IconClock } from '../../../components/ui/Icon';
@@ -41,6 +42,7 @@ export function PerfilDesafios() {
         titulo="Desafios"
         descricao="Metas curtas que trocam todo dia e toda segunda. Cumprir é receber: as moedas e o XP entram sozinhos."
         vinheta={<VinhetaAlvo size={44} />}
+        lado={<CenaDesafio className="hidden w-60 sm:block" />}
       />
 
       {loading ? (

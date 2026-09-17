@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useState } from 'react';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { AVATARES, AVATARES_LIVRES, AvatarDesenhado } from '../components/ui/Avatar';
+import { CenaEditor } from '../components/ui/Cena';
 
 export function Login() {
   useDocumentTitle('Entrar');
@@ -39,6 +40,10 @@ export function Login() {
   return (
     <main className="min-h-screen bg-canvas flex flex-col items-center justify-center p-4">
       <div className="w-full max-w-sm space-y-8">
+        {/* A mesma cena da página pública: quem chega direto aqui também vê
+            o que a plataforma faz antes de entrar. */}
+        <CenaEditor className="animar-pousar drop-shadow-lg" />
+
         <div className="flex flex-col items-center text-center space-y-2">
           <div className="w-12 h-12 bg-brand-600 rounded-xl flex items-center justify-center mb-2 shadow-sm">
             <IconLogo size={24} className="text-white" />

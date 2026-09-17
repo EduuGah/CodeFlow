@@ -21,6 +21,7 @@ import {
 } from '../../components/ui/Icon';
 import { buttonClasses } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
+import { CenaAulas } from '../../components/ui/Cena';
 import { EmblemaDaTrilha } from '../../components/ui/Emblema';
 import { Carregando, Skeleton } from '../../components/ui/Skeleton';
 import { ErrorState } from '../../components/ui/States';
@@ -129,8 +130,8 @@ export function Home() {
 
   return (
     <div className="space-y-9">
-      <header className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2">
-        <div className="min-w-0">
+      <header className="flex items-start justify-between gap-4">
+        <div className="min-w-0 flex-1">
           <h1 className="text-2xl font-extrabold tracking-tight text-ink sm:text-[1.75rem]">
             {primeiraVez ? `Bem-vindo, ${primeiroNome}` : `Olá, ${primeiroNome}`}
           </h1>
@@ -150,7 +151,7 @@ export function Home() {
         {/* Só aparece o que existe. "0 dias" e "0 moedas" seriam cobrança, não
             informação. O avatar aparece sempre: é a porta do perfil. */}
         {!loading && (
-          <Link to="/app/perfil" className="flex shrink-0 flex-wrap items-center gap-2" aria-label="Ver o perfil">
+          <Link to="/app/perfil" className="flex max-w-[55%] shrink-0 flex-wrap items-center justify-end gap-2" aria-label="Ver o perfil">
             {dobro && (
               <span className="flex items-center gap-1 rounded-lg bg-brand-50 px-2.5 py-1.5 text-sm font-bold text-brand-700">
                 <IconBolt size={15} />
@@ -207,6 +208,14 @@ export function Home() {
                 da tela, para a aula da vez ter cara, e não só texto. */}
             <EmblemaDaTrilha trackId={trilha.track.id} size={56} className="shrink-0 ring-4 ring-white/20 rounded-full" />
           </div>
+
+          {/* Na primeira visita, a cena de uma aula: passos, conteúdo,
+              "continuar" — o que a pessoa vai encontrar ao apertar o botão. */}
+          {primeiraVez && (
+            <div className="border-b border-line bg-sunken px-5 pt-4 sm:px-6">
+              <CenaAulas className="mx-auto max-w-sm" />
+            </div>
+          )}
 
           <div className="px-5 py-5 sm:px-6">
             <p className="flex items-start gap-2 text-sm leading-relaxed text-ink-soft">

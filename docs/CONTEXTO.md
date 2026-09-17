@@ -262,7 +262,7 @@ src/client/components/  Componentes
                         balão, editor, e a janela pintada na cor do tema
   ui/Emblema.tsx        O emblema de cada trilha (símbolo branco sobre a cor)
   ui/Cena.tsx           As cenas (360 × 220, animadas quando entram na
-                        tela): editor, aulas, página, correção, cartões,
+                        tela): editor, aulas, página, correção, cartões, desafio,
                         percurso, projeto — na página pública, nas trilhas,
                         nos projetos e na revisão
   perfil/               Os corpos das páginas do perfil: editar (nome, avatar,

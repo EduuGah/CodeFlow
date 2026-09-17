@@ -526,3 +526,59 @@ export function CenaProjeto({ className = '' }: { className?: string }) {
     </Cena>
   );
 }
+
+/**
+ * O desafio: a meta enchendo em três exercícios, a marca de feito, e as
+ * moedas que entram sozinhas — cumprir é receber.
+ */
+export function CenaDesafio({ className = '' }: { className?: string }) {
+  return (
+    <Cena className={className}>
+      <Quadro>
+        <JanelaClara x={8} y={10} w={344} h={200} />
+        <rect x="24" y="52" width="46" height="7" rx="3.5" fill={TELA.texto} />
+        <text x="336" y="59" fill={TELA.texto} fontSize="10" textAnchor="end" fontFamily={MONO}>
+          trocam em 6 h
+        </text>
+
+        {/* O desafio: ícone, título, meta e a barra que enche em três tempos. */}
+        <rect x="24" y="72" width="44" height="44" rx="10" fill="var(--color-brand-50)" />
+        <circle cx="46" cy="94" r="9" fill="none" stroke="var(--color-brand-700)" strokeWidth="2.5" />
+        <path d="M41.5 94l3 3 6-7" stroke="var(--color-brand-700)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+        <rect x="80" y="76" width="110" height="10" rx="5" fill="var(--color-ink)" />
+        <rect x="80" y="93" width="190" height="7" rx="3.5" fill={TELA.texto} />
+        <rect x="80" y="108" width="256" height="8" rx="4" fill={TELA.sunken} />
+        {[0, 1, 2].map((i) => (
+          <Barra key={i} x={80 + i * 86} y={108} w={84} h={8} rx={4} cor="var(--color-brand-600)" atraso={0.4 + i * 0.7} />
+        ))}
+        <text x="336" y="98" fill={TELA.texto} fontSize="10" textAnchor="end" fontFamily={MONO}>
+          3/3
+        </text>
+
+        {/* Feito: o ícone vira a marca verde e o título fica verde. */}
+        <Pop atraso={2.5}>
+          <rect x="24" y="72" width="44" height="44" rx="10" fill={P.verde} />
+          <path d="M37 94l6 6 12-13" stroke={P.creme} strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+          <rect x="80" y="108" width="256" height="8" rx="4" fill={P.verde} />
+        </Pop>
+
+        {/* As moedas e o XP, que entram sozinhos. */}
+        <Pop atraso={2.9}>
+          <rect x="24" y="138" width="130" height="34" rx="10" fill="var(--color-energy-50)" />
+          <circle cx="46" cy="155" r="9" fill={P.dourado} />
+          <circle cx="46" cy="155" r="5.5" fill="none" stroke={P.douradoEscuro} strokeWidth="1.5" />
+          <text x="64" y="160" fill="var(--color-energy-700)" fontSize="13" fontWeight="800" fontFamily={MONO}>
+            +15 moedas
+          </text>
+        </Pop>
+        <Pop atraso={3.2}>
+          <rect x="166" y="138" width="90" height="34" rx="10" fill="var(--color-brand-50)" />
+          <text x="211" y="160" fill="var(--color-brand-700)" fontSize="13" fontWeight="800" textAnchor="middle" fontFamily={MONO}>
+            +30 XP
+          </text>
+        </Pop>
+        <rect x="24" y="186" width="200" height="7" rx="3.5" fill={TELA.linha} />
+      </Quadro>
+    </Cena>
+  );
+}
