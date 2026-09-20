@@ -270,7 +270,7 @@ corpo: {}`,
         id: 'ex-node-8-sintaxe',
         type: 'find-bug',
         prompt:
-          'O servidor nem sobe: "await is only valid in async functions" (ou "await is only valid in async functions and the top level bodies of modules"). Aponte a linha com o defeito.',
+          'O servidor nem sobe: "await is only valid in async functions" (ou "await is only valid in async functions and the top level bodies of modules"). Aponte a linha que precisa mudar.',
         concepts: ['node-async'],
         difficulty: 'iniciante',
         tags: ['node', 'async', 'await', 'bug'],

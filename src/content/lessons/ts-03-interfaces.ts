@@ -282,7 +282,7 @@ console.log(ana.nome, ana.apelido);`,
         id: 'ex-ts-3-bug-digitacao',
         type: 'find-bug',
         prompt:
-          'O compilador recusa este programa. Em JavaScript ele rodaria e imprimiria `undefined` sem avisar. Aponte a linha.',
+          'O compilador recusa este programa. Em JavaScript ele rodaria e imprimiria `undefined` sem avisar. Aponte a linha que precisa mudar.',
         concepts: ['ts-interfaces'],
         difficulty: 'iniciante',
         tags: ['typescript', 'interfaces', 'depuracao'],

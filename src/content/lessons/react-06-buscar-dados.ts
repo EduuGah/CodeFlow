@@ -365,7 +365,7 @@ function App() {
         id: 'ex-react-6-bug-async',
         type: 'find-bug',
         prompt:
-          "O compilador recusa: `Argument of type '() => Promise<void>' is not assignable to parameter of type '() => void | (() => void)'`. Aponte a linha do defeito.",
+          "O compilador recusa: `Argument of type '() => Promise<void>' is not assignable to parameter of type '() => void | (() => void)'`. Aponte a linha que precisa mudar.",
         concepts: ['react-dados'],
         difficulty: 'iniciante',
         tags: ['react', 'dados', 'depuracao'],

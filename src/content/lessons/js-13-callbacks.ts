@@ -377,7 +377,7 @@ verificarIdade(20, function (erro, podeEntrar) {
         id: 'ex-js-13-achar-contrato',
         type: 'find-bug',
         prompt:
-          'Este programa quebra com `Error: Falhou: undefined` — mas nenhuma busca falhou, e a mensagem de erro nem tem conteúdo.\n\n`buscarUsuario` promete chamar o callback no padrão da aula: **erro primeiro, resultado depois**. Aponte a linha onde o defeito está.',
+          'Este programa quebra com `Error: Falhou: undefined` — mas nenhuma busca falhou, e a mensagem de erro nem tem conteúdo.\n\nAponte a linha que precisa mudar.',
         concepts: ['assincronia', 'funcoes'],
         difficulty: 'intermediario',
         tags: ['javascript', 'callbacks', 'depuracao'],

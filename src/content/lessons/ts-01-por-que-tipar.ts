@@ -239,7 +239,7 @@ console.log(nome, idade, ativo, notas.length);`,
         id: 'ex-ts-1-bug-chamada',
         type: 'find-bug',
         prompt:
-          'O compilador recusa este programa. Aponte a linha do defeito — a que o compilador marca.',
+          'O compilador recusa este programa. Aponte a linha que precisa mudar.',
         concepts: ['ts-por-que'],
         difficulty: 'iniciante',
         tags: ['typescript', 'tipos', 'depuracao'],

@@ -278,7 +278,7 @@ function App() {
         id: 'ex-react-13-bug-dom',
         type: 'find-bug',
         prompt:
-          'Este componente quebra na primeira montagem com `TypeError: Cannot read properties of null (reading \'focus\')`. Aponte a linha do defeito.',
+          'Este componente quebra na primeira montagem com `TypeError: Cannot read properties of null (reading \'focus\')`. Aponte a linha que precisa mudar.',
         concepts: ['react-testes'],
         difficulty: 'intermediario',
         tags: ['react', 'testes', 'depuracao'],

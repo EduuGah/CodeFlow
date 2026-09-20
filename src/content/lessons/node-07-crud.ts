@@ -347,7 +347,7 @@ depois de dois PUT iguais: 2 tarefa(s), a 1 é Revisar`,
         id: 'ex-node-7-constante',
         type: 'find-bug',
         prompt:
-          'O servidor quebra antes de subir: "Assignment to constant variable". Aponte a linha com o defeito.',
+          'O servidor quebra antes de subir: "Assignment to constant variable". Aponte a linha que precisa mudar.',
         concepts: ['node-crud'],
         difficulty: 'iniciante',
         tags: ['node', 'delete', 'const', 'bug'],

@@ -325,7 +325,7 @@ function App() {
         id: 'ex-react-11-bug-rota',
         type: 'find-bug',
         prompt:
-          "O compilador recusa: `Type '\"/sobr\"' is not assignable to type 'Rota'`. Um link aponta para uma tela que não existe. Aponte a linha do defeito.",
+          "O compilador recusa: `Type '\"/sobr\"' is not assignable to type 'Rota'`. Aponte a linha que precisa mudar.",
         concepts: ['react-rotas'],
         difficulty: 'iniciante',
         tags: ['react', 'rotas', 'depuracao'],

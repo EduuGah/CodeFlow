@@ -338,7 +338,7 @@ console.log(lerProduto('{"nome":"","preco":10}'));       // null`,
         id: 'ex-js-17-achar-parse',
         type: 'find-bug',
         prompt:
-          'Este programa quebra com `TypeError: Cannot read properties of undefined (reading \'toUpperCase\')`.\n\nA resposta do servidor tem o campo `nome`, você pode conferir. Aponte a linha onde o defeito está.',
+          'Este programa quebra com `TypeError: Cannot read properties of undefined (reading \'toUpperCase\')`.\n\nA resposta do servidor tem o campo `nome`, você pode conferir. Aponte a linha que precisa mudar.',
         concepts: ['json', 'objetos'],
         difficulty: 'intermediario',
         tags: ['javascript', 'json', 'depuracao'],

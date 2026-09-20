@@ -201,16 +201,23 @@ Uma quantidade **zero** — legítima, o usuário digitou 0 — cai no mesmo cam
       exercise: {
         id: 'ex-js-3-prever-zero',
         type: 'predict-output',
-        prompt: 'O que este programa imprime? Preste atenção nos valores que são avaliados como falsos.',
+        prompt:
+          'O que este programa imprime? Cada `if` testa um valor diferente — preste atenção nos que são avaliados como falsos.',
         concepts: ['condicoes', 'casos-extremos'],
         difficulty: 'intermediario',
         tags: ['javascript', 'condicoes'],
-        code: `const valores = [0, '', 'abc', [], null];
+        code: `const zero = 0;
+const vazio = '';
+const texto = 'abc';
+const lista = [];
+const nada = null;
 
-for (const v of valores) {
-  if (v) console.log('verdadeiro:', JSON.stringify(v));
-}`,
-        expectedOutput: 'verdadeiro: "abc"\nverdadeiro: []',
+if (zero) console.log('zero passou');
+if (vazio) console.log('texto vazio passou');
+if (texto) console.log('abc passou');
+if (lista) console.log('lista vazia passou');
+if (nada) console.log('null passou');`,
+        expectedOutput: 'abc passou\nlista vazia passou',
         explanation:
           '`0`, `\'\'` e `null` são falsos. Já `[]` é uma lista **vazia**, mas continua sendo um objeto — e todo objeto é verdadeiro. Para saber se uma lista tem itens, teste `lista.length`, não a lista em si.',
         hints: [
@@ -310,7 +317,7 @@ console.log(classificar(-1));   // idade inválida`,
         id: 'ex-js-3-achar-atribuicao',
         type: 'find-bug',
         prompt:
-          'Este programa tem um teste no fim, e ele está falhando: um visitante está sendo tratado como administrador.\n\nAponte a linha onde o defeito está.',
+          'Este programa tem um teste no fim, e ele está falhando: um visitante está sendo tratado como administrador.\n\nAponte a linha que precisa mudar.',
         concepts: ['condicoes', 'operadores'],
         difficulty: 'iniciante',
         tags: ['javascript', 'condicoes', 'depuracao'],

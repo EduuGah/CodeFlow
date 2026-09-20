@@ -251,7 +251,7 @@ A pergunta que decide: **esse valor pode ser confundido com uma resposta legíti
         id: 'ex-logica-2-achar-limite',
         type: 'find-bug',
         prompt:
-          'Esta função deveria devolver os últimos nomes da lista, em maiúsculas. Ela quebra com `Cannot read properties of undefined`.\n\n**Aponte a linha onde o defeito está.**',
+          'Esta função deveria devolver os últimos nomes da lista, em maiúsculas. Ela quebra com `Cannot read properties of undefined`.\n\nAponte a linha que precisa mudar.',
         concepts: ['casos-extremos', 'depuracao'],
         difficulty: 'intermediario',
         tags: ['logica', 'casos-extremos'],

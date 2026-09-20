@@ -340,7 +340,7 @@ app.listen(3000);`,
         id: 'ex-node-3-sem-parenteses',
         type: 'find-bug',
         prompt:
-          'Este servidor quebra antes de subir: "app.get is not a function". Aponte a linha com o defeito.',
+          'Este servidor quebra antes de subir: "app.get is not a function". Aponte a linha que precisa mudar.',
         concepts: ['node-rotas'],
         difficulty: 'iniciante',
         tags: ['node', 'express', 'bug'],

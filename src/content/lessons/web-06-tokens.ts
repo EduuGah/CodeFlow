@@ -369,7 +369,7 @@ console.log(lerToken('nao-e-token', 1700000000000));`,
         id: 'ex-web-6-achar-unidade',
         type: 'find-bug',
         prompt:
-          'A última linha é um teste: um token que vence daqui a uma hora não pode ser dado como vencido. E está sendo.\n\nAponte a linha onde o defeito está.',
+          'A última linha é um teste: um token que vence daqui a uma hora não pode ser dado como vencido. E está sendo.\n\nAponte a linha que precisa mudar.',
         concepts: ['autenticacao', 'datas'],
         difficulty: 'intermediario',
         tags: ['web', 'tokens', 'depuracao'],

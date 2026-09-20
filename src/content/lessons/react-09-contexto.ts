@@ -302,7 +302,7 @@ function App() {
         id: 'ex-react-9-bug-provider',
         type: 'find-bug',
         prompt:
-          'O compilador recusa: `Type \'string\' is not assignable to type \'Tema\'` — o valor entregue ao Provider não é um tema válido. Aponte a linha do defeito.',
+          'O compilador recusa: `Type \'string\' is not assignable to type \'Tema\'`. Aponte a linha que precisa mudar.',
         concepts: ['react-contexto'],
         difficulty: 'iniciante',
         tags: ['react', 'contexto', 'depuracao'],

@@ -290,7 +290,7 @@ function App() {
         id: 'ex-react-10-bug-tupla',
         type: 'find-bug',
         prompt:
-          "O compilador recusa: `Type 'number | (() => void)' is not assignable to type '(evento: MouseEvent<any>) => void'`. O hook devolve uma lista em que cada posição pode ser qualquer um dos dois — não uma tupla. Aponte a linha do defeito.",
+          "O compilador recusa: `Type 'number | (() => void)' is not assignable to type '(evento: MouseEvent<any>) => void'`. Aponte a linha que precisa mudar.",
         concepts: ['react-hooks'],
         difficulty: 'intermediario',
         tags: ['react', 'hooks', 'depuracao'],

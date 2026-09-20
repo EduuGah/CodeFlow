@@ -440,7 +440,7 @@ console.log(lerConfig('42', PADRAO));                // { tema: 'claro' }`,
         id: 'ex-js-10-achar-linha',
         type: 'find-bug',
         prompt:
-          'Este programa quebra com `TypeError: itens is not iterable`.\n\nO erro é reportado numa linha. **Aponte a linha onde o defeito está** — que é outra.',
+          'Este programa quebra com `TypeError: itens is not iterable`.\n\nAponte a linha que precisa mudar.',
         concepts: ['depuracao'],
         difficulty: 'intermediario',
         tags: ['javascript', 'erros'],

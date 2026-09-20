@@ -116,7 +116,7 @@ console.log(resumo.media.toFixed(2));  // 80.83`,
         id: 'ex-ts-2-bug-reatribuir',
         type: 'find-bug',
         prompt:
-          'O compilador recusa este programa. Não há anotação nenhuma — e mesmo assim há um erro de tipo. Aponte a linha.',
+          'O compilador recusa este programa. Não há anotação nenhuma — e mesmo assim há um erro de tipo. Aponte a linha que precisa mudar.',
         concepts: ['ts-inferencia'],
         difficulty: 'iniciante',
         tags: ['typescript', 'inferencia', 'depuracao'],

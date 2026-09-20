@@ -363,7 +363,7 @@ console.log(contarMaioresQue([1, 5, 9], 4)); // esperado: 2`,
         id: 'ex-js-11-achar-sombra',
         type: 'find-bug',
         prompt:
-          'Este programa quebra com `ReferenceError: Cannot access \'aprovados\' before initialization`.\n\nA variável existe: foi declarada lá em cima, com valor 0. Aponte a linha onde o defeito está.',
+          'Este programa quebra com `ReferenceError: Cannot access \'aprovados\' before initialization`.\n\nA variável existe: foi declarada lá em cima, com valor 0. Aponte a linha que precisa mudar.',
         concepts: ['escopo', 'variaveis'],
         difficulty: 'intermediario',
         tags: ['javascript', 'escopo', 'depuracao'],

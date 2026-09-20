@@ -95,7 +95,7 @@ export function FindBug({
         className="min-w-0 overflow-x-auto rounded-xl bg-editor py-3"
         disabled={enviada && acertou}
       >
-        <legend className="sr-only">Escolha a linha que contém o defeito</legend>
+        <legend className="sr-only">Escolha a linha que precisa mudar</legend>
 
         {linhas.map((linha) => {
           const selecionavel = podeSerResposta(linha.texto);
@@ -171,9 +171,9 @@ export function FindBug({
             estado={acertou ? 'acertou' : 'errou'}
             titulo={
               acertou
-                ? `A linha ${exercise.buggyLine} é onde o defeito está`
+                ? `A linha ${exercise.buggyLine} é a que precisa mudar`
                 : escolheuSintoma
-                  ? `A linha ${escolhida} é onde o erro aparece — não onde ele nasce`
+                  ? `A linha ${escolhida} é onde o erro aparece — não a que precisa mudar`
                   : 'Não é essa linha'
             }
             refDoBloco={retornoRef}

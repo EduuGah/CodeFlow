@@ -591,7 +591,7 @@ export async function resolverExercicio(
       await expect(radio).toBeChecked();
       await page.getByRole('button', { name: /Apontar a linha|Verificar de novo/ }).click();
       await page
-        .getByText(`A linha ${exercicio.buggyLine} é onde o defeito está`)
+        .getByText(`A linha ${exercicio.buggyLine} é a que precisa mudar`)
         .waitFor({ timeout: 10_000 });
       return;
     }

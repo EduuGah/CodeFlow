@@ -299,7 +299,7 @@ function App() {
         id: 'ex-react-4-bug-setter',
         type: 'find-bug',
         prompt:
-          "O compilador recusa: `Type 'Dispatch<SetStateAction<string>>' is not assignable to type '(evento: ChangeEvent) => void'`. É o erro mais comum ao ligar um campo ao estado. Aponte a linha do defeito.",
+          "O compilador recusa: `Type 'Dispatch<SetStateAction<string>>' is not assignable to type '(evento: ChangeEvent) => void'`. É o erro mais comum ao ligar um campo ao estado. Aponte a linha que precisa mudar.",
         concepts: ['react-formularios'],
         difficulty: 'iniciante',
         tags: ['react', 'formularios', 'depuracao'],

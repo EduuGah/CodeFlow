@@ -340,7 +340,7 @@ app.listen(3000);`,
         id: 'ex-node-5-chamou',
         type: 'find-bug',
         prompt:
-          'O servidor quebra antes de subir: "Cannot read properties of undefined (reading \'status\')". Aponte a linha com o defeito.',
+          'O servidor quebra antes de subir: "Cannot read properties of undefined (reading \'status\')". Aponte a linha que precisa mudar.',
         concepts: ['node-erros'],
         difficulty: 'intermediario',
         tags: ['node', 'express', 'middleware', 'bug'],

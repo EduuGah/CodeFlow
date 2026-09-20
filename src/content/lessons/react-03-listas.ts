@@ -310,7 +310,7 @@ function App() {
         id: 'ex-react-3-bug-mutacao',
         type: 'find-bug',
         prompt:
-          "O estado é `readonly string[]`, e por isso o compilador recusa: `Property 'push' does not exist on type 'readonly string[]'`. Sem o readonly, o programa rodaria — e clicar em Adicionar não faria nada aparecer, sem erro nenhum. Aponte a linha do defeito.",
+          "O estado é `readonly string[]`, e por isso o compilador recusa: `Property 'push' does not exist on type 'readonly string[]'`. Sem o readonly, o programa rodaria — e clicar em Adicionar não faria nada aparecer, sem erro nenhum. Aponte a linha que precisa mudar.",
         concepts: ['react-listas'],
         difficulty: 'intermediario',
         tags: ['react', 'listas', 'depuracao'],

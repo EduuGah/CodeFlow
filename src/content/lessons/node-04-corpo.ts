@@ -344,7 +344,7 @@ app.listen(3000);`,
         id: 'ex-node-4-json-estrito',
         type: 'find-bug',
         prompt:
-          'O servidor nem sobe: "Unexpected token t in JSON at position 3" (ou parecido, dependendo do navegador). Aponte a linha com o defeito.',
+          'O servidor nem sobe: "Unexpected token t in JSON at position 3" (ou parecido, dependendo do navegador). Aponte a linha que precisa mudar.',
         concepts: ['node-corpo'],
         difficulty: 'iniciante',
         tags: ['node', 'json', 'bug'],

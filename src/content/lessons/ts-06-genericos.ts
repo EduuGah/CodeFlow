@@ -265,7 +265,7 @@ console.log(numeros.dados.length, nome.dados.toUpperCase());`,
         id: 'ex-ts-6-bug-restricao',
         type: 'find-bug',
         prompt:
-          'O compilador recusa: `Property \'nome\' does not exist on type \'T\'`. A função é genérica demais para o que faz. Aponte a linha do defeito.',
+          'O compilador recusa: `Property \'nome\' does not exist on type \'T\'`. Aponte a linha que precisa mudar.',
         concepts: ['ts-genericos'],
         difficulty: 'intermediario',
         tags: ['typescript', 'genericos', 'depuracao'],

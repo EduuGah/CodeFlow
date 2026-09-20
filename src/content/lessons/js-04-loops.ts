@@ -258,7 +258,7 @@ console.log(somarAte(4)); // esperado: 10
         id: 'ex-js-4-achar-limite',
         type: 'find-bug',
         prompt:
-          'Este programa quebra com `TypeError: Cannot read properties of undefined (reading \'toUpperCase\')`.\n\nO erro é reportado numa linha, mas o defeito está em outra. Aponte a linha do defeito.',
+          'Este programa quebra com `TypeError: Cannot read properties of undefined (reading \'toUpperCase\')`.\n\nAponte a linha que precisa mudar.',
         concepts: ['loops', 'arrays'],
         difficulty: 'iniciante',
         tags: ['javascript', 'loops', 'depuracao'],

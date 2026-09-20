@@ -267,7 +267,7 @@ console.log(novo.nome, estoque.caneta);`,
         id: 'ex-ts-7-bug-keyof',
         type: 'find-bug',
         prompt:
-          'O compilador recusa: `Element implicitly has an \'any\' type because expression of type \'string\' can\'t be used to index type \'Produto\'`. Aponte a linha do defeito.',
+          'O compilador recusa: `Element implicitly has an \'any\' type because expression of type \'string\' can\'t be used to index type \'Produto\'`. Aponte a linha que precisa mudar.',
         concepts: ['ts-utilitarios'],
         difficulty: 'intermediario',
         tags: ['typescript', 'utilitarios', 'depuracao'],

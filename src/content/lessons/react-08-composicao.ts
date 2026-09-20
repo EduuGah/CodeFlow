@@ -278,7 +278,7 @@ function App() {
         id: 'ex-react-8-bug-children',
         type: 'find-bug',
         prompt:
-          "O compilador recusa: `Type '{ children: Element; titulo: string; }' is not assignable to type 'IntrinsicAttributes & { titulo: string; }'` — o `Painel` não aceita conteúdo. Aponte a linha do defeito.",
+          "O compilador recusa: `Type '{ children: Element; titulo: string; }' is not assignable to type 'IntrinsicAttributes & { titulo: string; }'`. Aponte a linha que precisa mudar.",
         concepts: ['react-composicao'],
         difficulty: 'iniciante',
         tags: ['react', 'composicao', 'depuracao'],

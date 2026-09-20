@@ -283,7 +283,7 @@ console.log(numeros.length);`,
         id: 'ex-js-1-achar-const',
         type: 'find-bug',
         prompt:
-          'Este programa quebra com `TypeError: Assignment to constant variable`.\n\nO erro aparece numa linha, mas a **decisão errada** foi tomada em outra. Aponte a linha onde o defeito está.',
+          'Este programa quebra com `TypeError: Assignment to constant variable`.\n\nAponte a linha que precisa mudar — nem sempre é a linha em que o erro aparece.',
         concepts: ['variaveis'],
         difficulty: 'iniciante',
         tags: ['javascript', 'variaveis', 'depuracao'],

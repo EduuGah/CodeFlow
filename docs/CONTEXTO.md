@@ -33,12 +33,12 @@ Números lidos do catálogo, não de memória.
 
 | | |
 | --- | --- |
-| Trilhas | 7 — Fundamentos de JavaScript (20 aulas), Lógica (3), Como a Web Funciona (8), A Página (26), TypeScript (10), React (14), SQL e Bancos de Dados (10) |
-| Aulas | 91, somando 2.556 minutos, em blocos por assunto (`Track.sections`) |
-| Exercícios | 532, em 9 tipos — 142 de múltipla escolha, 124 de código, 80 de lacuna, 56 de prever saída, 43 de SQL, 40 de ordenar passos, 36 de encontrar o bug, 6 de refatorar, 5 de escrever o teste. 78 exercícios de página (`runtime: 'iframe'`), 42 de componente React (a aula é `language: 'react'`), 16 com trechos de tipo (`typeTests`). **Toda aula tem ao menos um dos quatro tipos de prática de dev** |
-| Verificação | 731 casos fixos + 58 propriedades + 66 verificações de SQL (por linhas devolvidas) |
+| Trilhas | 8 — Fundamentos de JavaScript (20 aulas), Lógica (3), Como a Web Funciona (8), A Página (26), TypeScript (10), React (14), SQL e Bancos de Dados (10), Node e APIs (10) |
+| Aulas | 101, somando 2.891 minutos, em blocos por assunto (`Track.sections`) |
+| Exercícios | 596, em 10 tipos — 154 de múltipla escolha, 125 de código, 83 de lacuna, 63 de prever saída, 43 de SQL, 43 de ordenar passos, 43 de encontrar o bug, 30 de servidor, 7 de refatorar, 5 de escrever o teste. 78 exercícios de página (`runtime: 'iframe'`), 42 de componente React (a aula é `language: 'react'`), 16 com trechos de tipo (`typeTests`). **Toda aula tem ao menos um dos quatro tipos de prática de dev** |
+| Verificação | 825 casos fixos + 58 propriedades + 66 verificações de SQL (por linhas devolvidas) |
 | Projetos | 7, com 22 critérios de aceitação |
-| Conceitos | 87, com grafo de pré-requisitos |
+| Conceitos | 97, com grafo de pré-requisitos |
 | Flashcards | 22 |
 | Testes | 2.104 de unidade + 278 de navegador |
 | Pacote | 2.385 kB (667 kB comprimido) no chunk principal — o conteúdo vai junto; o Monaco são mais 3.362 kB (869 kB) num chunk à parte, baixado só quando o primeiro editor monta, e o worker de TypeScript (7 MB) só quando um modelo JS/TS abre. O motor de TypeScript não acrescentou arquivo; o de React acrescentou um chunk de 143 kB (47 kB) com o React e o ReactDOM como texto, baixado só por um exercício de React; o de SQL acrescentou o worker (49 kB) e o SQLite em WebAssembly (658 kB), baixados só por um exercício de SQL |
@@ -727,6 +727,19 @@ engenharia, que o dono do projeto já pediu (ver `docs/curriculo.md`).
   bento grid, glassmorphism, emoji na interface, roxo com preto, orbes, sparkles.
 - **Nenhum recurso falso.** Botão que não faz nada, número que não significa nada
   e teste que passa vazio já foram removidos várias vezes.
+- **Encontrar o bug pergunta uma coisa só: "a linha que precisa mudar"**
+  (2026-09-20, a pedido do dono do projeto, que reclamou de exercícios que
+  ora pediam onde o erro aparece, ora onde começa, e de enunciados que
+  entregavam a resposta). O enunciado descreve o **sintoma** — a mensagem
+  como o programa a imprime, o teste que falha — e termina com "Aponte a
+  linha que precisa mudar."; o diagnóstico fica na explicação. O CI cobra a
+  frase e recusa enunciado ou dica que traga a linha corrigida. A tela diz
+  "é a que precisa mudar" e, para a linha do sintoma, "é onde o erro aparece
+  — não a que precisa mudar".
+- **Uma aula só usa o que já foi ensinado.** O exercício de prever a saída da
+  aula 3 de JavaScript usava `for…of` antes da aula de laços; o dono do
+  projeto apontou. Ao escrever um exercício, confira que cada construção já
+  apareceu numa aula anterior da trilha.
 - **Modo escuro e quatro cores de destaque existem** (2026-09-16), a pedido do
   dono do projeto — "o site está muito seco". A regra continua: cor com
   significado; as cores extras são de destaque, não de fundo.

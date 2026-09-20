@@ -326,7 +326,7 @@ function App() {
         id: 'ex-react-12-bug-usememo',
         type: 'find-bug',
         prompt:
-          "O compilador recusa: `Property 'toFixed' does not exist on type 'void'`. O `useMemo` não está devolvendo nada. Aponte a linha do defeito.",
+          "O compilador recusa: `Property 'toFixed' does not exist on type 'void'`. Aponte a linha que precisa mudar.",
         concepts: ['react-render'],
         difficulty: 'intermediario',
         tags: ['react', 'render', 'depuracao'],

@@ -61,6 +61,15 @@ O detalhe que torna isso perigoso: **só o \`+\` se comporta assim**. Os outros 
 ~~~
 
 Ou seja, \`'10' - 5\` dá 5 e \`'10' + 5\` dá \`'105'\`. Não há lógica a deduzir aqui: é uma regra da linguagem, e o jeito de não ser pego por ela é converter explicitamente antes de operar.
+
+## Quando a conversão falha: \`NaN\`
+
+\`Number('abc')\` não tem como virar número — e mesmo assim não dá erro. Devolve \`NaN\`, que significa *not a number*, "não é um número": um valor especial que quer dizer "essa conta não fez sentido". Duas coisas para saber sobre ele:
+
+- **Ele se espalha.** Qualquer conta com \`NaN\` dá \`NaN\`: \`NaN + 10\` é \`NaN\`. Um só escapa e o relatório inteiro sai \`NaN\`.
+- **Ele não é igual a nada — nem a ele mesmo.** \`NaN === NaN\` é \`false\`. Então não dá para perguntar "é NaN?" com \`===\`.
+
+Por isso existe uma função só para essa pergunta: \`Number.isNaN(valor)\` devolve \`true\` quando o valor é \`NaN\`. A rotina é sempre a mesma: converta, guarde numa variável, pergunte se deu certo — e só então use.
 `.trim(),
     },
     {
@@ -90,20 +99,20 @@ console.log(a - b);`,
       kind: 'example',
       language: 'javascript',
       code: `// Converter TEXTO para NÚMERO
-Number('42');      // 42
-Number('3.5');     // 3.5
-Number('abc');     // NaN   <- não deu, mas não lançou erro
-Number('');        // 0     <- cuidado: texto vazio vira zero
+const idade = Number('42');    // 42
+const preco = Number('3.5');   // 3.5
+const ruim = Number('abc');    // NaN  <- não deu, mas não lançou erro
+Number('');                    // 0    <- cuidado: texto vazio vira zero
+
+// Deu certo? A pergunta se faz com Number.isNaN:
+Number.isNaN(ruim);            // true  -> a conversão falhou
+Number.isNaN(idade);           // false -> deu certo
 
 // Converter NÚMERO para TEXTO
 String(42);        // '42'
-(42).toFixed(2);   // '42.00'  — já formatado
-
-// Descobrir se a conversão deu certo
-Number.isNaN(Number('abc'));   // true  -> era inválido
-Number.isNaN(Number('42'));    // false -> era válido`,
+(42).toFixed(2);   // '42.00'  — já formatado`,
       caption:
-        '`Number` nunca lança erro: quando não consegue converter, devolve `NaN` — "não é um número". Como `NaN` se espalha silenciosamente por todas as contas seguintes, conferir logo depois de converter é o que evita um relatório inteiro cheio de `NaN`.',
+        'Converta, guarde, pergunte se deu certo. `Number` nunca lança erro: quando não consegue, devolve `NaN` — e `Number.isNaN` é a única forma certa de perguntar por ele, porque `NaN === NaN` é falso.',
     },
     {
       kind: 'exercise',
@@ -312,7 +321,7 @@ console.log(somarSeguro('', 10));     // null`,
         id: 'ex-js-2-achar-soma-texto',
         type: 'find-bug',
         prompt:
-          'A última linha deste programa é um teste: ela lança um erro quando o total sai errado. E está lançando.\n\nO total deveria ser 50. Aponte a linha onde o defeito está.',
+          'A última linha deste programa é um teste: ela lança um erro quando o total sai errado. E está lançando.\n\nO total deveria ser 50. Aponte a linha que precisa mudar.',
         concepts: ['tipos-de-dados', 'operadores'],
         difficulty: 'iniciante',
         tags: ['javascript', 'tipos', 'depuracao'],

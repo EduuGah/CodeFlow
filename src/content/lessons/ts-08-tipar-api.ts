@@ -272,7 +272,7 @@ console.log(nome);`,
         id: 'ex-ts-8-bug-as',
         type: 'find-bug',
         prompt:
-          'Este programa **compila** e quebra em execução com `TypeError: usuario.nome.toUpperCase is not a function`. Existe uma função de validação pronta — e ela não é usada. Aponte a linha do defeito.',
+          'Este programa **compila** e quebra em execução com `TypeError: usuario.nome.toUpperCase is not a function`. Aponte a linha que precisa mudar.',
         concepts: ['ts-api'],
         difficulty: 'intermediario',
         tags: ['typescript', 'unknown', 'depuracao'],

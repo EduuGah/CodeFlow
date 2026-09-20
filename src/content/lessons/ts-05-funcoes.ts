@@ -239,7 +239,7 @@ registrar('dobro de 4 é ' + dobro(4));`,
         id: 'ex-ts-5-bug-map',
         type: 'find-bug',
         prompt:
-          'O compilador recusa este programa. A função passada ao `map` devolve o tipo errado para o que a variável declara. Aponte a linha.',
+          "O compilador recusa este programa: `Type 'string[]' is not assignable to type 'number[]'`. Aponte a linha que precisa mudar.",
         concepts: ['ts-funcoes'],
         difficulty: 'iniciante',
         tags: ['typescript', 'funcoes', 'depuracao'],

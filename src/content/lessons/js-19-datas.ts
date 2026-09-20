@@ -334,7 +334,7 @@ console.log(diasEntre(new Date(2026, 2, 15), new Date(2026, 2, 10))); // 5`,
         id: 'ex-js-19-achar-mes',
         type: 'find-bug',
         prompt:
-          'A última linha é um teste, e ele está falhando: o Natal está sendo formatado no mês errado.\n\nAponte a linha onde o defeito está.',
+          'A última linha é um teste, e ele está falhando: o Natal está sendo formatado no mês errado.\n\nAponte a linha que precisa mudar.',
         concepts: ['datas'],
         difficulty: 'intermediario',
         tags: ['javascript', 'datas', 'depuracao'],

@@ -245,7 +245,7 @@ Um \`console.log\` no corpo do componente aparece antes do que está no efeito. 
         id: 'ex-react-5-bug-limpeza',
         type: 'find-bug',
         prompt:
-          "O compilador recusa: `Type 'number' is not assignable to type 'void | (() => void)'`. O efeito devolve a coisa errada. Aponte a linha do defeito.",
+          "O compilador recusa: `Type 'number' is not assignable to type 'void | (() => void)'`. Aponte a linha que precisa mudar.",
         concepts: ['react-efeitos'],
         difficulty: 'intermediario',
         tags: ['react', 'efeitos', 'depuracao'],

@@ -242,7 +242,7 @@ function App() {
         id: 'ex-react-1-bug-prop',
         type: 'find-bug',
         prompt:
-          'O compilador recusa este componente: `Property \'nome\' is missing`. Aponte a linha do defeito.',
+          'O compilador recusa este componente: `Property \'nome\' is missing`. Aponte a linha que precisa mudar.',
         concepts: ['react-componentes'],
         difficulty: 'iniciante',
         tags: ['react', 'props', 'depuracao'],

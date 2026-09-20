@@ -265,7 +265,7 @@ if (r !== "Bruno, 35 anos, cidade não informada") throw new Error("Esperado \\"
         id: 'ex-js-7-achar-ponto',
         type: 'find-bug',
         prompt:
-          'Este programa quebra com `TypeError: Cannot read properties of undefined (reading \'toUpperCase\')`.\n\nAponte a linha onde o defeito está.',
+          'Este programa quebra com `TypeError: Cannot read properties of undefined (reading \'toUpperCase\')`.\n\nAponte a linha que precisa mudar.',
         concepts: ['objetos'],
         difficulty: 'iniciante',
         tags: ['javascript', 'objetos', 'depuracao'],

@@ -163,7 +163,7 @@ const p: Produto = { nome: 'A', preco: precos[1] };  // Type 'string' is not ass
         id: 'ex-ts-9-bug-cascata',
         type: 'find-bug',
         prompt:
-          'O compilador mostra **três** erros neste programa, em três linhas diferentes. Todos têm uma causa só. Aponte a linha do defeito — a que faz os três aparecerem.',
+          'O compilador mostra **três** erros neste programa, em três linhas diferentes. Todos têm uma causa só. Aponte a linha que precisa mudar.',
         concepts: ['ts-erros'],
         difficulty: 'intermediario',
         tags: ['typescript', 'erros', 'depuracao'],

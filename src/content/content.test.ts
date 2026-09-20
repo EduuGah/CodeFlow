@@ -625,6 +625,29 @@ describe('exercícios de encontrar o bug', () => {
   );
 
   it.each(comBug.map(({ exercise }) => [exercise.id, exercise] as const))(
+    '%s: o enunciado faz a mesma pergunta de sempre, e não entrega a correção',
+    async (_id, exercise) => {
+      if (exercise.type !== 'find-bug') throw new Error('filtro inconsistente');
+
+      // "Onde o erro aparece" e "onde ele começa" são linhas diferentes, e o
+      // aluno reclamou, com razão, de exercícios que pediam ora uma ora
+      // outra. A pergunta é uma só: a linha que precisa mudar — a que a
+      // correção troca. E o enunciado descreve o sintoma; o diagnóstico é
+      // da explicação, senão o exercício vira leitura.
+      expect(exercise.prompt, 'o enunciado precisa pedir "a linha que precisa mudar"').toContain(
+        'Aponte a linha que precisa mudar'
+      );
+      const correcao = exercise.fix.trim();
+      if (correcao.length > 8) {
+        expect(exercise.prompt.includes(correcao), 'o enunciado traz a linha corrigida').toBe(false);
+        for (const dica of exercise.hints) {
+          expect(dica.includes(correcao), `a dica "${dica}" traz a linha corrigida`).toBe(false);
+        }
+      }
+    }
+  );
+
+  it.each(comBug.map(({ exercise }) => [exercise.id, exercise] as const))(
     '%s: a dica não entrega o número da linha',
     async (_id, exercise) => {
       if (exercise.type !== 'find-bug') throw new Error('filtro inconsistente');

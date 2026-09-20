@@ -304,7 +304,7 @@ function App() {
         id: 'ex-react-7-bug-unknown',
         type: 'find-bug',
         prompt:
-          "O compilador recusa: `Argument of type 'unknown' is not assignable to parameter of type 'SetStateAction<string | null>'`. Aponte a linha do defeito.",
+          "O compilador recusa: `Argument of type 'unknown' is not assignable to parameter of type 'SetStateAction<string | null>'`. Aponte a linha que precisa mudar.",
         concepts: ['react-erros'],
         difficulty: 'intermediario',
         tags: ['react', 'estados', 'depuracao'],

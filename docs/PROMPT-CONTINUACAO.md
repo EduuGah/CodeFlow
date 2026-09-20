@@ -81,9 +81,11 @@ Todos implementados, testados, e com validação de conteúdo que roda no CI:
 6. **escrever o teste** — o aluno escreve asserções, e elas são rodadas contra a
    implementação correta (precisam passar) e contra versões sabotadas (precisam
    falhar). Ensina que um teste que aceita tudo não vale nada
-7. **encontrar o bug** — aponta a linha do defeito. Declara também a linha do
-   **sintoma**, que recebe um retorno próprio: "é onde o erro aparece, não onde
-   ele nasce"
+7. **encontrar o bug** — aponta **a linha que precisa mudar** (a que o `fix`
+   troca). Declara também a linha do **sintoma**, que recebe um retorno
+   próprio: "é onde o erro aparece — não a que precisa mudar". O enunciado
+   descreve o sintoma e termina com "Aponte a linha que precisa mudar."; nunca
+   o diagnóstico — o CI cobra (2026-09-20, pedido do dono do projeto)
 8. **refatorar** — código que já passa nos testes, e precisa continuar passando
    depois de cumprir restrições sobre a forma
 9. **SQL** — escreve SQL contra um banco de exemplo num SQLite de verdade; a

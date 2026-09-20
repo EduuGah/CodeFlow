@@ -239,7 +239,7 @@ console.log(porta);`,
         id: 'ex-node-1-exports-quebrado',
         type: 'find-bug',
         prompt:
-          'Este módulo deveria exportar `somar`, mas a última linha — que simula o que outro arquivo receberia com `require` — quebra com "somar is not a function". Aponte a linha com o defeito.',
+          'Este módulo deveria exportar `somar`, mas a última linha — que simula o que outro arquivo receberia com `require` — quebra com "somar is not a function". Aponte a linha que precisa mudar.',
         concepts: ['node-modulos'],
         difficulty: 'intermediario',
         tags: ['node', 'modulos', 'exports'],

@@ -263,7 +263,7 @@ console.log(area({ tipo: 'quadrado', lado: 3 }));`,
         id: 'ex-ts-4-bug-undefined',
         type: 'find-bug',
         prompt:
-          'O compilador recusa este programa com `\'nome\' is possibly \'undefined\'`. Em JavaScript, a segunda chamada quebraria com o `TypeError` mais famoso da linguagem. Aponte a linha.',
+          'O compilador recusa este programa com `\'nome\' is possibly \'undefined\'`. Em JavaScript, a segunda chamada quebraria com o `TypeError` mais famoso da linguagem. Aponte a linha que precisa mudar.',
         concepts: ['ts-estreitar'],
         difficulty: 'iniciante',
         tags: ['typescript', 'uniao', 'depuracao'],

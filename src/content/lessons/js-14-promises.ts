@@ -413,7 +413,7 @@ precoTotal(['pao', 'leite']).then((t) => console.log(t)); // esperado: 16`,
         id: 'ex-js-14-achar-return',
         type: 'find-bug',
         prompt:
-          'Este programa quebra com `TypeError: Cannot read properties of undefined (reading \'then\')`.\n\nAponte a linha onde o defeito está.',
+          'Este programa quebra com `TypeError: Cannot read properties of undefined (reading \'then\')`.\n\nAponte a linha que precisa mudar.',
         concepts: ['promises', 'funcoes'],
         difficulty: 'intermediario',
         tags: ['javascript', 'promises', 'depuracao'],

@@ -243,7 +243,7 @@ Dois estados que precisam andar juntos vão se desencontrar. Se dá para calcula
         id: 'ex-react-2-bug-chamada',
         type: 'find-bug',
         prompt:
-          "O compilador recusa este componente: `Type 'void' is not assignable to type '(evento: MouseEvent) => void'`. Em JavaScript sem tipos ele travaria a página, e o React interromperia com \"Too many re-renders\". Aponte a linha do defeito.",
+          "O compilador recusa este componente: `Type 'void' is not assignable to type '(evento: MouseEvent) => void'`. Em JavaScript sem tipos ele travaria a página, e o React interromperia com \"Too many re-renders\". Aponte a linha que precisa mudar.",
         concepts: ['react-estado'],
         difficulty: 'iniciante',
         tags: ['react', 'estado', 'depuracao'],

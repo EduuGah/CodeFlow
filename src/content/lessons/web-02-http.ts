@@ -377,7 +377,7 @@ console.log(analisarStatus(429));`,
         id: 'ex-web-2-achar-separador',
         type: 'find-bug',
         prompt:
-          'A função lê a primeira linha de um pedido HTTP e separa o método do caminho. A última linha é um teste — e está falhando.\n\nAponte a linha onde o defeito está.',
+          'A função lê a primeira linha de um pedido HTTP e separa o método do caminho. A última linha é um teste — e está falhando.\n\nAponte a linha que precisa mudar.',
         concepts: ['http', 'strings'],
         difficulty: 'iniciante',
         tags: ['web', 'http', 'depuracao'],

@@ -79,7 +79,7 @@ describe('verificação', () => {
 
     await apontar(user, 2);
 
-    expect(screen.getByText('A linha 2 é onde o defeito está')).toBeInTheDocument();
+    expect(screen.getByText('A linha 2 é a que precisa mudar')).toBeInTheDocument();
     expect(screen.getByText(EXERCICIO.explanation)).toBeInTheDocument();
   });
 
@@ -94,7 +94,7 @@ describe('verificação', () => {
     await apontar(user, 4);
 
     expect(
-      screen.getByText('A linha 4 é onde o erro aparece — não onde ele nasce')
+      screen.getByText('A linha 4 é onde o erro aparece — não a que precisa mudar')
     ).toBeInTheDocument();
     expect(screen.getByText(EXERCICIO.symptomFeedback!)).toBeInTheDocument();
   });

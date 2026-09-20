@@ -301,7 +301,7 @@ app.listen(config.porta);`,
         id: 'ex-node-9-congelado',
         type: 'find-bug',
         prompt:
-          'O servidor quebra antes de subir: "Cannot assign to read only property \'limiteDeItens\'". Aponte a linha com o defeito.',
+          'O servidor quebra antes de subir: "Cannot assign to read only property \'limiteDeItens\'". Aponte a linha que precisa mudar.',
         concepts: ['node-config'],
         difficulty: 'iniciante',
         tags: ['node', 'config', 'freeze', 'bug'],
