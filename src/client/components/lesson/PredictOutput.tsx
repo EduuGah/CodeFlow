@@ -148,14 +148,17 @@ export function PredictOutput({
             </p>
           </ExerciseFeedback>
 
+          {/* min-w-0: um item de grade não encolhe abaixo do conteúdo, e uma
+              linha de saída comprida alargaria a página inteira no celular em
+              vez de rolar dentro do bloco. */}
           <div className="grid gap-3 sm:grid-cols-2">
-            <div>
+            <div className="min-w-0">
               <p className="label-mono mb-1 text-ink-faint">Sua previsão</p>
               <pre className="overflow-x-auto rounded-lg border border-line bg-canvas p-3 text-sm">
                 <code className="font-mono text-ink-soft">{previsao.trim() || '(vazio)'}</code>
               </pre>
             </div>
-            <div>
+            <div className="min-w-0">
               <p className="label-mono mb-1 text-ink-faint">Resultado real</p>
               <pre
                 className={`overflow-x-auto rounded-lg border p-3 text-sm ${

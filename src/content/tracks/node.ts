@@ -18,12 +18,38 @@ export const trackNode: Track = {
     'Escrever o servidor por trás da tela: rotas, JSON, erros, autenticação e uma API inteira — no Node, aqui mesmo.',
   language: 'node',
   status: 'published',
-  lessonIds: ['lesson-node-1', 'lesson-node-2', 'lesson-node-3'],
+  lessonIds: [
+    'lesson-node-1',
+    'lesson-node-2',
+    'lesson-node-3',
+    'lesson-node-4',
+    'lesson-node-5',
+    'lesson-node-6',
+    'lesson-node-7',
+    'lesson-node-8',
+    'lesson-node-9',
+    'lesson-node-10',
+  ],
   sections: [
     {
       title: 'O servidor',
       description: 'O Node fora do navegador, o primeiro servidor, as rotas e o que elas respondem.',
       lessonIds: ['lesson-node-1', 'lesson-node-2', 'lesson-node-3'],
+    },
+    {
+      title: 'Escrever e falhar bem',
+      description: 'Dados que chegam no corpo, a validação, e o que responder quando algo dá errado.',
+      lessonIds: ['lesson-node-4', 'lesson-node-5'],
+    },
+    {
+      title: 'Proteger e completar',
+      description: 'A corrente de middlewares, quem está pedindo, e o CRUD inteiro.',
+      lessonIds: ['lesson-node-6', 'lesson-node-7'],
+    },
+    {
+      title: 'Do protótipo ao real',
+      description: 'Dados que chegam de um banco, a configuração que muda entre máquinas, e a API inteira.',
+      lessonIds: ['lesson-node-8', 'lesson-node-9', 'lesson-node-10'],
     },
   ],
 };

@@ -176,7 +176,7 @@ function __cfResposta() {
       res.enviado = true;
       return res;
     },
-    sendStatus: function (n) { res.statusCode = n; return res.send(String(n)); },
+    sendStatus: function (n) { res.statusCode = n; return n === 204 || n === 304 ? res.end() : res.send(String(n)); },
     end: function () { if (!res.enviado) { res.corpo = res.corpo === undefined ? '' : res.corpo; res.enviado = true; } return res; },
   };
   return res;

@@ -675,13 +675,20 @@ agregação, subconsultas e WITH) e 4 de escrita e modelagem (INSERT/UPDATE/
 DELETE e transação, CREATE TABLE e restrições, normalização, índices) — com
 43 exercícios de SQL e 66 verificações. `e2e/sql.spec.ts` conclui cada aula
 no Chromium, em celular e desktop, e prova o erro traduzido e a consulta sem
-fim interrompida. Falta a outra metade da fase: o **servidor simulado (Node)**
-e as 10 aulas de back-end — motor sem parentesco com os cinco que existem.
-Decisão do dono do projeto (2026-09-16): o SQL veio antes do Node.
+fim interrompida. A outra metade veio depois: o **servidor simulado**
+(motor 4, `servidor-core.ts`, 2026-09-17) e a trilha **Node e APIs** inteira
+(2026-09-20) — 10 aulas e 64 exercícios, 30 deles de servidor. As aulas 8 a
+10 fornecem módulos prontos em `arquivos` (repositório assíncrono, `auth`,
+`erros`, `config`, `rotas`) e o aluno escreve o que falta; os testes podem
+fazer `require('./modulo')` para ler o estado do módulo (a aula 8 prova o
+`Promise.all` pela ordem das chamadas registradas no repositório).
+`e2e/node.spec.ts` conclui cada aula no Chromium e prova o painel de pedidos
+e respostas. A Fase 4 está completa.
 
 **Fases 5 a 7 — não iniciadas.** Pyodide (Python) é o último motor.
 Investimentos grandes o bastante para a escolha ser do dono do projeto —
-pergunte antes de começar o servidor simulado ou qualquer outra fase.
+pergunte antes de começar qualquer fase. A Fase 5 começa pela trilha de
+engenharia, que o dono do projeto já pediu (ver `docs/curriculo.md`).
 
 ## 9. Pendências do lado do usuário
 

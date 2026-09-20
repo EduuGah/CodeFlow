@@ -9,7 +9,7 @@ que explica o porquê do erro, não apenas se acertou.
 
 ## O que tem hoje
 
-**8 trilhas, 94 aulas, 551 exercícios em 10 tipos, 7 projetos, 90 conceitos.**
+**8 trilhas, 101 aulas, 596 exercícios em 10 tipos, 7 projetos, 97 conceitos.**
 Tudo é contado do catálogo; a página pública mostra os mesmos números.
 
 | Etapa | Trilha | Linguagem | Aulas | Exercícios |
@@ -21,12 +21,12 @@ Tudo é contado do catálogo; a página pública mostra os mesmos números.
 | 3 · As ferramentas do trabalho | TypeScript | TypeScript | 10 | 59 |
 | 3 · As ferramentas do trabalho | React | React (TSX) | 14 | 84 |
 | 3 · As ferramentas do trabalho | SQL e Bancos de Dados | SQL | 10 | 59 |
-| 4 · A aplicação inteira | Node e APIs | Node | 3 de 10 | 19 |
+| 4 · A aplicação inteira | Node e APIs | Node | 10 | 64 |
 
-**Os dez tipos de exercício**: escrever o código (125), múltipla escolha (146),
-prever a saída (58), completar a lacuna (81), ordenar os passos (40),
-encontrar o bug (38), escrever o teste (5), refatorar (6), consulta SQL (43)
-e servidor (9). Toda aula tem ao menos um dos quatro "de prática de dev" —
+**Os dez tipos de exercício**: escrever o código (125), múltipla escolha (154),
+prever a saída (63), completar a lacuna (83), ordenar os passos (43),
+encontrar o bug (43), escrever o teste (5), refatorar (7), consulta SQL (43)
+e servidor (30). Toda aula tem ao menos um dos quatro "de prática de dev" —
 bug, ordenar, teste, refatorar — que pedem o conceito de outro ângulo.
 
 **Os seis motores de execução**, todos no navegador, nenhum servidor no meio:
@@ -38,7 +38,7 @@ bug, ordenar, teste, refatorar — que pedem o conceito de outro ângulo.
 | TypeScript | TypeScript | o compilador (o mesmo do editor) na frente do sandbox; os erros de tipo viram retorno |
 | React | componentes TSX | compilado e montado no iframe da página, com o React embutido |
 | SQL | consultas e modelagem | o SQLite em WebAssembly (sql.js) num worker que fica vivo; a correção compara **linhas devolvidas** |
-| Servidor | Node e Express | um Node de mentira no sandbox: `require`, `process.env`, um Express pequeno e um cliente HTTP para os testes; a tela mostra pedidos e respostas |
+| Servidor | Node e Express | um Node de mentira no sandbox: `require` (do Express pequeno e dos arquivos que o exercício fornece), `process.env`, e um cliente HTTP para os testes; a tela mostra pedidos e respostas |
 
 **O que acompanha o aluno**: percurso em etapas com o ponto atual, revisão
 espaçada (Leitner), XP e níveis sem teto, sequência de dias com congelamento,
@@ -103,8 +103,8 @@ Redirect URLs.
 
 ```bash
 npm run typecheck   # tipos, incluindo os testes de navegador
-npm test            # 2.386 testes de unidade, propriedade e componente (Vitest)
-npm run test:e2e    # 304 testes de navegador (Playwright, Chromium, celular e desktop)
+npm test            # 2.508 testes de unidade, propriedade e componente (Vitest)
+npm run test:e2e    # 326 testes de navegador (Playwright, Chromium, celular e desktop)
 ```
 
 O E2E precisa do Chromium uma vez: `npx playwright install chromium`.
@@ -184,17 +184,14 @@ docs/               CONTEXTO.md (o mapa do projeto), curriculo.md (o roadmap),
 O roadmap completo, com o estado de cada aula e o custo de cada motor, está em
 [`docs/curriculo.md`](docs/curriculo.md). Em resumo, na ordem:
 
-1. **Node e APIs, aulas 4 a 10** — corpo e JSON, status e erros, middleware e
-   autenticação, CRUD, assincronia no servidor, configuração e segredos, o
-   projeto de API. Fecha a Fase 4.
-2. **Engenharia: organizar um projeto** — módulos e pastas por
+1. **Engenharia: organizar um projeto** — módulos e pastas por
    responsabilidade, nomes, funções pequenas, erros, configuração, README,
    revisão de código. Com **Testes e qualidade**, **Git e equipe** e
    **Terminal**, é a Fase 5.
-3. **Python** — a primeira linguagem nova, com o Pyodide (Fase 6).
-4. **Projeto final** — do zero a uma aplicação completa: página + API + banco,
+2. **Python** — a primeira linguagem nova, com o Pyodide (Fase 6).
+3. **Projeto final** — do zero a uma aplicação completa: página + API + banco,
    com testes e publicação (Fase 7).
-5. **Mais linguagens**, uma por vez, cada uma com o motor que a roda no
+4. **Mais linguagens**, uma por vez, cada uma com o motor que a roda no
    navegador.
 
 ## Licença

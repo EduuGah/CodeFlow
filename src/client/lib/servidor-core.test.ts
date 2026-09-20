@@ -155,6 +155,23 @@ describe('o Express pequeno', () => {
     expect(r.testResults.map((t) => t.passed)).toEqual([true, true, true]);
   });
 
+  it('204 sai sem corpo, por res.status(204).end() ou por res.sendStatus(204)', async () => {
+    const codigo = `
+      const express = require('express');
+      const app = express();
+      app.delete('/a', (req, res) => { res.status(204).end(); });
+      app.delete('/b', (req, res) => { res.sendStatus(204); });
+      app.get('/c', (req, res) => { res.sendStatus(200); });
+    `;
+    const r = await rodar(codigo, [
+      `const res = await pedir(app, 'DELETE', '/a'); if (res.status !== 204 || res.texto !== '') throw new Error(res.status + ' "' + res.texto + '"');`,
+      `const res = await pedir(app, 'DELETE', '/b'); if (res.status !== 204 || res.texto !== '') throw new Error(res.status + ' "' + res.texto + '"');`,
+      `const res = await pedir(app, 'GET', '/c'); if (res.status !== 200 || res.texto !== '200') throw new Error(res.status + ' "' + res.texto + '"');`,
+    ]);
+    expect(r.testResults.map((t) => t.message)).toEqual(['t1', 't2', 't3']);
+    expect(r.testResults.map((t) => t.passed)).toEqual([true, true, true]);
+  });
+
   it('uma rota que não responde nem chama next é apontada, não fica pendurada', async () => {
     const codigo = `
       const express = require('express');

@@ -6,7 +6,7 @@ que conclui uma fase.
 
 ## Onde estamos
 
-**Fases 1, 2 e 3 de 8 concluídas · Fase 4: SQL 10 de 10, Node 3 de 10 · publicado**
+**Fases 1, 2, 3 e 4 de 8 concluídas · publicado**
 
 ```
 Fase 0  Fundamentos e lógica      ██████████████████████  13/13  pronto
@@ -15,7 +15,7 @@ Fase 1  JavaScript real          ███████████████�
         Plataforma                ██████████████████████   7/7  pronto
 Fase 2  A página                 ██████████████████████  26/26  pronto
 Fase 3  Tipos e componentes      ██████████████████████  24/24  pronto
-Fase 4  Back-end e dados         ██████████████░░░░░░░░  13/20  SQL pronto, Node começou
+Fase 4  Back-end e dados         ██████████████████████  20/20  pronto
 Fase 5  Profissionalização       ░░░░░░░░░░░░░░░░░░░░░░   0/27  engenharia, testes, git, terminal
 Fase 6  Python                   ░░░░░░░░░░░░░░░░░░░░░░   0/10  motor 6
 Fase 7  Projeto final            ░░░░░░░░░░░░░░░░░░░░░░   0/5   + 3 capstones, motor 7
@@ -23,18 +23,22 @@ Fase 7  Projeto final            ░░░░░░░░░░░░░░░�
 
 | | Hoje | Previsto | Feito |
 | --- | ---: | ---: | ---: |
-| Aulas | **94** | ~150 | 63% |
-| Exercícios | **551** | ~800 | 69% |
+| Aulas | **101** | ~150 | 67% |
+| Exercícios | **596** | ~800 | 75% |
 | Tipos de exercício | **10** | 13 | 77% |
 | Motores de execução | **6** | 8 | 75% |
 | Projetos | **7** | ~20 | 35% |
 
-**Último trabalho** (2026-09-17): o motor 4, o **servidor simulado** — um
-Node de mentira dentro do sandbox de sempre, com um Express pequeno,
-`require` de arquivos do exercício, `process.env` e o `pedir()` dos testes
-— e as três primeiras aulas de "Node e APIs": Node fora do navegador e
-módulos, o primeiro servidor, rotas e parâmetros. O exercício `server`
-mostra os pedidos e as respostas como um cliente de API. Antes disso
+**Último trabalho** (2026-09-20): as sete aulas que faltavam de "Node e
+APIs" — corpo e JSON, status e erros, middleware e autenticação, CRUD,
+assincronia no servidor, configuração e segredos, e o projeto da API inteira
+— 45 exercícios, 21 deles de servidor. A Fase 4 fechou. As aulas 8 a 10
+fornecem módulos prontos em `arquivos` (um repositório assíncrono, `auth`,
+`erros`, `config`, `rotas`) e o aluno escreve o que falta; o projeto termina
+com o `servidor.js` que só monta a corrente. Antes disso (2026-09-17): o
+motor 4, o **servidor simulado** — um Node de mentira dentro do sandbox de
+sempre, com um Express pequeno, `require` de arquivos do exercício,
+`process.env` e o `pedir()` dos testes — e as três primeiras aulas. E antes
 (2026-09-16): o motor de SQL — o sql.js num worker, o
 exercício julgado pelas linhas devolvidas — e a trilha "SQL e Bancos de
 Dados" inteira, 10 aulas e 43 exercícios de SQL sobre o banco de uma loja.
@@ -391,9 +395,9 @@ vinhetas e ícones desenhados para a plataforma.
 ### Fase 4 — Back-end e dados · 20 aulas
 Motores **4 (servidor simulado)** e **5 (sql.js, ~1,5 MB)**.
 
-- **Node e back-end** (10): Node fora do navegador, pacotes, servidor HTTP,
-  rotas, corpo da requisição, middleware, erros e status, autenticação, variáveis
-  de ambiente, projeto de API.
+- **Node e APIs** (10) — **feita**: Node fora do navegador, o servidor, rotas,
+  corpo e JSON, status e erros, middleware e autenticação, CRUD, assincronia,
+  configuração e segredos, projeto de API.
 - **SQL e modelagem** (10): tabelas, SELECT/WHERE, ordenar, JOIN, agregação,
   subconsultas, escrita, modelar domínio, normalização, índices.
 
@@ -430,9 +434,11 @@ vendido, e-mails vazios, um pedido cancelado, preços que mudaram.
 | 9 | Normalização: as três anomalias, cada fato num lugar, 1:N e N:N com tabela de ligação, migrar, repetir de propósito |
 | 10 | Índices: SCAN vs SEARCH, EXPLAIN QUERY PLAN, o custo, índice composto, o que impede o índice, índice único; o relatório final |
 
-**Node e APIs — 3 de 10.** Motor 4 (servidor simulado) — **pronto**
-(2026-09-17). A trilha `track-node` abre a quarta etapa do percurso, "A
-aplicação inteira".
+**Node e APIs — 10 de 10.** Motor 4 (servidor simulado) — **pronto**
+(2026-09-17); as dez aulas, 2026-09-20. A trilha `track-node` abre a quarta
+etapa do percurso, "A aplicação inteira", em quatro blocos: o servidor (1–3),
+escrever e falhar bem (4–5), proteger e completar (6–7), do protótipo ao real
+(8–10). 64 exercícios, 30 de servidor.
 
 Como o motor 4 funciona, para quem for escrever mais aulas: em aula com
 `language: 'node'`, todo exercício roda no sandbox de sempre com o prelúdio
@@ -456,7 +462,13 @@ inicial não passa, e que toda verificação com `pedir` fez o pedido.
 | 1 | Node fora do navegador: o que muda, `process.env`, `module.exports`/`require`, `exports =` que não funciona |
 | 2 | O primeiro servidor: porta, `express()`, `app.get`, `req`/`res`, `res.send`/`res.json`, `listen` assíncrono |
 | 3 | Rotas e parâmetros: `req.params` (texto!), `req.query`, 404 com `return`, a ordem das rotas |
-| 4–10 | por fazer: corpo e JSON (`express.json()`, POST, 201, validação); status e erros (middleware de erro); middleware e autenticação por cabeçalho; CRUD em memória (PUT/PATCH/DELETE); assincronia no servidor (repositório `async`); configuração e segredos; projeto de API |
+| 4 | Corpo e JSON: `express.json()` antes das rotas, POST e 201 com o criado, o id do servidor, validar e recusar com 400 e `return`, ler-validar-guardar-responder, JSON estrito |
+| 5 | Status e erros: as famílias e "quem consertaria?", 400/404/409/500, o middleware de erro de quatro parâmetros por último, `next(erro)`, `ErroHttp` com status, a mensagem interna fica no log, um formato só |
+| 6 | Middleware e autenticação: a corrente (responder encerra, `next()` passa, nenhum dos dois pendura), o `req` que atravessa, `app.use` geral/por prefixo/por rota, `Authorization: Bearer` e `req.headers` em minúsculas, 401 contra 403 |
+| 7 | CRUD: PUT substitui, PATCH altera parte (campo validado se veio), DELETE e 204 sem corpo, campo a campo, `splice` contra `filter` com `let`, idempotência; refatorar a busca com 404 para uma função |
+| 8 | Assincronia no servidor: o repositório (funções que devolvem Promises, fornecido em `arquivos`), rotas `async` com `await`, esquecer o `await` responde `{}`, `await` fora de `async` é erro de sintaxe, o erro cai no middleware (Express 5), `Promise.all` para buscas independentes |
+| 9 | Configuração e segredos: `process.env` é texto e pode faltar, converter e dar padrão, falhar cedo sem a chave, `.env` fora do Git e `.env.example` dentro, módulo de configuração congelado, `NODE_ENV`, segredo não entra em código/commit/log/resposta/URL |
+| 10 | Projeto: a tabela de recursos antes do código (toda tarefa tem dono), um arquivo por responsabilidade, dependência num sentido só, a ordem de construção, o `servidor.js` que só monta a corrente, CORS quando a página chamar; módulos prontos em `arquivos` e o aluno escreve as rotas e o servidor |
 
 ## O que o dono do projeto pediu em 2026-09-17
 
@@ -464,9 +476,9 @@ Depois de uma rodada inteira de plataforma (gamificação, perfil, temas,
 figuras, cenas), a ordem foi **voltar às aulas**, com três alvos:
 
 1. **Do zero a uma aplicação completa**: página + API + banco, integrados.
-   É a Fase 4 que falta (Node e back-end, motor 4) mais o capstone da Fase
-   7 — a página que já se sabe fazer chamando a API que se vai aprender a
-   escrever, sobre o SQL que já se sabe consultar.
+   Era a Fase 4 que faltava (Node e APIs, motor 4 — feita em 2026-09-20)
+   mais o capstone da Fase 7 — a página que já se sabe fazer chamando a API
+   que agora se sabe escrever, sobre o SQL que já se sabe consultar.
 2. **Uma área de engenharia**: como dividir os arquivos em pastas, boas
    práticas, o que faz um projeto ser legível por outra pessoa. Vira uma
    trilha própria na Fase 5 ("Engenharia: organizar um projeto"), sem motor
@@ -474,8 +486,9 @@ figuras, cenas), a ordem foi **voltar às aulas**, com três alvos:
    funções pequenas, erros, configuração e segredos, README, revisão.
 3. **Mais linguagens**, mais adiante — Python (Fase 6) é a primeira.
 
-A ordem escolhida: motor 4 e a trilha de Node (é o pedaço que falta para a
-aplicação completa), depois a trilha de engenharia, depois o capstone.
+A ordem escolhida: motor 4 e a trilha de Node (era o pedaço que faltava para
+a aplicação completa — feito), depois a trilha de engenharia, depois o
+capstone.
 
 Também saiu o "Pular por ora": um exercício sem resposta verificada não deixa
 avançar; responder errado libera ("Continuar assim mesmo").
@@ -600,9 +613,9 @@ Um por fase, cada um preso ao motor dela:
 
 ## Sobre tamanho
 
-As 94 aulas de hoje levaram bastante tempo para ficar no padrão do projeto. As
-~55 restantes (7 de Node, 27 da Fase 5, 10 de Python, 5 do projeto final, mais
-os capstones) são muitas vezes esse trabalho, e os ~250 exercícios novos são a
+As 101 aulas de hoje levaram bastante tempo para ficar no padrão do projeto.
+As ~48 restantes (27 da Fase 5, 10 de Python, 5 do projeto final, mais os
+capstones) são muitas vezes esse trabalho, e os ~200 exercícios novos são a
 maior parte dele. Por isso a unidade é a fase: cada uma termina numa versão do
 produto que dá para usar. O roadmap escolhe a ordem; não promete prazo.
 

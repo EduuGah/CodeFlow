@@ -117,9 +117,15 @@ mentira que roda no sandbox de sempre — `require('express')` devolve um
 Express pequeno, `require('./x')` acha os `arquivos` do exercício,
 `process.env` vem do exercício, `pedir(app, 'GET', '/rota')` é o cliente
 HTTP dos testes, que rodam em série. A trilha "Node e APIs" (`track-node`,
-linguagem `node`, exercício `server`) tem 3 de 10 aulas; as próximas estão
-listadas em `docs/curriculo.md`. O "Pular por ora" saiu: exercício sem
-resposta verificada não deixa avançar.
+linguagem `node`, exercício `server`) está **completa** (2026-09-20): 10
+aulas, 64 exercícios — corpo e JSON, status e erros, middleware e
+autenticação, CRUD, assincronia, configuração e segredos, e o projeto da API.
+As aulas 8 a 10 fornecem módulos prontos em `arquivos` (repositório
+assíncrono, `auth`, `erros`, `config`, `rotas`); os testes podem fazer
+`require('./modulo')` para olhar o estado dele. A Fase 4 fechou; o próximo
+passo do roadmap é a Fase 5 — a trilha "Engenharia: organizar um projeto",
+que o dono do projeto pediu — em `docs/curriculo.md`. O "Pular por ora" saiu:
+exercício sem resposta verificada não deixa avançar.
 **Avisos de novidade** (`lib/novidades.ts` + `layout/Novidades.tsx`): subir de
 nível, abrir conquista e cumprir desafio são avisados ao voltar ao aplicativo,
 comparando o estado derivado com o que a pessoa já viu (guardado no aparelho —
@@ -264,6 +270,20 @@ projeto: seis trilhas desenroladas numa coluna eram uma parede.
 - Trilha `track-sql`, 10 aulas em dois blocos, 43 exercícios de SQL;
   `e2e/sql.spec.ts` conclui cada aula no Chromium.
 
+### B6) Motor 4 e a trilha de Node — feito (2026-09-17 e 2026-09-20)
+
+- `lib/servidor-core.ts`: o prelúdio do Node de mentira (`require`,
+  `process.env`, `module.exports`, o Express pequeno, `pedir()`); o sandbox
+  ganhou `sequencial` e devolve as `trocas`. `lib/servidor.ts` no cliente.
+- Tipo de exercício `server`: `initialCode`, `tests` com `pedir(app, método,
+  caminho, { body, headers })`, `env`, `arquivos` (módulos que
+  `require('./nome')` encontra — os testes também podem fazer `require`),
+  `solution` obrigatória. O CI prova a solução, o inicial que não passa, e que
+  toda verificação com `pedir` fez o pedido.
+- Trilha `track-node`, 10 aulas em quatro blocos, 64 exercícios (30 de
+  servidor); `e2e/node.spec.ts` conclui cada aula no Chromium e prova o painel
+  de pedidos e respostas.
+
 ### C) Mais projetos com o motor atual — barato, sem currículo novo
 
 Existem 7 projetos e o roadmap prevê ~30. Eles usam a mecânica que já existe e
@@ -271,16 +291,18 @@ dão prática aplicada. É o caminho de menor risco e menor retorno.
 
 ### Recomendação
 
-A, B, B2, B3, B4 e B5 estão feitos. O que vem agora é a **outra metade da
-Fase 4** — o servidor simulado (Node) e as 10 aulas de back-end, motor sem
-parentesco com os cinco que existem — ou C, ou os itens de plataforma que
-ficaram (mapa de tópicos e busca, tutor com IA, painel do aluno). Antes de
-qualquer um, vale o que só o dono do projeto pode fazer: usar o aplicativo
-publicado num telefone de verdade, inclusive uma aula de SQL.
+A, B, B2, B3, B4, B5 e B6 estão feitos: as Fases 1 a 4 estão completas. O
+que vem agora, pelo pedido do dono do projeto em 2026-09-17, é a **Fase 5**
+começando pela trilha "Engenharia: organizar um projeto" (sem motor novo; o
+plano aula a aula está em `docs/curriculo.md`), depois o capstone da Fase 7
+(motor 7: servidor + SQLite no mesmo worker, a página fazendo `fetch` para
+ele). Ou C, ou os itens de plataforma que ficaram (mapa de tópicos e busca,
+tutor com IA, painel do aluno). Antes de qualquer um, vale o que só o dono
+do projeto pode fazer: usar o aplicativo publicado num telefone de verdade,
+inclusive uma aula de Node.
 
-Se o dono do projeto não indicar o caminho, pergunte antes de começar o
-servidor simulado ou C — são investimentos grandes o bastante para a escolha
-ser dele.
+Se o dono do projeto não indicar o caminho, pergunte antes de começar uma
+fase ou C — são investimentos grandes o bastante para a escolha ser dele.
 
 ## 7. Como trabalhar
 
@@ -288,8 +310,8 @@ ser dele.
 
 ```bash
 npm run typecheck   # inclui e2e/ e playwright.config.ts
-npm test            # 2.104 testes
-npm run test:e2e    # 278 no navegador (antes: npx playwright install chromium)
+npm test            # 2.508 testes
+npm run test:e2e    # 326 no navegador (antes: npx playwright install chromium)
 npm run build
 ```
 

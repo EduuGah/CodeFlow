@@ -120,6 +120,13 @@ import { lessonIndices } from './lessons/sql-10-indices';
 import { lessonNodeForaDoNavegador } from './lessons/node-01-fora-do-navegador';
 import { lessonNodeServidor } from './lessons/node-02-servidor';
 import { lessonNodeRotas } from './lessons/node-03-rotas';
+import { lessonNodeCorpo } from './lessons/node-04-corpo';
+import { lessonNodeErros } from './lessons/node-05-erros';
+import { lessonNodeMiddleware } from './lessons/node-06-middleware';
+import { lessonNodeCrud } from './lessons/node-07-crud';
+import { lessonNodeAssincrono } from './lessons/node-08-assincrono';
+import { lessonNodeConfiguracao } from './lessons/node-09-configuracao';
+import { lessonNodeProjeto } from './lessons/node-10-projeto';
 import { projetoImc } from './projects/js-imc';
 import { projetoConversor } from './projects/js-conversor';
 import { projetoBoletim } from './projects/js-boletim';
@@ -228,6 +235,13 @@ const lessons: Lesson[] = [
   lessonNodeForaDoNavegador,
   lessonNodeServidor,
   lessonNodeRotas,
+  lessonNodeCorpo,
+  lessonNodeErros,
+  lessonNodeMiddleware,
+  lessonNodeCrud,
+  lessonNodeAssincrono,
+  lessonNodeConfiguracao,
+  lessonNodeProjeto,
 ];
 const projects: Project[] = [
   projetoImc,

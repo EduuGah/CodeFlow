@@ -702,4 +702,60 @@ export const concepts: Concept[] = [
     prerequisites: ['node-servidor', 'rest'],
     tags: ['node'],
   },
+  {
+    id: 'node-corpo',
+    title: 'Corpo, JSON e POST',
+    summary:
+      'O corpo viaja como texto JSON e express.json() o põe em req.body (antes das rotas); POST cria e responde 201 com o recurso, com o id do servidor; validar o corpo e recusar com 400 e return; ler, validar, guardar, responder.',
+    prerequisites: ['node-rotas', 'json'],
+    tags: ['node'],
+  },
+  {
+    id: 'node-erros',
+    title: 'Status e erros',
+    summary:
+      'As famílias de status e a pergunta que escolhe (quem consertaria?); 400, 404, 409 e 500; o middleware de erro de quatro parâmetros, por último; next(erro); erro com status; a mensagem interna fica no log; um formato só para toda falha.',
+    prerequisites: ['node-corpo', 'http'],
+    tags: ['node'],
+  },
+  {
+    id: 'node-middleware',
+    title: 'Middleware e autenticação',
+    summary:
+      'A corrente (req, res, next): responder encerra, next() passa adiante, nenhum dos dois pendura; a ordem de registro; o req que atravessa a corrente; app.use geral, por prefixo e por rota; Authorization: Bearer, req.headers em minúsculas, req.usuario; 401 (quem é?) contra 403 (não pode).',
+    prerequisites: ['node-erros', 'autenticacao'],
+    tags: ['node'],
+  },
+  {
+    id: 'node-crud',
+    title: 'CRUD: PUT, PATCH e DELETE',
+    summary:
+      'O desenho de um recurso, seis rotas num caminho e o verbo decide; PUT substitui (tudo obrigatório), PATCH altera parte (cada campo validado se veio), DELETE responde 204 sem corpo; alterar campo a campo; splice contra filter com let; idempotência: o estado depois de N pedidos iguais é o de um.',
+    prerequisites: ['node-corpo', 'rest'],
+    tags: ['node'],
+  },
+  {
+    id: 'node-async',
+    title: 'Assincronia no servidor',
+    summary:
+      'O repositório: funções que devolvem Promises, a forma de todo acesso a banco; rotas async com await em cada acesso; esquecer o await responde {} com 200; await fora de async é erro de sintaxe; o erro da rota async vai ao middleware de erro (Express 5); Promise.all para buscas independentes; a thread é uma só.',
+    prerequisites: ['node-crud', 'promises'],
+    tags: ['node'],
+  },
+  {
+    id: 'node-config',
+    title: 'Configuração e segredos',
+    summary:
+      'O que muda entre máquinas vem do ambiente: process.env é texto e pode faltar, converter e dar padrão ao que pode ter padrão, falhar cedo sem a chave; o .env fora do Git e o .env.example dentro; um módulo de configuração lido uma vez e congelado; NODE_ENV; segredo não entra em código, commit, log, resposta nem URL, e o que vai ao navegador é público.',
+    prerequisites: ['node-modulos', 'seguranca-web'],
+    tags: ['node'],
+  },
+  {
+    id: 'node-projeto',
+    title: 'Projeto: a API inteira',
+    summary:
+      'A tabela de recursos antes do código (e a decisão de que todo recurso tem dono); um arquivo por responsabilidade e a regra "quem muda quando isto mudar?"; dependência num sentido só; a ordem de construção em fatias que rodam; o servidor.js que só monta a corrente; a entrega com README e .env.example; CORS quando a página chamar de outra origem.',
+    prerequisites: ['node-config', 'node-async', 'node-middleware', 'cors'],
+    tags: ['node'],
+  },
 ];
