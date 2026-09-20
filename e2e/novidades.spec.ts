@@ -29,11 +29,18 @@ test('na primeira visita não há aviso; tudo o que existe já é "visto"', asyn
   semear(banco);
   await page.goto('/app');
   await esperarConteudo(page);
-  await page.waitForTimeout(800);
+
+  // O estado é guardado assim que os dados chegam — no celular, um pouco
+  // depois do conteúdo aparecer.
+  await expect
+    .poll(() => page.evaluate((id) => localStorage.getItem(`codeflow:visto:${id}`), ALUNO.id), {
+      timeout: 10_000,
+    })
+    .not.toBeNull();
   await expect(page.getByText('Conquista aberta')).toHaveCount(0);
+  await expect(page.getByText('Subiu de nível')).toHaveCount(0);
 
   const guardado = await page.evaluate((id) => localStorage.getItem(`codeflow:visto:${id}`), ALUNO.id);
-  expect(guardado).not.toBeNull();
   expect(JSON.parse(guardado!).conquistas).toContain('persistente');
 });
 
@@ -50,15 +57,22 @@ test('com um estado antigo guardado, a conquista nova é avisada e o aviso fecha
   await page.goto('/app');
   await esperarConteudo(page);
 
-  // Um aviso de cada vez, na ordem das conquistas; o primeiro diz quantos
-  // faltam. Fechar traz o seguinte; fechar todos deixa a tela limpa.
-  const aviso = page.getByRole('status').filter({ hasText: 'Conquista aberta' });
-  await expect(aviso).toBeVisible();
-  await expect(aviso).toContainText('Não desistiu');
-  await expect(aviso).toContainText(/mais \d+ novidades?/);
+  // Um aviso de cada vez; o primeiro diz quantos faltam. Fechar traz o
+  // seguinte; fechar todos deixa a tela limpa. O que vem primeiro depende do
+  // dia: o desafio do dia sorteado pode estar cumprido pela semeadura, e o
+  // XP dele sobe o nível — aí a primeira notícia é o nível, não a conquista.
+  const avisos = page.getByRole('status');
+  await expect(avisos.first()).toBeVisible();
+  await expect(avisos.first()).toContainText(/mais \d+ novidades?/);
 
-  await aviso.getByRole('button', { name: 'Fechar aviso' }).click();
-  await expect(aviso.filter({ hasText: 'Não desistiu' })).toHaveCount(0);
+  const conquista = avisos.filter({ hasText: 'Conquista aberta' }).filter({ hasText: 'Não desistiu' });
+  for (let fechados = 0; (await conquista.count()) === 0; fechados++) {
+    expect(fechados, 'a conquista "Não desistiu" nunca apareceu').toBeLessThan(8);
+    await page.getByRole('button', { name: 'Fechar aviso' }).first().click();
+  }
+  await expect(conquista).toBeVisible();
+  await conquista.getByRole('button', { name: 'Fechar aviso' }).click();
+  await expect(conquista).toHaveCount(0);
 
   while ((await page.getByRole('button', { name: 'Fechar aviso' }).count()) > 0) {
     await page.getByRole('button', { name: 'Fechar aviso' }).click();
