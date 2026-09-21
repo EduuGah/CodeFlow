@@ -44,4 +44,9 @@ export const ETAPAS_DO_PERCURSO: EtapaDoPercurso[] = [
     description: 'As práticas que fazem um projeto continuar entendível depois de funcionar: onde cada coisa mora, como se chama, como falha.',
     trackIds: ['track-engenharia'],
   },
+  {
+    title: 'O projeto final',
+    description: 'A página, a API e o banco de uma aplicação de verdade, juntos — do desenho à publicação.',
+    trackIds: ['track-projeto'],
+  },
 ];

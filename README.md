@@ -10,7 +10,7 @@ erro, não apenas se acertou.
 
 ## O que tem hoje
 
-**9 trilhas, 109 aulas, 644 exercícios em 10 tipos, 7 projetos, 105 conceitos.**
+**10 trilhas, 112 aulas, 660 exercícios em 10 tipos, 7 projetos, 108 conceitos.**
 Tudo é contado do catálogo; a página pública mostra os mesmos números.
 
 | Etapa | Trilha | Linguagem | Aulas | Exercícios |
@@ -24,14 +24,15 @@ Tudo é contado do catálogo; a página pública mostra os mesmos números.
 | 3 · As ferramentas do trabalho | SQL e Bancos de Dados | SQL | 10 | 59 |
 | 4 · A aplicação inteira | Node e APIs | Node | 10 | 64 |
 | 5 · O ofício | Engenharia: Organizar um Projeto | Node | 8 | 48 |
+| 6 · O projeto final | Projeto Final: A Aplicação Inteira | Node + SQL | 3 de 5 | 16 |
 
-**Os dez tipos de exercício**: escrever o código (126), múltipla escolha (167),
-prever a saída (69), completar a lacuna (86), ordenar os passos (49),
-encontrar o bug (49), escrever o teste (6), refatorar (13), consulta SQL (43)
-e servidor (36). Toda aula tem ao menos um dos quatro "de prática de dev" —
+**Os dez tipos de exercício**: escrever o código (126), múltipla escolha (170),
+prever a saída (71), completar a lacuna (86), ordenar os passos (52),
+encontrar o bug (49), escrever o teste (6), refatorar (13), consulta SQL (46)
+e servidor (41). Toda aula tem ao menos um dos quatro "de prática de dev" —
 bug, ordenar, teste, refatorar — que pedem o conceito de outro ângulo.
 
-**Os seis motores de execução**, todos no navegador, nenhum servidor no meio:
+**Os sete motores de execução**, todos no navegador, nenhum servidor no meio:
 
 | Motor | O que roda | Como |
 | --- | --- | --- |
@@ -41,6 +42,7 @@ bug, ordenar, teste, refatorar — que pedem o conceito de outro ângulo.
 | React | componentes TSX | compilado e montado no iframe da página, com o React embutido |
 | SQL | consultas e modelagem | o SQLite em WebAssembly (sql.js) num worker que fica vivo; a correção compara **linhas devolvidas** |
 | Servidor | Node e Express, e projetos de vários arquivos | um Node de mentira no sandbox: `require` (do Express pequeno e dos arquivos que o exercício fornece, resolvido como no Node — `../`, pasta com `index.js`), `process.env`, e um cliente HTTP para os testes; a tela mostra pedidos e respostas, e onde o arquivo do aluno mora |
+| Servidor com banco | a API sobre o SQLite | o mesmo sandbox com o SQLite do motor de SQL carregado no mesmo worker: `require('./banco')` dá `consultar` e `executar` com parâmetros, assíncronos; a tela mostra o SQL do banco antes e as tabelas depois |
 
 **O que acompanha o aluno**: percurso em etapas com o ponto atual, revisão
 espaçada (Leitner), XP e níveis sem teto, sequência de dias com congelamento,
@@ -105,8 +107,8 @@ Redirect URLs.
 
 ```bash
 npm run typecheck   # tipos, incluindo os testes de navegador
-npm test            # 2.693 testes de unidade, propriedade e componente (Vitest)
-npm run test:e2e    # 344 testes de navegador (Playwright, Chromium, celular e desktop)
+npm test            # 2.746 testes de unidade, propriedade e componente (Vitest)
+npm run test:e2e    # 352 testes de navegador (Playwright, Chromium, celular e desktop)
 ```
 
 O E2E precisa do Chromium uma vez: `npx playwright install chromium`.
@@ -169,9 +171,9 @@ paleta só. O movimento tem motivo e respeita `prefers-reduced-motion`.
 
 ```
 src/content/        Aulas, exercícios, projetos, conceitos, percurso + schema Zod
-  lessons/          Uma aula por arquivo (js-, logica-, web-, pagina-, ts-, react-, sql-, node-, eng-)
+  lessons/          Uma aula por arquivo (js-, logica-, web-, pagina-, ts-, react-, sql-, node-, eng-, proj-)
   tracks/           As trilhas e a ordem das aulas
-  bancos/           Os bancos de exemplo do SQL
+  bancos/           Os bancos de exemplo do SQL e do projeto final
 src/client/lib/     Lógica derivada e os motores: sandbox, página, TypeScript,
                     React, SQL, servidor; domínio, revisão, XP, economia, desafios
 src/client/         Telas, componentes, contextos, ícones e cenas
@@ -193,6 +195,9 @@ O roadmap completo, com o estado de cada aula e o custo de cada motor, está em
    com testes e publicação (Fase 7).
 4. **Mais linguagens**, uma por vez, cada uma com o motor que a roda no
    navegador.
+
+O projeto final já começou: o banco e a API (aulas 1 a 3) estão no ar; a
+página que chama a API e o fechamento vêm em seguida.
 
 ## Licença
 

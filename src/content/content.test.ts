@@ -887,6 +887,8 @@ describe('exercícios de SQL', () => {
       expect(permitidos.has(exercise.type), `${exercise.id} é do tipo ${exercise.type}, que o motor de SQL não roda`).toBe(true);
     }
     for (const { lesson, exercise } of sqlExercises) {
+      // O projeto final junta as camadas de propósito: SQL numa aula `node`.
+      if (lesson.trackId === 'track-projeto') continue;
       expect(lesson.language, `${exercise.id} é de SQL numa aula de ${lesson.language}`).toBe('sql');
     }
   });
@@ -1130,19 +1132,28 @@ describe('exercícios de servidor', () => {
     (item): item is { lesson: Lesson; exercise: ServerExercise } => item.exercise.type === 'server'
   );
 
-  const rodar = (exercise: ServerExercise, codigo: string) =>
-    runProgram(
-      montarCodigoDoServidor(codigo, { env: exercise.env, arquivos: exercise.arquivos, caminho: exercise.caminho }),
-      exercise.tests,
-      [],
-      { sequencial: true }
-    );
+  // Com banco, o mesmo sql.js do navegador abre um banco novo por execução,
+  // roda o SQL do exercício e entra no programa como `__cfBancoNativo` — o
+  // que o worker do servidor com banco faz no Chromium.
+  const rodar = async (exercise: ServerExercise, codigo: string) => {
+    const programa = montarCodigoDoServidor(codigo, { env: exercise.env, arquivos: exercise.arquivos, caminho: exercise.caminho });
+    if (exercise.banco === undefined) return runProgram(programa, exercise.tests, [], { sequencial: true });
+    const abrir = await abrirBancoNoNode();
+    const banco = abrir();
+    try {
+      banco.rodar(exercise.banco);
+      return await runProgram(programa, exercise.tests, [], { sequencial: true, globais: { __cfBancoNativo: banco } });
+    } finally {
+      banco.fechar();
+    }
+  };
 
-  it('exercício de servidor só existe em aula de Node, e aula de Node não tem SQL', () => {
-    // Fora de uma aula de Node o editor e o motor seriam outros; e o SQL tem
-    // o motor próprio.
+  it('exercício de servidor só existe em aula de Node, e SQL numa aula de Node só no projeto final', () => {
+    // Fora de uma aula de Node o editor e o motor seriam outros. O SQL tem
+    // motor próprio e vive nas aulas de SQL — e no projeto final, que junta
+    // as camadas de propósito.
     for (const { lesson, exercise } of allExercises) {
-      if (lesson.language !== 'node') continue;
+      if (lesson.language !== 'node' || lesson.trackId === 'track-projeto') continue;
       expect(exercise.type, `${exercise.id} é de SQL numa aula de Node`).not.toBe('sql');
     }
     for (const { lesson, exercise } of serverExercises) {

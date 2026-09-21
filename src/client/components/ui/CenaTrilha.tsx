@@ -437,6 +437,69 @@ function CenaEngenharia() {
   );
 }
 
+/** Projeto final: a página pede, a API decide, o banco responde — e a lista aparece. */
+function CenaAplicacao() {
+  return (
+    <Cena>
+      <Quadro>
+        {/* A página, com a lista que vai encher. */}
+        <JanelaClara x={8} y={22} w={132} h={176} />
+        <text x="24" y="66" fill="var(--color-ink)" fontSize="10" fontWeight="800">
+          Minhas tarefas
+        </text>
+        {[0, 1, 2].map((i) => (
+          <Pop key={i} atraso={3.2 + i * 0.3}>
+            <rect x="24" y={78 + i * 24} width="10" height="10" rx="3" fill={i === 2 ? P.verde : TELA.linha} />
+            <rect x="40" y={80 + i * 24} width={i === 1 ? 70 : 84} height="6" rx="3" fill="var(--color-ink)" opacity={0.8} />
+          </Pop>
+        ))}
+        <rect x="24" y="160" width="100" height="18" rx="9" fill="var(--color-brand-600)" />
+        <rect x="40" y="167" width="68" height="4" rx="2" fill={P.creme} />
+
+        {/* A API no meio. */}
+        <Pop atraso={1.2}>
+          <rect x="164" y="88" width="64" height="44" rx="12" fill={EDITOR.fundo} />
+          <text x="196" y="106" fill={P.creme} fontSize="9" fontWeight="700" textAnchor="middle" fontFamily={MONO}>
+            GET
+          </text>
+          <text x="196" y="121" fill={P.azulClaro} fontSize="9" textAnchor="middle" fontFamily={MONO}>
+            /tarefas
+          </text>
+        </Pop>
+
+        {/* O banco à direita. */}
+        <Pop atraso={2}>
+          <ellipse cx="308" cy="82" rx="30" ry="10" fill={P.roxo} />
+          <path d="M278 82v46c0 5.5 13.4 10 30 10s30-4.5 30-10V82c0 5.5-13.4 10-30 10s-30-4.5-30-10z" fill={P.roxo} opacity={0.85} />
+          <text x="308" y="118" fill={P.creme} fontSize="9" fontWeight="700" textAnchor="middle" fontFamily={MONO}>
+            tarefas
+          </text>
+        </Pop>
+
+        {/* O pedido vai, a resposta volta. */}
+        {[
+          ['M142 104h20', 0.6],
+          ['M230 104h46', 1.6],
+          ['M276 116h-46', 2.4],
+          ['M162 116h-20', 2.9],
+        ].map(([d, atraso], i) => (
+          <path
+            key={i}
+            d={d as string}
+            fill="none"
+            stroke={i < 2 ? 'var(--color-brand-600)' : P.verde}
+            strokeWidth="3"
+            strokeLinecap="round"
+            pathLength={1}
+            className="animar-tracar"
+            style={{ animationDelay: `${atraso}s` } as CSSProperties}
+          />
+        ))}
+      </Quadro>
+    </Cena>
+  );
+}
+
 const CENAS: Record<string, ComponentType> = {
   'track-js-fundamentos': CenaVariaveis,
   'track-logica': CenaLogica,
@@ -447,6 +510,7 @@ const CENAS: Record<string, ComponentType> = {
   'track-sql': CenaConsulta,
   'track-node': CenaApi,
   'track-engenharia': CenaEngenharia,
+  'track-projeto': CenaAplicacao,
 };
 
 /** A cena de abertura da trilha, ou nada — uma trilha nova sem cena não quebra. */

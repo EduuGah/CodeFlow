@@ -181,8 +181,9 @@ arquivo" acima do editor. O tipo de exercício de vários arquivos editáveis
 ("reorganizar o projeto") continua por fazer; a trilha foi escrita sem ele.
 
 **A tela inicial e a de trilhas mostram o percurso, não a trilha padrão.**
-`content/percurso.ts` nomeia cinco etapas ("A base", "A web", "As ferramentas
-do trabalho", "A aplicação inteira", "O ofício") na ordem de `listTracks()`, e `lib/percurso.ts` monta o
+`content/percurso.ts` nomeia seis etapas ("A base", "A web", "As ferramentas
+do trabalho", "A aplicação inteira", "O ofício", "O projeto final") na ordem
+de `listTracks()`, e `lib/percurso.ts` monta o
 percurso do aluno — cada trilha com caminho, resumo e estado — e responde
 "em qual trilha eu estou" (`trilhaDaVez`: a da última atividade, senão a
 primeira começada, senão a primeira). A inicial é a aula da vez dessa
@@ -203,7 +204,7 @@ exatamente o mesmo código que roda em produção.
 ```
 src/content/            Aulas, exercícios, projetos, conceitos, flashcards
   types.ts              Tipos (Exercise é união discriminada por `type`)
-  percurso.ts           As cinco etapas do percurso, na ordem das trilhas
+  percurso.ts           As seis etapas do percurso, na ordem das trilhas
   bancos/               Os bancos de exemplo da trilha de SQL (`loja`): o SQL
                         que cria, e a descrição que o aluno lê
   schema.ts             Espelhos Zod; valida na carga e falha alto em DEV
@@ -252,7 +253,12 @@ src/client/lib/         Lógica pura e testada
                         process.env, module.exports, o Express pequeno e o
                         pedir() dos testes; `montarCodigoDoServidor`
   servidor.ts           executarServidor(): o sandbox com o prelúdio e os
-                        testes em série
+                        testes em série — e o worker com banco quando o
+                        exercício declara `banco`
+  servidor-banco.worker.ts  Motor 7 (metade): o sandbox com o SQLite no
+                        mesmo worker; monta o banco do exercício, avisa
+                        'pronto' só então, roda o programa com o banco em
+                        `globais`, devolve o retrato das tabelas
   fill-blank.ts         Molde com lacunas: dividir, preencher, validar
   mastery.ts            Domínio por conceito, em 4 níveis
   review.ts             Repetição espaçada, Leitner [1,3,7,14,30,60] dias
@@ -702,7 +708,19 @@ catálogo, 6 aqui), abrindo a quinta etapa do percurso, "O ofício";
 `e2e/engenharia.spec.ts` conclui cada aula no Chromium. Faltam da fase:
 Testes e qualidade (8), Git e equipe (6), Terminal (5) — sem motor novo.
 
-**Fases 6 e 7 — não iniciadas.** Pyodide (Python) é o último motor.
+**Fase 7 — começou (2026-09-21).** A trilha **Projeto Final: A Aplicação
+Inteira** (`track-projeto`, sexta etapa do percurso) tem as aulas 1 a 3 — o
+desenho, o banco e o repositório, a API sobre o banco — sobre a primeira
+metade do motor 7: `servidor-banco.worker.ts` (o sandbox com o SQLite no
+mesmo worker), `require('./banco')` no prelúdio, o campo `banco` do
+exercício `server`, o banco de exemplo `tarefas`, e `runProgram` com
+`globais` para o banco entrar no programa sem `globalThis`. O CI abre para
+essa trilha a exceção de SQL numa aula `node`. Faltam a ponte página → API
+(o `fetch` do iframe indo ao worker) e as aulas 4 e 5;
+`e2e/projeto.spec.ts` conclui as três aulas no Chromium e prova o painel
+"O banco depois".
+
+**Fase 6 — não iniciada.** Pyodide (Python) é o último motor.
 Investimentos grandes o bastante para a escolha ser do dono do projeto —
 pergunte antes de começar qualquer fase (ver `docs/curriculo.md`).
 

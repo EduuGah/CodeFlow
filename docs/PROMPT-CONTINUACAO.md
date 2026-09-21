@@ -297,6 +297,20 @@ projeto: seis trilhas desenroladas numa coluna eram uma parede.
   seu arquivo" acima do editor.
 - `e2e/engenharia.spec.ts` conclui cada aula no Chromium.
 
+### B8) O projeto final, metade — feito (2026-09-21)
+
+- `track-projeto`, "Projeto Final: A Aplicação Inteira", aulas 1–3 (desenho;
+  banco e repositório; API sobre o banco), 16 exercícios, sexta etapa do
+  percurso. SQL e servidor na mesma aula (exceção do CI só para esta trilha);
+  banco de exemplo `tarefas` em `content/bancos/`.
+- Motor 7, primeira metade: `lib/servidor-banco.worker.ts` (sandbox + SQLite
+  no mesmo worker), `require('./banco')` no prelúdio (`consultar`/`executar`
+  com `?`, Promises), `ServerExercise.banco`, `runProgram({ globais })`,
+  `retratoDasTabelas`, a tela com `banco.sql` antes e "O banco depois". Prazo
+  de execução com banco: 8 s (`EXECUTION_COM_BANCO_MS`).
+- Falta: a ponte página → API (o `fetch` do iframe indo ao worker que mantém
+  o servidor vivo, e o equivalente no jsdom do CI) e as aulas 4 e 5.
+
 ### C) Mais projetos com o motor atual — barato, sem currículo novo
 
 Existem 7 projetos e o roadmap prevê ~30. Eles usam a mecânica que já existe e
@@ -304,12 +318,12 @@ dão prática aplicada. É o caminho de menor risco e menor retorno.
 
 ### Recomendação
 
-A, B, B2, B3, B4, B5, B6 e B7 estão feitos: as Fases 1 a 4 estão completas
-e a Fase 5 começou pela engenharia. O que vem agora: o resto da **Fase 5**
-(Testes e qualidade, Git e equipe, Terminal — sem motor novo; o plano está
-em `docs/curriculo.md`), ou o capstone da Fase 7 (motor 7: servidor + SQLite
-no mesmo worker, a página fazendo `fetch` para ele), que era o pedido central
-do dono do projeto. Ou C, ou os itens de plataforma que ficaram (mapa de tópicos e busca,
+A, B, B2, B3, B4, B5, B6, B7 e B8 estão feitos: as Fases 1 a 4 completas, a
+Fase 5 começou pela engenharia, e a Fase 7 (o projeto final, o pedido central
+do dono do projeto) está com o banco e a API prontos. O próximo passo é a
+**segunda metade do motor 7** — a página do iframe fazendo `fetch` para o
+servidor do aluno no worker — e as aulas 4 e 5 do projeto. Depois, o resto
+da Fase 5 (Testes e qualidade, Git e equipe, Terminal) ou os capstones. Ou C, ou os itens de plataforma que ficaram (mapa de tópicos e busca,
 tutor com IA, painel do aluno). Antes de qualquer um, vale o que só o dono
 do projeto pode fazer: usar o aplicativo publicado num telefone de verdade,
 inclusive uma aula de Node.
@@ -323,8 +337,8 @@ fase ou C — são investimentos grandes o bastante para a escolha ser dele.
 
 ```bash
 npm run typecheck   # inclui e2e/ e playwright.config.ts
-npm test            # 2.693 testes
-npm run test:e2e    # 344 no navegador (antes: npx playwright install chromium)
+npm test            # 2.746 testes
+npm run test:e2e    # 352 no navegador (antes: npx playwright install chromium)
 npm run build
 ```
 

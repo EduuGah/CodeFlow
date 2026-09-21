@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { runProgram } from './sandbox-core';
 import { montarCodigoDoServidor, type Troca } from './servidor-core';
+import { abrirBancoNoNode } from './sql-node';
 
 /**
  * O servidor simulado, rodando no mesmo sandbox dos outros exercícios — em
@@ -242,6 +243,36 @@ describe('o Express pequeno', () => {
     });
     expect(r.error).toBeUndefined();
     expect(r.testResults[0].passed).toBe(true);
+  });
+
+  it("require('./banco') consulta o SQLite do exercício com await, e sem banco explica", async () => {
+    const abrir = await abrirBancoNoNode();
+    const banco = abrir();
+    banco.rodar("CREATE TABLE tarefas (id INTEGER PRIMARY KEY, titulo TEXT NOT NULL); INSERT INTO tarefas (titulo) VALUES ('Estudar');");
+    const codigo = `
+      const express = require('express');
+      const banco = require('./banco');
+      const app = express();
+      app.use(express.json());
+      app.get('/tarefas', async (req, res) => res.json(await banco.consultar('SELECT * FROM tarefas ORDER BY id')));
+      app.post('/tarefas', async (req, res) => {
+        const { ultimoId } = await banco.executar('INSERT INTO tarefas (titulo) VALUES (?)', [req.body.titulo]);
+        res.status(201).json({ id: ultimoId, titulo: req.body.titulo });
+      });
+    `;
+    const tests = [
+      { description: 'lista', assertion: `const r = await pedir(app, 'GET', '/tarefas'); if (r.body.length !== 1 || r.body[0].titulo !== 'Estudar') throw new Error(r.texto);` },
+      { description: 'cria', assertion: `const r = await pedir(app, 'POST', '/tarefas', { body: { titulo: 'Revisar' } }); if (r.status !== 201 || r.body.id !== 2) throw new Error(r.texto);` },
+      { description: 'ficou no banco', assertion: `const r = await pedir(app, 'GET', '/tarefas'); if (r.body.length !== 2) throw new Error(r.texto);` },
+    ];
+    const r = await runProgram(montarCodigoDoServidor(codigo), tests, [], { sequencial: true, globais: { __cfBancoNativo: banco } });
+    expect(r.error).toBeUndefined();
+    expect(r.testResults.map((t) => t.passed)).toEqual([true, true, true]);
+    expect(banco.consultar('SELECT COUNT(*) AS n FROM tarefas')).toEqual([{ n: 2 }]);
+    banco.fechar();
+
+    const sem = await rodar(`const banco = require('./banco');`, []);
+    expect(sem.error).toContain('não tem banco de dados');
   });
 
   it('require de módulo que não existe explica o que existe', async () => {

@@ -6,7 +6,7 @@ que conclui uma fase.
 
 ## Onde estamos
 
-**Fases 1, 2, 3 e 4 de 8 concluídas · Fase 5: Engenharia 8 de 8 · publicado**
+**Fases 1, 2, 3 e 4 de 8 concluídas · Fase 5: Engenharia 8 de 8 · Fase 7: 3 de 5 · publicado**
 
 ```
 Fase 0  Fundamentos e lógica      ██████████████████████  13/13  pronto
@@ -18,18 +18,27 @@ Fase 3  Tipos e componentes      ███████████████�
 Fase 4  Back-end e dados         ██████████████████████  20/20  pronto
 Fase 5  Profissionalização       ██████░░░░░░░░░░░░░░░░   8/27  engenharia pronta; testes, git, terminal
 Fase 6  Python                   ░░░░░░░░░░░░░░░░░░░░░░   0/10  motor 6
-Fase 7  Projeto final            ░░░░░░░░░░░░░░░░░░░░░░   0/5   + 3 capstones, motor 7
+Fase 7  Projeto final            █████████████░░░░░░░░░   3/5   banco e API prontos; motor 7 pela metade
 ```
 
 | | Hoje | Previsto | Feito |
 | --- | ---: | ---: | ---: |
-| Aulas | **109** | ~150 | 73% |
-| Exercícios | **644** | ~800 | 81% |
+| Aulas | **112** | ~150 | 75% |
+| Exercícios | **660** | ~800 | 83% |
 | Tipos de exercício | **10** | 13 | 77% |
-| Motores de execução | **6** | 8 | 75% |
+| Motores de execução | **7** | 8 | 88% |
 | Projetos | **7** | ~20 | 35% |
 
-**Último trabalho** (2026-09-21): a trilha **Engenharia: Organizar um
+**Último trabalho** (2026-09-21, tarde): o **projeto final começou** — as
+três primeiras aulas de "Projeto Final: A Aplicação Inteira" (o desenho; o
+banco e o repositório; a API sobre o banco), 16 exercícios, na sexta etapa
+do percurso — e a metade do **motor 7** que elas precisavam: o servidor
+simulado com o SQLite dentro do mesmo worker (`servidor-banco.worker.ts`),
+`require('./banco')` com `consultar` e `executar` assíncronos e com
+parâmetros, o campo `banco` do exercício `server`, o banco de exemplo
+`tarefas`, e a tela mostrando o SQL do banco antes e as tabelas depois.
+Falta a outra metade — a página fazendo `fetch` para o servidor — para as
+aulas 4 e 5. De manhã: a trilha **Engenharia: Organizar um
 Projeto**, inteira — 8 aulas e 48 exercícios sobre coesão e acoplamento,
 módulos como fronteiras, pastas por responsabilidade, nomes, funções
 pequenas, erros como contrato, dependências e o `package.json`, e o projeto
@@ -583,17 +592,32 @@ se aprendeu a consultar.
 
 Plataforma: o **motor 7, a aplicação inteira** — o servidor simulado (motor
 4) e o SQLite (motor 5) no mesmo worker, e a página do motor 1 fazendo
-`fetch` para ele. É a única fase que junta motores; os três já existem, o
-trabalho é a ponte: um `fetch` de mentira dentro do iframe que entrega o
-pedido ao servidor do aluno no worker.
+`fetch` para ele. É a única fase que junta motores. **A primeira metade
+está feita** (2026-09-21): `servidor-banco.worker.ts` carrega o SQLite e
+roda o sandbox de sempre com o banco injetado (`runProgram` ganhou
+`globais`); o prelúdio do servidor entrega `require('./banco')` —
+`consultar(sql, params)` e `executar(sql, params)`, Promises, parâmetros
+com `?` —; o exercício `server` tem o campo `banco` (o SQL que monta o
+banco); a tela mostra `banco.sql` entre os arquivos do projeto e "O banco
+depois" com as tabelas; o CI roda o mesmo `sql.js` no Node. O prazo de
+execução com banco é 8 s (não 3), porque uma rodada faz dezenas de
+consultas e divide a máquina com o compilador do editor. **A segunda
+metade** — o `fetch` de mentira dentro do iframe que entrega o pedido ao
+servidor do aluno no worker, e o equivalente no jsdom do CI — é o que as
+aulas 4 e 5 precisam.
+
+**Trilha `track-projeto` — 3 de 5.** Linguagem `node`; é a única trilha
+em que exercícios de SQL e de servidor convivem na mesma aula (o CI abre
+essa exceção só para ela). O banco de exemplo `tarefas` (usuários, sessões,
+tarefas com dono) serve às aulas de SQL e aos exercícios com `banco`.
 
 | Aula | Assunto |
 | --- | --- |
-| 1 | O desenho antes do código: os dados, os recursos da API, as telas, a ordem de construção |
-| 2 | O banco e o acesso a ele: tabelas, o repositório que a API chama, migração |
-| 3 | A API sobre o banco: rotas, validação, erros, o contrato que a página vai usar |
-| 4 | A página sobre a API: `fetch`, estados de carregamento e erro, formulários que enviam |
-| 5 | Fechar: testes de ponta a ponta, README, publicar (Vercel + Supabase, o mesmo caminho do CodeFlow) |
+| 1 | O desenho antes do código: as três camadas e o papel de cada uma (a verdade mora no banco, só a API o toca, a página nunca confia em si), os dados, os recursos como contrato, a tela e seus estados, a ordem de baixo para cima, o que "pronto" quer dizer — **feita** |
+| 2 | O banco e o repositório: tabelas que se defendem, a migração, o repositório como único módulo que sabe SQL, parâmetros e nunca concatenação (a injeção mostrada), o que cada função devolve, `feita` em 0/1 — **feita** |
+| 3 | A API sobre o banco: o login que lê `sessoes` com `JOIN`, as rotas que compõem, o dono conferido num lugar só, `paraApi` em toda resposta, o contrato e o que o quebra, CORS na publicação — **feita** |
+| 4 | A página sobre a API: `fetch` com o token, estados de carregando, erro e vazio, o formulário que envia, a lista que se atualiza — por fazer (motor 7, segunda metade) |
+| 5 | Fechar: pedidos de ponta a ponta, README, publicar (Vercel + Supabase, o mesmo caminho do CodeFlow) — por fazer |
 
 Os três capstones, cada um com critérios de aceitação como os projetos de
 hoje, mas em três camadas:

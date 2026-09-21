@@ -4,6 +4,7 @@ import {
   compararTabelas,
   executarSql,
   formatarLinha,
+  retratoDasTabelas,
   traduzirErroSql,
   type AbrirBanco,
   type Saida,
@@ -75,6 +76,43 @@ describe('o adaptador do sql.js', () => {
   it('lança no comando que falha, com a mensagem do SQLite', () => {
     const banco = abrir();
     expect(() => banco.rodar(`${SETUP} SELECT nomee FROM produtos`)).toThrow('no such column: nomee');
+    banco.fechar();
+  });
+});
+
+describe('o banco visto por um programa: consultar e executar com parâmetros', () => {
+  it('consultar devolve objetos por coluna, e os parâmetros entram no lugar dos ?', () => {
+    const banco = abrir();
+    banco.rodar(SETUP);
+    const caros = banco.consultar('SELECT nome, preco FROM produtos WHERE preco > ? ORDER BY preco', [10]);
+    expect(caros).toEqual([
+      { nome: 'Caderno', preco: 12.5 },
+      { nome: 'Mouse', preco: 65 },
+      { nome: 'Fone', preco: 89 },
+    ]);
+    // O parâmetro é valor, nunca SQL: um texto com aspas não vira injeção.
+    expect(banco.consultar('SELECT id FROM produtos WHERE nome = ?', ["' OR 1=1 --"])).toEqual([]);
+    banco.fechar();
+  });
+
+  it('executar diz quantas linhas mexeu e o id do último INSERT', () => {
+    const banco = abrir();
+    banco.rodar(SETUP);
+    const inserido = banco.executar('INSERT INTO produtos (nome, preco) VALUES (?, ?)', ['Régua', 4]);
+    expect(inserido).toEqual({ linhas: 1, ultimoId: 5 });
+    const alterados = banco.executar('UPDATE produtos SET preco = preco * 2 WHERE categoria = ?', ['papelaria']);
+    expect(alterados.linhas).toBe(2);
+    banco.fechar();
+  });
+
+  it('o retrato das tabelas traz cada uma com as linhas de agora', () => {
+    const banco = abrir();
+    banco.rodar(SETUP + "CREATE TABLE vazia (id INTEGER PRIMARY KEY, x TEXT);");
+    const retrato = retratoDasTabelas(banco, 2);
+    expect(retrato.map((t) => t.nome)).toEqual(['produtos', 'vazia']);
+    expect(retrato[0].columns).toEqual(['id', 'nome', 'preco', 'categoria']);
+    expect(retrato[0].values).toHaveLength(2);
+    expect(retrato[1]).toEqual({ nome: 'vazia', columns: ['id', 'x'], values: [] });
     banco.fechar();
   });
 });

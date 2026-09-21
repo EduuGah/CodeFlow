@@ -89,6 +89,18 @@ const SIMBOLOS: Record<string, ReactNode> = {
       </g>
     </g>
   ),
+  // Projeto final: as três camadas empilhadas — a página, a API, o banco.
+  'track-projeto': (
+    <g fill="currentColor">
+      <rect x="9" y="6" width="30" height="12" rx="3" />
+      <rect x="13" y="10" width="14" height="2" rx="1" fill="var(--emblema-fundo)" />
+      <rect x="13" y="14" width="22" height="2" rx="1" fill="var(--emblema-fundo)" />
+      <rect x="9" y="21" width="30" height="8" rx="3" opacity={0.75} />
+      <circle cx="14" cy="25" r="1.6" fill="var(--emblema-fundo)" />
+      <ellipse cx="24" cy="34" rx="15" ry="4" />
+      <path d="M9 34v5c0 2.2 6.7 4 15 4s15-1.8 15-4v-5c0 2.2-6.7 4-15 4s-15-1.8-15-4z" />
+    </g>
+  ),
   'track-sql': (
     <g fill="currentColor">
       <ellipse cx="24" cy="13" rx="13" ry="5" />

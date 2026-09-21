@@ -1,5 +1,7 @@
 import SandboxWorker from './sandbox.worker?worker';
+import ServidorBancoWorker from './servidor-banco.worker?worker';
 import type { WorkerRequest, WorkerResponse } from './sandbox.worker';
+import type { RetratoDeTabela } from './sql-core';
 import type { SandboxProperty, SandboxTest } from './sandbox-core';
 import type { ErroDeCompilacao } from './typescript-core';
 import type { Troca } from './servidor-core';
@@ -27,6 +29,8 @@ export interface ExecutionResult {
   compileErrors?: ErroDeCompilacao[];
   /** As trocas HTTP do servidor simulado, quando o programa é um servidor. */
   trocas?: Troca[];
+  /** As tabelas do banco do exercício depois do programa, quando ele tem banco. */
+  tabelas?: RetratoDeTabela[];
 }
 
 /**
@@ -44,6 +48,18 @@ export const EXECUTION_TIMEOUT_MS = 3000;
  */
 export const STARTUP_TIMEOUT_MS = 20_000;
 
+/** O worker com banco carrega o SQLite (650 kB) antes de avisar: o prazo do motor de SQL. */
+export const STARTUP_COM_BANCO_MS = 40_000;
+
+/**
+ * O prazo de execução com banco. Um servidor sobre o SQLite faz dezenas de
+ * consultas numa rodada de testes, e o worker divide a máquina com o
+ * compilador do editor; a suíte de navegador viu programas de dez linhas
+ * passarem dos 3 segundos numa máquina ocupada. Um laço infinito ainda é
+ * interrompido — leva 8 segundos em vez de 3.
+ */
+export const EXECUTION_COM_BANCO_MS = 8000;
+
 function toResult(response: Exclude<WorkerResponse, 'pronto'>): ExecutionResult {
   return {
     output: response.logs.join('\n'),
@@ -51,6 +67,7 @@ function toResult(response: Exclude<WorkerResponse, 'pronto'>): ExecutionResult 
     testResults: response.testResults,
     error: response.error,
     ...(response.trocas ? { trocas: response.trocas as Troca[] } : {}),
+    ...(response.tabelas ? { tabelas: response.tabelas as RetratoDeTabela[] } : {}),
   };
 }
 
@@ -64,13 +81,13 @@ export function executeCode(
   code: string,
   testCases: SandboxTest[] = [],
   properties: SandboxProperty[] = [],
-  opcoes: { sequencial?: boolean } = {}
+  opcoes: { sequencial?: boolean; banco?: string } = {}
 ): Promise<ExecutionResult> {
   return new Promise((resolve) => {
     let worker: Worker;
 
     try {
-      worker = new SandboxWorker();
+      worker = opcoes.banco !== undefined ? new ServidorBancoWorker() : new SandboxWorker();
     } catch (error) {
       resolve({
         output: '',
@@ -106,7 +123,9 @@ export function executeCode(
         error:
           'O ambiente de execução não ficou pronto a tempo. Confira a conexão e tente executar de novo.',
       });
-    }, STARTUP_TIMEOUT_MS);
+    }, opcoes.banco !== undefined ? STARTUP_COM_BANCO_MS : STARTUP_TIMEOUT_MS);
+
+    const prazo = opcoes.banco !== undefined ? EXECUTION_COM_BANCO_MS : EXECUTION_TIMEOUT_MS;
 
     worker.onmessage = (event: MessageEvent<WorkerResponse>) => {
       if (event.data === 'pronto') {
@@ -118,10 +137,10 @@ export function executeCode(
             testResults: [],
             timedOut: true,
             error: `Seu código passou de ${
-              EXECUTION_TIMEOUT_MS / 1000
+              prazo / 1000
             } segundos e foi interrompido. Isso costuma indicar um laço que nunca termina — verifique se a condição de parada realmente chega a ser falsa.`,
           });
-        }, EXECUTION_TIMEOUT_MS);
+        }, prazo);
         return;
       }
 
@@ -139,7 +158,13 @@ export function executeCode(
       });
     };
 
-    const request: WorkerRequest = { code, tests: testCases, properties, sequencial: opcoes.sequencial };
+    const request: WorkerRequest & { banco?: string } = {
+      code,
+      tests: testCases,
+      properties,
+      sequencial: opcoes.sequencial,
+      ...(opcoes.banco !== undefined ? { banco: opcoes.banco } : {}),
+    };
     worker.postMessage(request);
   });
 }

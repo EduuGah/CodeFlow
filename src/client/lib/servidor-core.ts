@@ -10,6 +10,10 @@
  * - `require`: devolve o `express` daqui, o módulo `./x` que o exercício
  *   fornecer em `arquivos` — resolvido relativo a quem pede, com `../` e
  *   pasta com `index.js`, como no Node — e recusa o resto com uma frase;
+ * - `require('./banco')`: nos exercícios com banco, o SQLite do exercício
+ *   (motor 5, dentro deste mesmo worker) com `consultar(sql, params)` e
+ *   `executar(sql, params)`, os dois devolvendo Promises — como um driver
+ *   de banco de verdade, e para o aluno manter o hábito do `await`;
  * - `process.env`: o que o exercício definir em `env`;
  * - `module.exports` / `exports`: para o aluno exportar como no Node;
  * - `express()`: um Express pequeno — rotas com `:parametro`, `req.query`,
@@ -82,8 +86,28 @@ function __cfResolver(nome) {
   return __cfNormalizar(pasta + '/' + nome.replace(/\.js$/, ''));
 }
 
+var __cfBancoModulo = null;
+function __cfBanco() {
+  if (__cfBancoModulo) return __cfBancoModulo;
+  var nativo = typeof __cfBancoNativo === 'undefined' ? null : __cfBancoNativo;
+  if (!nativo) {
+    throw new Error("Este exercício não tem banco de dados: require('./banco') só existe nos exercícios que declaram um banco.");
+  }
+  __cfBancoModulo = {
+    consultar: function (sql, params) {
+      return Promise.resolve().then(function () { return nativo.consultar(String(sql), params || []); });
+    },
+    executar: function (sql, params) {
+      return Promise.resolve().then(function () { return nativo.executar(String(sql), params || []); });
+    },
+  };
+  return __cfBancoModulo;
+}
+
 function require(nome) {
   if (nome === 'express') return __cfExpress;
+  // O banco do exercício, de qualquer pasta: './banco' na raiz, '../banco' de dentro de dados/.
+  if (typeof nome === 'string' && /^\.\.?\/(?:.*\/)?banco(?:\.js)?$/.test(nome)) return __cfBanco();
   if (typeof nome === 'string' && (nome.startsWith('./') || nome.startsWith('../'))) {
     var chave = __cfResolver(nome);
     // Como no Node: 'x', 'x.js', ou a pasta x com o index.js dentro.

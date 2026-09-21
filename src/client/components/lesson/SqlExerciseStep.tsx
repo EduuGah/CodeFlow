@@ -303,7 +303,8 @@ function TabelaDoEsquema({ tabela }: { tabela: TabelaDeExemplo }) {
 /** O teto de linhas mostradas por tabela: o resto fica atrás de "mostrar tudo". */
 const LINHAS_VISIVEIS = 30;
 
-function SaidaDoComando({ saida }: { saida: Saida }) {
+/** Exportada: o exercício de servidor com banco mostra as tabelas com a mesma grade. */
+export function SaidaDoComando({ saida }: { saida: Saida }) {
   const [tudo, setTudo] = useState(false);
 
   if (saida.tipo === 'comando') {

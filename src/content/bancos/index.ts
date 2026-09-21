@@ -1,4 +1,5 @@
 import { LOJA } from './loja';
+import { TAREFAS } from './tarefas';
 import type { BancoDeExemplo } from './tipos';
 
 export type { BancoDeExemplo, ColunaDeExemplo, TabelaDeExemplo } from './tipos';
@@ -9,6 +10,7 @@ export type { BancoDeExemplo, ColunaDeExemplo, TabelaDeExemplo } from './tipos';
  */
 export const BANCOS: Record<string, BancoDeExemplo> = {
   [LOJA.id]: LOJA,
+  [TAREFAS.id]: TAREFAS,
 };
 
 export function getBanco(id: string): BancoDeExemplo | undefined {

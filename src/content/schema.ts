@@ -228,6 +228,7 @@ export const exerciseSchema = z.discriminatedUnion('type', [
     env: z.record(z.string(), z.string()).optional(),
     arquivos: z.record(z.string(), z.string()).optional(),
     caminho: z.string().regex(/^\.\/[^\s]+$/, 'o caminho do arquivo do aluno começa com ./').optional(),
+    banco: z.string().min(1).optional(),
     solution: z.string().min(1, 'exercício de servidor precisa da solução de referência'),
   }),
   z.object({

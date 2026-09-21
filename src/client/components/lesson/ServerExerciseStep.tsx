@@ -5,6 +5,7 @@ import type { ExerciseState, OnExerciseState } from '../../lib/exercise-state';
 import type { ExecutionResult } from '../../lib/sandbox';
 import { executarServidor } from '../../lib/servidor';
 import type { Troca } from '../../lib/servidor-core';
+import type { RetratoDeTabela } from '../../lib/sql-core';
 import { useRecordAttempt } from '../../hooks/useRecordAttempt';
 import { useReportarEstado } from '../../hooks/useReportarEstado';
 import { Button } from '../ui/Button';
@@ -14,6 +15,7 @@ import { IconCheck, IconClose, IconPlay } from '../ui/Icon';
 import { MarkdownReader } from '../ui/MarkdownReader';
 import { ExerciseAction, ExerciseFeedback } from './ExerciseAction';
 import { HintPanel } from './HintPanel';
+import { SaidaDoComando } from './SqlExerciseStep';
 
 /**
  * Exercício de servidor como passo da aula.
@@ -41,6 +43,28 @@ interface ServerExerciseStepProps {
 
 const COR_DO_STATUS = (status: number) =>
   status < 300 ? 'bg-success-600 text-white' : status < 500 ? 'bg-energy-500 text-white' : 'bg-danger-500 text-white';
+
+/** O banco depois do servidor rodar: cada tabela com as linhas de agora. */
+function Tabelas({ tabelas }: { tabelas: RetratoDeTabela[] }) {
+  return (
+    <Card padding="none" className="overflow-hidden">
+      <div className="flex items-baseline justify-between gap-3 border-b border-line px-4 py-2">
+        <SectionLabel as="p">O banco depois</SectionLabel>
+        <span className="text-xs text-ink-faint">
+          {tabelas.length} {tabelas.length === 1 ? 'tabela' : 'tabelas'}
+        </span>
+      </div>
+      <div className="space-y-4 px-4 py-3">
+        {tabelas.map((t) => (
+          <div key={t.nome}>
+            <p className="mb-1 font-mono text-sm font-semibold text-ink">{t.nome}</p>
+            <SaidaDoComando saida={{ tipo: 'tabela', columns: t.columns, values: t.values }} />
+          </div>
+        ))}
+      </div>
+    </Card>
+  );
+}
 
 function Trocas({ trocas }: { trocas: Troca[] }) {
   return (
@@ -88,6 +112,9 @@ export function ServerExerciseStep({ exercise, lessonId, onEstado }: ServerExerc
   const registrar = useRecordAttempt();
   const arquivos = Object.entries(exercise.arquivos ?? {});
   const env = Object.entries(exercise.env ?? {});
+  // O banco do exercício aparece como mais um arquivo do projeto: o SQL que
+  // cria as tabelas é o que o aluno precisa ler para escrever as consultas.
+  const banco = exercise.banco !== undefined ? ([['banco.sql', exercise.banco]] as Array<[string, string]>) : [];
   // Um exercício de módulo (sem pedido HTTP nenhum) roda no mesmo Node de
   // mentira, mas o botão não pode prometer um servidor que não existe.
   const temServidor = exercise.tests.some((t) => t.assertion.includes('pedir('));
@@ -156,7 +183,7 @@ export function ServerExerciseStep({ exercise, lessonId, onEstado }: ServerExerc
         <MarkdownReader content={exercise.prompt} />
       </Card>
 
-      {(arquivos.length > 0 || env.length > 0) && (
+      {(arquivos.length > 0 || env.length > 0 || banco.length > 0) && (
         <Card padding="none" className="overflow-hidden">
           <div className="border-b border-line px-4 py-2">
             <SectionLabel as="p">O que já existe no projeto</SectionLabel>
@@ -173,7 +200,7 @@ export function ServerExerciseStep({ exercise, lessonId, onEstado }: ServerExerc
               </ul>
             </div>
           )}
-          {arquivos.map(([nome, fonte]) => (
+          {[...banco, ...arquivos].map(([nome, fonte]) => (
             <details key={nome} className="border-b border-line last:border-b-0">
               <summary className="cursor-pointer px-4 py-2.5 font-mono text-sm text-ink hover:bg-sunken">{nome}</summary>
               <pre className="overflow-x-auto border-t border-line bg-editor p-4 text-xs leading-relaxed">
@@ -278,6 +305,8 @@ export function ServerExerciseStep({ exercise, lessonId, onEstado }: ServerExerc
           )}
 
           {resultado.trocas && resultado.trocas.length > 0 && <Trocas trocas={resultado.trocas} />}
+
+          {resultado.tabelas && resultado.tabelas.length > 0 && <Tabelas tabelas={resultado.tabelas} />}
 
           {resultado.output && (
             <div className="overflow-hidden rounded-lg bg-terminal">

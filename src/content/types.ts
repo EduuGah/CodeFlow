@@ -393,6 +393,13 @@ export interface ServerExercise extends ExerciseBase {
    * o caminho acima do editor quando ele é declarado.
    */
   caminho?: string;
+  /**
+   * O banco do exercício: o SQL que cria as tabelas e os dados iniciais. Com
+   * ele, `require('./banco')` existe no servidor do aluno — o SQLite do motor
+   * de SQL dentro do mesmo worker, com `consultar` e `executar` assíncronos
+   * — e a tela mostra as tabelas depois do programa rodar.
+   */
+  banco?: string;
   /** Solução de referência. Obrigatória: é ela que prova que o exercício é resolvível. */
   solution: string;
 }

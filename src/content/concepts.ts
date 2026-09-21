@@ -822,4 +822,28 @@ export const concepts: Concept[] = [
     prerequisites: ['eng-nomes', 'eng-dependencias'],
     tags: ['engenharia'],
   },
+  {
+    id: 'proj-desenho',
+    title: 'O desenho da aplicação',
+    summary:
+      'As três camadas e o papel de cada uma (a página mostra, a API decide e traduz, o banco guarda e garante); a verdade mora no banco, só a API o toca, a página nunca confia em si mesma; os dados, os recursos da API como contrato, a tela com seus estados; a ordem de construção de baixo para cima; a lista do que "pronto" quer dizer.',
+    prerequisites: ['node-projeto', 'eng-pastas', 'sql-modelar', 'dom-fetch'],
+    tags: ['projeto'],
+  },
+  {
+    id: 'proj-banco',
+    title: 'O banco e o repositório',
+    summary:
+      'As tabelas se defendem (NOT NULL, CHECK, chave estrangeira) e a migração as cria; o repositório é o único módulo que sabe SQL, uma função async por operação; parâmetros com ? e nunca concatenação (injeção de SQL); o que cada função devolve (lista, ou null, a linha lida de volta, se mexeu); as linhas saem como o banco as tem; testar sem servidor.',
+    prerequisites: ['proj-desenho', 'sql-escrita', 'node-async'],
+    tags: ['projeto'],
+  },
+  {
+    id: 'proj-api',
+    title: 'A API sobre o banco',
+    summary:
+      'O login lê a sessão no banco (async, por parâmetro, com JOIN); as rotas compõem: ler, validar, repositório, responder; o dono conferido em toda rota com :id (404, depois 403) num lugar só; a tradução paraApi (feita booleano, criadaEm) em toda resposta; o contrato (rotas, status, formato) é o que a página programa contra, e muda com cuidado; CORS na publicação.',
+    prerequisites: ['proj-banco', 'node-projeto'],
+    tags: ['projeto'],
+  },
 ];

@@ -27,6 +27,7 @@ import { trackReact } from './tracks/react';
 import { trackSql } from './tracks/sql';
 import { trackNode } from './tracks/node';
 import { trackEngenharia } from './tracks/engenharia';
+import { trackProjeto } from './tracks/projeto';
 import { lessonVariaveis } from './lessons/js-01-variaveis';
 import { lessonTiposEOperadores } from './lessons/js-02-tipos-e-operadores';
 import { lessonCondicoes } from './lessons/js-03-condicoes';
@@ -136,6 +137,9 @@ import { lessonEngFuncoesPequenas } from './lessons/eng-05-funcoes-pequenas';
 import { lessonEngErros } from './lessons/eng-06-erros';
 import { lessonEngDependencias } from './lessons/eng-07-dependencias';
 import { lessonEngLegivel } from './lessons/eng-08-legivel';
+import { lessonProjDesenho } from './lessons/proj-01-desenho';
+import { lessonProjBanco } from './lessons/proj-02-banco';
+import { lessonProjApi } from './lessons/proj-03-api';
 import { projetoImc } from './projects/js-imc';
 import { projetoConversor } from './projects/js-conversor';
 import { projetoBoletim } from './projects/js-boletim';
@@ -259,6 +263,9 @@ const lessons: Lesson[] = [
   lessonEngErros,
   lessonEngDependencias,
   lessonEngLegivel,
+  lessonProjDesenho,
+  lessonProjBanco,
+  lessonProjApi,
 ];
 const projects: Project[] = [
   projetoImc,
@@ -279,6 +286,7 @@ const tracks: Track[] = [
   trackSql,
   trackNode,
   trackEngenharia,
+  trackProjeto,
 ];
 
 /**

@@ -36,7 +36,39 @@ export type Saida =
 export interface Banco {
   /** Roda o SQL inteiro. Lança no primeiro comando que falha. */
   rodar(sql: string): Saida[];
+  /**
+   * Um SELECT com parâmetros (`?`), como um programa faz: cada linha vira um
+   * objeto com as colunas. É o que `require('./banco')` do servidor
+   * simulado entrega ao aluno — e é assim que se ensina a nunca concatenar
+   * valores no SQL.
+   */
+  consultar(sql: string, params?: Valor[]): Array<Record<string, Valor>>;
+  /** INSERT, UPDATE ou DELETE com parâmetros: quantas linhas mexeu, e o id do último INSERT. */
+  executar(sql: string, params?: Valor[]): { linhas: number; ultimoId: number };
   fechar(): void;
+}
+
+/** Uma tabela como está agora: para a tela mostrar o banco depois do servidor rodar. */
+export interface RetratoDeTabela {
+  nome: string;
+  columns: string[];
+  values: Valor[][];
+}
+
+/**
+ * As tabelas do banco com as linhas que têm, na ordem em que foram criadas.
+ * Até `limite` linhas por tabela: o retrato é para olhar, não para paginar.
+ */
+export function retratoDasTabelas(banco: Banco, limite = 30): RetratoDeTabela[] {
+  const nomes = banco
+    .consultar("SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%' ORDER BY rowid")
+    .map((linha) => String(linha.name));
+  return nomes.map((nome) => {
+    const saidas = banco.rodar(`SELECT * FROM "${nome.replace(/"/g, '""')}" LIMIT ${limite}`);
+    const tabela = saidas[0];
+    if (!tabela || tabela.tipo !== 'tabela') return { nome, columns: [], values: [] };
+    return { nome, columns: tabela.columns, values: tabela.values };
+  });
 }
 
 export type AbrirBanco = () => Banco;
@@ -150,6 +182,14 @@ export interface BancoSqlJs {
     getRemainingSQL(): string;
   };
   getRowsModified(): number;
+  /** Um comando preparado, para consultar com parâmetros. */
+  prepare(sql: string): {
+    bind(params: Array<number | string | null>): boolean;
+    step(): boolean;
+    getAsObject(): Record<string, number | string | Uint8Array | null>;
+    free(): boolean;
+  };
+  run(sql: string, params?: Array<number | string | null>): unknown;
   close(): void;
 }
 
@@ -211,6 +251,38 @@ export function adaptarSqlJs(db: BancoSqlJs): Banco {
         }
       }
       return saidas;
+    },
+    consultar(sql, params = []) {
+      const comando = db.prepare(sql);
+      try {
+        comando.bind(params);
+        const linhas: Array<Record<string, Valor>> = [];
+        while (comando.step()) {
+          if (linhas.length >= MAX_LINHAS) break;
+          const objeto = comando.getAsObject();
+          const linha: Record<string, Valor> = {};
+          for (const chave of Object.keys(objeto)) {
+            const v = objeto[chave];
+            linha[chave] = v instanceof Uint8Array ? `[blob de ${v.length} bytes]` : v;
+          }
+          linhas.push(linha);
+        }
+        return linhas;
+      } finally {
+        comando.free();
+      }
+    },
+    executar(sql, params = []) {
+      db.run(sql, params);
+      const linhas = db.getRowsModified();
+      const id = db.prepare('SELECT last_insert_rowid() AS id');
+      try {
+        id.step();
+        const ultimoId = Number(id.getAsObject().id ?? 0);
+        return { linhas, ultimoId };
+      } finally {
+        id.free();
+      }
     },
     fechar() {
       db.close();

@@ -55,6 +55,8 @@ export interface SandboxRunResult {
    * registrou em `globalThis.__cfTrocas`.
    */
   trocas?: unknown[];
+  /** As tabelas do banco do exercício depois do programa, quando ele tem banco (o worker preenche). */
+  tabelas?: unknown[];
 }
 
 /** Teto de logs: um laço que imprime sem parar não pode estourar a memória. */
@@ -493,6 +495,13 @@ function expressaoDePropriedade(propriedade: SandboxProperty): string {
 
 export interface OpcoesDoPrograma {
   /**
+   * Valores que o programa enxerga pelo nome, como se fossem globais — é
+   * assim que o banco do exercício (`__cfBancoNativo`) chega ao prelúdio do
+   * servidor simulado sem passar por `globalThis`, que o código do aluno
+   * também vê e que não existe do mesmo jeito no Node do CI.
+   */
+  globais?: Record<string, unknown>;
+  /**
    * Roda os testes um depois do outro, e não todos ao mesmo tempo.
    *
    * No sandbox de Worker os testes são independentes e correm em paralelo.
@@ -591,8 +600,9 @@ export async function runProgram(
   console.error = capture;
 
   try {
-    const program = new Function(buildProgram(code, tests, properties, opcoes));
-    const testResults = (await program()) as SandboxTestResult[];
+    const nomes = Object.keys(opcoes.globais ?? {});
+    const program = new Function(...nomes, buildProgram(code, tests, properties, opcoes));
+    const testResults = (await program(...nomes.map((n) => opcoes.globais![n]))) as SandboxTestResult[];
 
     await esperarAgendados(() => logs.length);
 
