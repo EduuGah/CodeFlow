@@ -974,4 +974,44 @@ export const concepts: Concept[] = [
     prerequisites: ['git-commit'],
     tags: ['git'],
   },
+  {
+    id: 'terminal-shell',
+    title: 'O shell e o caminho',
+    summary:
+      'O shell lê comandos e os roda, sempre a partir de um diretório atual (`pwd`); `cd` muda esse diretório, `ls` lista o que existe; caminho absoluto começa na raiz, relativo parte de onde você está; `.` é o diretório atual, `..` o pai, `~` a casa do usuário.',
+    prerequisites: ['funcoes'],
+    tags: ['terminal'],
+  },
+  {
+    id: 'terminal-env',
+    title: 'Variáveis de ambiente',
+    summary:
+      'Um valor que vive fora do código, definido pelo shell ou pela plataforma e lido pelo programa (`process.env`); permite o mesmo código rodar diferente em ambientes diferentes, sem editar nada; PATH é a lista de pastas onde o shell procura um comando, na ordem — a primeira que tiver o comando vence.',
+    prerequisites: ['terminal-shell'],
+    tags: ['terminal'],
+  },
+  {
+    id: 'terminal-scripts',
+    title: 'Scripts do package.json na prática',
+    summary:
+      '`npm run nome` procura `nome` em `scripts` e roda o comando associado; `pre<nome>` e `post<nome>` rodam automaticamente antes e depois, se existirem; `&&` encadeia comandos e para no primeiro que falhar (código de saída diferente de zero); scripts guardam o comando certo uma vez, para todo mundo do projeto usar igual.',
+    prerequisites: ['eng-dependencias', 'terminal-env'],
+    tags: ['terminal'],
+  },
+  {
+    id: 'terminal-erros',
+    title: 'O que ler numa saída de erro',
+    summary:
+      'Código de saída zero é sucesso, qualquer outro é falha; um stack trace lista de onde o erro foi lançado até quem chamou por cima — a primeira linha do seu próprio código (não de uma biblioteca) é onde procurar; ler a mensagem inteira antes de tentar corrigir, em vez de adivinhar pelo começo dela.',
+    prerequisites: ['depuracao', 'terminal-shell'],
+    tags: ['terminal'],
+  },
+  {
+    id: 'terminal-fechamento',
+    title: 'Diagnosticar um comando que falhou',
+    summary:
+      'Um diagnóstico de verdade combina as três habilidades: o código de saída diz se falhou, o stack trace aponta onde, e a variável de ambiente ausente costuma ser a causa mais comum e mais rápida de conferir — nessa ordem, uma coisa corrigida por vez.',
+    prerequisites: ['terminal-scripts', 'terminal-erros'],
+    tags: ['terminal'],
+  },
 ];

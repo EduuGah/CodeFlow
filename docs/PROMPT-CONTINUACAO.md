@@ -157,18 +157,20 @@ o banco só guarda fatos, e "viu" não é um).
 
 ## 5. O que ESTÁ SENDO FEITO agora
 
-**Nada em andamento.** O último commit fecha a trilha de Git e Equipe (veja
-B10) — 6 aulas, simuladas em JavaScript comum porque não há motor de Git —,
-o CI está verde, e a árvore está limpa. Você começa num ponto estável.
+**Nada em andamento.** O último commit fecha a trilha de Terminal e
+Ferramentas (veja B11) — 5 aulas, simuladas em JavaScript comum porque não
+há motor de terminal —, o CI está verde, e a árvore está limpa. Você
+começa num ponto estável.
 
-O que falta na Fase 5: só Terminal e Ferramentas (5 aulas), que não exige
-motor novo.
+**A Fase 5 está completa**: Engenharia, Testes, Git e Terminal, as quatro
+trilhas. O que falta no roadmap inteiro: a Fase 6 (Python) e os três
+capstones da Fase 7.
 
 ## 6. O que VAI SER FEITO — e a decisão que precisa ser tomada
 
-O projeto está em **~67%**. A porcentagem por aula (91 de 135, 67%) anda
-junto com os motores: 5 dos 7 prontos, e os dois que faltam são o servidor
-simulado (Node) e o Pyodide.
+O projeto está em **~89%** por aula (133 de ~150 previstas). As Fases 1 a
+5 e 7 estão completas; falta só a Fase 6 (Python, o Pyodide — o único
+motor que falta) e os três capstones do projeto final.
 
 Há três caminhos, e eles **não são equivalentes**:
 
@@ -356,6 +358,24 @@ projeto: seis trilhas desenroladas numa coluna eram uma parede.
   squash de commits).
 - `e2e/git.spec.ts` conclui cada aula no Chromium e no celular.
 
+### B11) A trilha de Terminal e Ferramentas — feito (2026-09-21)
+
+- `track-terminal`, "Terminal e Ferramentas", 5 aulas em dois blocos ("Se
+  localizar"; "Rodar e entender o que deu errado"), 25 exercícios, na
+  sétima etapa do percurso, "A profissão", ao lado de Git e de Testes —
+  **fecha a Fase 5 inteira**.
+- Como Git, sem motor de terminal no sandbox: os exercícios simulam o
+  raciocínio em JavaScript comum — resolver um caminho relativo
+  (`resolverCaminho`, a mesma lógica de `require('./x')`), ler uma
+  variável de ambiente com valor padrão (`valorOuPadrao`, cuidando da
+  diferença entre `!== undefined` e `||`), montar a ordem de scripts
+  `pre`/`post` do `package.json` (`scriptsNaOrdem`), achar a primeira
+  linha de um stack trace que é do próprio código
+  (`primeiraLinhaDoProprioCodigo`), e uma aula de fechamento que
+  diagnostica um comando que falhou combinando as três anteriores
+  (`diagnosticar`). Nenhum tipo de exercício novo.
+- `e2e/terminal.spec.ts` conclui cada aula no Chromium e no celular.
+
 ### C) Mais projetos com o motor atual — barato, sem currículo novo
 
 Existem 7 projetos e o roadmap prevê ~30. Eles usam a mecânica que já existe e
@@ -363,13 +383,12 @@ dão prática aplicada. É o caminho de menor risco e menor retorno.
 
 ### Recomendação
 
-A, B, B2, B3, B4, B5, B6, B7, B8, B9 e B10 estão feitos: as Fases 1 a 4
-completas, a Fase 5 com engenharia, testes e git prontos (falta só
-Terminal), e a Fase 7 — o projeto final, o pedido central do dono do
-projeto — está completa, com o motor 7 inteiro. O que vem agora: os **três
-capstones** da Fase 7 (a plataforma existe; falta decidir a forma), o que
-falta da **Fase 5** (Terminal e Ferramentas — 5 aulas) ou a Fase 6 (Python,
-o Pyodide). Pergunte ao dono do projeto. Ou C, ou os itens de plataforma que
+A, B, B2 a B11 estão feitos: as Fases 1 a 5 e 7 completas — a Fase 5
+(Engenharia, Testes, Git, Terminal) fechou inteira, e a Fase 7, o projeto
+final, o pedido central do dono do projeto, está completa com o motor 7
+inteiro. O que vem agora: os **três capstones** da Fase 7 (a plataforma
+existe; falta decidir a forma) ou a Fase 6 (Python, o Pyodide — o último
+motor). Pergunte ao dono do projeto. Ou C, ou os itens de plataforma que
 ficaram (mapa de tópicos e busca, tutor com IA, painel do aluno). Antes de
 qualquer um, vale o que só o dono do projeto pode fazer: usar o aplicativo
 publicado num telefone de verdade, inclusive uma aula de Node.
@@ -383,8 +402,8 @@ fase ou C — são investimentos grandes o bastante para a escolha ser dele.
 
 ```bash
 npm run typecheck   # inclui e2e/ e playwright.config.ts
-npm test            # 2.946 testes
-npm run test:e2e    # 390 no navegador (antes: npx playwright install chromium)
+npm test            # 3.017 testes
+npm run test:e2e    # 400 no navegador (antes: npx playwright install chromium)
 npm run build
 ```
 

@@ -6,7 +6,7 @@ que conclui uma fase.
 
 ## Onde estamos
 
-**Fases 1, 2, 3, 4 e 7 de 8 concluídas · Fase 5: Engenharia 8/8, Testes 8/8, Git 6/6 · publicado**
+**Fases 1, 2, 3, 4, 5 e 7 de 8 concluídas · publicado**
 
 ```
 Fase 0  Fundamentos e lógica      ██████████████████████  13/13  pronto
@@ -16,20 +16,29 @@ Fase 1  JavaScript real          ███████████████�
 Fase 2  A página                 ██████████████████████  26/26  pronto
 Fase 3  Tipos e componentes      ██████████████████████  24/24  pronto
 Fase 4  Back-end e dados         ██████████████████████  20/20  pronto
-Fase 5  Profissionalização       ████████████████████░░░  22/27  engenharia, testes e git prontos; falta terminal
+Fase 5  Profissionalização       ██████████████████████  27/27  pronto
 Fase 6  Python                   ░░░░░░░░░░░░░░░░░░░░░░   0/10  motor 6
 Fase 7  Projeto final            ██████████████████████   5/5   pronto; motor 7 inteiro; faltam os capstones
 ```
 
 | | Hoje | Previsto | Feito |
 | --- | ---: | ---: | ---: |
-| Aulas | **128** | ~150 | 85% |
-| Exercícios | **732** | ~800 | 92% |
+| Aulas | **133** | ~150 | 89% |
+| Exercícios | **757** | ~800 | 95% |
 | Tipos de exercício | **10** | 13 | 77% |
 | Motores de execução | **7** | 8 | 88% |
 | Projetos | **7** | ~20 | 35% |
 
-**Último trabalho** (2026-09-21, tarde): a trilha **Git e Equipe**, inteira
+**Último trabalho** (2026-09-21, noite): a trilha **Terminal e
+Ferramentas**, inteira — 5 aulas e 25 exercícios sobre o shell e caminhos,
+variáveis de ambiente, os scripts do `package.json` na prática, o que ler
+numa saída de erro, e uma aula de fechamento que diagnostica um comando
+que falhou combinando as três anteriores. `track-terminal`, mesma etapa do
+percurso ("A profissão"). Fecha a **Fase 5 inteira** — Engenharia, Testes,
+Git e Terminal, as quatro trilhas. Como Git, sem motor: os exercícios
+simulam caminhos, variáveis de ambiente, scripts e stack traces como texto
+e objetos JavaScript comuns. `e2e/terminal.spec.ts` conclui cada aula.
+Antes (2026-09-21, tarde): a trilha **Git e Equipe**, inteira
 — 6 aulas e 33 exercícios sobre commit atômico, branch por assunto, pull
 request e revisão, conflito e seus marcadores, squash e a regra de nunca
 reescrever histórico compartilhado, e o que nunca deveria entrar no
@@ -612,10 +621,23 @@ nenhum novo.
 | 5 | Histórico que conta uma história: para quem o `git log` é escrito; squash junta os passos de um trabalho; a regra de ouro — nunca reescrever histórico já compartilhado |
 | 6 | O que não entra no repositório: gerado, secreto ou da máquina não é código-fonte; padrões do `.gitignore`; um segredo já commitado se resolve trocando a chave, não só ignorando o arquivo |
 
-**Terminal e ferramentas — 0 de 5.** O shell, caminhos, os scripts do
-`package.json` na prática, variáveis de ambiente no terminal, o que ler numa
-saída de erro. Idem: sem motor. (O `package.json`, o semver e o lockfile já
-são a aula 7 de Engenharia.)
+**Terminal e ferramentas — 5 de 5** (2026-09-21). Trilha própria,
+`track-terminal`, em JavaScript puro — como Git, sem motor de terminal de
+verdade: os exercícios simulam caminhos, variáveis de ambiente, scripts e
+stack traces em JavaScript comum. Mesma etapa do percurso que Git e
+Testes, "A profissão". O `package.json`, o semver e o lockfile já são a
+aula 7 de Engenharia; esta trilha cobre o resto — navegar, configurar,
+rodar os scripts do dia a dia, e ler o que deu errado.
+
+| Aula | Assunto |
+| --- | --- |
+| 1 | O shell e o caminho: `pwd`/`cd`/`ls`; absoluto (começa em `/`) contra relativo (parte de onde você está); `.`, `..`, `~`; resolver um caminho relativo, a mesma lógica de `require('./x')` |
+| 2 | Variáveis de ambiente: definidas por fora, lidas por `process.env`; o mesmo código roda diferente por ambiente; ler com `!== undefined`, não `\|\|`, para não confundir "ausente" com "vazio"; PATH como lista ordenada de pastas |
+| 3 | Scripts do package.json na prática: `npm run` procura e roda; `pre`/`post` entram sozinhos; `&&` encadeia e para na primeira falha |
+| 4 | O que ler numa saída de erro: código de saída 0 é sucesso; um stack trace aponta de onde para quem chamou; a primeira linha do próprio código é onde procurar, não a de uma biblioteca |
+| 5 | Diagnosticar um comando que falhou: junta as três anteriores — código de saída diz que falhou, stack trace aponta onde, variável de ambiente ausente é a causa mais comum e mais barata de conferir |
+
+Fecha a Fase 5 inteira.
 
 ### Fase 6 — Python · 10 aulas
 Motor **6: Pyodide, ~10 MB**. Por último entre os motores pelo peso, não
@@ -724,8 +746,8 @@ Um por fase, cada um preso ao motor dela:
 
 ## Sobre tamanho
 
-As 128 aulas de hoje levaram bastante tempo para ficar no padrão do projeto.
-As ~15 restantes (5 de Terminal, 10 de Python), mais os três
+As 133 aulas de hoje levaram bastante tempo para ficar no padrão do projeto.
+As ~10 restantes (Python), mais os três
 capstones do projeto final, são muitas vezes esse trabalho. Por isso a
 unidade é a fase: cada uma termina numa versão do produto que dá para usar.
 O roadmap escolhe a ordem; não promete prazo.

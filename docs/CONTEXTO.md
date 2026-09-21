@@ -33,14 +33,14 @@ Números lidos do catálogo, não de memória.
 
 | | |
 | --- | --- |
-| Trilhas | 12 — Fundamentos de JavaScript (20 aulas), Lógica (3), Como a Web Funciona (8), A Página (26), TypeScript (10), React (14), SQL e Bancos de Dados (10), Node e APIs (10), Engenharia: Organizar um Projeto (8), Projeto Final (5), Testes e Qualidade (8), Git e Equipe (6) |
-| Aulas | 128, somando 3.666 minutos, em blocos por assunto (`Track.sections`) |
-| Exercícios | 732, em 10 tipos — 195 de múltipla escolha, 139 de código, 86 de lacuna, 79 de prever saída, 62 de ordenar passos, 55 de encontrar o bug, 46 de SQL, 41 de servidor, 14 de refatorar, 15 de escrever o teste. 78 exercícios de página (`runtime: 'iframe'`), 42 de componente React (a aula é `language: 'react'`), 16 com trechos de tipo (`typeTests`). **Toda aula tem ao menos um dos quatro tipos de prática de dev** |
-| Verificação | 924 casos fixos + 59 propriedades + 71 verificações de SQL (por linhas devolvidas) |
+| Trilhas | 13 — Fundamentos de JavaScript (20 aulas), Lógica (3), Como a Web Funciona (8), A Página (26), TypeScript (10), React (14), SQL e Bancos de Dados (10), Node e APIs (10), Engenharia: Organizar um Projeto (8), Projeto Final (5), Testes e Qualidade (8), Git e Equipe (6), Terminal e Ferramentas (5) |
+| Aulas | 133, somando 3.791 minutos, em blocos por assunto (`Track.sections`) |
+| Exercícios | 757, em 10 tipos — 203 de múltipla escolha, 144 de código, 86 de lacuna, 82 de prever saída, 66 de ordenar passos, 60 de encontrar o bug, 46 de SQL, 41 de servidor, 14 de refatorar, 15 de escrever o teste. 78 exercícios de página (`runtime: 'iframe'`), 42 de componente React (a aula é `language: 'react'`), 16 com trechos de tipo (`typeTests`). **Toda aula tem ao menos um dos quatro tipos de prática de dev** |
+| Verificação | 941 casos fixos + 59 propriedades + 71 verificações de SQL (por linhas devolvidas) |
 | Projetos | 7, com 22 critérios de aceitação |
-| Conceitos | 124, com grafo de pré-requisitos |
+| Conceitos | 130, com grafo de pré-requisitos |
 | Flashcards | 22 |
-| Testes | 2.946 de unidade + 390 de navegador |
+| Testes | 3.017 de unidade + 400 de navegador |
 | Pacote | 2.385 kB (667 kB comprimido) no chunk principal — o conteúdo vai junto; o Monaco são mais 3.362 kB (869 kB) num chunk à parte, baixado só quando o primeiro editor monta, e o worker de TypeScript (7 MB) só quando um modelo JS/TS abre. O motor de TypeScript não acrescentou arquivo; o de React acrescentou um chunk de 143 kB (47 kB) com o React e o ReactDOM como texto, baixado só por um exercício de React; o de SQL acrescentou o worker (49 kB) e o SQLite em WebAssembly (658 kB), baixados só por um exercício de SQL |
 
 ## 4. Decisões que não devem ser desfeitas sem motivo forte
@@ -708,7 +708,7 @@ fazer `require('./modulo')` para ler o estado do módulo (a aula 8 prova o
 `e2e/node.spec.ts` conclui cada aula no Chromium e prova o painel de pedidos
 e respostas. A Fase 4 está completa.
 
-**Fase 5 — engenharia, testes e git prontos (2026-09-21).** A trilha
+**Fase 5 — completa (2026-09-21).** A trilha
 **Engenharia: Organizar um Projeto** tem as 8 aulas e 48 exercícios (14 de
 refatorar no catálogo, 6 aqui), abrindo a quinta etapa do percurso, "O
 ofício"; `e2e/engenharia.spec.ts` conclui cada aula no Chromium. A trilha
@@ -725,8 +725,14 @@ na mesma etapa, "A profissão"; sem motor de Git de verdade no sandbox, os
 exercícios simulam o raciocínio (commit, branch, conflito, `.gitignore`)
 em JavaScript comum, com os tipos já existentes — `code`, `find-bug`,
 `multiple-choice`, `order-steps`, `predict-output`, e um `write-test` sobre
-uma função de squash. `e2e/git.spec.ts` conclui cada aula no Chromium.
-Falta da fase: Terminal (5) — sem motor novo.
+uma função de squash. `e2e/git.spec.ts` conclui cada aula no Chromium. A
+trilha **Terminal e Ferramentas** tem as 5 aulas e 25 exercícios, mesma
+etapa; shell e caminhos, variáveis de ambiente, scripts do `package.json`,
+leitura de saída de erro, e uma aula de fechamento que diagnostica um
+comando que falhou combinando as três anteriores. Também sem motor —
+caminhos, ambiente e stack traces simulados em JavaScript comum.
+`e2e/terminal.spec.ts` conclui cada aula no Chromium. **A Fase 5 está
+completa**: as quatro trilhas — Engenharia, Testes, Git, Terminal.
 
 **Fase 7 — o projeto final está completo (2026-09-21).** A trilha
 **Projeto Final: A Aplicação Inteira** (`track-projeto`, sexta etapa do

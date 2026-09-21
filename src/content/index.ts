@@ -30,6 +30,7 @@ import { trackEngenharia } from './tracks/engenharia';
 import { trackProjeto } from './tracks/projeto';
 import { trackTestes } from './tracks/testes';
 import { trackGit } from './tracks/git';
+import { trackTerminal } from './tracks/terminal';
 import { lessonVariaveis } from './lessons/js-01-variaveis';
 import { lessonTiposEOperadores } from './lessons/js-02-tipos-e-operadores';
 import { lessonCondicoes } from './lessons/js-03-condicoes';
@@ -158,6 +159,11 @@ import { lessonGitPullRequestERevisao } from './lessons/git-03-pull-request-e-re
 import { lessonGitConflitoSemPanico } from './lessons/git-04-conflito-sem-panico';
 import { lessonGitHistoricoQueContaUmaHistoria } from './lessons/git-05-historico-que-conta-uma-historia';
 import { lessonGitGitignore } from './lessons/git-06-gitignore';
+import { lessonTerminalShellECaminhos } from './lessons/terminal-01-shell-e-caminhos';
+import { lessonTerminalVariaveisDeAmbiente } from './lessons/terminal-02-variaveis-de-ambiente';
+import { lessonTerminalScriptsDoPackageJson } from './lessons/terminal-03-scripts-do-package-json';
+import { lessonTerminalLerASaidaDeErro } from './lessons/terminal-04-ler-a-saida-de-erro';
+import { lessonTerminalDiagnosticar } from './lessons/terminal-05-diagnosticar';
 import { projetoImc } from './projects/js-imc';
 import { projetoConversor } from './projects/js-conversor';
 import { projetoBoletim } from './projects/js-boletim';
@@ -300,6 +306,11 @@ const lessons: Lesson[] = [
   lessonGitConflitoSemPanico,
   lessonGitHistoricoQueContaUmaHistoria,
   lessonGitGitignore,
+  lessonTerminalShellECaminhos,
+  lessonTerminalVariaveisDeAmbiente,
+  lessonTerminalScriptsDoPackageJson,
+  lessonTerminalLerASaidaDeErro,
+  lessonTerminalDiagnosticar,
 ];
 const projects: Project[] = [
   projetoImc,
@@ -323,6 +334,7 @@ const tracks: Track[] = [
   trackProjeto,
   trackTestes,
   trackGit,
+  trackTerminal,
 ];
 
 /**
