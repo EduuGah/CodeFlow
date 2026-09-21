@@ -308,8 +308,16 @@ projeto: seis trilhas desenroladas numa coluna eram uma parede.
   com `?`, Promises), `ServerExercise.banco`, `runProgram({ globais })`,
   `retratoDasTabelas`, a tela com `banco.sql` antes e "O banco depois". Prazo
   de execução com banco: 8 s (`EXECUTION_COM_BANCO_MS`).
-- Falta: a ponte página → API (o `fetch` do iframe indo ao worker que mantém
-  o servidor vivo, e o equivalente no jsdom do CI) e as aulas 4 e 5.
+- A segunda metade (mesmo dia): `worker-servico.ts` (o protocolo servir /
+  pedir / trocas nos dois workers), `abrirServidorVivo` em `sandbox.ts`,
+  `subirServidor` em `servidor-core.ts` (o último `app` e o `pedir` ficam em
+  `globalThis`), a `PONTE` em `pagina-core.ts` (o `fetch` do iframe que manda
+  o pedido ao pai por `postMessage` e recebe a resposta pelo id),
+  `executarPagina`/`rodarPaginaNoJsdom` com `servidor`, e
+  `CodeExercise.servidor` — a tela mostra o servidor antes e os pedidos da
+  página depois. Aulas 4 e 5 escritas; `e2e/projeto.spec.ts` prova a ponte no
+  Chromium. Os arquivos da API ficam em `lessons/proj-servidor.ts`.
+- Faltam os três capstones (a lista de tarefas completa, a loja, o blog).
 
 ### C) Mais projetos com o motor atual — barato, sem currículo novo
 
@@ -319,11 +327,11 @@ dão prática aplicada. É o caminho de menor risco e menor retorno.
 ### Recomendação
 
 A, B, B2, B3, B4, B5, B6, B7 e B8 estão feitos: as Fases 1 a 4 completas, a
-Fase 5 começou pela engenharia, e a Fase 7 (o projeto final, o pedido central
-do dono do projeto) está com o banco e a API prontos. O próximo passo é a
-**segunda metade do motor 7** — a página do iframe fazendo `fetch` para o
-servidor do aluno no worker — e as aulas 4 e 5 do projeto. Depois, o resto
-da Fase 5 (Testes e qualidade, Git e equipe, Terminal) ou os capstones. Ou C, ou os itens de plataforma que ficaram (mapa de tópicos e busca,
+Fase 5 começou pela engenharia, e a Fase 7 — o projeto final, o pedido
+central do dono do projeto — está completa, com o motor 7 inteiro. O que vem
+agora: os **três capstones** da Fase 7 (a plataforma existe; falta decidir a
+forma), o resto da **Fase 5** (Testes e qualidade, Git e equipe, Terminal) ou
+a Fase 6 (Python, o Pyodide). Pergunte ao dono do projeto. Ou C, ou os itens de plataforma que ficaram (mapa de tópicos e busca,
 tutor com IA, painel do aluno). Antes de qualquer um, vale o que só o dono
 do projeto pode fazer: usar o aplicativo publicado num telefone de verdade,
 inclusive uma aula de Node.
@@ -337,8 +345,8 @@ fase ou C — são investimentos grandes o bastante para a escolha ser dele.
 
 ```bash
 npm run typecheck   # inclui e2e/ e playwright.config.ts
-npm test            # 2.746 testes
-npm run test:e2e    # 352 no navegador (antes: npx playwright install chromium)
+npm test            # 2.785 testes
+npm run test:e2e    # 358 no navegador (antes: npx playwright install chromium)
 npm run build
 ```
 

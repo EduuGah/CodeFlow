@@ -122,10 +122,29 @@ export interface ExerciseProperty {
 }
 
 /** Escreve código e passa nos testes. */
+/**
+ * O servidor por trás de uma página (motor 7): o programa de Node, os
+ * arquivos que ele requer, o ambiente e o banco. Sobe antes de a página
+ * rodar e fica de pé; cada `fetch` da página vai a ele.
+ */
+export interface ServidorDaPagina {
+  /** O `servidor.js`: o mesmo código de um exercício de servidor. */
+  code: string;
+  arquivos?: Record<string, string>;
+  env?: Record<string, string>;
+  /** O SQL que monta o banco; com ele, `require('./banco')` existe no servidor. */
+  banco?: string;
+}
+
 export interface CodeExercise extends ExerciseBase {
   type: 'code';
   /** Padrão `worker`. Com `iframe`, o código é uma página e os testes veem o DOM. */
   runtime?: Runtime;
+  /**
+   * Só com `runtime: 'iframe'`: a página do aluno chama este servidor pelo
+   * `fetch`. É a aplicação inteira — página, API e banco — num exercício.
+   */
+  servidor?: ServidorDaPagina;
   initialCode: string;
   tests: TestCase[];
   /**

@@ -1,103 +1,6 @@
 import { TAREFAS } from '../bancos/tarefas';
 import type { Lesson } from '../types';
-
-/**
- * Os arquivos do projeto que a API usa, prontos das aulas anteriores: o
- * repositório (aula 2), os erros (trilha de Node) e, a partir do segundo
- * exercício, o login que lê a sessão no banco (o primeiro exercício desta
- * aula). O aluno escreve as rotas.
- */
-const REPOSITORIO = `// dados/tarefas.js — o único arquivo que sabe SQL (aula 2).
-const banco = require('../banco');
-
-async function listarDe(usuarioId) {
-  return banco.consultar('SELECT * FROM tarefas WHERE usuario_id = ? ORDER BY id', [usuarioId]);
-}
-
-async function buscar(id) {
-  const linhas = await banco.consultar('SELECT * FROM tarefas WHERE id = ?', [id]);
-  return linhas[0] ?? null;
-}
-
-async function criar({ titulo, usuarioId }) {
-  const { ultimoId } = await banco.executar(
-    "INSERT INTO tarefas (titulo, usuario_id, criada_em) VALUES (?, ?, date('now'))",
-    [titulo, usuarioId]
-  );
-  return buscar(ultimoId);
-}
-
-async function alterar(id, { titulo, feita }) {
-  if (titulo !== undefined) await banco.executar('UPDATE tarefas SET titulo = ? WHERE id = ?', [titulo, id]);
-  if (feita !== undefined) await banco.executar('UPDATE tarefas SET feita = ? WHERE id = ?', [feita ? 1 : 0, id]);
-  return buscar(id);
-}
-
-async function remover(id) {
-  const { linhas } = await banco.executar('DELETE FROM tarefas WHERE id = ?', [id]);
-  return linhas > 0;
-}
-
-module.exports = { listarDe, buscar, criar, alterar, remover };
-`;
-
-const ERROS = `class ErroHttp extends Error {
-  constructor(status, mensagem) {
-    super(mensagem);
-    this.status = status;
-  }
-}
-
-function tratarErros(erro, req, res, next) {
-  const status = erro.status || 500;
-  res.status(status).json({ erro: status === 500 ? 'Erro interno' : erro.message });
-}
-
-module.exports = { ErroHttp, tratarErros };
-`;
-
-const AUTH = `// auth.js — o token vira pessoa pela tabela sessoes.
-const banco = require('./banco');
-
-async function exigirLogin(req, res, next) {
-  const token = (req.headers.authorization || '').replace('Bearer ', '');
-  const linhas = await banco.consultar(
-    'SELECT u.id, u.nome FROM sessoes s JOIN usuarios u ON u.id = s.usuario_id WHERE s.token = ?',
-    [token]
-  );
-  if (linhas.length === 0) return res.status(401).json({ erro: 'Não autenticado' });
-  req.usuario = linhas[0];
-  next();
-}
-
-module.exports = { exigirLogin };
-`;
-
-const CABECALHO = `const express = require('express');
-const repositorio = require('./dados/tarefas');
-const { ErroHttp, tratarErros } = require('./erros');
-const { exigirLogin } = require('./auth');
-
-const app = express();
-app.use(express.json());
-
-// A API entrega feita como booleano; o banco guarda 0/1.
-function paraApi(tarefa) {
-  return { id: tarefa.id, titulo: tarefa.titulo, feita: tarefa.feita === 1, criadaEm: tarefa.criada_em };
-}
-
-async function tarefaDoUsuario(id, usuario) {
-  const tarefa = await repositorio.buscar(Number(id));
-  if (!tarefa) throw new ErroHttp(404, 'Tarefa não encontrada');
-  if (tarefa.usuario_id !== usuario.id) throw new ErroHttp(403, 'Sem permissão');
-  return tarefa;
-}
-`;
-
-const RODAPE = `
-app.use(tratarErros);
-app.listen(3000);
-`;
+import { ARQUIVOS_DA_API, CABECALHO, RODAPE } from './proj-servidor';
 
 const ANA = { Authorization: 'Bearer token-da-ana' };
 const BIA = { Authorization: 'Bearer token-da-bia' };
@@ -283,7 +186,7 @@ app.listen(3000);`,
         difficulty: 'intermediario',
         tags: ['projeto', 'api', 'rotas'],
         banco: TAREFAS.sql,
-        arquivos: { './dados/tarefas.js': REPOSITORIO, './erros.js': ERROS, './auth.js': AUTH },
+        arquivos: ARQUIVOS_DA_API,
         initialCode: `${CABECALHO}
 // GET /tarefas
 
@@ -344,7 +247,7 @@ ${RODAPE}`,
         difficulty: 'avancado',
         tags: ['projeto', 'api', 'patch', 'delete'],
         banco: TAREFAS.sql,
-        arquivos: { './dados/tarefas.js': REPOSITORIO, './erros.js': ERROS, './auth.js': AUTH },
+        arquivos: ARQUIVOS_DA_API,
         initialCode: `${CABECALHO}
 app.get('/tarefas', exigirLogin, async (req, res) => {
   res.json((await repositorio.listarDe(req.usuario.id)).map(paraApi));

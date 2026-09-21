@@ -66,7 +66,8 @@ function Tabelas({ tabelas }: { tabelas: RetratoDeTabela[] }) {
   );
 }
 
-function Trocas({ trocas }: { trocas: Troca[] }) {
+/** Exportada: a página com servidor (motor 7) mostra os pedidos que o fetch dela fez. */
+export function Trocas({ trocas }: { trocas: Troca[] }) {
   return (
     <Card padding="none" className="overflow-hidden">
       <div className="flex items-baseline justify-between gap-3 border-b border-line px-4 py-2">

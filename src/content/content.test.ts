@@ -10,7 +10,8 @@ import { rodarPaginaNoJsdom } from '../client/lib/pagina-jsdom';
 import { compilarNoNode } from '../client/lib/typescript-node';
 import { executarSql, type AbrirBanco } from '../client/lib/sql-core';
 import { abrirBancoNoNode } from '../client/lib/sql-node';
-import { montarCodigoDoServidor } from '../client/lib/servidor-core';
+import { montarCodigoDoServidor, subirServidor, type ServidorVivo } from '../client/lib/servidor-core';
+import type { ServidorDaPagina } from './types';
 import { BANCOS } from './bancos';
 import { ETAPAS_DO_PERCURSO } from './percurso';
 import { formatarErros, verificarTrechos, type TrechoDeTipo } from '../client/lib/typescript-core';
@@ -86,6 +87,19 @@ async function executar(
   }
 
   if (motor.runtime === 'iframe') {
+    // Motor 7: o servidor do exercício sobe no Node, com o banco se houver,
+    // e a página do jsdom faz fetch para ele — o mesmo caminho do navegador.
+    const declarado = (exercise as { servidor?: ServidorDaPagina }).servidor;
+    if (declarado) {
+      const { servidor, fechar } = await subirServidorDoExercicio(declarado);
+      try {
+        if (servidor.error) return { logs: servidor.logs, testResults: [], error: `o servidor do exercício não subiu: ${servidor.error}` };
+        const r = await rodarPaginaNoJsdom(codigo, tests, 8000, { servidor });
+        return { logs: r.logs, testResults: r.testResults, error: r.error };
+      } finally {
+        fechar();
+      }
+    }
     const r = await rodarPaginaNoJsdom(codigo, tests);
     return { logs: r.logs, testResults: r.testResults, error: r.error };
   }
@@ -108,6 +122,20 @@ async function executar(
 
   const trechos = await verificarTrechos(compilar, codigo, motor.typeTests);
   return { ...resultado, testResults: [...resultado.testResults, ...trechos] };
+}
+
+/** O servidor de um exercício de página, de pé no Node, com o banco dele. */
+async function subirServidorDoExercicio(declarado: ServidorDaPagina): Promise<{ servidor: ServidorVivo; fechar: () => void }> {
+  const programa = montarCodigoDoServidor(declarado.code, { env: declarado.env, arquivos: declarado.arquivos });
+  if (declarado.banco === undefined) {
+    const servidor = await subirServidor(programa, (p) => runProgram(p, [], [], { sequencial: true }));
+    return { servidor, fechar: () => {} };
+  }
+  const abrir = await abrirBancoNoNode();
+  const banco = abrir();
+  banco.rodar(declarado.banco);
+  const servidor = await subirServidor(programa, (p) => runProgram(p, [], [], { sequencial: true, globais: { __cfBancoNativo: banco } }));
+  return { servidor, fechar: () => banco.fechar() };
 }
 
 /**
@@ -330,6 +358,22 @@ describe('exercícios de código', () => {
         resultado.testResults.length > 0 && resultado.testResults.every((t) => t.passed);
 
       expect(todosPassaram, 'o exercício está passando sem o aluno escrever nada').toBe(false);
+    }
+  );
+
+  const comServidor = codeExercises.filter(({ exercise }) => exercise.servidor !== undefined);
+
+  it.each(comServidor.map(({ exercise }) => [exercise.id, exercise] as const))(
+    '%s: o servidor por trás da página sobe sem erro',
+    async (_id, exercise) => {
+      // Um servidor que não sobe deixaria a página do aluno recebendo 503
+      // em tudo — e o aluno procuraria o defeito no lugar errado.
+      const { servidor, fechar } = await subirServidorDoExercicio(exercise.servidor!);
+      try {
+        expect(servidor.error, 'o servidor do exercício quebrou ao subir').toBeUndefined();
+      } finally {
+        fechar();
+      }
     }
   );
 

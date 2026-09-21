@@ -10,7 +10,7 @@ erro, não apenas se acertou.
 
 ## O que tem hoje
 
-**10 trilhas, 112 aulas, 660 exercícios em 10 tipos, 7 projetos, 108 conceitos.**
+**10 trilhas, 114 aulas, 671 exercícios em 10 tipos, 7 projetos, 110 conceitos.**
 Tudo é contado do catálogo; a página pública mostra os mesmos números.
 
 | Etapa | Trilha | Linguagem | Aulas | Exercícios |
@@ -24,11 +24,11 @@ Tudo é contado do catálogo; a página pública mostra os mesmos números.
 | 3 · As ferramentas do trabalho | SQL e Bancos de Dados | SQL | 10 | 59 |
 | 4 · A aplicação inteira | Node e APIs | Node | 10 | 64 |
 | 5 · O ofício | Engenharia: Organizar um Projeto | Node | 8 | 48 |
-| 6 · O projeto final | Projeto Final: A Aplicação Inteira | Node + SQL | 3 de 5 | 16 |
+| 6 · O projeto final | Projeto Final: A Aplicação Inteira | Node + SQL + página | 5 | 27 |
 
-**Os dez tipos de exercício**: escrever o código (126), múltipla escolha (170),
-prever a saída (71), completar a lacuna (86), ordenar os passos (52),
-encontrar o bug (49), escrever o teste (6), refatorar (13), consulta SQL (46)
+**Os dez tipos de exercício**: escrever o código (131), múltipla escolha (173),
+prever a saída (71), completar a lacuna (86), ordenar os passos (54),
+encontrar o bug (49), escrever o teste (7), refatorar (13), consulta SQL (46)
 e servidor (41). Toda aula tem ao menos um dos quatro "de prática de dev" —
 bug, ordenar, teste, refatorar — que pedem o conceito de outro ângulo.
 
@@ -42,7 +42,7 @@ bug, ordenar, teste, refatorar — que pedem o conceito de outro ângulo.
 | React | componentes TSX | compilado e montado no iframe da página, com o React embutido |
 | SQL | consultas e modelagem | o SQLite em WebAssembly (sql.js) num worker que fica vivo; a correção compara **linhas devolvidas** |
 | Servidor | Node e Express, e projetos de vários arquivos | um Node de mentira no sandbox: `require` (do Express pequeno e dos arquivos que o exercício fornece, resolvido como no Node — `../`, pasta com `index.js`), `process.env`, e um cliente HTTP para os testes; a tela mostra pedidos e respostas, e onde o arquivo do aluno mora |
-| Servidor com banco | a API sobre o SQLite | o mesmo sandbox com o SQLite do motor de SQL carregado no mesmo worker: `require('./banco')` dá `consultar` e `executar` com parâmetros, assíncronos; a tela mostra o SQL do banco antes e as tabelas depois |
+| Aplicação inteira | página + API + banco | o servidor simulado com o SQLite do motor de SQL no mesmo worker (`require('./banco')`, `consultar` e `executar` com parâmetros, assíncronos), de pé enquanto a página do aluno roda no iframe: cada `fetch` dela vai ao servidor por mensagens e volta como resposta; a tela mostra o servidor antes, e os pedidos que a página fez depois |
 
 **O que acompanha o aluno**: percurso em etapas com o ponto atual, revisão
 espaçada (Leitner), XP e níveis sem teto, sequência de dias com congelamento,
@@ -107,8 +107,8 @@ Redirect URLs.
 
 ```bash
 npm run typecheck   # tipos, incluindo os testes de navegador
-npm test            # 2.746 testes de unidade, propriedade e componente (Vitest)
-npm run test:e2e    # 352 testes de navegador (Playwright, Chromium, celular e desktop)
+npm test            # 2.785 testes de unidade, propriedade e componente (Vitest)
+npm run test:e2e    # 358 testes de navegador (Playwright, Chromium, celular e desktop)
 ```
 
 O E2E precisa do Chromium uma vez: `npx playwright install chromium`.
@@ -196,8 +196,9 @@ O roadmap completo, com o estado de cada aula e o custo de cada motor, está em
 4. **Mais linguagens**, uma por vez, cada uma com o motor que a roda no
    navegador.
 
-O projeto final já começou: o banco e a API (aulas 1 a 3) estão no ar; a
-página que chama a API e o fechamento vêm em seguida.
+O projeto final — página, API e banco, do desenho à publicação — está
+completo. Os capstones (a loja, o blog) usam a mesma arquitetura e vêm em
+seguida.
 
 ## Licença
 

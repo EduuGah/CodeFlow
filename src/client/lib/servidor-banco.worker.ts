@@ -5,7 +5,9 @@ import wasmUrl from 'sql.js/dist/sql-wasm-browser.wasm?url';
 
 import { runProgram } from './sandbox-core';
 import type { WorkerRequest, WorkerResponse } from './sandbox.worker';
-import { adaptarSqlJs, retratoDasTabelas } from './sql-core';
+import type { ServidorVivo } from './servidor-core';
+import { adaptarSqlJs, retratoDasTabelas, type Banco } from './sql-core';
+import { atenderServico, ehMensagemDeServico, type MensagemDeServico } from './worker-servico';
 
 /**
  * O worker do servidor **com banco** — o motor 7 pela metade que já existe.
@@ -40,31 +42,55 @@ function lockDownGlobals(): void {
   }
 }
 
-self.onmessage = async (event: MessageEvent<WorkerRequest & { banco: string }>) => {
-  const { code, tests, properties, sequencial, banco: setup } = event.data;
+/** Abre um banco novo com o SQL do exercício, ou devolve a frase do que falhou. */
+async function abrirBanco(setup: string): Promise<{ banco: Banco } | { error: string }> {
   let SQL: Awaited<typeof sqlite>;
   try {
     SQL = await sqlite;
   } catch (erro) {
-    self.postMessage({
-      logs: [],
-      testResults: [],
-      error: `O banco de dados não pôde ser carregado: ${erro instanceof Error ? erro.message : String(erro)}`,
-    } satisfies WorkerResponse);
-    return;
+    return { error: `O banco de dados não pôde ser carregado: ${erro instanceof Error ? erro.message : String(erro)}` };
   }
-
   const banco = adaptarSqlJs(new SQL.Database());
   try {
     banco.rodar(setup);
   } catch (erro) {
-    self.postMessage({
-      logs: [],
-      testResults: [],
-      error: `O banco do exercício não pôde ser montado: ${erro instanceof Error ? erro.message : String(erro)}`,
-    } satisfies WorkerResponse);
+    return { error: `O banco do exercício não pôde ser montado: ${erro instanceof Error ? erro.message : String(erro)}` };
+  }
+  return { banco };
+}
+
+// O servidor vivo do motor 7, quando este worker está servindo uma página.
+let servidor: ServidorVivo | null = null;
+
+self.onmessage = async (event: MessageEvent<(WorkerRequest & { banco: string }) | MensagemDeServico>) => {
+  if (ehMensagemDeServico(event.data)) {
+    const mensagem = event.data;
+    let globais: Record<string, unknown> = {};
+    if (mensagem.modo === 'servir') {
+      const aberto = await abrirBanco(mensagem.banco ?? '');
+      if ('error' in aberto) {
+        self.postMessage({ modo: 'servindo', logs: [], error: aberto.error } satisfies WorkerResponse);
+        return;
+      }
+      globais = { __cfBancoNativo: aberto.banco };
+      lockDownGlobals();
+    }
+    servidor = await atenderServico(
+      mensagem,
+      servidor,
+      (programa) => runProgram(programa, [], [], { sequencial: true, globais }),
+      (m) => self.postMessage(m satisfies WorkerResponse)
+    );
     return;
   }
+
+  const { code, tests, properties, sequencial, banco: setup } = event.data;
+  const aberto = await abrirBanco(setup);
+  if ('error' in aberto) {
+    self.postMessage({ logs: [], testResults: [], error: aberto.error } satisfies WorkerResponse);
+    return;
+  }
+  const banco = aberto.banco;
 
   self.postMessage('pronto' satisfies WorkerResponse);
   lockDownGlobals();

@@ -1,17 +1,26 @@
 import {
   interpretarMensagem,
+  interpretarPedido,
+  mensagemDeResposta,
   montarDocumento,
   PRAZO_DA_PAGINA_MS,
   SANDBOX_DO_IFRAME,
 } from './pagina-core';
 import { montarDocumentoReact } from './react-core';
 import type { ExecutionResult } from './sandbox';
+import type { PedidoAoServidor, RespostaDoServidor } from './servidor-core';
 import type { SandboxTest } from './sandbox-core';
 import { formatarErros } from './typescript-core';
 
 export interface OpcoesDaPagina {
   /** O código é um componente em TSX: compila e monta com o React embutido. */
   react?: boolean;
+  /**
+   * O servidor vivo do motor 7: cada `fetch` da página vira um pedido a
+   * ele, e a resposta volta para o iframe. Sem isto, o `fetch` responde
+   * pelo servidor de mentira de `window.__servidor`.
+   */
+  servidor?: { pedir(pedido: PedidoAoServidor): Promise<RespostaDoServidor> };
 }
 
 /**
@@ -25,7 +34,7 @@ async function prepararDocumento(
   tests: SandboxTest[],
   opcoes: OpcoesDaPagina
 ): Promise<{ documento: string } | { erro: ExecutionResult }> {
-  if (!opcoes.react) return { documento: montarDocumento(codigoDoAluno, tests) };
+  if (!opcoes.react) return { documento: montarDocumento(codigoDoAluno, tests, { comServidor: opcoes.servidor !== undefined }) };
 
   let compilacao;
   try {
@@ -100,6 +109,17 @@ export async function executarPagina(
 
     const aoReceber = (evento: MessageEvent) => {
       if (evento.source !== iframe.contentWindow) return;
+
+      // Um fetch da página: vai ao servidor vivo e a resposta volta ao iframe.
+      const pedido = interpretarPedido(evento.data);
+      if (pedido) {
+        if (!opcoes.servidor) return;
+        void opcoes.servidor.pedir(pedido.pedido).then((resposta) => {
+          if (!encerrado) iframe.contentWindow?.postMessage(mensagemDeResposta(pedido.id, resposta), '*');
+        });
+        return;
+      }
+
       const mensagem = interpretarMensagem(evento.data);
       if (!mensagem) return;
 

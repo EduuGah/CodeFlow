@@ -1,14 +1,15 @@
-import { getLessonsOfTrack } from '../src/content';
+import { getLesson, getLessonsOfTrack } from '../src/content';
 import { concluirAula, expect, irAteOExercicio, test } from './fixtures';
 
 /**
  * O projeto final, no navegador de verdade.
  *
- * É a única trilha em que dois motores rodam na mesma aula: o SQL (o worker
- * do SQLite) e o servidor **com banco** — o sandbox de sempre com o SQLite
- * carregado dentro do mesmo worker (`servidor-banco.worker.ts`), que o CI
- * só prova no Node. Aqui é o Chromium concluindo cada aula, e a tela
- * mostrando o banco depois de o servidor rodar.
+ * É a única trilha em que os motores se juntam: o SQL (o worker do SQLite),
+ * o servidor **com banco** (o sandbox com o SQLite dentro do mesmo worker,
+ * `servidor-banco.worker.ts`) e, nas aulas 4 e 5, a página do iframe fazendo
+ * `fetch` para esse servidor de pé — a ponte do motor 7, que o CI só prova
+ * no jsdom. Aqui é o Chromium concluindo cada aula, a tela mostrando o
+ * banco depois de o servidor rodar, e os pedidos que a página fez.
  *
  * Em série: dois SQLites em WebAssembly disputando a máquina com outro
  * teste já fez o editor passar do prazo.
@@ -89,4 +90,53 @@ test('o servidor com banco mostra o SQL do banco antes, e as tabelas depois de r
     await expect(depois.getByText(tabela, { exact: true })).toBeVisible();
   }
   await expect(depois.getByText('Estudar Node')).toBeVisible();
+});
+
+test('a página chama o servidor de pé: o painel do servidor antes, e os pedidos do fetch depois', async ({
+  logado: page,
+}) => {
+  test.setTimeout(150_000);
+
+  await page.goto('/lesson/lesson-proj-4');
+  await irAteOExercicio(page, (e) => e.type === 'code' && e.servidor !== undefined);
+
+  // O servidor por trás da página fica à vista, com o banco e os arquivos.
+  const painel = page.getByText('O servidor por trás da página').locator('..').locator('..');
+  await expect(painel).toBeVisible();
+  for (const nome of ['banco.sql', 'servidor.js', './dados/tarefas.js']) {
+    await expect(painel.getByText(nome, { exact: true })).toBeVisible();
+  }
+
+  await page.locator('.monaco-editor').first().waitFor({ timeout: 90_000 });
+  await page.waitForFunction(
+    () => {
+      const m = (window as unknown as { monaco?: { editor: { getModels(): unknown[] } } }).monaco;
+      return !!m && m.editor.getModels().length > 0;
+    },
+    undefined,
+    { timeout: 40_000 }
+  );
+
+  // A solução de referência do primeiro exercício: a página que lista as tarefas.
+  const aula = getLesson('lesson-proj-4')!;
+  const exercicio = aula.blocks.find((b) => b.kind === 'exercise' && b.exercise.type === 'code' && b.exercise.servidor !== undefined);
+  const solucao = exercicio && exercicio.kind === 'exercise' && exercicio.exercise.type === 'code' ? exercicio.exercise.solution! : '';
+  await page.evaluate((codigo) => {
+    window.monaco!.editor.getModels()[0].setValue(codigo);
+  }, solucao);
+  await page.getByRole('button', { name: 'Rodar a página' }).click();
+  // O servidor sobe num worker com o SQLite antes de a página rodar.
+  await expect(page.getByText('Todos os testes passaram')).toBeVisible({ timeout: 90_000 });
+
+  // A página de verdade, dentro do iframe, com a lista que veio da API.
+  const iframe = page.frameLocator('iframe[title="Pré-visualização da página"]');
+  await expect(iframe.locator('#lista li')).toHaveCount(3);
+  await expect(iframe.locator('#estado')).toHaveText(/3 tarefas/);
+
+  // E o que passou pelo servidor: o GET que o fetch da página fez.
+  const trocas = page.getByText('Pedidos e respostas').locator('..').locator('..');
+  await expect(trocas).toBeVisible();
+  await expect(trocas.getByText('GET', { exact: true }).first()).toBeVisible();
+  await expect(trocas.getByText('/tarefas', { exact: true }).first()).toBeVisible();
+  await expect(trocas.getByText('200', { exact: true }).first()).toBeVisible();
 });

@@ -140,6 +140,8 @@ import { lessonEngLegivel } from './lessons/eng-08-legivel';
 import { lessonProjDesenho } from './lessons/proj-01-desenho';
 import { lessonProjBanco } from './lessons/proj-02-banco';
 import { lessonProjApi } from './lessons/proj-03-api';
+import { lessonProjPagina } from './lessons/proj-04-pagina';
+import { lessonProjFechar } from './lessons/proj-05-fechar';
 import { projetoImc } from './projects/js-imc';
 import { projetoConversor } from './projects/js-conversor';
 import { projetoBoletim } from './projects/js-boletim';
@@ -266,6 +268,8 @@ const lessons: Lesson[] = [
   lessonProjDesenho,
   lessonProjBanco,
   lessonProjApi,
+  lessonProjPagina,
+  lessonProjFechar,
 ];
 const projects: Project[] = [
   projetoImc,

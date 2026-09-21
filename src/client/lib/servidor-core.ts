@@ -194,6 +194,9 @@ function __cfExpress() {
     porta: null,
     __cfCamadas: camadas,
   };
+  // O último app criado é o que a página do motor 7 vai chamar: quem serve
+  // a página não conhece o nome da variável do aluno.
+  globalThis.__cfUltimoApp = app;
   return app;
 }
 
@@ -296,6 +299,7 @@ async function __cfDespachar(app, req) {
   return res;
 }
 
+globalThis.__cfPedir = pedir;
 async function pedir(app, metodo, url, opcoes) {
   if (!app || !app.__cfCamadas) throw new Error('pedir() precisa do app criado por express().');
   opcoes = opcoes || {};
@@ -355,3 +359,80 @@ export function montarCodigoDoServidor(codigo: string, opcoes: OpcoesDoServidor 
 
 /** Quantas linhas o prelúdio ocupa: para um erro na linha N do aluno ser a linha N. */
 export const LINHAS_DO_PRELUDIO = PRELUDIO.split('\n').length;
+
+/** Um pedido que a página faz ao servidor vivo, pelo `fetch` de mentira. */
+export interface PedidoAoServidor {
+  metodo: string;
+  url: string;
+  headers?: Record<string, string>;
+  body?: string;
+}
+
+/** O que o servidor vivo responde: o suficiente para o `fetch` da página montar um Response. */
+export interface RespostaDoServidor {
+  status: number;
+  headers: Record<string, string>;
+  texto: string;
+}
+
+/**
+ * Um servidor que continua de pé depois de rodar: a segunda metade do
+ * motor 7. Roda o programa (o prelúdio já dentro) e, em vez de testes, deixa
+ * uma função `pedir` que entrega pedidos ao último `app` criado — é ela que
+ * o `fetch` da página do aluno chama, por mensagens, do iframe até aqui.
+ */
+export interface ServidorVivo {
+  pedir(pedido: PedidoAoServidor): Promise<RespostaDoServidor>;
+  /** O que o servidor imprimiu ao subir. */
+  logs: string[];
+  /** Se o programa quebrou ao subir: não há app para pedir. */
+  error?: string;
+  /** As trocas registradas até agora, para a tela mostrar. */
+  trocas(): Troca[];
+}
+
+type PedirDoPreludio = (
+  app: unknown,
+  metodo: string,
+  url: string,
+  opcoes: { headers?: Record<string, string>; body?: string }
+) => Promise<{ status: number; headers: Record<string, string>; texto: string }>;
+
+/**
+ * Sobe o servidor no escopo global de quem chama — o worker, ou o Node do CI
+ * — e devolve o `ServidorVivo`. O programa roda como qualquer outro
+ * (`runProgram`, sem testes); o app e o `pedir` ficam em `globalThis`, que é
+ * por onde o prelúdio os deixa. Recebe o `runProgram` por parâmetro para
+ * este módulo continuar sem importar o sandbox.
+ */
+export async function subirServidor(
+  programa: string,
+  rodar: (programa: string) => Promise<{ logs: string[]; error?: string }>
+): Promise<ServidorVivo> {
+  const escopo = globalThis as {
+    __cfUltimoApp?: unknown;
+    __cfPedir?: PedirDoPreludio;
+    __cfTrocas?: Troca[];
+  };
+  delete escopo.__cfUltimoApp;
+  const resultado = await rodar(programa);
+  const app = escopo.__cfUltimoApp;
+  const pedir = escopo.__cfPedir;
+  const trocas = escopo.__cfTrocas ?? [];
+  const error =
+    resultado.error ??
+    (app === undefined || pedir === undefined
+      ? "O servidor não criou nenhuma aplicação: falta o `const app = express()`, e as rotas nele."
+      : undefined);
+
+  return {
+    logs: resultado.logs,
+    error,
+    trocas: () => trocas.slice(),
+    async pedir(pedido) {
+      if (error || !pedir) return { status: 503, headers: { 'content-type': 'application/json' }, texto: JSON.stringify({ erro: error ?? 'servidor fora do ar' }) };
+      const r = await pedir(app, pedido.metodo, pedido.url, { headers: pedido.headers, body: pedido.body });
+      return { status: r.status, headers: r.headers, texto: r.texto };
+    },
+  };
+}

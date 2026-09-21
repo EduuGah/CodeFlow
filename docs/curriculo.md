@@ -6,7 +6,7 @@ que conclui uma fase.
 
 ## Onde estamos
 
-**Fases 1, 2, 3 e 4 de 8 concluídas · Fase 5: Engenharia 8 de 8 · Fase 7: 3 de 5 · publicado**
+**Fases 1, 2, 3, 4 e 7 de 8 concluídas · Fase 5: Engenharia 8 de 8 · publicado**
 
 ```
 Fase 0  Fundamentos e lógica      ██████████████████████  13/13  pronto
@@ -18,28 +18,31 @@ Fase 3  Tipos e componentes      ███████████████�
 Fase 4  Back-end e dados         ██████████████████████  20/20  pronto
 Fase 5  Profissionalização       ██████░░░░░░░░░░░░░░░░   8/27  engenharia pronta; testes, git, terminal
 Fase 6  Python                   ░░░░░░░░░░░░░░░░░░░░░░   0/10  motor 6
-Fase 7  Projeto final            █████████████░░░░░░░░░   3/5   banco e API prontos; motor 7 pela metade
+Fase 7  Projeto final            ██████████████████████   5/5   pronto; motor 7 inteiro; faltam os capstones
 ```
 
 | | Hoje | Previsto | Feito |
 | --- | ---: | ---: | ---: |
-| Aulas | **112** | ~150 | 75% |
-| Exercícios | **660** | ~800 | 83% |
+| Aulas | **114** | ~150 | 76% |
+| Exercícios | **671** | ~800 | 84% |
 | Tipos de exercício | **10** | 13 | 77% |
 | Motores de execução | **7** | 8 | 88% |
 | Projetos | **7** | ~20 | 35% |
 
-**Último trabalho** (2026-09-21, tarde): o **projeto final começou** — as
-três primeiras aulas de "Projeto Final: A Aplicação Inteira" (o desenho; o
-banco e o repositório; a API sobre o banco), 16 exercícios, na sexta etapa
-do percurso — e a metade do **motor 7** que elas precisavam: o servidor
-simulado com o SQLite dentro do mesmo worker (`servidor-banco.worker.ts`),
-`require('./banco')` com `consultar` e `executar` assíncronos e com
-parâmetros, o campo `banco` do exercício `server`, o banco de exemplo
-`tarefas`, e a tela mostrando o SQL do banco antes e as tabelas depois.
-Falta a outra metade — a página fazendo `fetch` para o servidor — para as
-aulas 4 e 5. De manhã: a trilha **Engenharia: Organizar um
-Projeto**, inteira — 8 aulas e 48 exercícios sobre coesão e acoplamento,
+**Último trabalho** (2026-09-21, noite): o **projeto final está completo** —
+as aulas 4 e 5 ("A Página sobre a API", "Fechar: Testar, Documentar,
+Publicar") e a segunda metade do **motor 7**: o servidor do exercício sobe
+num worker e fica de pé (`abrirServidorVivo`), e o `fetch` de mentira do
+iframe manda cada pedido ao pai por mensagem, que o entrega ao worker e
+devolve a resposta — a página do aluno lista, cria, marca e apaga tarefas
+numa API de verdade sobre o SQLite, sem porta nenhuma. O CI faz o mesmo no
+jsdom com o servidor no Node. O exercício `code` de página ganhou o campo
+`servidor` (código, arquivos, env, banco); a tela mostra o servidor antes e
+os pedidos que a página fez depois. À tarde: as três primeiras aulas (o
+desenho; o banco e o repositório; a API sobre o banco) e a primeira metade
+do motor — o SQLite dentro do worker do servidor, `require('./banco')`, o
+campo `banco`, o banco de exemplo `tarefas`. De manhã: a trilha
+**Engenharia: Organizar um Projeto**, inteira — 8 aulas e 48 exercícios sobre coesão e acoplamento,
 módulos como fronteiras, pastas por responsabilidade, nomes, funções
 pequenas, erros como contrato, dependências e o `package.json`, e o projeto
 que outra pessoa lê. Roda no motor 4, que ganhou o que a trilha precisava:
@@ -592,35 +595,44 @@ se aprendeu a consultar.
 
 Plataforma: o **motor 7, a aplicação inteira** — o servidor simulado (motor
 4) e o SQLite (motor 5) no mesmo worker, e a página do motor 1 fazendo
-`fetch` para ele. É a única fase que junta motores. **A primeira metade
-está feita** (2026-09-21): `servidor-banco.worker.ts` carrega o SQLite e
-roda o sandbox de sempre com o banco injetado (`runProgram` ganhou
+`fetch` para ele. É a única fase que junta motores, e **está feito**
+(2026-09-21). A primeira metade: `servidor-banco.worker.ts` carrega o
+SQLite e roda o sandbox de sempre com o banco injetado (`runProgram` ganhou
 `globais`); o prelúdio do servidor entrega `require('./banco')` —
 `consultar(sql, params)` e `executar(sql, params)`, Promises, parâmetros
-com `?` —; o exercício `server` tem o campo `banco` (o SQL que monta o
-banco); a tela mostra `banco.sql` entre os arquivos do projeto e "O banco
-depois" com as tabelas; o CI roda o mesmo `sql.js` no Node. O prazo de
-execução com banco é 8 s (não 3), porque uma rodada faz dezenas de
-consultas e divide a máquina com o compilador do editor. **A segunda
-metade** — o `fetch` de mentira dentro do iframe que entrega o pedido ao
-servidor do aluno no worker, e o equivalente no jsdom do CI — é o que as
-aulas 4 e 5 precisam.
+com `?` —; o exercício `server` tem o campo `banco`; a tela mostra
+`banco.sql` entre os arquivos e "O banco depois" com as tabelas; o CI roda
+o mesmo `sql.js` no Node; o prazo de execução com banco é 8 s. A segunda
+metade: o worker atende um protocolo de serviço (`worker-servico.ts`:
+`servir`, `pedir`, `trocas`) e fica de pé (`abrirServidorVivo`, em
+`sandbox.ts`); o prelúdio deixa o último `app` e o `pedir` em `globalThis`
+(`subirServidor`, em `servidor-core.ts`); o documento da página ganha, só
+com servidor, um `fetch` que manda o pedido ao pai por `postMessage` e
+recebe a resposta pelo id (`PONTE`, em `pagina-core.ts`); `executarPagina`
+e `rodarPaginaNoJsdom` encaminham os pedidos ao servidor vivo. O exercício
+`code` de página tem o campo `servidor` (código, arquivos, env, banco), e
+o CI sobe esse servidor no Node antes de rodar a página no jsdom — o mesmo
+caminho do navegador, só que sem worker.
 
-**Trilha `track-projeto` — 3 de 5.** Linguagem `node`; é a única trilha
-em que exercícios de SQL e de servidor convivem na mesma aula (o CI abre
-essa exceção só para ela). O banco de exemplo `tarefas` (usuários, sessões,
-tarefas com dono) serve às aulas de SQL e aos exercícios com `banco`.
+**Trilha `track-projeto` — 5 de 5.** Linguagem `node`; é a única trilha
+em que exercícios de SQL, de servidor e de página convivem na mesma aula
+(o CI abre a exceção do SQL só para ela). O banco de exemplo `tarefas`
+(usuários, sessões, tarefas com dono) serve às aulas de SQL e aos
+exercícios com `banco`; os arquivos da API ficam em
+`lessons/proj-servidor.ts`, reaproveitados pelas aulas 3, 4 e 5.
 
 | Aula | Assunto |
 | --- | --- |
 | 1 | O desenho antes do código: as três camadas e o papel de cada uma (a verdade mora no banco, só a API o toca, a página nunca confia em si), os dados, os recursos como contrato, a tela e seus estados, a ordem de baixo para cima, o que "pronto" quer dizer — **feita** |
 | 2 | O banco e o repositório: tabelas que se defendem, a migração, o repositório como único módulo que sabe SQL, parâmetros e nunca concatenação (a injeção mostrada), o que cada função devolve, `feita` em 0/1 — **feita** |
 | 3 | A API sobre o banco: o login que lê `sessoes` com `JOIN`, as rotas que compõem, o dono conferido num lugar só, `paraApi` em toda resposta, o contrato e o que o quebra, CORS na publicação — **feita** |
-| 4 | A página sobre a API: `fetch` com o token, estados de carregando, erro e vazio, o formulário que envia, a lista que se atualiza — por fazer (motor 7, segunda metade) |
-| 5 | Fechar: pedidos de ponta a ponta, README, publicar (Vercel + Supabase, o mesmo caminho do CodeFlow) — por fazer |
+| 4 | A página sobre a API: a página não sabe nada, o cliente da API num lugar só (token, JSON, erro virando exceção), os quatro estados, a lista como função dos dados, recarregar depois de mudar, o formulário, marcar e apagar por delegação — cada exercício com a API de pé atrás da página — **feita** |
+| 5 | Fechar: a lista do "pronto" vira o roteiro de fumaça (uma página que faz os pedidos e relata), o teste do contrato (`paraApi` com sabotagens), o README com as decisões, publicar (o que muda: ambiente e CORS; o que não muda: nenhuma linha), a ordem de publicar — **feita** |
 
-Os três capstones, cada um com critérios de aceitação como os projetos de
-hoje, mas em três camadas:
+**Faltam os três capstones**, cada um com critérios de aceitação como os
+projetos de hoje, mas em três camadas — a plataforma para eles (o motor 7)
+já existe; o que falta é decidir a forma: um exercício `code` de página com
+`servidor` por critério, ou um tipo novo de vários arquivos:
 
 - **Lista de tarefas com conta** — tarefas por usuário, feitas e pendentes, filtro e busca.
 - **Loja com carrinho** — o banco da trilha de SQL virando produto: catálogo, carrinho, pedido, estoque que abaixa.

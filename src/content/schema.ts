@@ -61,18 +61,31 @@ const exerciseBase = {
   tags: z.array(z.string().min(1)),
 };
 
+const servidorDaPaginaSchema = z.object({
+  code: z.string().min(1),
+  arquivos: z.record(z.string(), z.string()).optional(),
+  env: z.record(z.string(), z.string()).optional(),
+  banco: z.string().min(1).optional(),
+});
+
 export const exerciseSchema = z.discriminatedUnion('type', [
-  z.object({
-    ...exerciseBase,
-    type: z.literal('code'),
-    runtime: runtimeSchema,
-    initialCode: z.string(),
+  z
+    .object({
+      ...exerciseBase,
+      type: z.literal('code'),
+      runtime: runtimeSchema,
+      servidor: servidorDaPaginaSchema.optional(),
+      initialCode: z.string(),
     // Exercício de código sem teste daria feedback errado ao aluno (§ "testes pedagógicos").
     tests: z.array(testCaseSchema).min(1, 'exercício de código precisa de ao menos um teste'),
-    properties: z.array(propertySchema).optional(),
-    typeTests: z.array(typeTestSchema).optional(),
-    solution: z.string().optional(),
-  }),
+      properties: z.array(propertySchema).optional(),
+      typeTests: z.array(typeTestSchema).optional(),
+      solution: z.string().optional(),
+    })
+    // Um servidor só faz sentido atrás de uma página: é o fetch dela que o chama.
+    .refine((e) => e.servidor === undefined || e.runtime === 'iframe', {
+      message: "um exercício com servidor precisa de runtime: 'iframe'",
+    }),
   z
     .object({
       ...exerciseBase,

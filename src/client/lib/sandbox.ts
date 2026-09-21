@@ -2,6 +2,8 @@ import SandboxWorker from './sandbox.worker?worker';
 import ServidorBancoWorker from './servidor-banco.worker?worker';
 import type { WorkerRequest, WorkerResponse } from './sandbox.worker';
 import type { RetratoDeTabela } from './sql-core';
+import type { PedidoAoServidor, RespostaDoServidor, Troca as TrocaDoServidor } from './servidor-core';
+import type { MensagemDeServico, RespostaDeServico } from './worker-servico';
 import type { SandboxProperty, SandboxTest } from './sandbox-core';
 import type { ErroDeCompilacao } from './typescript-core';
 import type { Troca } from './servidor-core';
@@ -60,7 +62,7 @@ export const STARTUP_COM_BANCO_MS = 40_000;
  */
 export const EXECUTION_COM_BANCO_MS = 8000;
 
-function toResult(response: Exclude<WorkerResponse, 'pronto'>): ExecutionResult {
+function toResult(response: Exclude<WorkerResponse, 'pronto' | RespostaDeServico>): ExecutionResult {
   return {
     output: response.logs.join('\n'),
     logs: response.logs,
@@ -128,6 +130,7 @@ export function executeCode(
     const prazo = opcoes.banco !== undefined ? EXECUTION_COM_BANCO_MS : EXECUTION_TIMEOUT_MS;
 
     worker.onmessage = (event: MessageEvent<WorkerResponse>) => {
+      if (typeof event.data === 'object' && 'modo' in event.data) return; // do servidor vivo: não é deste caminho
       if (event.data === 'pronto') {
         clearTimeout(timer);
         timer = setTimeout(() => {
@@ -166,5 +169,129 @@ export function executeCode(
       ...(opcoes.banco !== undefined ? { banco: opcoes.banco } : {}),
     };
     worker.postMessage(request);
+  });
+}
+
+/** O servidor vivo visto pela tela: pede, lê as trocas, fecha. */
+export interface ServidorVivoNoNavegador {
+  /** O que o servidor imprimiu ao subir. */
+  logs: string[];
+  /** Se o programa quebrou ao subir. Ainda assim `pedir` responde — com 503. */
+  error?: string;
+  pedir(pedido: PedidoAoServidor): Promise<RespostaDoServidor>;
+  trocas(): Promise<TrocaDoServidor[]>;
+  fechar(): void;
+}
+
+const RESPOSTA_DE_ERRO = (status: number, erro: string): RespostaDoServidor => ({
+  status,
+  headers: { 'content-type': 'application/json' },
+  texto: JSON.stringify({ erro }),
+});
+
+/**
+ * Sobe o servidor num worker e o deixa de pé: a segunda metade do motor 7.
+ *
+ * É o `executeCode` sem testes e sem `terminate()` no fim — o worker fica
+ * vivo atendendo os pedidos que o `fetch` da página do aluno faz, e só
+ * `fechar()` o encerra. Com `banco`, é o worker com o SQLite. Cada pedido
+ * tem o seu prazo: um servidor que não responde não pode deixar a página
+ * esperando para sempre.
+ */
+export function abrirServidorVivo(
+  code: string,
+  opcoes: { banco?: string } = {}
+): Promise<ServidorVivoNoNavegador> {
+  return new Promise((resolve) => {
+    let worker: Worker;
+    try {
+      worker = opcoes.banco !== undefined ? new ServidorBancoWorker() : new SandboxWorker();
+    } catch (error) {
+      const mensagem = `Não foi possível iniciar o servidor: ${error instanceof Error ? error.message : String(error)}`;
+      resolve({
+        logs: [],
+        error: mensagem,
+        pedir: async () => RESPOSTA_DE_ERRO(503, mensagem),
+        trocas: async () => [],
+        fechar: () => {},
+      });
+      return;
+    }
+
+    // Os pedidos voltam pelo id — um lento não pode entregar a resposta do
+    // seguinte —; as outras perguntas (servir, trocas) voltam na ordem.
+    const pendentes = new Map<number, (r: RespostaDoServidor) => void>();
+    const fila: Array<(r: RespostaDeServico) => void> = [];
+    let proximoId = 1;
+    let fechado = false;
+
+    worker.onmessage = (event: MessageEvent<WorkerResponse>) => {
+      const data = event.data;
+      if (typeof data !== 'object' || !('modo' in data)) return;
+      if (data.modo === 'resposta') {
+        const entregar = pendentes.get(data.id);
+        pendentes.delete(data.id);
+        entregar?.(data.resposta);
+        return;
+      }
+      fila.shift()?.(data);
+    };
+    worker.onerror = (event) => {
+      event.preventDefault();
+      const erro = event.message || 'Erro inesperado no servidor.';
+      for (const entregar of fila.splice(0)) entregar({ modo: 'servindo', logs: [], error: erro });
+      for (const [id, entregar] of pendentes) {
+        pendentes.delete(id);
+        entregar(RESPOSTA_DE_ERRO(500, erro));
+      }
+    };
+
+    const perguntar = <T extends RespostaDeServico>(m: MensagemDeServico, prazoMs: number, aoEstourar: T): Promise<T> =>
+      new Promise((ok) => {
+        const timer = setTimeout(() => ok(aoEstourar), prazoMs);
+        fila.push((r) => {
+          clearTimeout(timer);
+          ok(r as T);
+        });
+        worker.postMessage(m);
+      });
+
+    const pedir = (pedido: PedidoAoServidor): Promise<RespostaDoServidor> =>
+      new Promise((ok) => {
+        const id = proximoId++;
+        const timer = setTimeout(() => {
+          pendentes.delete(id);
+          ok(RESPOSTA_DE_ERRO(504, 'o servidor não respondeu a tempo — uma rota que não responde nem chama next()?'));
+        }, EXECUTION_COM_BANCO_MS);
+        pendentes.set(id, (r) => {
+          clearTimeout(timer);
+          ok(r);
+        });
+        worker.postMessage({ modo: 'pedir', id, pedido } satisfies MensagemDeServico);
+      });
+
+    const prazoParaSubir = (opcoes.banco !== undefined ? STARTUP_COM_BANCO_MS : STARTUP_TIMEOUT_MS) + EXECUTION_COM_BANCO_MS;
+    void perguntar<Extract<RespostaDeServico, { modo: 'servindo' }>>(
+      { modo: 'servir', code, ...(opcoes.banco !== undefined ? { banco: opcoes.banco } : {}) },
+      prazoParaSubir,
+      { modo: 'servindo', logs: [], error: 'O servidor não ficou pronto a tempo. Confira a conexão e tente rodar de novo.' }
+    ).then((subiu) => {
+      resolve({
+        logs: subiu.logs,
+        error: subiu.error,
+        pedir: (pedido) => (fechado ? Promise.resolve(RESPOSTA_DE_ERRO(503, 'o servidor foi encerrado')) : pedir(pedido)),
+        trocas: () =>
+          fechado
+            ? Promise.resolve([])
+            : perguntar<Extract<RespostaDeServico, { modo: 'trocas' }>>({ modo: 'trocas' }, 2000, { modo: 'trocas', trocas: [] }).then(
+                (r) => r.trocas
+              ),
+        fechar: () => {
+          if (fechado) return;
+          fechado = true;
+          worker.terminate();
+        },
+      });
+    });
   });
 }

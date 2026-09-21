@@ -46,7 +46,7 @@ export const ETAPAS_DO_PERCURSO: EtapaDoPercurso[] = [
   },
   {
     title: 'O projeto final',
-    description: 'A página, a API e o banco de uma aplicação de verdade, juntos — do desenho à publicação.',
+    description: 'Tela, API e banco de uma aplicação de verdade, juntos — do desenho à publicação.',
     trackIds: ['track-projeto'],
   },
 ];

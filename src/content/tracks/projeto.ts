@@ -14,16 +14,23 @@ import type { Track } from '../types';
 export const trackProjeto: Track = {
   id: 'track-projeto',
   title: 'Projeto Final: A Aplicação Inteira',
+  // Sem "a página" no texto: a suíte de navegador acha a trilha "A Página"
+  // pelo nome, e um texto com as mesmas palavras a confundiria.
   description:
-    'Do desenho à publicação: a página, a API e o banco de uma lista de tarefas com conta — as três camadas que você aprendeu, juntas.',
+    'Do desenho à publicação: tela, API e banco de uma lista de tarefas com conta — as três camadas que você aprendeu, juntas.',
   language: 'node',
   status: 'published',
-  lessonIds: ['lesson-proj-1', 'lesson-proj-2', 'lesson-proj-3'],
+  lessonIds: ['lesson-proj-1', 'lesson-proj-2', 'lesson-proj-3', 'lesson-proj-4', 'lesson-proj-5'],
   sections: [
     {
       title: 'As camadas',
       description: 'O desenho, o banco com o repositório, e a API sobre ele.',
       lessonIds: ['lesson-proj-1', 'lesson-proj-2', 'lesson-proj-3'],
+    },
+    {
+      title: 'Juntar e entregar',
+      description: 'A tela que chama a API, e o que falta para publicar.',
+      lessonIds: ['lesson-proj-4', 'lesson-proj-5'],
     },
   ],
 };

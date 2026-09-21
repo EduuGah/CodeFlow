@@ -255,10 +255,16 @@ src/client/lib/         Lógica pura e testada
   servidor.ts           executarServidor(): o sandbox com o prelúdio e os
                         testes em série — e o worker com banco quando o
                         exercício declara `banco`
-  servidor-banco.worker.ts  Motor 7 (metade): o sandbox com o SQLite no
-                        mesmo worker; monta o banco do exercício, avisa
-                        'pronto' só então, roda o programa com o banco em
-                        `globais`, devolve o retrato das tabelas
+  servidor-banco.worker.ts  Motor 7: o sandbox com o SQLite no mesmo
+                        worker; monta o banco do exercício, avisa 'pronto'
+                        só então, roda o programa com o banco em `globais`,
+                        devolve o retrato das tabelas — e atende o
+                        protocolo de serviço quando está servindo uma página
+  worker-servico.ts     O protocolo do servidor vivo (servir, pedir,
+                        trocas), atendido pelos dois workers do sandbox;
+                        `abrirServidorVivo` em sandbox.ts é o lado da tela
+  pagina-core.ts        …e a PONTE: o fetch que vai ao servidor vivo por
+                        postMessage, `interpretarPedido`, `mensagemDeResposta`
   fill-blank.ts         Molde com lacunas: dividir, preencher, validar
   mastery.ts            Domínio por conceito, em 4 níveis
   review.ts             Repetição espaçada, Leitner [1,3,7,14,30,60] dias
@@ -708,17 +714,22 @@ catálogo, 6 aqui), abrindo a quinta etapa do percurso, "O ofício";
 `e2e/engenharia.spec.ts` conclui cada aula no Chromium. Faltam da fase:
 Testes e qualidade (8), Git e equipe (6), Terminal (5) — sem motor novo.
 
-**Fase 7 — começou (2026-09-21).** A trilha **Projeto Final: A Aplicação
-Inteira** (`track-projeto`, sexta etapa do percurso) tem as aulas 1 a 3 — o
-desenho, o banco e o repositório, a API sobre o banco — sobre a primeira
-metade do motor 7: `servidor-banco.worker.ts` (o sandbox com o SQLite no
-mesmo worker), `require('./banco')` no prelúdio, o campo `banco` do
-exercício `server`, o banco de exemplo `tarefas`, e `runProgram` com
-`globais` para o banco entrar no programa sem `globalThis`. O CI abre para
-essa trilha a exceção de SQL numa aula `node`. Faltam a ponte página → API
-(o `fetch` do iframe indo ao worker) e as aulas 4 e 5;
-`e2e/projeto.spec.ts` conclui as três aulas no Chromium e prova o painel
-"O banco depois".
+**Fase 7 — o projeto final está completo (2026-09-21).** A trilha
+**Projeto Final: A Aplicação Inteira** (`track-projeto`, sexta etapa do
+percurso) tem as 5 aulas — o desenho; o banco e o repositório; a API sobre
+o banco; a página sobre a API; fechar — sobre o motor 7 inteiro:
+`servidor-banco.worker.ts` (o sandbox com o SQLite no mesmo worker),
+`require('./banco')` no prelúdio, o campo `banco` do exercício `server`, o
+banco de exemplo `tarefas`, `runProgram` com `globais`; e a ponte página →
+API: o worker fica de pé (`worker-servico.ts`, `abrirServidorVivo`), o
+documento da página ganha um `fetch` que manda cada pedido ao pai por
+mensagem (`PONTE` em `pagina-core.ts`), `executarPagina` e
+`rodarPaginaNoJsdom` os encaminham ao servidor, e o exercício `code` de
+página tem o campo `servidor`. O CI abre para essa trilha a exceção de SQL
+numa aula `node`, e sobe o servidor de cada exercício de página no Node
+antes do jsdom. `e2e/projeto.spec.ts` conclui as cinco aulas no Chromium e
+prova "O banco depois" e a página listando tarefas vindas do servidor de
+pé. Faltam os três capstones.
 
 **Fase 6 — não iniciada.** Pyodide (Python) é o último motor.
 Investimentos grandes o bastante para a escolha ser do dono do projeto —

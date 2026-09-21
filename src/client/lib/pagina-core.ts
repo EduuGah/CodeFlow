@@ -1,4 +1,5 @@
 import { buildProgram, type SandboxTest, type SandboxTestResult } from './sandbox-core';
+import type { PedidoAoServidor, RespostaDoServidor } from './servidor-core';
 
 /**
  * O motor de página: o código do aluno vira um documento HTML de verdade.
@@ -32,6 +33,24 @@ import { buildProgram, type SandboxTest, type SandboxTestResult } from './sandbo
 
 /** O que o iframe manda de volta. Só existe uma mensagem, no fim. */
 export const TIPO_DA_MENSAGEM = 'codeflow:pagina';
+
+/**
+ * As mensagens da ponte do motor 7: a página do aluno faz `fetch`, o
+ * `fetch` de mentira manda um `pedido` ao pai, e o pai devolve a `resposta`
+ * do servidor vivo com o mesmo id.
+ */
+export const TIPO_DO_PEDIDO = 'codeflow:pedido';
+export const TIPO_DA_RESPOSTA = 'codeflow:resposta';
+
+export interface PedidoDaPagina {
+  id: number;
+  pedido: PedidoAoServidor;
+}
+
+/** A resposta como vai para o iframe: o id do pedido e o que o servidor devolveu. */
+export function mensagemDeResposta(id: number, resposta: RespostaDoServidor): Record<string, unknown> {
+  return { tipo: TIPO_DA_RESPOSTA, id, status: resposta.status, headers: resposta.headers, texto: resposta.texto };
+}
 
 export interface ResultadoDaPagina {
   tipo: typeof TIPO_DA_MENSAGEM;
@@ -173,6 +192,89 @@ const CAPTURA = `
 `;
 
 /**
+ * O `fetch` que vai ao servidor vivo, no lugar do servidor de mentira.
+ *
+ * Entra depois da captura, só quando o exercício tem servidor: cada
+ * `fetch(url, opcoes)` vira uma mensagem ao pai com um id, e a resposta
+ * volta por outra mensagem. O objeto devolvido tem o que a trilha da página
+ * ensinou a usar — `ok`, `status`, `headers.get`, `json()`, `text()`. O
+ * corpo só viaja como texto: é o que o `fetch` de verdade manda também.
+ */
+const PONTE = `
+(function () {
+  var pendentes = {};
+  var proximo = 1;
+  window.addEventListener('message', function (e) {
+    var m = e.data;
+    if (!m || m.tipo !== ${JSON.stringify(TIPO_DA_RESPOSTA)} || !pendentes[m.id]) return;
+    var entregar = pendentes[m.id];
+    delete pendentes[m.id];
+    entregar(m);
+  });
+  function cabecalhos(h) {
+    var saida = {};
+    if (!h) return saida;
+    if (Array.isArray(h)) { h.forEach(function (par) { saida[String(par[0]).toLowerCase()] = String(par[1]); }); return saida; }
+    if (typeof h.forEach === 'function') { h.forEach(function (v, k) { saida[String(k).toLowerCase()] = String(v); }); return saida; }
+    Object.keys(h).forEach(function (k) { saida[k.toLowerCase()] = String(h[k]); });
+    return saida;
+  }
+  window.fetch = function (url, opcoes) {
+    opcoes = opcoes || {};
+    var id = proximo++;
+    var corpo = opcoes.body;
+    if (corpo !== undefined && corpo !== null && typeof corpo !== 'string') corpo = String(corpo);
+    var pedido = {
+      tipo: ${JSON.stringify(TIPO_DO_PEDIDO)},
+      id: id,
+      metodo: String(opcoes.method || 'GET').toUpperCase(),
+      url: String(url),
+      headers: cabecalhos(opcoes.headers),
+      body: corpo === undefined || corpo === null ? undefined : corpo
+    };
+    return new Promise(function (resolver) {
+      pendentes[id] = function (m) {
+        var texto = m.texto === undefined ? '' : String(m.texto);
+        var headers = m.headers || {};
+        resolver({
+          ok: m.status >= 200 && m.status < 300,
+          status: m.status,
+          statusText: '',
+          url: String(url),
+          headers: { get: function (nome) { var v = headers[String(nome).toLowerCase()]; return v === undefined ? null : v; } },
+          json: function () {
+            return new Promise(function (ok, falha) {
+              try { ok(JSON.parse(texto)); } catch (e) { falha(new SyntaxError('A resposta não é JSON: ' + texto.slice(0, 80))); }
+            });
+          },
+          text: function () { return Promise.resolve(texto); }
+        });
+      };
+      window.parent.postMessage(pedido, '*');
+    });
+  };
+})();
+`;
+
+/**
+ * Lê um pedido do `fetch` de mentira, ou devolve `null` se a mensagem não é
+ * um. Quem chama ainda confere `event.source`.
+ */
+export function interpretarPedido(data: unknown): PedidoDaPagina | null {
+  if (!data || typeof data !== 'object') return null;
+  const m = data as { tipo?: unknown; id?: unknown; metodo?: unknown; url?: unknown; headers?: unknown; body?: unknown };
+  if (m.tipo !== TIPO_DO_PEDIDO || typeof m.id !== 'number' || typeof m.metodo !== 'string' || typeof m.url !== 'string') return null;
+  const headers: Record<string, string> = {};
+  if (m.headers && typeof m.headers === 'object') {
+    for (const [k, v] of Object.entries(m.headers as Record<string, unknown>)) headers[k] = String(v);
+  }
+  return {
+    id: m.id,
+    pedido: { metodo: m.metodo, url: m.url, headers, ...(typeof m.body === 'string' ? { body: m.body } : {}) },
+  };
+}
+
+/**
  * O documento completo, pronto para `srcdoc`.
  *
  * Os testes são o mesmo programa do Worker, com o código do aluno vazio: só
@@ -181,7 +283,11 @@ const CAPTURA = `
  * topo — inclusive `let` e `const`, porque uma função criada com `Function`
  * resolve nomes pelo ambiente global do realm.
  */
-export function montarDocumento(codigoDoAluno: string, tests: SandboxTest[]): string {
+export function montarDocumento(
+  codigoDoAluno: string,
+  tests: SandboxTest[],
+  { comServidor = false }: { comServidor?: boolean } = {}
+): string {
   // Em série: os testes compartilham o DOM, e um clique de um não pode
   // atropelar o que o outro está lendo.
   const programaDeTestes = escaparParaScript(buildProgram('', tests, [], { sequencial: true }));
@@ -223,6 +329,7 @@ export function montarDocumento(codigoDoAluno: string, tests: SandboxTest[]): st
     `<meta http-equiv="Content-Security-Policy" content="${CSP_DA_PAGINA}">`,
     '<meta name="viewport" content="width=device-width, initial-scale=1">',
     `<script>${CAPTURA}</script>`,
+    ...(comServidor ? [`<script>${PONTE}</script>`] : []),
     '</head>',
     '<body>',
     codigoDoAluno,

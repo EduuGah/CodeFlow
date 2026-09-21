@@ -846,4 +846,20 @@ export const concepts: Concept[] = [
     prerequisites: ['proj-banco', 'node-projeto'],
     tags: ['projeto'],
   },
+  {
+    id: 'proj-pagina',
+    title: 'A página sobre a API',
+    summary:
+      'A página não sabe nada: mostra o que a API mandou e transforma cada gesto num pedido; o cliente da API num lugar só (token, JSON, erro virando exceção); os quatro estados (carregando, erro, vazio, lista); a lista como função dos dados, com textContent; depois de mudar, recarregar — uma fonte só; o formulário, e marcar e apagar por delegação.',
+    prerequisites: ['proj-api', 'dom-fetch', 'dom-formularios', 'dom-delegacao'],
+    tags: ['projeto'],
+  },
+  {
+    id: 'proj-fechar',
+    title: 'Fechar: testar, documentar, publicar',
+    summary:
+      'A lista do "pronto" vira pedidos de ponta a ponta (o roteiro de fumaça, que roda depois de publicar); testar o contrato da API; o README do projeto com as decisões; publicar muda o ambiente e a fronteira entre origens (CORS), nunca uma linha de rota, repositório ou tela; o que aparece só em produção.',
+    prerequisites: ['proj-pagina', 'eng-legivel', 'eng-dependencias'],
+    tags: ['projeto'],
+  },
 ];

@@ -6,6 +6,8 @@ import {
   type SandboxRunResult,
   type SandboxTest,
 } from './sandbox-core';
+import type { ServidorVivo } from './servidor-core';
+import { atenderServico, ehMensagemDeServico, type MensagemDeServico, type RespostaDeServico } from './worker-servico';
 
 /**
  * Worker de execução de código do aluno.
@@ -43,7 +45,7 @@ export interface WorkerRequest {
  * aluno lia "seu código passou de 3 segundos" sobre um programa de duas
  * linhas que nem tinha começado.
  */
-export type WorkerResponse = 'pronto' | SandboxRunResult;
+export type WorkerResponse = 'pronto' | SandboxRunResult | RespostaDeServico;
 
 /**
  * Remove as APIs de rede e persistência do escopo do worker.
@@ -76,10 +78,26 @@ function lockDownGlobals(): void {
   }
 }
 
-self.onmessage = async (event: MessageEvent<WorkerRequest>) => {
-  const { code, tests, properties, sequencial } = event.data;
+// O servidor vivo do motor 7, quando este worker está servindo uma página.
+let servidor: ServidorVivo | null = null;
+let trancado = false;
 
-  lockDownGlobals();
+self.onmessage = async (event: MessageEvent<WorkerRequest | MensagemDeServico>) => {
+  if (!trancado) {
+    lockDownGlobals();
+    trancado = true;
+  }
+  if (ehMensagemDeServico(event.data)) {
+    servidor = await atenderServico(
+      event.data,
+      servidor,
+      (programa) => runProgram(programa, [], [], { sequencial: true }),
+      (m) => self.postMessage(m satisfies WorkerResponse)
+    );
+    return;
+  }
+
+  const { code, tests, properties, sequencial } = event.data;
   self.postMessage(await runProgram(code, tests, properties, { sequencial }));
 };
 
