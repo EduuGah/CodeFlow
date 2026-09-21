@@ -862,4 +862,68 @@ export const concepts: Concept[] = [
     prerequisites: ['proj-pagina', 'eng-legivel', 'eng-dependencias'],
     tags: ['projeto'],
   },
+  {
+    id: 'testes-por-que',
+    title: 'Por que testar',
+    summary:
+      'O que um teste prova (só os casos que executa) e o que não prova; o custo de não testar contra o custo de escrever e manter; quando não vale a pena; assert(condição, mensagem).',
+    prerequisites: ['funcoes'],
+    tags: ['testes'],
+  },
+  {
+    id: 'testes-aaa',
+    title: 'Arrange, Act, Assert',
+    summary:
+      'A forma de todo teste: preparar o cenário, agir uma vez, afirmar o resultado; por que separar as três partes ajuda a consertar quando falha; um "act" por teste.',
+    prerequisites: ['testes-por-que'],
+    tags: ['testes'],
+  },
+  {
+    id: 'testes-comportamento',
+    title: 'Um teste por comportamento',
+    summary:
+      'Dividir uma função com várias regras num teste por regra; testar os limites exatos, não só o meio da faixa; nomes de teste que documentam a regra do negócio, não repetem o código.',
+    prerequisites: ['testes-aaa'],
+    tags: ['testes'],
+  },
+  {
+    id: 'testes-dubles',
+    title: 'Dublês',
+    summary:
+      'Injeção de dependência: receber por fora o que fala com o mundo externo (e-mail, banco, relógio); o espião como dublê mais comum (vi.fn faz o mesmo pronto); só dependências externas merecem dublê.',
+    prerequisites: ['testes-comportamento'],
+    tags: ['testes'],
+  },
+  {
+    id: 'testes-servidor',
+    title: 'Testando o servidor',
+    summary:
+      'pedir() como cliente HTTP dos testes; um teste por rota e por caso da rota; o servidor tem estado entre pedidos, por isso os testes rodam em série; testar status e corpo, sempre os dois.',
+    prerequisites: ['testes-aaa', 'node-rotas'],
+    tags: ['testes'],
+  },
+  {
+    id: 'testes-cobertura',
+    title: 'O que não testar',
+    summary:
+      'Cobertura mede execução, não verificação; é pista de onde não há teste, nunca meta de 100%; vale testar onde há decisão (condições, limites, casos extremos, regras do negócio), vale menos código sem lógica própria.',
+    prerequisites: ['testes-comportamento'],
+    tags: ['testes'],
+  },
+  {
+    id: 'testes-fragil',
+    title: 'Testes frágeis',
+    summary:
+      'Um teste verifica o comportamento (a porta de fora), nunca a implementação (o como); testes que espiam código-fonte, variáveis internas ou ordem não garantida quebram numa refatoração sem motivo.',
+    prerequisites: ['testes-cobertura', 'eng-funcoes'],
+    tags: ['testes'],
+  },
+  {
+    id: 'testes-regressao',
+    title: 'O teste que pega o bug de ontem',
+    summary:
+      'O ritual: reproduzir o bug num teste que falha antes de consertar, ver o conserto fazer o teste passar, manter o teste para sempre; a mensagem nomeia a combinação que causou o bug, não um número de chamado.',
+    prerequisites: ['testes-fragil'],
+    tags: ['testes'],
+  },
 ];

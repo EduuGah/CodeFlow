@@ -81,8 +81,8 @@ export function WriteTest({
     setRodando(true);
 
     const enviado = codigo;
-    const resultado = await avaliarTestes(exercise.subject, exercise.mutants, enviado, (programa) =>
-      executarNaLinguagem({ language, code: programa })
+    const resultado = await avaliarTestes(exercise.subject, exercise.mutants, enviado, (programa, tests) =>
+      executarNaLinguagem({ language, code: programa, tests })
     );
 
     setVeredito(resultado);

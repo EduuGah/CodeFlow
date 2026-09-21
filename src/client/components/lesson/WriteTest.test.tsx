@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -16,22 +16,23 @@ vi.mock('../ui/CodeEditor', () => ({
 }));
 
 // O sandbox real usa Web Worker. Aqui o que está sob teste é a leitura do
-// veredito na tela, então o executor roda o programa com `new Function`.
-vi.mock('../../lib/sandbox', () => ({
-  executeCode: (programa: string) => {
-    try {
-      new Function(programa)();
-      return Promise.resolve({ output: '', testResults: [], timedOut: false });
-    } catch (erro) {
-      return Promise.resolve({
-        output: '',
-        error: erro instanceof Error ? erro.message : String(erro),
-        testResults: [],
-        timedOut: false,
-      });
-    }
-  },
-}));
+// veredito na tela — o teste do aluno chega como uma verificação (`tests`),
+// não mais dentro do próprio `code` —, então o executor delega ao mesmo
+// `runProgram` que o sandbox de verdade usa, sem precisar de um Worker.
+vi.mock('../../lib/sandbox', async () => {
+  const { runProgram } = await import('../../lib/sandbox-core');
+  return {
+    executeCode: async (code: string, tests: unknown[] = [], properties: unknown[] = []) => {
+      const resultado = await runProgram(code, tests as never, properties as never);
+      return {
+        output: resultado.logs.join(String.fromCharCode(10)),
+        logs: resultado.logs,
+        testResults: resultado.testResults,
+        error: resultado.error,
+      };
+    },
+  };
+});
 
 const EXERCICIO: WriteTestExercise = {
   id: 'ex-teste-escrever',
@@ -77,6 +78,12 @@ async function escrever(user: ReturnType<typeof userEvent.setup>, codigo: string
 
 async function rodar(user: ReturnType<typeof userEvent.setup>) {
   await user.click(screen.getByRole('button', { name: /Rodar meus testes|Rodar de novo/ }));
+  // O veredito passa pelo mesmo sandbox do navegador, que aguarda o programa
+  // do aluno assentar (setTimeout, promises) antes de responder — real, não
+  // instantâneo como o dublê anterior. Espera o botão sair de "Rodando…".
+  await waitFor(() => {
+    expect(screen.queryByRole('button', { name: 'Rodando seus testes…' })).not.toBeInTheDocument();
+  });
 }
 
 describe('o enunciado', () => {

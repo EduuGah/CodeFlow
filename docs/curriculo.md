@@ -6,7 +6,7 @@ que conclui uma fase.
 
 ## Onde estamos
 
-**Fases 1, 2, 3, 4 e 7 de 8 concluídas · Fase 5: Engenharia 8 de 8 · publicado**
+**Fases 1, 2, 3, 4 e 7 de 8 concluídas · Fase 5: Engenharia 8/8, Testes 8/8 · publicado**
 
 ```
 Fase 0  Fundamentos e lógica      ██████████████████████  13/13  pronto
@@ -16,20 +16,29 @@ Fase 1  JavaScript real          ███████████████�
 Fase 2  A página                 ██████████████████████  26/26  pronto
 Fase 3  Tipos e componentes      ██████████████████████  24/24  pronto
 Fase 4  Back-end e dados         ██████████████████████  20/20  pronto
-Fase 5  Profissionalização       ██████░░░░░░░░░░░░░░░░   8/27  engenharia pronta; testes, git, terminal
+Fase 5  Profissionalização       █████████████░░░░░░░░░  16/27  engenharia e testes prontos; git, terminal
 Fase 6  Python                   ░░░░░░░░░░░░░░░░░░░░░░   0/10  motor 6
 Fase 7  Projeto final            ██████████████████████   5/5   pronto; motor 7 inteiro; faltam os capstones
 ```
 
 | | Hoje | Previsto | Feito |
 | --- | ---: | ---: | ---: |
-| Aulas | **114** | ~150 | 76% |
-| Exercícios | **671** | ~800 | 84% |
+| Aulas | **122** | ~150 | 81% |
+| Exercícios | **699** | ~800 | 87% |
 | Tipos de exercício | **10** | 13 | 77% |
 | Motores de execução | **7** | 8 | 88% |
 | Projetos | **7** | ~20 | 35% |
 
-**Último trabalho** (2026-09-21, noite): o **projeto final está completo** —
+**Último trabalho** (2026-09-21, madrugada): a trilha **Testes e
+Qualidade**, inteira — 8 aulas e 41 exercícios sobre arrange/act/assert, um
+comportamento por teste, dublês, testar o servidor com `pedir`, cobertura
+como pista, testes frágeis e o teste de regressão. `track-testes`, sétima
+etapa do percurso ("A profissão"). Isso exigiu um conserto no próprio motor
+do exercício `escrever o teste`: o teste do aluno agora entra como uma
+verificação assíncrona do sandbox (a mesma forma que os exercícios de
+código já usavam), em vez de texto colado dentro do programa — o que
+faltava para `assert` com `await pedir(...)` funcionar, e é o que a aula 5
+usa. Antes (2026-09-21, noite): o **projeto final ficou completo** —
 as aulas 4 e 5 ("A Página sobre a API", "Fechar: Testar, Documentar,
 Publicar") e a segunda metade do **motor 7**: o servidor do exercício sobe
 num worker e fica de pé (`abrirServidorVivo`), e o `fetch` de mentira do
@@ -552,10 +561,29 @@ A aula 7 mudou em relação ao plano: configuração e segredos já é a aula 9
 de Node, então aqui entrou o que faltava — as dependências. O item de `npm`
 sai da trilha de Terminal.
 
-**Testes e qualidade — 0 de 8.** Vitest de verdade como assunto:
-arrange/act/assert, um teste por comportamento, nomes que viram
-documentação, dublês (`vi.fn`), testar o servidor com `pedir`, cobertura
-como pista e não como meta, o teste que pega o bug de ontem.
+**Testes e qualidade — 8 de 8** (2026-09-21). Trilha própria,
+`track-testes`; a maioria em JavaScript puro (motor 1), a aula 5 em `node`
+(motor 4). O tipo central é o `write-test`, que já existia desde a trilha
+de arrays: o aluno recebe uma implementação correta e escreve `assert`s
+sobre ela, verificados contra a implementação **e** contra sabotagens. Foi
+preciso mudar `escrever-teste.ts`: o teste do aluno virou uma `SandboxTest`
+própria (com o corredor assíncrono e o prazo por verificação que os
+exercícios de código já tinham), em vez de texto concatenado dentro do
+programa — sem isso, `await pedir(...)` dentro do teste do aluno era um
+erro de sintaxe (`await` fora de função `async`). O outro tipo de prática
+usado: `refactor` (testes que sobrevivem a uma reescrita) e `find-bug`
+(um teste com mensagem ruim que também não pega o bug certo).
+
+| Aula | Assunto |
+| --- | --- |
+| 1 | Por que testar: o que um teste prova (só os casos que executa) e o que não prova; o custo de não testar; quando não vale a pena; `assert` |
+| 2 | Arrange, Act, Assert: a forma de todo teste; um "act" por teste; o arrange implícito |
+| 3 | Um teste por comportamento: dividir por regra, testar os limites exatos, nomes que documentam a regra do negócio |
+| 4 | Dublês: injeção de dependência, o espião como dublê mais comum (`vi.fn` faz o mesmo pronto), quando o dublê precisa devolver algo |
+| 5 | Testando o servidor: `pedir()` como cliente, um teste por rota e por caso, o servidor tem estado entre pedidos (testes em série) |
+| 6 | O que não testar: cobertura mede execução não verificação, é pista não meta; onde há decisão vale testar, código sem lógica vale menos |
+| 7 | Testes frágeis: comportamento (a porta) contra implementação (o como); código-fonte, variável interna e ordem não garantida como armadilhas |
+| 8 | O teste que pega o bug de ontem: reproduzir antes de consertar, ver falhar primeiro, manter para sempre; nomear a combinação, não o chamado |
 
 **Git e equipe — 0 de 6.** Commit como frase, branch por assunto, pull
 request e revisão, conflito sem pânico, histórico que conta uma história,
@@ -674,11 +702,11 @@ Um por fase, cada um preso ao motor dela:
 
 ## Sobre tamanho
 
-As 109 aulas de hoje levaram bastante tempo para ficar no padrão do projeto.
-As ~40 restantes (19 da Fase 5, 10 de Python, 5 do projeto final, mais os
-capstones) são muitas vezes esse trabalho, e os ~160 exercícios novos são a
-maior parte dele. Por isso a unidade é a fase: cada uma termina numa versão do
-produto que dá para usar. O roadmap escolhe a ordem; não promete prazo.
+As 122 aulas de hoje levaram bastante tempo para ficar no padrão do projeto.
+As ~21 restantes (6 de Git, 5 de Terminal, 10 de Python), mais os três
+capstones do projeto final, são muitas vezes esse trabalho. Por isso a
+unidade é a fase: cada uma termina numa versão do produto que dá para usar.
+O roadmap escolhe a ordem; não promete prazo.
 
 A Fase 1 foi o primeiro passo por um motivo concreto: era a única que não
 precisava de motor nenhum, e é onde estão os testes por propriedade e os

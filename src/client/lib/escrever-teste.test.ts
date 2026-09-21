@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { runProgram } from './sandbox-core';
+import type { SandboxTest } from './sandbox-core';
 import {
   avaliarTestes,
   montarPrograma,
@@ -30,16 +31,16 @@ const SABOTAGENS: Sabotagem[] = [
 ];
 
 /** O sandbox de verdade — é o mesmo que roda no navegador do aluno. */
-const executar = (programa: string) => runProgram(programa, []);
+const executar = (programa: string, tests: SandboxTest[]) => runProgram(programa, tests);
 
 describe('montar o programa', () => {
-  it('põe a implementação antes do teste do aluno', () => {
-    const programa = montarPrograma('const x = 1;', 'assert(x === 1);');
-    expect(programa.indexOf('const x = 1;')).toBeLessThan(programa.indexOf('assert(x === 1)'));
+  it('põe a implementação antes do assert', () => {
+    const programa = montarPrograma('const x = 1;');
+    expect(programa.indexOf('const x = 1;')).toBeLessThan(programa.indexOf('function assert('));
   });
 
-  it('injeta o assert entre os dois', () => {
-    expect(montarPrograma('a', 'b')).toContain('function assert(');
+  it('injeta o assert', () => {
+    expect(montarPrograma('a')).toContain('function assert(');
   });
 });
 

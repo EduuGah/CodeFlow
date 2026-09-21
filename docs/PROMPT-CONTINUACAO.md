@@ -157,13 +157,13 @@ o banco só guarda fatos, e "viu" não é um).
 
 ## 5. O que ESTÁ SENDO FEITO agora
 
-**Nada em andamento.** O último commit fecha a metade de SQL da Fase 4 — o
-motor 5 (sql.js) e as 10 aulas da trilha —, o CI está verde, e a árvore está
+**Nada em andamento.** O último commit fecha a trilha de Testes e
+Qualidade (veja B9) — 8 aulas, o conserto do motor `write-test` para
+aceitar `await` no teste do aluno —, o CI está verde, e a árvore está
 limpa. Você começa num ponto estável.
 
-O que acabou de ser concluído: o quinto motor, e a primeira trilha em que o
-aluno não escreve JavaScript. O que falta na Fase 4 é a outra metade — o
-servidor simulado (Node) e as 10 aulas de back-end.
+O que falta na Fase 5: Git e Equipe (6 aulas) e Terminal e Ferramentas
+(5 aulas), nenhuma exigindo motor novo.
 
 ## 6. O que VAI SER FEITO — e a decisão que precisa ser tomada
 
@@ -319,6 +319,27 @@ projeto: seis trilhas desenroladas numa coluna eram uma parede.
   Chromium. Os arquivos da API ficam em `lessons/proj-servidor.ts`.
 - Faltam os três capstones (a lista de tarefas completa, a loja, o blog).
 
+### B9) A trilha de Testes e Qualidade — feito (2026-09-21)
+
+- `track-testes`, "Testes e Qualidade", 8 aulas em dois blocos ("A forma de
+  um teste"; "Testar sem travar"), 41 exercícios (14 de escrever o teste no
+  catálogo, 7 aqui — o tipo central da trilha), na sétima etapa do percurso,
+  "A profissão", pedida pelo dono do projeto como parte do resto da Fase 5.
+- A aula 5 ensina a testar um servidor (motor 4) com `await pedir(...)`
+  **dentro do próprio teste que o aluno escreve** — e isso expôs uma
+  limitação real do motor `write-test`: o código do aluno era colado como
+  texto solto num programa síncrono (`new Function`), então `await` no topo
+  era `SyntaxError`. Consertado em `lib/escrever-teste.ts`: o teste do aluno
+  virou uma `SandboxTest` própria, passando pelo mesmo corredor assíncrono
+  com prazo (`expressaoDeTeste` em `sandbox-core.ts`) que os exercícios de
+  código e servidor já usavam. `avaliarTestes()` agora recebe um `executar`
+  que roda `SandboxTest[]` de verdade, em vez de só o texto do programa —
+  toda a suíte de unidade (2.856 testes) confirma que nenhum `write-test`
+  existente quebrou com a mudança.
+- `e2e/testes.spec.ts` conclui cada aula no Chromium e prova, com um teste
+  correto e um vazio, que a tela nomeia cada sabotagem pega e cada defeito
+  que escapou.
+
 ### C) Mais projetos com o motor atual — barato, sem currículo novo
 
 Existem 7 projetos e o roadmap prevê ~30. Eles usam a mecânica que já existe e
@@ -326,15 +347,16 @@ dão prática aplicada. É o caminho de menor risco e menor retorno.
 
 ### Recomendação
 
-A, B, B2, B3, B4, B5, B6, B7 e B8 estão feitos: as Fases 1 a 4 completas, a
-Fase 5 começou pela engenharia, e a Fase 7 — o projeto final, o pedido
-central do dono do projeto — está completa, com o motor 7 inteiro. O que vem
-agora: os **três capstones** da Fase 7 (a plataforma existe; falta decidir a
-forma), o resto da **Fase 5** (Testes e qualidade, Git e equipe, Terminal) ou
-a Fase 6 (Python, o Pyodide). Pergunte ao dono do projeto. Ou C, ou os itens de plataforma que ficaram (mapa de tópicos e busca,
-tutor com IA, painel do aluno). Antes de qualquer um, vale o que só o dono
-do projeto pode fazer: usar o aplicativo publicado num telefone de verdade,
-inclusive uma aula de Node.
+A, B, B2, B3, B4, B5, B6, B7, B8 e B9 estão feitos: as Fases 1 a 4 completas,
+a Fase 5 com engenharia e testes prontos (falta Git e equipe, e Terminal), e
+a Fase 7 — o projeto final, o pedido central do dono do projeto — está
+completa, com o motor 7 inteiro. O que vem agora: os **três capstones** da
+Fase 7 (a plataforma existe; falta decidir a forma), o resto da **Fase 5**
+(Git e equipe — 6 aulas —, Terminal — 5 aulas) ou a Fase 6 (Python, o
+Pyodide). Pergunte ao dono do projeto. Ou C, ou os itens de plataforma que
+ficaram (mapa de tópicos e busca, tutor com IA, painel do aluno). Antes de
+qualquer um, vale o que só o dono do projeto pode fazer: usar o aplicativo
+publicado num telefone de verdade, inclusive uma aula de Node.
 
 Se o dono do projeto não indicar o caminho, pergunte antes de começar uma
 fase ou C — são investimentos grandes o bastante para a escolha ser dele.
@@ -345,8 +367,8 @@ fase ou C — são investimentos grandes o bastante para a escolha ser dele.
 
 ```bash
 npm run typecheck   # inclui e2e/ e playwright.config.ts
-npm test            # 2.785 testes
-npm run test:e2e    # 358 no navegador (antes: npx playwright install chromium)
+npm test            # 2.856 testes
+npm run test:e2e    # 378 no navegador (antes: npx playwright install chromium)
 npm run build
 ```
 

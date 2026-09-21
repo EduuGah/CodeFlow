@@ -500,6 +500,69 @@ function CenaAplicacao() {
   );
 }
 
+/** Testes: o assert é escrito, e os vereditos aparecem um a um — dois certos, um pego. */
+function CenaTestes() {
+  const linhas: Array<[boolean, number]> = [
+    [true, 1.6],
+    [true, 2.0],
+    [false, 2.4],
+  ];
+  return (
+    <Cena>
+      <Quadro>
+        <JanelaEscura x={8} y={10} w={344} h={90} />
+        <text x="26" y="52" fill={EDITOR.apagado} fontSize="11" fontFamily={MONO}>
+          1
+        </text>
+        <text
+          x="44"
+          y="52"
+          fill={P.creme}
+          fontSize="11"
+          fontFamily={MONO}
+          className="animar-digitar"
+          style={{ animationDelay: '0.2s', transformBox: 'fill-box' } as CSSProperties}
+        >
+          assert(<tspan fill={P.azulClaro}>somar([2, 3])</tspan> === <tspan fill={P.dourado}>5</tspan>);
+        </text>
+        <text x="26" y="76" fill={EDITOR.apagado} fontSize="11" fontFamily={MONO}>
+          2
+        </text>
+        <Barra x={44} y={69} w={150} h={10} cor={P.verdeEscuro} atraso={1.2} />
+
+        <JanelaClara x={8} y={112} w={344} h={98} />
+        <text x="26" y="136" fill={TELA.texto} fontSize="9" fontWeight="700" fontFamily={MONO}>
+          VEREDITO
+        </text>
+        {linhas.map(([ok, atraso], i) => (
+          <Pop key={i} atraso={atraso}>
+            <circle cx="30" cy={156 + i * 22} r="8" fill={ok ? P.verde : P.vermelho} />
+            {ok ? (
+              <path
+                d={`M26 ${156 + i * 22}l3 3 5-6`}
+                stroke={P.creme}
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                fill="none"
+              />
+            ) : (
+              <path
+                d={`M27 ${153 + i * 22}l6 6M33 ${153 + i * 22}l-6 6`}
+                stroke={P.creme}
+                strokeWidth="2"
+                strokeLinecap="round"
+                fill="none"
+              />
+            )}
+            <rect x="46" y={150 + i * 22} width={ok ? 130 : 90} height="7" rx="3.5" fill={TELA.linha} />
+          </Pop>
+        ))}
+      </Quadro>
+    </Cena>
+  );
+}
+
 const CENAS: Record<string, ComponentType> = {
   'track-js-fundamentos': CenaVariaveis,
   'track-logica': CenaLogica,
@@ -511,6 +574,7 @@ const CENAS: Record<string, ComponentType> = {
   'track-node': CenaApi,
   'track-engenharia': CenaEngenharia,
   'track-projeto': CenaAplicacao,
+  'track-testes': CenaTestes,
 };
 
 /** A cena de abertura da trilha, ou nada — uma trilha nova sem cena não quebra. */

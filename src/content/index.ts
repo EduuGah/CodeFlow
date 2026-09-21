@@ -28,6 +28,7 @@ import { trackSql } from './tracks/sql';
 import { trackNode } from './tracks/node';
 import { trackEngenharia } from './tracks/engenharia';
 import { trackProjeto } from './tracks/projeto';
+import { trackTestes } from './tracks/testes';
 import { lessonVariaveis } from './lessons/js-01-variaveis';
 import { lessonTiposEOperadores } from './lessons/js-02-tipos-e-operadores';
 import { lessonCondicoes } from './lessons/js-03-condicoes';
@@ -142,6 +143,14 @@ import { lessonProjBanco } from './lessons/proj-02-banco';
 import { lessonProjApi } from './lessons/proj-03-api';
 import { lessonProjPagina } from './lessons/proj-04-pagina';
 import { lessonProjFechar } from './lessons/proj-05-fechar';
+import { lessonTestesPorQueTestar } from './lessons/testes-01-por-que-testar';
+import { lessonTestesArrangeActAssert } from './lessons/testes-02-arrange-act-assert';
+import { lessonTestesUmComportamento } from './lessons/testes-03-um-comportamento';
+import { lessonTestesDubles } from './lessons/testes-04-dubles';
+import { lessonTestesServidor } from './lessons/testes-05-testar-servidor';
+import { lessonTestesCobertura } from './lessons/testes-06-cobertura';
+import { lessonTestesFragil } from './lessons/testes-07-fragil';
+import { lessonTestesRegressao } from './lessons/testes-08-regressao';
 import { projetoImc } from './projects/js-imc';
 import { projetoConversor } from './projects/js-conversor';
 import { projetoBoletim } from './projects/js-boletim';
@@ -270,6 +279,14 @@ const lessons: Lesson[] = [
   lessonProjApi,
   lessonProjPagina,
   lessonProjFechar,
+  lessonTestesPorQueTestar,
+  lessonTestesArrangeActAssert,
+  lessonTestesUmComportamento,
+  lessonTestesDubles,
+  lessonTestesServidor,
+  lessonTestesCobertura,
+  lessonTestesFragil,
+  lessonTestesRegressao,
 ];
 const projects: Project[] = [
   projetoImc,
@@ -291,6 +308,7 @@ const tracks: Track[] = [
   trackNode,
   trackEngenharia,
   trackProjeto,
+  trackTestes,
 ];
 
 /**

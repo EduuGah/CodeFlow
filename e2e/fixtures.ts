@@ -436,7 +436,7 @@ export async function concluirAula(page: Page, aulaId: string): Promise<void> {
 }
 
 /** Espera o Monaco existir e ter um modelo, e escreve o código nele. */
-async function escreverNoEditor(page: Page, codigo: string): Promise<void> {
+export async function escreverNoEditor(page: Page, codigo: string): Promise<void> {
   await page.locator('.monaco-editor').first().waitFor({ timeout: 40_000 });
   await page.waitForFunction(
     () => {

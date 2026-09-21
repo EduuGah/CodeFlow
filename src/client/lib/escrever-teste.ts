@@ -15,6 +15,8 @@
  * mensagem diz exatamente qual defeito passou despercebido.
  */
 
+import type { SandboxTest, SandboxTestResult } from './sandbox-core';
+
 /**
  * `assert` entra no escopo do aluno.
  *
@@ -50,9 +52,14 @@ export interface VereditoDeTeste {
   aprovado: boolean;
 }
 
-/** Junta implementação, auxiliares e o teste do aluno num programa só. */
-export function montarPrograma(implementacao: string, codigoDoAluno: string): string {
-  return `${implementacao}\n\n${PREAMBULO}\n\n${codigoDoAluno}`;
+/**
+ * A implementação (correta ou sabotada) mais o `assert`. O teste do aluno
+ * **não** entra aqui: ele vira uma verificação própria (ver `avaliarTestes`),
+ * para poder usar `await` — testar um servidor com `pedir()` é assíncrono,
+ * e só uma verificação roda dentro do corredor assíncrono do sandbox.
+ */
+export function montarPrograma(implementacao: string): string {
+  return `${implementacao}\n\n${PREAMBULO}`;
 }
 
 /**
@@ -61,29 +68,45 @@ export function montarPrograma(implementacao: string, codigoDoAluno: string): st
  * O executor entra por parâmetro para esta função ser pura e testável: o
  * componente passa o sandbox de verdade, o teste de conteúdo passa o mesmo
  * `runProgram` que roda no navegador, e o teste desta lógica passa um dublê.
+ *
+ * O teste do aluno vira uma única verificação (`SandboxTest`), do mesmo jeito
+ * que qualquer exercício de código — é isso que dá a ele o corredor
+ * assíncrono do sandbox, com prazo próprio, e permite `await` (testar rotas
+ * com `pedir()`, por exemplo) sem precisar de nenhum tratamento especial.
  */
 export async function avaliarTestes(
   referencia: string,
   sabotagens: Sabotagem[],
   codigoDoAluno: string,
-  executar: (programa: string) => Promise<{ error?: string }>
+  executar: (
+    programa: string,
+    tests: SandboxTest[]
+  ) => Promise<{ error?: string; testResults: SandboxTestResult[] }>
 ): Promise<VereditoDeTeste> {
-  const naReferencia = await executar(montarPrograma(referencia, codigoDoAluno));
-  const referenciaPassou = !naReferencia.error;
+  const tests: SandboxTest[] = [{ description: 'os testes do aluno', assertion: codigoDoAluno }];
+
+  const avaliar = async (implementacao: string): Promise<{ passou: boolean; mensagem?: string }> => {
+    const resultado = await executar(montarPrograma(implementacao), tests);
+    if (resultado.error) return { passou: false, mensagem: resultado.error };
+    const falha = resultado.testResults.find((t) => !t.passed);
+    return falha ? { passou: false, mensagem: falha.message } : { passou: true };
+  };
+
+  const naReferencia = await avaliar(referencia);
 
   const resultados: ResultadoDeSabotagem[] = [];
   for (const sabotagem of sabotagens) {
-    const resultado = await executar(montarPrograma(sabotagem.code, codigoDoAluno));
-    // Reprovar a versão quebrada é o comportamento certo: o erro aqui é sinal
+    const resultado = await avaliar(sabotagem.code);
+    // Reprovar a versão quebrada é o comportamento certo: não passar é sinal
     // de que o teste funciona.
-    resultados.push({ description: sabotagem.description, pego: Boolean(resultado.error) });
+    resultados.push({ description: sabotagem.description, pego: !resultado.passou });
   }
 
   return {
-    referenciaPassou,
-    erroNaReferencia: naReferencia.error,
+    referenciaPassou: naReferencia.passou,
+    erroNaReferencia: naReferencia.mensagem,
     sabotagens: resultados,
-    aprovado: referenciaPassou && resultados.every((r) => r.pego),
+    aprovado: naReferencia.passou && resultados.every((r) => r.pego),
   };
 }
 

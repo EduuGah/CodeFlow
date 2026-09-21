@@ -10,7 +10,7 @@ erro, não apenas se acertou.
 
 ## O que tem hoje
 
-**10 trilhas, 114 aulas, 671 exercícios em 10 tipos, 7 projetos, 110 conceitos.**
+**11 trilhas, 122 aulas, 699 exercícios em 10 tipos, 7 projetos, 118 conceitos.**
 Tudo é contado do catálogo; a página pública mostra os mesmos números.
 
 | Etapa | Trilha | Linguagem | Aulas | Exercícios |
@@ -25,10 +25,11 @@ Tudo é contado do catálogo; a página pública mostra os mesmos números.
 | 4 · A aplicação inteira | Node e APIs | Node | 10 | 64 |
 | 5 · O ofício | Engenharia: Organizar um Projeto | Node | 8 | 48 |
 | 6 · O projeto final | Projeto Final: A Aplicação Inteira | Node + SQL + página | 5 | 27 |
+| 7 · A profissão | Testes e Qualidade | JavaScript + Node | 8 | 41 |
 
-**Os dez tipos de exercício**: escrever o código (131), múltipla escolha (173),
-prever a saída (71), completar a lacuna (86), ordenar os passos (54),
-encontrar o bug (49), escrever o teste (7), refatorar (13), consulta SQL (46)
+**Os dez tipos de exercício**: escrever o código (132), múltipla escolha (182),
+prever a saída (77), completar a lacuna (86), ordenar os passos (56),
+encontrar o bug (51), escrever o teste (14), refatorar (14), consulta SQL (46)
 e servidor (41). Toda aula tem ao menos um dos quatro "de prática de dev" —
 bug, ordenar, teste, refatorar — que pedem o conceito de outro ângulo.
 
@@ -107,8 +108,8 @@ Redirect URLs.
 
 ```bash
 npm run typecheck   # tipos, incluindo os testes de navegador
-npm test            # 2.785 testes de unidade, propriedade e componente (Vitest)
-npm run test:e2e    # 358 testes de navegador (Playwright, Chromium, celular e desktop)
+npm test            # 2.856 testes de unidade, propriedade e componente (Vitest)
+npm run test:e2e    # 378 testes de navegador (Playwright, Chromium, celular e desktop)
 ```
 
 O E2E precisa do Chromium uma vez: `npx playwright install chromium`.
@@ -171,7 +172,7 @@ paleta só. O movimento tem motivo e respeita `prefers-reduced-motion`.
 
 ```
 src/content/        Aulas, exercícios, projetos, conceitos, percurso + schema Zod
-  lessons/          Uma aula por arquivo (js-, logica-, web-, pagina-, ts-, react-, sql-, node-, eng-, proj-)
+  lessons/          Uma aula por arquivo (js-, logica-, web-, pagina-, ts-, react-, sql-, node-, eng-, proj-, testes-)
   tracks/           As trilhas e a ordem das aulas
   bancos/           Os bancos de exemplo do SQL e do projeto final
 src/client/lib/     Lógica derivada e os motores: sandbox, página, TypeScript,
@@ -188,17 +189,17 @@ docs/               CONTEXTO.md (o mapa do projeto), curriculo.md (o roadmap),
 O roadmap completo, com o estado de cada aula e o custo de cada motor, está em
 [`docs/curriculo.md`](docs/curriculo.md). Em resumo, na ordem:
 
-1. **O resto da Fase 5** — **Testes e qualidade**, **Git e equipe** e
-   **Terminal**, ao lado da trilha de engenharia que já existe.
+1. **Git e equipe** e **Terminal e ferramentas** — o resto da Fase 5, ao lado
+   das trilhas de Engenharia e de Testes que já existem.
 2. **Python** — a primeira linguagem nova, com o Pyodide (Fase 6).
-3. **Projeto final** — do zero a uma aplicação completa: página + API + banco,
-   com testes e publicação (Fase 7).
+3. **Os três capstones do projeto final** — lista de tarefas completa, loja
+   com carrinho, blog com autenticação — com a mesma arquitetura de Testes e
+   Qualidade.
 4. **Mais linguagens**, uma por vez, cada uma com o motor que a roda no
    navegador.
 
 O projeto final — página, API e banco, do desenho à publicação — está
-completo. Os capstones (a loja, o blog) usam a mesma arquitetura e vêm em
-seguida.
+completo, e a trilha de Testes e Qualidade fechou a primeira metade da Fase 5.
 
 ## Licença
 

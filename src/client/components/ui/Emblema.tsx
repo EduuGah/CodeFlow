@@ -89,6 +89,20 @@ const SIMBOLOS: Record<string, ReactNode> = {
       </g>
     </g>
   ),
+  // Testes: o crachá com a marca de aprovado — o veredito que um teste dá.
+  'track-testes': (
+    <g fill="currentColor">
+      <path d="M24 5l16 7v11c0 10-7 16.5-16 20-9-3.5-16-10-16-20V12z" />
+      <path
+        d="M16 24l6 6 11-12"
+        fill="none"
+        stroke="var(--emblema-fundo)"
+        strokeWidth="4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </g>
+  ),
   // Projeto final: as três camadas empilhadas — a página, a API, o banco.
   'track-projeto': (
     <g fill="currentColor">

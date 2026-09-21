@@ -530,7 +530,7 @@ describe('exercícios de escrever o teste', () => {
   const escritas = allExercises.filter(({ exercise }) => exercise.type === 'write-test');
 
   /** Roda o programa no mesmo sandbox que o navegador do aluno usa, na linguagem da aula. */
-  const rodar = (exercise: Exercise) => (programa: string) => executar(exercise, programa, []);
+  const rodar = (exercise: Exercise) => (programa: string, tests: SandboxTest[]) => executar(exercise, programa, tests);
 
   it.each(escritas.map(({ exercise }) => [exercise.id, exercise] as const))(
     '%s: o teste de referência aceita a implementação correta e pega todas as sabotagens',
@@ -587,7 +587,7 @@ describe('exercícios de escrever o teste', () => {
       // "pega" por qualquer teste, inclusive por um arquivo vazio — e o
       // exercício passaria a aprovar quem não escreveu nada.
       for (const mutante of exercise.mutants) {
-        const sozinha = await rodar(exercise)(mutante.code);
+        const sozinha = await rodar(exercise)(mutante.code, []);
         expect(
           sozinha.error,
           `a sabotagem "${mutante.description}" nem chega a rodar`
