@@ -6,7 +6,7 @@ que conclui uma fase.
 
 ## Onde estamos
 
-**Fases 1, 2, 3, 4 e 7 de 8 concluídas · Fase 5: Engenharia 8/8, Testes 8/8 · publicado**
+**Fases 1, 2, 3, 4 e 7 de 8 concluídas · Fase 5: Engenharia 8/8, Testes 8/8, Git 6/6 · publicado**
 
 ```
 Fase 0  Fundamentos e lógica      ██████████████████████  13/13  pronto
@@ -16,24 +16,32 @@ Fase 1  JavaScript real          ███████████████�
 Fase 2  A página                 ██████████████████████  26/26  pronto
 Fase 3  Tipos e componentes      ██████████████████████  24/24  pronto
 Fase 4  Back-end e dados         ██████████████████████  20/20  pronto
-Fase 5  Profissionalização       █████████████░░░░░░░░░  16/27  engenharia e testes prontos; git, terminal
+Fase 5  Profissionalização       ████████████████████░░░  22/27  engenharia, testes e git prontos; falta terminal
 Fase 6  Python                   ░░░░░░░░░░░░░░░░░░░░░░   0/10  motor 6
 Fase 7  Projeto final            ██████████████████████   5/5   pronto; motor 7 inteiro; faltam os capstones
 ```
 
 | | Hoje | Previsto | Feito |
 | --- | ---: | ---: | ---: |
-| Aulas | **122** | ~150 | 81% |
-| Exercícios | **699** | ~800 | 87% |
+| Aulas | **128** | ~150 | 85% |
+| Exercícios | **732** | ~800 | 92% |
 | Tipos de exercício | **10** | 13 | 77% |
 | Motores de execução | **7** | 8 | 88% |
 | Projetos | **7** | ~20 | 35% |
 
-**Último trabalho** (2026-09-21, madrugada): a trilha **Testes e
+**Último trabalho** (2026-09-21, tarde): a trilha **Git e Equipe**, inteira
+— 6 aulas e 33 exercícios sobre commit atômico, branch por assunto, pull
+request e revisão, conflito e seus marcadores, squash e a regra de nunca
+reescrever histórico compartilhado, e o que nunca deveria entrar no
+repositório. `track-git`, sétima etapa do percurso ("A profissão"), ao lado
+de Testes e Qualidade. Sem motor novo: como não existe Git de verdade no
+sandbox, os exercícios simulam o raciocínio (mensagens, branches e
+conflitos como texto e objetos JavaScript comuns) nos tipos já existentes.
+Antes (2026-09-21, madrugada): a trilha **Testes e
 Qualidade**, inteira — 8 aulas e 41 exercícios sobre arrange/act/assert, um
 comportamento por teste, dublês, testar o servidor com `pedir`, cobertura
-como pista, testes frágeis e o teste de regressão. `track-testes`, sétima
-etapa do percurso ("A profissão"). Isso exigiu um conserto no próprio motor
+como pista, testes frágeis e o teste de regressão. `track-testes`, mesma
+etapa do percurso. Isso exigiu um conserto no próprio motor
 do exercício `escrever o teste`: o teste do aluno agora entra como uma
 verificação assíncrona do sandbox (a mesma forma que os exercícios de
 código já usavam), em vez de texto colado dentro do programa — o que
@@ -585,10 +593,24 @@ usado: `refactor` (testes que sobrevivem a uma reescrita) e `find-bug`
 | 7 | Testes frágeis: comportamento (a porta) contra implementação (o como); código-fonte, variável interna e ordem não garantida como armadilhas |
 | 8 | O teste que pega o bug de ontem: reproduzir antes de consertar, ver falhar primeiro, manter para sempre; nomear a combinação, não o chamado |
 
-**Git e equipe — 0 de 6.** Commit como frase, branch por assunto, pull
-request e revisão, conflito sem pânico, histórico que conta uma história,
-`.gitignore`. Sem motor: os exercícios são de ordenar, múltipla escolha e
-prever a saída sobre transcrições de terminal reais.
+**Git e equipe — 6 de 6** (2026-09-21). Trilha própria, `track-git`, em
+JavaScript puro (motor 1) — não existe motor de Git; os exercícios simulam
+o raciocínio (mensagens como texto, branches como listas, conflitos como
+marcadores num arquivo), porque a habilidade ensinada é a decisão, não a
+sintaxe do comando. Sétima etapa do percurso, "A profissão", ao lado de
+Testes e Qualidade. Mistura os tipos já existentes — `code`, `find-bug`,
+`multiple-choice`, `order-steps`, `predict-output` e um `write-test`
+(escrever asserções sobre um `squash` de commits correto) — sem exigir
+nenhum novo.
+
+| Aula | Assunto |
+| --- | --- |
+| 1 | O commit como frase: mudança lógica só, uma razão para existir; resumo no imperativo até 50 caracteres; o corpo explica o porquê, o diff já mostra o quê |
+| 2 | Uma branch por assunto: isola trabalho em andamento do main; nasce da branch atualizada, vive pouco; o nome diz o assunto |
+| 3 | Pull request e revisão: por que uma segunda pessoa pega o que quem escreveu não vê mais; PR pequeno e focado é revisável, PR de 40 arquivos não é |
+| 4 | Conflito sem pânico: nasce quando duas branches mudam a mesma linha; os marcadores `<<<<<<<`/`=======`/`>>>>>>>`; resolver é combinar as duas intenções, sempre testando depois |
+| 5 | Histórico que conta uma história: para quem o `git log` é escrito; squash junta os passos de um trabalho; a regra de ouro — nunca reescrever histórico já compartilhado |
+| 6 | O que não entra no repositório: gerado, secreto ou da máquina não é código-fonte; padrões do `.gitignore`; um segredo já commitado se resolve trocando a chave, não só ignorando o arquivo |
 
 **Terminal e ferramentas — 0 de 5.** O shell, caminhos, os scripts do
 `package.json` na prática, variáveis de ambiente no terminal, o que ler numa
@@ -702,8 +724,8 @@ Um por fase, cada um preso ao motor dela:
 
 ## Sobre tamanho
 
-As 122 aulas de hoje levaram bastante tempo para ficar no padrão do projeto.
-As ~21 restantes (6 de Git, 5 de Terminal, 10 de Python), mais os três
+As 128 aulas de hoje levaram bastante tempo para ficar no padrão do projeto.
+As ~15 restantes (5 de Terminal, 10 de Python), mais os três
 capstones do projeto final, são muitas vezes esse trabalho. Por isso a
 unidade é a fase: cada uma termina numa versão do produto que dá para usar.
 O roadmap escolhe a ordem; não promete prazo.

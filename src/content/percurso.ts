@@ -52,6 +52,6 @@ export const ETAPAS_DO_PERCURSO: EtapaDoPercurso[] = [
   {
     title: 'A profissão',
     description: 'O que separa código que funciona de trabalho em equipe: testes que valem alguma coisa, Git e o fluxo de revisão, o terminal como ferramenta.',
-    trackIds: ['track-testes'],
+    trackIds: ['track-testes', 'track-git'],
   },
 ];

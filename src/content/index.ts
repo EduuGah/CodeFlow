@@ -29,6 +29,7 @@ import { trackNode } from './tracks/node';
 import { trackEngenharia } from './tracks/engenharia';
 import { trackProjeto } from './tracks/projeto';
 import { trackTestes } from './tracks/testes';
+import { trackGit } from './tracks/git';
 import { lessonVariaveis } from './lessons/js-01-variaveis';
 import { lessonTiposEOperadores } from './lessons/js-02-tipos-e-operadores';
 import { lessonCondicoes } from './lessons/js-03-condicoes';
@@ -151,6 +152,12 @@ import { lessonTestesServidor } from './lessons/testes-05-testar-servidor';
 import { lessonTestesCobertura } from './lessons/testes-06-cobertura';
 import { lessonTestesFragil } from './lessons/testes-07-fragil';
 import { lessonTestesRegressao } from './lessons/testes-08-regressao';
+import { lessonGitCommitComoFrase } from './lessons/git-01-commit-como-frase';
+import { lessonGitBranchPorAssunto } from './lessons/git-02-branch-por-assunto';
+import { lessonGitPullRequestERevisao } from './lessons/git-03-pull-request-e-revisao';
+import { lessonGitConflitoSemPanico } from './lessons/git-04-conflito-sem-panico';
+import { lessonGitHistoricoQueContaUmaHistoria } from './lessons/git-05-historico-que-conta-uma-historia';
+import { lessonGitGitignore } from './lessons/git-06-gitignore';
 import { projetoImc } from './projects/js-imc';
 import { projetoConversor } from './projects/js-conversor';
 import { projetoBoletim } from './projects/js-boletim';
@@ -287,6 +294,12 @@ const lessons: Lesson[] = [
   lessonTestesCobertura,
   lessonTestesFragil,
   lessonTestesRegressao,
+  lessonGitCommitComoFrase,
+  lessonGitBranchPorAssunto,
+  lessonGitPullRequestERevisao,
+  lessonGitConflitoSemPanico,
+  lessonGitHistoricoQueContaUmaHistoria,
+  lessonGitGitignore,
 ];
 const projects: Project[] = [
   projetoImc,
@@ -309,6 +322,7 @@ const tracks: Track[] = [
   trackEngenharia,
   trackProjeto,
   trackTestes,
+  trackGit,
 ];
 
 /**

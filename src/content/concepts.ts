@@ -926,4 +926,52 @@ export const concepts: Concept[] = [
     prerequisites: ['testes-fragil'],
     tags: ['testes'],
   },
+  {
+    id: 'git-commit',
+    title: 'O commit como frase',
+    summary:
+      'Um commit é uma mudança lógica só, com uma razão para existir; resumo no imperativo, até 50 caracteres, sem ponto final; o corpo explica por quê, não o quê — o diff já mostra o quê.',
+    prerequisites: ['funcoes'],
+    tags: ['git'],
+  },
+  {
+    id: 'git-branch',
+    title: 'Uma branch por assunto',
+    summary:
+      'Uma branch isola um trabalho em andamento da linha principal; nasce da branch atualizada, tem um nome que diz o assunto, vive pouco e morre ao ser incorporada — mais de um assunto por branch mistura revisões.',
+    prerequisites: ['git-commit'],
+    tags: ['git'],
+  },
+  {
+    id: 'git-pr',
+    title: 'Pull request e revisão',
+    summary:
+      'Um PR propõe incorporar uma branch, com descrição do porquê; revisão é a segunda pessoa que lê antes de ir para todo mundo — pega o que quem escreveu não vê mais; PR pequeno e focado é revisável, PR de 40 arquivos não é.',
+    prerequisites: ['git-branch'],
+    tags: ['git'],
+  },
+  {
+    id: 'git-conflito',
+    title: 'Conflito sem pânico',
+    summary:
+      'Um conflito nasce quando duas branches mudam a mesma linha de jeitos diferentes; os marcadores `<<<<<<<`, `=======` e `>>>>>>>` mostram as duas versões; resolver é entender as duas intenções e escrever o resultado combinado, nunca escolher às cegas.',
+    prerequisites: ['git-branch'],
+    tags: ['git'],
+  },
+  {
+    id: 'git-historico',
+    title: 'Histórico que conta uma história',
+    summary:
+      'O histórico é lido por quem vai depurar um bug daqui a um ano — inclusive você; commits "wip" e "correção" não dizem nada; juntar (squash) os passos de um mesmo trabalho antes de incorporar deixa cada commit como uma unidade que faz sentido sozinha.',
+    prerequisites: ['git-commit', 'git-pr'],
+    tags: ['git'],
+  },
+  {
+    id: 'git-gitignore',
+    title: 'O que não entra no repositório',
+    summary:
+      'Arquivo gerado, segredo e configuração de máquina não são código-fonte e não deveriam ser versionados; `.gitignore` lista padrões que o Git para de rastrear; um segredo já commitado precisa ser trocado, porque tirá-lo do arquivo não apaga o histórico.',
+    prerequisites: ['git-commit'],
+    tags: ['git'],
+  },
 ];

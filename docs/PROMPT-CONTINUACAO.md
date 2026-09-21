@@ -157,13 +157,12 @@ o banco só guarda fatos, e "viu" não é um).
 
 ## 5. O que ESTÁ SENDO FEITO agora
 
-**Nada em andamento.** O último commit fecha a trilha de Testes e
-Qualidade (veja B9) — 8 aulas, o conserto do motor `write-test` para
-aceitar `await` no teste do aluno —, o CI está verde, e a árvore está
-limpa. Você começa num ponto estável.
+**Nada em andamento.** O último commit fecha a trilha de Git e Equipe (veja
+B10) — 6 aulas, simuladas em JavaScript comum porque não há motor de Git —,
+o CI está verde, e a árvore está limpa. Você começa num ponto estável.
 
-O que falta na Fase 5: Git e Equipe (6 aulas) e Terminal e Ferramentas
-(5 aulas), nenhuma exigindo motor novo.
+O que falta na Fase 5: só Terminal e Ferramentas (5 aulas), que não exige
+motor novo.
 
 ## 6. O que VAI SER FEITO — e a decisão que precisa ser tomada
 
@@ -340,6 +339,23 @@ projeto: seis trilhas desenroladas numa coluna eram uma parede.
   correto e um vazio, que a tela nomeia cada sabotagem pega e cada defeito
   que escapou.
 
+### B10) A trilha de Git e Equipe — feito (2026-09-21)
+
+- `track-git`, "Git e Equipe", 6 aulas em três blocos ("Registrar o
+  trabalho"; "Trabalhar com outra pessoa"; "Deixar organizado"), 33
+  exercícios, na sétima etapa do percurso, "A profissão", ao lado de Testes
+  e Qualidade — fecha o resto da Fase 5 que faltava, menos Terminal.
+- Não existe motor de Git no sandbox — não há como executar `git commit` ou
+  `git merge` de verdade. Os exercícios ensinam o raciocínio por trás dos
+  comandos simulando-o em JavaScript comum: mensagens de commit como texto
+  (`resumoDaMensagem`), branches como objetos com `nasceuDe` e `commits`,
+  conflitos como um arquivo com marcadores `<<<<<<</=======/>>>>>>>`, um
+  `.gitignore` simplificado como casador de padrões (`correspondeAoPadrao`).
+  Nenhum tipo de exercício novo: `code`, `find-bug`, `multiple-choice`,
+  `order-steps`, `predict-output`, e um `write-test` (testar uma função de
+  squash de commits).
+- `e2e/git.spec.ts` conclui cada aula no Chromium e no celular.
+
 ### C) Mais projetos com o motor atual — barato, sem currículo novo
 
 Existem 7 projetos e o roadmap prevê ~30. Eles usam a mecânica que já existe e
@@ -347,13 +363,13 @@ dão prática aplicada. É o caminho de menor risco e menor retorno.
 
 ### Recomendação
 
-A, B, B2, B3, B4, B5, B6, B7, B8 e B9 estão feitos: as Fases 1 a 4 completas,
-a Fase 5 com engenharia e testes prontos (falta Git e equipe, e Terminal), e
-a Fase 7 — o projeto final, o pedido central do dono do projeto — está
-completa, com o motor 7 inteiro. O que vem agora: os **três capstones** da
-Fase 7 (a plataforma existe; falta decidir a forma), o resto da **Fase 5**
-(Git e equipe — 6 aulas —, Terminal — 5 aulas) ou a Fase 6 (Python, o
-Pyodide). Pergunte ao dono do projeto. Ou C, ou os itens de plataforma que
+A, B, B2, B3, B4, B5, B6, B7, B8, B9 e B10 estão feitos: as Fases 1 a 4
+completas, a Fase 5 com engenharia, testes e git prontos (falta só
+Terminal), e a Fase 7 — o projeto final, o pedido central do dono do
+projeto — está completa, com o motor 7 inteiro. O que vem agora: os **três
+capstones** da Fase 7 (a plataforma existe; falta decidir a forma), o que
+falta da **Fase 5** (Terminal e Ferramentas — 5 aulas) ou a Fase 6 (Python,
+o Pyodide). Pergunte ao dono do projeto. Ou C, ou os itens de plataforma que
 ficaram (mapa de tópicos e busca, tutor com IA, painel do aluno). Antes de
 qualquer um, vale o que só o dono do projeto pode fazer: usar o aplicativo
 publicado num telefone de verdade, inclusive uma aula de Node.
@@ -367,8 +383,8 @@ fase ou C — são investimentos grandes o bastante para a escolha ser dele.
 
 ```bash
 npm run typecheck   # inclui e2e/ e playwright.config.ts
-npm test            # 2.856 testes
-npm run test:e2e    # 378 no navegador (antes: npx playwright install chromium)
+npm test            # 2.946 testes
+npm run test:e2e    # 390 no navegador (antes: npx playwright install chromium)
 npm run build
 ```
 
