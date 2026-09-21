@@ -26,6 +26,7 @@ import { trackTypescript } from './tracks/typescript';
 import { trackReact } from './tracks/react';
 import { trackSql } from './tracks/sql';
 import { trackNode } from './tracks/node';
+import { trackEngenharia } from './tracks/engenharia';
 import { lessonVariaveis } from './lessons/js-01-variaveis';
 import { lessonTiposEOperadores } from './lessons/js-02-tipos-e-operadores';
 import { lessonCondicoes } from './lessons/js-03-condicoes';
@@ -127,6 +128,14 @@ import { lessonNodeCrud } from './lessons/node-07-crud';
 import { lessonNodeAssincrono } from './lessons/node-08-assincrono';
 import { lessonNodeConfiguracao } from './lessons/node-09-configuracao';
 import { lessonNodeProjeto } from './lessons/node-10-projeto';
+import { lessonEngPorQueSeparar } from './lessons/eng-01-por-que-separar';
+import { lessonEngModulos } from './lessons/eng-02-modulos';
+import { lessonEngPastas } from './lessons/eng-03-pastas';
+import { lessonEngNomes } from './lessons/eng-04-nomes';
+import { lessonEngFuncoesPequenas } from './lessons/eng-05-funcoes-pequenas';
+import { lessonEngErros } from './lessons/eng-06-erros';
+import { lessonEngDependencias } from './lessons/eng-07-dependencias';
+import { lessonEngLegivel } from './lessons/eng-08-legivel';
 import { projetoImc } from './projects/js-imc';
 import { projetoConversor } from './projects/js-conversor';
 import { projetoBoletim } from './projects/js-boletim';
@@ -242,6 +251,14 @@ const lessons: Lesson[] = [
   lessonNodeAssincrono,
   lessonNodeConfiguracao,
   lessonNodeProjeto,
+  lessonEngPorQueSeparar,
+  lessonEngModulos,
+  lessonEngPastas,
+  lessonEngNomes,
+  lessonEngFuncoesPequenas,
+  lessonEngErros,
+  lessonEngDependencias,
+  lessonEngLegivel,
 ];
 const projects: Project[] = [
   projetoImc,
@@ -261,6 +278,7 @@ const tracks: Track[] = [
   trackReact,
   trackSql,
   trackNode,
+  trackEngenharia,
 ];
 
 /**

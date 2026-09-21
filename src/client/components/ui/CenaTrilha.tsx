@@ -376,6 +376,67 @@ function CenaApi() {
   );
 }
 
+/** Engenharia: o arquivo que faz tudo vira pastas — e cada coisa acha o seu lugar. */
+function CenaEngenharia() {
+  const pastas: Array<[string, string, string]> = [
+    ['rotas/', 'pedidos.js', P.azul],
+    ['servicos/', 'pedidos.js', P.verdeEscuro],
+    ['dados/', 'pedidos.js', P.roxo],
+  ];
+  return (
+    <Cena>
+      <Quadro>
+        {/* O arquivo comprido, com tudo dentro. */}
+        <JanelaEscura x={8} y={10} w={126} h={200} />
+        <text x="26" y="52" fill={P.creme} fontSize="10" fontFamily={MONO}>
+          app.js
+        </text>
+        {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
+          <Barra
+            key={i}
+            x={26}
+            y={62 + i * 13}
+            w={i % 4 === 0 ? 70 : i % 3 === 0 ? 40 : 90}
+            h={6}
+            cor={i % 4 === 0 ? P.azulClaro : i % 3 === 0 ? P.dourado : EDITOR.apagado}
+            atraso={0.1 + i * 0.06}
+          />
+        ))}
+        {/* A seta: separar. */}
+        <path
+          d="M146 110h40"
+          fill="none"
+          stroke={TELA.linha}
+          strokeWidth="3"
+          strokeLinecap="round"
+          strokeDasharray="4 5"
+          pathLength={1}
+          className="animar-tracar"
+          style={{ animationDelay: '1s' } as CSSProperties}
+        />
+        {/* As pastas, cada uma com o seu arquivo. */}
+        <JanelaClara x={196} y={10} w={156} h={200} />
+        <text x="212" y="52" fill={TELA.texto} fontSize="9" fontWeight="700" fontFamily={MONO}>
+          servidor.js
+        </text>
+        {pastas.map(([pasta, arquivo, cor], i) => (
+          <Pop key={pasta} atraso={1.4 + i * 0.4}>
+            <path d={`M212 ${66 + i * 44}h10l2 3h14v9a2 2 0 0 1-2 2h-22a2 2 0 0 1-2-2z`} fill={cor} />
+            <text x="244" y={77 + i * 44} fill="var(--color-ink)" fontSize="10" fontWeight="700" fontFamily={MONO}>
+              {pasta}
+            </text>
+            <rect x="228" y={86 + i * 44} width="10" height="12" rx="2" fill={TELA.sunken} stroke={TELA.linha} strokeWidth="1" />
+            <text x="244" y={96 + i * 44} fill={TELA.texto} fontSize="9" fontFamily={MONO}>
+              {arquivo}
+            </text>
+          </Pop>
+        ))}
+        <rect x="212" y="192" width="90" height="6" rx="3" fill={TELA.linha} />
+      </Quadro>
+    </Cena>
+  );
+}
+
 const CENAS: Record<string, ComponentType> = {
   'track-js-fundamentos': CenaVariaveis,
   'track-logica': CenaLogica,
@@ -385,6 +446,7 @@ const CENAS: Record<string, ComponentType> = {
   'track-react': CenaComponente,
   'track-sql': CenaConsulta,
   'track-node': CenaApi,
+  'track-engenharia': CenaEngenharia,
 };
 
 /** A cena de abertura da trilha, ou nada — uma trilha nova sem cena não quebra. */

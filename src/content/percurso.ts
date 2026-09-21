@@ -39,4 +39,9 @@ export const ETAPAS_DO_PERCURSO: EtapaDoPercurso[] = [
     description: 'O servidor por trás da tela, e o que faz um projeto ser de gente grande.',
     trackIds: ['track-node'],
   },
+  {
+    title: 'O ofício',
+    description: 'As práticas que fazem um projeto continuar entendível depois de funcionar: onde cada coisa mora, como se chama, como falha.',
+    trackIds: ['track-engenharia'],
+  },
 ];

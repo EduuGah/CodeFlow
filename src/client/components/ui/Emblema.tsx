@@ -76,6 +76,19 @@ const SIMBOLOS: Record<string, ReactNode> = {
       </g>
     </g>
   ),
+  // Engenharia: a pasta, com os arquivos separados dentro — cada coisa no
+  // seu lugar.
+  'track-engenharia': (
+    <g fill="currentColor">
+      <path d="M7 11h13l3 3h18v22a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2z" opacity={0.4} />
+      <path d="M7 18h34v18a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2z" />
+      <g fill="var(--emblema-fundo)">
+        <rect x="12" y="23" width="9" height="8" rx="1.5" />
+        <rect x="24" y="23" width="12" height="8" rx="1.5" />
+        <rect x="12" y="33" width="24" height="2.5" rx="1.25" />
+      </g>
+    </g>
+  ),
   'track-sql': (
     <g fill="currentColor">
       <ellipse cx="24" cy="13" rx="13" ry="5" />

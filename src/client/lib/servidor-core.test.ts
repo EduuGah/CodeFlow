@@ -202,6 +202,48 @@ describe('o Express pequeno', () => {
     expect(r.testResults[0].passed).toBe(true);
   });
 
+  it('require resolve relativo a quem pede, com ../ e pasta com index.js — e um ciclo devolve o que já existe', async () => {
+    const codigo = `
+      const pedidos = require('./servicos/pedidos');
+      const util = require('./util');
+      console.log(pedidos.totalDo(1), util.moeda(5));
+    `;
+    const arquivos = {
+      './servicos/pedidos': `
+        const dados = require('../dados/pedidos');
+        const { moeda } = require('../util');
+        module.exports = { totalDo(id) { return moeda(dados.buscar(id).valor); } };
+      `,
+      './dados/pedidos.js': `module.exports = { buscar(id) { return { id, valor: 12 }; } };`,
+      './util/index.js': `
+        const ciclo = require('../servicos/pedidos'); // ciclo: recebe o que existe até aqui
+        module.exports = { moeda(n) { return 'R$ ' + n.toFixed(2); }, ciclo: Object.keys(ciclo) };
+      `,
+    };
+    const r = await rodar(codigo, [`if (require('./util').ciclo.length !== 0) throw new Error('ciclo deveria ver o módulo ainda vazio');`], { arquivos });
+    expect(r.error).toBeUndefined();
+    expect(r.logs).toEqual(['R$ 12.00 R$ 5.00']);
+    expect(r.testResults[0].passed).toBe(true);
+  });
+
+  it('o arquivo do aluno pode morar numa pasta: o require relativo dele parte de lá', async () => {
+    const codigo = `
+      const { total } = require('./total');
+      const { moeda } = require('../util/moeda');
+      module.exports = { resumo: (n) => moeda(total(n)) };
+    `;
+    const arquivos = {
+      './precos/total.js': `module.exports = { total: (n) => n * 2 };`,
+      './util/moeda.js': `module.exports = { moeda: (n) => 'R$ ' + n };`,
+    };
+    const r = await rodar(codigo, [`if (module.exports.resumo(4) !== 'R$ 8') throw new Error(module.exports.resumo(4));`], {
+      arquivos,
+      caminho: './precos/index',
+    });
+    expect(r.error).toBeUndefined();
+    expect(r.testResults[0].passed).toBe(true);
+  });
+
   it('require de módulo que não existe explica o que existe', async () => {
     const r = await rodar(`const fs = require('fs');`, []);
     expect(r.error).toContain("Cannot find module 'fs'");

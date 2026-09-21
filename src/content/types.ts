@@ -386,6 +386,13 @@ export interface ServerExercise extends ExerciseBase {
   env?: Record<string, string>;
   /** Arquivos que `require('./nome')` encontra: caminho → código. */
   arquivos?: Record<string, string>;
+  /**
+   * Onde o arquivo do aluno mora no projeto, para o `require` relativo dele
+   * resolver a partir dali — `'./precos/index'` faz `require('./total')`
+   * achar `'./precos/total'`. Padrão: a raiz (`'./servidor'`). A tela mostra
+   * o caminho acima do editor quando ele é declarado.
+   */
+  caminho?: string;
   /** Solução de referência. Obrigatória: é ela que prova que o exercício é resolvível. */
   solution: string;
 }

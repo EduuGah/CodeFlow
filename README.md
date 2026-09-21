@@ -1,15 +1,16 @@
 # CodeFlow
 
 Plataforma de ensino de programação em português, do zero até uma aplicação
-completa. Aulas curtas em passos, código do aluno rodando **dentro do
-navegador** — JavaScript, TypeScript, React, HTML/CSS, SQL e Node — e correção
-que explica o porquê do erro, não apenas se acertou.
+completa — e até o projeto que outra pessoa consegue manter. Aulas curtas em
+passos, código do aluno rodando **dentro do navegador** — JavaScript,
+TypeScript, React, HTML/CSS, SQL e Node — e correção que explica o porquê do
+erro, não apenas se acertou.
 
 > Você não aprende a programar lendo. Aprende resolvendo.
 
 ## O que tem hoje
 
-**8 trilhas, 101 aulas, 596 exercícios em 10 tipos, 7 projetos, 97 conceitos.**
+**9 trilhas, 109 aulas, 644 exercícios em 10 tipos, 7 projetos, 105 conceitos.**
 Tudo é contado do catálogo; a página pública mostra os mesmos números.
 
 | Etapa | Trilha | Linguagem | Aulas | Exercícios |
@@ -22,11 +23,12 @@ Tudo é contado do catálogo; a página pública mostra os mesmos números.
 | 3 · As ferramentas do trabalho | React | React (TSX) | 14 | 84 |
 | 3 · As ferramentas do trabalho | SQL e Bancos de Dados | SQL | 10 | 59 |
 | 4 · A aplicação inteira | Node e APIs | Node | 10 | 64 |
+| 5 · O ofício | Engenharia: Organizar um Projeto | Node | 8 | 48 |
 
-**Os dez tipos de exercício**: escrever o código (125), múltipla escolha (154),
-prever a saída (63), completar a lacuna (83), ordenar os passos (43),
-encontrar o bug (43), escrever o teste (5), refatorar (7), consulta SQL (43)
-e servidor (30). Toda aula tem ao menos um dos quatro "de prática de dev" —
+**Os dez tipos de exercício**: escrever o código (126), múltipla escolha (167),
+prever a saída (69), completar a lacuna (86), ordenar os passos (49),
+encontrar o bug (49), escrever o teste (6), refatorar (13), consulta SQL (43)
+e servidor (36). Toda aula tem ao menos um dos quatro "de prática de dev" —
 bug, ordenar, teste, refatorar — que pedem o conceito de outro ângulo.
 
 **Os seis motores de execução**, todos no navegador, nenhum servidor no meio:
@@ -38,7 +40,7 @@ bug, ordenar, teste, refatorar — que pedem o conceito de outro ângulo.
 | TypeScript | TypeScript | o compilador (o mesmo do editor) na frente do sandbox; os erros de tipo viram retorno |
 | React | componentes TSX | compilado e montado no iframe da página, com o React embutido |
 | SQL | consultas e modelagem | o SQLite em WebAssembly (sql.js) num worker que fica vivo; a correção compara **linhas devolvidas** |
-| Servidor | Node e Express | um Node de mentira no sandbox: `require` (do Express pequeno e dos arquivos que o exercício fornece), `process.env`, e um cliente HTTP para os testes; a tela mostra pedidos e respostas |
+| Servidor | Node e Express, e projetos de vários arquivos | um Node de mentira no sandbox: `require` (do Express pequeno e dos arquivos que o exercício fornece, resolvido como no Node — `../`, pasta com `index.js`), `process.env`, e um cliente HTTP para os testes; a tela mostra pedidos e respostas, e onde o arquivo do aluno mora |
 
 **O que acompanha o aluno**: percurso em etapas com o ponto atual, revisão
 espaçada (Leitner), XP e níveis sem teto, sequência de dias com congelamento,
@@ -103,8 +105,8 @@ Redirect URLs.
 
 ```bash
 npm run typecheck   # tipos, incluindo os testes de navegador
-npm test            # 2.508 testes de unidade, propriedade e componente (Vitest)
-npm run test:e2e    # 326 testes de navegador (Playwright, Chromium, celular e desktop)
+npm test            # 2.693 testes de unidade, propriedade e componente (Vitest)
+npm run test:e2e    # 344 testes de navegador (Playwright, Chromium, celular e desktop)
 ```
 
 O E2E precisa do Chromium uma vez: `npx playwright install chromium`.
@@ -167,7 +169,7 @@ paleta só. O movimento tem motivo e respeita `prefers-reduced-motion`.
 
 ```
 src/content/        Aulas, exercícios, projetos, conceitos, percurso + schema Zod
-  lessons/          Uma aula por arquivo (js-, logica-, web-, pagina-, ts-, react-, sql-, node-)
+  lessons/          Uma aula por arquivo (js-, logica-, web-, pagina-, ts-, react-, sql-, node-, eng-)
   tracks/           As trilhas e a ordem das aulas
   bancos/           Os bancos de exemplo do SQL
 src/client/lib/     Lógica derivada e os motores: sandbox, página, TypeScript,
@@ -184,10 +186,8 @@ docs/               CONTEXTO.md (o mapa do projeto), curriculo.md (o roadmap),
 O roadmap completo, com o estado de cada aula e o custo de cada motor, está em
 [`docs/curriculo.md`](docs/curriculo.md). Em resumo, na ordem:
 
-1. **Engenharia: organizar um projeto** — módulos e pastas por
-   responsabilidade, nomes, funções pequenas, erros, configuração, README,
-   revisão de código. Com **Testes e qualidade**, **Git e equipe** e
-   **Terminal**, é a Fase 5.
+1. **O resto da Fase 5** — **Testes e qualidade**, **Git e equipe** e
+   **Terminal**, ao lado da trilha de engenharia que já existe.
 2. **Python** — a primeira linguagem nova, com o Pyodide (Fase 6).
 3. **Projeto final** — do zero a uma aplicação completa: página + API + banco,
    com testes e publicação (Fase 7).

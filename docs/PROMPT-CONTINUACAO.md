@@ -148,8 +148,8 @@ o banco só guarda fatos, e "viu" não é um).
   infinitos e `undefined`.
 - **A tela inicial só conhecia a trilha de JavaScript, e a de trilhas era uma
   grade de cards iguais.** Hoje as duas mostram o **percurso**
-  (`content/percurso.ts`, `lib/percurso.ts`): três etapas na ordem em que uma
-  trilha prepara a outra, o ponto atual marcado, um botão só. Não volte à
+  (`content/percurso.ts`, `lib/percurso.ts`): cinco etapas na ordem em que
+  uma trilha prepara a outra, o ponto atual marcado, um botão só. Não volte à
   grade.
 - **Ordenar passos só tinha setas; escrever o teste não explicava `assert`.**
   O arrasto existe (pela pega, com as setas mantidas para teclado) e o
@@ -286,6 +286,17 @@ projeto: seis trilhas desenroladas numa coluna eram uma parede.
   servidor); `e2e/node.spec.ts` conclui cada aula no Chromium e prova o painel
   de pedidos e respostas.
 
+### B7) A trilha de engenharia — feito (2026-09-21)
+
+- `track-engenharia`, "Engenharia: Organizar um Projeto", 8 aulas em três
+  blocos, 48 exercícios, na quinta etapa do percurso ("O ofício"). Pedida pelo
+  dono do projeto em 2026-09-17.
+- O motor 4 ganhou: `require` resolvido relativo a quem pede (`../`, pasta
+  com `index.js`, ciclo devolve o parcial) e o campo `caminho` do exercício
+  `server` — onde o arquivo do aluno mora; a tela mostra "pasta/arquivo.js — o
+  seu arquivo" acima do editor.
+- `e2e/engenharia.spec.ts` conclui cada aula no Chromium.
+
 ### C) Mais projetos com o motor atual — barato, sem currículo novo
 
 Existem 7 projetos e o roadmap prevê ~30. Eles usam a mecânica que já existe e
@@ -293,12 +304,12 @@ dão prática aplicada. É o caminho de menor risco e menor retorno.
 
 ### Recomendação
 
-A, B, B2, B3, B4, B5 e B6 estão feitos: as Fases 1 a 4 estão completas. O
-que vem agora, pelo pedido do dono do projeto em 2026-09-17, é a **Fase 5**
-começando pela trilha "Engenharia: organizar um projeto" (sem motor novo; o
-plano aula a aula está em `docs/curriculo.md`), depois o capstone da Fase 7
-(motor 7: servidor + SQLite no mesmo worker, a página fazendo `fetch` para
-ele). Ou C, ou os itens de plataforma que ficaram (mapa de tópicos e busca,
+A, B, B2, B3, B4, B5, B6 e B7 estão feitos: as Fases 1 a 4 estão completas
+e a Fase 5 começou pela engenharia. O que vem agora: o resto da **Fase 5**
+(Testes e qualidade, Git e equipe, Terminal — sem motor novo; o plano está
+em `docs/curriculo.md`), ou o capstone da Fase 7 (motor 7: servidor + SQLite
+no mesmo worker, a página fazendo `fetch` para ele), que era o pedido central
+do dono do projeto. Ou C, ou os itens de plataforma que ficaram (mapa de tópicos e busca,
 tutor com IA, painel do aluno). Antes de qualquer um, vale o que só o dono
 do projeto pode fazer: usar o aplicativo publicado num telefone de verdade,
 inclusive uma aula de Node.
@@ -312,8 +323,8 @@ fase ou C — são investimentos grandes o bastante para a escolha ser dele.
 
 ```bash
 npm run typecheck   # inclui e2e/ e playwright.config.ts
-npm test            # 2.508 testes
-npm run test:e2e    # 326 no navegador (antes: npx playwright install chromium)
+npm test            # 2.693 testes
+npm run test:e2e    # 344 no navegador (antes: npx playwright install chromium)
 npm run build
 ```
 

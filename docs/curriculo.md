@@ -6,7 +6,7 @@ que conclui uma fase.
 
 ## Onde estamos
 
-**Fases 1, 2, 3 e 4 de 8 concluídas · publicado**
+**Fases 1, 2, 3 e 4 de 8 concluídas · Fase 5: Engenharia 8 de 8 · publicado**
 
 ```
 Fase 0  Fundamentos e lógica      ██████████████████████  13/13  pronto
@@ -16,20 +16,32 @@ Fase 1  JavaScript real          ███████████████�
 Fase 2  A página                 ██████████████████████  26/26  pronto
 Fase 3  Tipos e componentes      ██████████████████████  24/24  pronto
 Fase 4  Back-end e dados         ██████████████████████  20/20  pronto
-Fase 5  Profissionalização       ░░░░░░░░░░░░░░░░░░░░░░   0/27  engenharia, testes, git, terminal
+Fase 5  Profissionalização       ██████░░░░░░░░░░░░░░░░   8/27  engenharia pronta; testes, git, terminal
 Fase 6  Python                   ░░░░░░░░░░░░░░░░░░░░░░   0/10  motor 6
 Fase 7  Projeto final            ░░░░░░░░░░░░░░░░░░░░░░   0/5   + 3 capstones, motor 7
 ```
 
 | | Hoje | Previsto | Feito |
 | --- | ---: | ---: | ---: |
-| Aulas | **101** | ~150 | 67% |
-| Exercícios | **596** | ~800 | 75% |
+| Aulas | **109** | ~150 | 73% |
+| Exercícios | **644** | ~800 | 81% |
 | Tipos de exercício | **10** | 13 | 77% |
 | Motores de execução | **6** | 8 | 75% |
 | Projetos | **7** | ~20 | 35% |
 
-**Último trabalho** (2026-09-20): as sete aulas que faltavam de "Node e
+**Último trabalho** (2026-09-21): a trilha **Engenharia: Organizar um
+Projeto**, inteira — 8 aulas e 48 exercícios sobre coesão e acoplamento,
+módulos como fronteiras, pastas por responsabilidade, nomes, funções
+pequenas, erros como contrato, dependências e o `package.json`, e o projeto
+que outra pessoa lê. Roda no motor 4, que ganhou o que a trilha precisava:
+`require` resolvido como no Node (`../` relativo a quem pede, pasta com
+`index.js`) e o `caminho` do arquivo do aluno (`'./precos/index'`), para ele
+escrever um arquivo de dentro de uma pasta com os vizinhos à vista. Abre a
+quinta etapa do percurso, "O ofício". No mesmo dia, três retornos do dono do
+projeto: o encontrar-o-bug passou a fazer uma pergunta só ("a linha que
+precisa mudar") sem entregar o diagnóstico, o NaN ganhou explicação antes do
+uso, e um exercício da aula 3 de JavaScript deixou de usar `for` antes da
+aula de laços. Antes disso (2026-09-20): as sete aulas que faltavam de "Node e
 APIs" — corpo e JSON, status e erros, middleware e autenticação, CRUD,
 assincronia no servidor, configuração e segredos, e o projeto da API inteira
 — 45 exercícios, 21 deles de servidor. A Fase 4 fechou. As aulas 8 a 10
@@ -499,24 +511,34 @@ o dono do projeto quem pediu a primeira trilha desta fase, em 2026-09-17:
 "uma área que explica engenharia, como dividir os arquivos em pastas, boas
 práticas".
 
-**Engenharia: organizar um projeto — 0 de 8.** Trilha própria,
-`track-engenharia`, em JavaScript (com `require`/`module.exports` do motor 4,
-que já sabe ler vários arquivos por exercício). O aluno recebe projetos
-pequenos já escritos e os reorganiza; a correção continua sendo por
-comportamento — os testes chamam o que cada módulo exporta — mais as
-restrições de forma do exercício de refatorar (o arquivo não pode ter mais
-que N linhas, a função tal precisa existir no módulo tal).
+**Engenharia: organizar um projeto — 8 de 8** (2026-09-21). Trilha própria,
+`track-engenharia`, linguagem `node` (o motor 4: `require`/`module.exports`,
+vários arquivos por exercício). Em três blocos: Dividir (1–3), Escrever
+(4–6), Entregar (7–8). O aluno recebe projetos pequenos já escritos e
+escreve ou reescreve **um arquivo por vez** — a porta de um módulo, o
+`index.js` de uma pasta, o serviço que fica em `servicos/` e requer
+`../dados/` —, com os vizinhos à vista acima do editor. A correção é por
+comportamento (os testes chamam o que o módulo exporta, ou fazem `pedir`)
+mais as restrições de forma do exercício de refatorar (`required`,
+`forbidden`), que é o tipo mais usado aqui: 6 dos 13 do catálogo. O que o
+motor 4 ganhou para isto: `require` resolvido relativo a quem pede, com
+`../` e pasta com `index.js`, e o campo `caminho` do exercício `server`, que
+diz onde o arquivo do aluno mora.
 
 | Aula | Assunto |
 | --- | --- |
-| 1 | Por que separar: um arquivo de 400 linhas, e o que custa achar uma coisa nele; coesão e acoplamento em palavras simples |
-| 2 | Módulos como fronteiras: o que exportar e o que esconder; `index.js` como porta de uma pasta; dependência num sentido só |
-| 3 | Pastas por responsabilidade: `rotas/`, `servicos/`, `dados/`, `util/` — e por que não por tipo de arquivo; o mesmo esqueleto para uma API e para uma página |
-| 4 | Nomes: verbos para funções, substantivos para dados, sem abreviação, sem mentira; o nome do arquivo é o nome do que ele exporta |
-| 5 | Funções pequenas e uma coisa só: extrair, parametrizar, a regra dos três; quando não extrair |
-| 6 | Erros como contrato: lançar cedo, tratar num lugar só, mensagens para quem lê; `Error` com nome |
-| 7 | Configuração e segredos: `process.env`, `.env` fora do Git, valores padrão, o que nunca vai para o repositório |
-| 8 | O projeto que outra pessoa lê: README que responde "o que é, como rodar, como testar", comentários que dizem o porquê, revisão de código como conversa |
+| 1 | Por que separar: o custo do arquivo que faz tudo; coesão e acoplamento em palavras simples; uma razão para mudar; dividir com rede de segurança, uma extração por vez |
+| 2 | Módulos como fronteiras: a porta é o `module.exports`, exportar o mínimo; `index.js` como porta da pasta; dependência num sentido só e o ciclo que entrega um módulo pela metade |
+| 3 | Pastas por responsabilidade: por tipo espalha cada assunto; os dois esqueletos; `util/` só para o que não sabe do domínio; mover um arquivo muda os `require` dos dois lados |
+| 4 | Nomes: verbo, substantivo, pergunta; sem abreviação, sem mentira; uma palavra por conceito; o arquivo se chama pelo que exporta; renomear é barato |
+| 5 | Funções pequenas: o nome sem "e"; extrair em cinco passos; parâmetro em vez de cópia e a regra dos três; retornos cedo, sem `else`; quando não extrair |
+| 6 | Erros como contrato: "não tem" devolve, "não dá" lança; falhar cedo com mensagem que explica; erros com nome (`extends Error`, `super` primeiro); tratar num lugar só, nunca engolir |
+| 7 | Dependências e o `package.json`: `dependencies` e `devDependencies`, semver e o que `^` promete, versão é três números, o lockfile e `npm ci`, antes de instalar, `npm outdated`/`audit` |
+| 8 | O projeto que outra pessoa lê: README (o que é, como rodar, como testar); comentários dizem por quê; formatador e linter; revisão como conversa; apagar também é organizar |
+
+A aula 7 mudou em relação ao plano: configuração e segredos já é a aula 9
+de Node, então aqui entrou o que faltava — as dependências. O item de `npm`
+sai da trilha de Terminal.
 
 **Testes e qualidade — 0 de 8.** Vitest de verdade como assunto:
 arrange/act/assert, um teste por comportamento, nomes que viram
@@ -528,9 +550,10 @@ request e revisão, conflito sem pânico, histórico que conta uma história,
 `.gitignore`. Sem motor: os exercícios são de ordenar, múltipla escolha e
 prever a saída sobre transcrições de terminal reais.
 
-**Terminal e ferramentas — 0 de 5.** O shell, caminhos, `npm` e o
-`package.json`, scripts, o que `npm ci` faz que `npm install` não faz,
-variáveis de ambiente no terminal. Idem: sem motor.
+**Terminal e ferramentas — 0 de 5.** O shell, caminhos, os scripts do
+`package.json` na prática, variáveis de ambiente no terminal, o que ler numa
+saída de erro. Idem: sem motor. (O `package.json`, o semver e o lockfile já
+são a aula 7 de Engenharia.)
 
 ### Fase 6 — Python · 10 aulas
 Motor **6: Pyodide, ~10 MB**. Por último entre os motores pelo peso, não
@@ -605,17 +628,19 @@ Um por fase, cada um preso ao motor dela:
 - **Consertar a tela** (motor 1): a página está errada, o aluno corrige o
   CSS ou o DOM até o teste ver o que espera. Cabe na Fase 2 a qualquer
   momento.
-- **Reorganizar o projeto** (motor 4, vários arquivos): o exercício central
-  da trilha de engenharia — mover, renomear, extrair, com testes de
-  comportamento e restrições de forma.
+- **Reorganizar o projeto** (motor 4, vários arquivos editáveis): mover,
+  renomear, extrair entre arquivos, com testes de comportamento e restrições
+  de forma. A trilha de engenharia saiu sem ele — os exercícios editam um
+  arquivo por vez, com os vizinhos fornecidos — e é o que a tornaria mais
+  forte: um editor com abas sobre os `arquivos` do exercício.
 - **Construir do zero** (motor 7): o capstone, com critérios de aceitação em
   três camadas.
 
 ## Sobre tamanho
 
-As 101 aulas de hoje levaram bastante tempo para ficar no padrão do projeto.
-As ~48 restantes (27 da Fase 5, 10 de Python, 5 do projeto final, mais os
-capstones) são muitas vezes esse trabalho, e os ~200 exercícios novos são a
+As 109 aulas de hoje levaram bastante tempo para ficar no padrão do projeto.
+As ~40 restantes (19 da Fase 5, 10 de Python, 5 do projeto final, mais os
+capstones) são muitas vezes esse trabalho, e os ~160 exercícios novos são a
 maior parte dele. Por isso a unidade é a fase: cada uma termina numa versão do
 produto que dá para usar. O roadmap escolhe a ordem; não promete prazo.
 

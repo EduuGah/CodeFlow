@@ -13,10 +13,10 @@ import { montarCodigoDoServidor } from './servidor-core';
  */
 export function executarServidor(
   codigo: string,
-  exercicio: Pick<ServerExercise, 'tests' | 'env' | 'arquivos'>
+  exercicio: Pick<ServerExercise, 'tests' | 'env' | 'arquivos' | 'caminho'>
 ): Promise<ExecutionResult> {
   return executeCode(
-    montarCodigoDoServidor(codigo, { env: exercicio.env, arquivos: exercicio.arquivos }),
+    montarCodigoDoServidor(codigo, { env: exercicio.env, arquivos: exercicio.arquivos, caminho: exercicio.caminho }),
     exercicio.tests,
     [],
     { sequencial: true }

@@ -8,7 +8,8 @@
  * mentira, com o bastante para o código ser o mesmo que rodaria fora:
  *
  * - `require`: devolve o `express` daqui, o módulo `./x` que o exercício
- *   fornecer em `arquivos`, e recusa o resto com uma frase;
+ *   fornecer em `arquivos` — resolvido relativo a quem pede, com `../` e
+ *   pasta com `index.js`, como no Node — e recusa o resto com uma frase;
  * - `process.env`: o que o exercício definir em `env`;
  * - `module.exports` / `exports`: para o aluno exportar como no Node;
  * - `express()`: um Express pequeno — rotas com `:parametro`, `req.query`,
@@ -41,6 +42,8 @@ export interface OpcoesDoServidor {
   env?: Record<string, string>;
   /** Módulos que `require('./nome')` encontra: caminho → código. */
   arquivos?: Record<string, string>;
+  /** Onde o arquivo do aluno mora, para o `require` relativo dele. Padrão `'./servidor'`. */
+  caminho?: string;
 }
 
 /**
@@ -56,19 +59,51 @@ var module = { exports: {} };
 var exports = module.exports;
 var __cfArquivos = __CF_ARQUIVOS__;
 var __cfModulos = {};
+// O arquivo do aluno é a raiz ('./servidor'); cada módulo carregado entra na
+// pilha enquanto roda, para um require('../dados/x') dentro de
+// './servicos/y' resolver como no Node: relativo ao arquivo que pede.
+var __cfPilhaDeModulos = [__CF_CAMINHO__];
+
+function __cfNormalizar(caminho) {
+  var partes = caminho.split('/');
+  var saida = [];
+  for (var i = 0; i < partes.length; i++) {
+    var p = partes[i];
+    if (p === '' || p === '.') continue;
+    if (p === '..') { if (saida.length > 0) saida.pop(); continue; }
+    saida.push(p);
+  }
+  return './' + saida.join('/');
+}
+
+function __cfResolver(nome) {
+  var base = __cfPilhaDeModulos[__cfPilhaDeModulos.length - 1];
+  var pasta = base.slice(0, base.lastIndexOf('/'));
+  return __cfNormalizar(pasta + '/' + nome.replace(/\.js$/, ''));
+}
 
 function require(nome) {
   if (nome === 'express') return __cfExpress;
   if (typeof nome === 'string' && (nome.startsWith('./') || nome.startsWith('../'))) {
-    var chave = nome.replace(/\.js$/, '');
-    if (__cfModulos[chave]) return __cfModulos[chave].exports;
-    var fonte = __cfArquivos[chave] !== undefined ? __cfArquivos[chave] : __cfArquivos[chave + '.js'];
-    if (fonte === undefined) {
-      throw new Error("Cannot find module '" + nome + "'. Neste exercício existem: " + (Object.keys(__cfArquivos).join(', ') || 'nenhum arquivo além deste') + '.');
+    var chave = __cfResolver(nome);
+    // Como no Node: 'x', 'x.js', ou a pasta x com o index.js dentro.
+    var candidatos = [chave, chave + '.js', chave + '/index', chave + '/index.js'];
+    var achada = null;
+    for (var c = 0; c < candidatos.length; c++) {
+      if (__cfArquivos[candidatos[c]] !== undefined) { achada = candidatos[c]; break; }
     }
+    if (achada === null) {
+      throw new Error("Cannot find module '" + nome + "' (procurado como " + chave + "). Neste exercício existem: " + (Object.keys(__cfArquivos).join(', ') || 'nenhum arquivo além deste') + '.');
+    }
+    if (__cfModulos[achada]) return __cfModulos[achada].exports;
     var mod = { exports: {} };
-    __cfModulos[chave] = mod;
-    new Function('require', 'module', 'exports', 'process', 'console', fonte)(require, mod, mod.exports, process, console);
+    __cfModulos[achada] = mod;
+    __cfPilhaDeModulos.push(achada);
+    try {
+      new Function('require', 'module', 'exports', 'process', 'console', __cfArquivos[achada])(require, mod, mod.exports, process, console);
+    } finally {
+      __cfPilhaDeModulos.pop();
+    }
     return mod.exports;
   }
   throw new Error("Cannot find module '" + nome + "'. Aqui dentro só existem o 'express' e os arquivos do exercício (require('./nome')).");
@@ -288,10 +323,9 @@ async function pedir(app, metodo, url, opcoes) {
  * a mesma lista.
  */
 export function montarCodigoDoServidor(codigo: string, opcoes: OpcoesDoServidor = {}): string {
-  const preludio = PRELUDIO.replace('__CF_ENV__', JSON.stringify(opcoes.env ?? {})).replace(
-    '__CF_ARQUIVOS__',
-    JSON.stringify(opcoes.arquivos ?? {})
-  );
+  const preludio = PRELUDIO.replace('__CF_ENV__', JSON.stringify(opcoes.env ?? {}))
+    .replace('__CF_ARQUIVOS__', JSON.stringify(opcoes.arquivos ?? {}))
+    .replace('__CF_CAMINHO__', JSON.stringify(opcoes.caminho ?? './servidor'));
   return `${preludio}\n${codigo}`;
 }
 

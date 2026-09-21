@@ -1132,7 +1132,7 @@ describe('exercícios de servidor', () => {
 
   const rodar = (exercise: ServerExercise, codigo: string) =>
     runProgram(
-      montarCodigoDoServidor(codigo, { env: exercise.env, arquivos: exercise.arquivos }),
+      montarCodigoDoServidor(codigo, { env: exercise.env, arquivos: exercise.arquivos, caminho: exercise.caminho }),
       exercise.tests,
       [],
       { sequencial: true }

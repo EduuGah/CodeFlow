@@ -227,6 +227,7 @@ export const exerciseSchema = z.discriminatedUnion('type', [
     tests: z.array(testCaseSchema).min(1, 'exercício de servidor precisa de ao menos uma verificação'),
     env: z.record(z.string(), z.string()).optional(),
     arquivos: z.record(z.string(), z.string()).optional(),
+    caminho: z.string().regex(/^\.\/[^\s]+$/, 'o caminho do arquivo do aluno começa com ./').optional(),
     solution: z.string().min(1, 'exercício de servidor precisa da solução de referência'),
   }),
   z.object({

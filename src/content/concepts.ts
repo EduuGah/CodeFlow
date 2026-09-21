@@ -758,4 +758,68 @@ export const concepts: Concept[] = [
     prerequisites: ['node-config', 'node-async', 'node-middleware', 'cors'],
     tags: ['node'],
   },
+  {
+    id: 'eng-separar',
+    title: 'Por que separar',
+    summary:
+      'O custo do arquivo que faz tudo (achar, mudar, entender, trabalhar em dupla); coesão (as coisas de um arquivo têm a ver umas com as outras) e acoplamento (o quanto uma parte precisa saber da outra); uma razão para mudar por arquivo e por função; dividir com rede de segurança, uma extração por vez; estrutura proporcional ao problema.',
+    prerequisites: ['funcoes', 'node-modulos'],
+    tags: ['engenharia'],
+  },
+  {
+    id: 'eng-modulos',
+    title: 'Módulos como fronteiras',
+    summary:
+      'A porta é o module.exports e tudo o mais é de dentro; exportar o mínimo, porque cada exportação é um contrato; index.js como porta de uma pasta; dependência num sentido só, e o ciclo que entrega um módulo pela metade; onde passa a fronteira (outro programa reutilizaria? muda por motivo próprio?).',
+    prerequisites: ['eng-separar', 'node-modulos'],
+    tags: ['engenharia'],
+  },
+  {
+    id: 'eng-pastas',
+    title: 'Pastas por responsabilidade',
+    summary:
+      'Por tipo espalha cada assunto por todas as pastas; por responsabilidade, o que muda junto fica junto; os dois esqueletos (camadas rotas/servicos/dados/util, ou por assunto com a camada dentro); util só para o que não sabe do domínio; o caminho é uma frase de dois níveis; mover muda os require dos dois lados, um arquivo por vez.',
+    prerequisites: ['eng-modulos'],
+    tags: ['engenharia'],
+  },
+  {
+    id: 'eng-nomes',
+    title: 'Nomes',
+    summary:
+      'Função é verbo, dado é substantivo, booleano é pergunta; sem abreviação fora as universais; o nome é uma promessa (obter não cria); uma palavra por conceito e um idioma só; tamanho proporcional ao alcance; o arquivo se chama pelo que exporta, nunca utils.js; renomear é a mudança mais segura.',
+    prerequisites: ['eng-separar'],
+    tags: ['engenharia'],
+  },
+  {
+    id: 'eng-funcoes',
+    title: 'Funções pequenas',
+    summary:
+      'Uma coisa só: o nome sem "e", o comentário de seção que é uma função esperando; extrair em cinco passos, e o número de parâmetros como teste do corte; parâmetro em vez de cópia, com a regra dos três; retornos cedo, guardas em ordem de dependência, sem else; até três parâmetros; quando não extrair.',
+    prerequisites: ['eng-nomes', 'funcoes'],
+    tags: ['engenharia'],
+  },
+  {
+    id: 'eng-erros',
+    title: 'Erros como contrato',
+    summary:
+      'Como a função falha é parte do contrato: não tem devolve null, não dá lança; falhar cedo na entrada com mensagem que diz o quê, onde e o que se esperava; sempre new Error, nunca texto solto; erros com nome (extends Error, super primeiro) para tratar por instanceof; tratar num lugar só, deixar passar no meio, nunca engolir; duas plateias (log e pessoa).',
+    prerequisites: ['eng-funcoes', 'node-erros'],
+    tags: ['engenharia'],
+  },
+  {
+    id: 'eng-dependencias',
+    title: 'Dependências e o package.json',
+    summary:
+      'Dependência é código de outra pessoa rodando como seu; package.json com scripts, dependencies e devDependencies; semver (major.minor.patch) e o que ^ promete; versão é três números, não texto; o lockfile vai para o Git, npm ci o reproduz, node_modules nunca entra; antes de instalar (dá para escrever? a plataforma já tem? está viva? pesa? licença?); npm outdated e audit em passos pequenos.',
+    prerequisites: ['eng-modulos', 'node-config'],
+    tags: ['engenharia'],
+  },
+  {
+    id: 'eng-legivel',
+    title: 'O projeto que outra pessoa lê',
+    summary:
+      'Tudo é para quem abre o projeto sem você por perto; o README responde o que é, como rodar, como testar, e desatualizado é pior que nenhum; comentários dizem por quê, nunca o quê, e código comentado se apaga; estilo por formatador e linter; revisão de código como conversa (o porquê, mudanças pequenas, sugestão com motivo, nada pessoal); apagar também é organizar.',
+    prerequisites: ['eng-nomes', 'eng-dependencias'],
+    tags: ['engenharia'],
+  },
 ];

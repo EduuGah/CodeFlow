@@ -189,6 +189,12 @@ export function ServerExerciseStep({ exercise, lessonId, onEstado }: ServerExerc
           estado === 'acertou' ? 'border-success-200' : 'border-line'
         }`}
       >
+        {exercise.caminho && (
+          <p className="border-b border-line bg-sunken px-4 py-1.5 font-mono text-xs text-ink-soft">
+            {exercise.caminho.replace(/^\.\//, '')}.js
+            <span className="text-ink-faint"> — o seu arquivo</span>
+          </p>
+        )}
         <CodeEditor height="280px" language="javascript" value={code} onChange={setCode} />
       </div>
 
