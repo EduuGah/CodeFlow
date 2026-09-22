@@ -10,7 +10,7 @@ erro, não apenas se acertou.
 
 ## O que tem hoje
 
-**14 trilhas, 134 aulas, 763 exercícios em 10 tipos, 10 projetos, 131 conceitos.**
+**14 trilhas, 143 aulas, 807 exercícios em 10 tipos, 10 projetos, 139 conceitos.**
 Tudo é contado do catálogo; a página pública mostra os mesmos números.
 
 | Etapa | Trilha | Linguagem | Aulas | Exercícios |
@@ -25,14 +25,14 @@ Tudo é contado do catálogo; a página pública mostra os mesmos números.
 | 4 · A aplicação inteira | Node e APIs | Node | 10 | 64 |
 | 5 · O ofício | Engenharia: Organizar um Projeto | Node | 8 | 48 |
 | 6 · O projeto final | Projeto Final: A Aplicação Inteira | Node + SQL + página | 5 | 27 |
-| 7 · A profissão | Testes e Qualidade | JavaScript + Node | 8 | 41 |
+| 7 · A profissão | Testes e Qualidade | JavaScript + Node | 8 | 28 |
 | 7 · A profissão | Git e Equipe | JavaScript | 6 | 33 |
 | 7 · A profissão | Terminal e Ferramentas | JavaScript | 5 | 25 |
-| 8 · Outra linguagem | Python | Python | 1 | 6 |
+| 8 · Outra linguagem | Python | Python | 10 | 50 |
 
-**Os dez tipos de exercício**: escrever o código (145), múltipla escolha (205),
-prever a saída (84), completar a lacuna (86), ordenar os passos (66),
-encontrar o bug (61), escrever o teste (15), refatorar (14), consulta SQL (46)
+**Os dez tipos de exercício**: escrever o código (160), múltipla escolha (216),
+prever a saída (93), completar a lacuna (86), ordenar os passos (66),
+encontrar o bug (70), escrever o teste (15), refatorar (14), consulta SQL (46)
 e servidor (41). Toda aula tem ao menos um dos quatro "de prática de dev" —
 bug, ordenar, teste, refatorar — que pedem o conceito de outro ângulo.
 
@@ -191,19 +191,15 @@ docs/               CONTEXTO.md (o mapa do projeto), curriculo.md (o roadmap),
 ## Para onde vai
 
 O roadmap completo, com o estado de cada aula e o custo de cada motor, está em
-[`docs/curriculo.md`](docs/curriculo.md). Em resumo, na ordem:
-
-1. **O resto da trilha de Python** — 9 aulas (condições e laços, funções,
-   listas, dicionários, strings, erros, classes, módulos, um projeto final).
-   O motor (Pyodide, motor 6) já está de pé, com a primeira aula publicada.
-2. **Mais linguagens**, uma por vez, cada uma com o motor que a roda no
-   navegador.
+[`docs/curriculo.md`](docs/curriculo.md). As oito fases previstas estão
+**completas** — o que vem a seguir é **mais linguagens**, uma por vez, cada
+uma com o motor que a roda no navegador.
 
 O projeto final — página, API e banco, do desenho à publicação — está
 completo, a Fase 5 (Profissionalização: Engenharia, Testes, Git e Terminal)
 fechou inteira, os **três capstones** também (lista de tarefas com conta,
-loja com carrinho, blog com autenticação), e a Fase 6 (Python) começou: o
-motor 8 no total, o último que faltava conforme o roadmap original.
+loja com carrinho, blog com autenticação), e a Fase 6 (Python) fechou: as
+10 aulas do roadmap sobre o motor 8 (Pyodide), o último motor previsto.
 
 ## Licença
 

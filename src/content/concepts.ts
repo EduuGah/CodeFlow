@@ -1022,4 +1022,76 @@ export const concepts: Concept[] = [
     prerequisites: ['variaveis', 'funcoes'],
     tags: ['python'],
   },
+  {
+    id: 'py-condicoes',
+    title: 'Condições e laços em Python',
+    summary:
+      '`and`/`or`/`not` no lugar de `&&`/`||`/`!`; `for item in colecao` percorre direto, sem índice; `range(inicio, fim, passo)` gera a sequência de números; `while` e `break`/`continue` iguais; valores "falsy" incluem `0`, `""`, `[]`, `None` — mais casos que o JavaScript considera falso.',
+    prerequisites: ['py-intro', 'condicoes', 'loops'],
+    tags: ['python'],
+  },
+  {
+    id: 'py-funcoes',
+    title: 'Funções em Python',
+    summary:
+      'Parâmetros nomeados (`funcao(nome=valor)`) chamam por nome, em qualquer ordem; valor padrão parecido com JavaScript, mas cuidado com padrão mutável (lista/dicionário) compartilhado entre chamadas; `return a, b` devolve uma tupla — "múltiplos retornos" sem objeto; docstring como primeira linha do corpo documenta a função.',
+    prerequisites: ['py-condicoes'],
+    tags: ['python'],
+  },
+  {
+    id: 'py-listas',
+    title: 'Listas e compreensões',
+    summary:
+      'Lista é o array do Python: `append`, fatiar com `[a:b]`, `len()`. Compreensão de lista (`[expressao for item in colecao if condicao]`) é o `map`/`filter` do Python, numa linha só — a mesma ideia de transformar uma coleção sem loop explícito.',
+    prerequisites: ['py-funcoes'],
+    tags: ['python'],
+  },
+  {
+    id: 'py-dicionarios',
+    title: 'Dicionários e conjuntos',
+    summary:
+      '`dict` é o objeto do Python — chave e valor, `dicionario[chave]`, `.get(chave, padrao)` para não lançar; `set` é o `Set` — únicos, sem ordem garantida, união e interseção com `|`/`&`; iterar um dicionário com `.items()` dá chave e valor juntos.',
+    prerequisites: ['py-listas'],
+    tags: ['python'],
+  },
+  {
+    id: 'py-strings',
+    title: 'Strings e f-strings',
+    summary:
+      'Fatiar com `[a:b]`, como lista; `f"texto {expressao}"` interpola, como o template literal do JavaScript; `split`/`join` — `join` é método da string separadora, não da lista, na ordem trocada em relação ao JavaScript.',
+    prerequisites: ['py-listas'],
+    tags: ['python'],
+  },
+  {
+    id: 'py-erros',
+    title: 'Erros em Python',
+    summary:
+      '`try/except/finally` no lugar de `try/catch/finally`; `except TipoDoErro as nome` pega só aquele tipo, deixa os outros subirem; `raise` lança, `raise ErroProprio("mensagem")` com uma classe que herda de `Exception` nomeia o erro, como `extends Error` no JavaScript.',
+    prerequisites: ['py-funcoes', 'depuracao'],
+    tags: ['python'],
+  },
+  {
+    id: 'py-classes',
+    title: 'Classes em Python',
+    summary:
+      '`__init__` é o construtor; `self` é o `this` explícito — todo método o recebe como primeiro parâmetro, por escrito; método é função dentro da classe, chamada com `objeto.metodo()`; uma classe vale a pena quando dados e comportamento andam sempre juntos, não para agrupar funções soltas.',
+    prerequisites: ['py-funcoes'],
+    tags: ['python'],
+  },
+  {
+    id: 'py-modulos',
+    title: 'Módulos e a biblioteca padrão',
+    summary:
+      '`import modulo` ou `from modulo import nome`, no lugar do `import` do JavaScript; a biblioteca padrão já traz `json` (igual a `JSON.parse`/`stringify`), `datetime` (datas), `math`, `random` — sem precisar instalar nada.',
+    prerequisites: ['py-classes'],
+    tags: ['python'],
+  },
+  {
+    id: 'py-projeto',
+    title: 'Projeto em Python: ler, transformar, escrever',
+    summary:
+      'Um script comum tem três partes — ler os dados de entrada, transformar com funções puras, produzir a saída — a mesma forma de qualquer programa que processa dados, agora juntando tudo que a trilha ensinou: listas, dicionários, strings, erros.',
+    prerequisites: ['py-modulos', 'py-erros'],
+    tags: ['python'],
+  },
 ];

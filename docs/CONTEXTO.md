@@ -33,14 +33,14 @@ Números lidos do catálogo, não de memória.
 
 | | |
 | --- | --- |
-| Trilhas | 14 — Fundamentos de JavaScript (20 aulas), Lógica (3), Como a Web Funciona (8), A Página (26), TypeScript (10), React (14), SQL e Bancos de Dados (10), Node e APIs (10), Engenharia: Organizar um Projeto (8), Projeto Final (5), Testes e Qualidade (8), Git e Equipe (6), Terminal e Ferramentas (5), Python (1) |
-| Aulas | 134, somando 3.816 minutos, em blocos por assunto (`Track.sections`) |
-| Exercícios | 763, em 10 tipos — 205 de múltipla escolha, 145 de código, 86 de lacuna, 84 de prever saída, 66 de ordenar passos, 61 de encontrar o bug, 46 de SQL, 41 de servidor, 14 de refatorar, 15 de escrever o teste. 78 exercícios de página (`runtime: 'iframe'`), 42 de componente React (a aula é `language: 'react'`), 16 com trechos de tipo (`typeTests`). **Toda aula tem ao menos um dos quatro tipos de prática de dev** |
-| Verificação | 945 casos fixos + 59 propriedades + 71 verificações de SQL (por linhas devolvidas) |
+| Trilhas | 14 — Fundamentos de JavaScript (20 aulas), Lógica (3), Como a Web Funciona (8), A Página (26), TypeScript (10), React (14), SQL e Bancos de Dados (10), Node e APIs (10), Engenharia: Organizar um Projeto (8), Projeto Final (5), Testes e Qualidade (8), Git e Equipe (6), Terminal e Ferramentas (5), Python (10) |
+| Aulas | 143, em blocos por assunto (`Track.sections`) |
+| Exercícios | 807, em 10 tipos — 216 de múltipla escolha, 160 de código, 93 de prever saída, 86 de lacuna, 70 de encontrar o bug, 66 de ordenar passos, 46 de SQL, 41 de servidor, 15 de escrever o teste, 14 de refatorar. 78 exercícios de página (`runtime: 'iframe'`), 42 de componente React (a aula é `language: 'react'`), 16 com trechos de tipo (`typeTests`). **Toda aula tem ao menos um dos quatro tipos de prática de dev** |
+| Verificação | 1.051 casos fixos + 59 propriedades + 71 verificações de SQL (por linhas devolvidas) |
 | Projetos | 10, com 34 critérios de aceitação — os 3 capstones são página + API + banco (motor 7), os outros 7 são JavaScript puro |
-| Conceitos | 131, com grafo de pré-requisitos |
+| Conceitos | 139, com grafo de pré-requisitos |
 | Flashcards | 22 |
-| Testes | 3.046 de unidade + 408 de navegador |
+| Testes | 3.157 de unidade + 408 de navegador |
 | Pacote | 2.385 kB (667 kB comprimido) no chunk principal — o conteúdo vai junto; o Monaco são mais 3.362 kB (869 kB) num chunk à parte, baixado só quando o primeiro editor monta, e o worker de TypeScript (7 MB) só quando um modelo JS/TS abre. O motor de TypeScript não acrescentou arquivo; o de React acrescentou um chunk de 143 kB (47 kB) com o React e o ReactDOM como texto, baixado só por um exercício de React; o de SQL acrescentou o worker (49 kB) e o SQLite em WebAssembly (658 kB), baixados só por um exercício de SQL; o de Python acrescentou o worker (~22 kB) e o Pyodide inteiro (~13,5 MB: o WebAssembly do CPython, a biblioteca padrão zipada, o manifesto de pacotes), copiados para `/pyodide/` na build e baixados só por um exercício de Python |
 
 ## 4. Decisões que não devem ser desfeitas sem motivo forte
@@ -794,13 +794,29 @@ no build (`iife`, que não suporta código dividido) — `worker: { format:
 'es' }` resolve, e não quebrou o motor de SQL (confirmado por
 `e2e/sql.spec.ts` depois da mudança).
 
-`track-python`, oitava etapa do percurso ("Outra linguagem"), com a
-primeira aula publicada: "Python Depois de JavaScript" — indentação no
-lugar de chaves, `print()`, tipos dinâmicos sem coerção implícita, `None`
-como único "nada". `e2e/python.spec.ts` prova a aula inteira no Chromium e
-no celular. Faltam as outras 9 aulas do roadmap (condições e laços,
-funções, listas, dicionários, strings, erros, classes, módulos, um
-projeto de fechamento).
+Uma terceira armadilha, descoberta só ao escrever o conteúdo: o worker do
+navegador interrompe um laço sem fim de fora, com `worker.terminate()`
+depois de `EXECUTION_TIMEOUT_MS`, mas `python-node.ts` (o mesmo motor no
+CI) roda `runPython` de forma síncrona e bloqueante — sem processo externo
+para matar, um laço genuinamente infinito trava o `vitest` para sempre.
+Resolvido dentro do próprio `montarPrograma`, não em quem chama: o
+programa inteiro (código do aluno incluído) roda sob um `sys.settrace`
+armado por ele mesmo, que confere o relógio a cada linha executada e lança
+`TimeoutError` se passar de `EXECUTION_TIMEOUT_MS`. `sys.settrace` sozinho
+só instrumenta frames abertos depois dele; a linha que faltava foi também
+setar `f_trace` no frame atual (`sys._getframe().f_trace = watchdog`), para
+cobrir o laço que já estava rodando quando o relógio foi armado. Isso vale
+para os dois lados — navegador e Node — com o mesmo código, e sem depender
+de quem chamou.
+
+`track-python`, oitava etapa do percurso ("Outra linguagem"), com as 10
+aulas do roadmap completas: "Python Depois de JavaScript" (indentação no
+lugar de chaves, tipos dinâmicos, `None`), condições e laços, funções,
+listas e compreensões, dicionários e conjuntos, strings e f-strings, erros
+(`try`/`except`/`finally`, exceção própria), classes (`__init__`, `self`),
+módulos e biblioteca padrão (`json`, `math`, `datetime`), e um projeto de
+fechamento que junta tudo num relatório. `e2e/python.spec.ts` prova as 10
+aulas no Chromium e no celular. **A Fase 6 está completa.**
 
 ## 9. Pendências do lado do usuário
 

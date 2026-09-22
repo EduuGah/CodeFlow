@@ -6,7 +6,7 @@ que conclui uma fase.
 
 ## Onde estamos
 
-**Fases 1, 2, 3, 4, 5 e 7 de 8 concluídas · Fase 6 (Python): motor pronto, 1/10 aulas · publicado**
+**Fases 1 a 7 de 8 concluídas · publicado**
 
 ```
 Fase 0  Fundamentos e lógica      ██████████████████████  13/13  pronto
@@ -17,37 +17,33 @@ Fase 2  A página                 ███████████████�
 Fase 3  Tipos e componentes      ██████████████████████  24/24  pronto
 Fase 4  Back-end e dados         ██████████████████████  20/20  pronto
 Fase 5  Profissionalização       ██████████████████████  27/27  pronto
-Fase 6  Python                   ██░░░░░░░░░░░░░░░░░░░░   1/10  motor 8 pronto; falta o resto das aulas
+Fase 6  Python                   ██████████████████████  10/10  pronto
 Fase 7  Projeto final            ██████████████████████   5/5   pronto; motor 7 inteiro; 3 capstones prontos
 ```
 
 | | Hoje | Previsto | Feito |
 | --- | ---: | ---: | ---: |
-| Aulas | **134** | ~150 | 89% |
-| Exercícios | **763** | ~800 | 95% |
+| Aulas | **143** | ~150 | 95% |
+| Exercícios | **807** | ~800 | 100% |
 | Tipos de exercício | **10** | 13 | 77% |
 | Motores de execução | **8** | 8 | 100% |
 | Projetos | **10** | ~20 | 50% |
 
-**Último trabalho** (2026-09-22): a **Fase 6 começou** — o motor 8,
-**Pyodide** (CPython em WebAssembly, ~13,5 MB), e a primeira aula da
-trilha de Python. Arquitetura em quatro arquivos, como o motor de SQL
-(`python-core.ts` puro, `python.worker.ts`, `python.ts` no cliente,
-`python-node.ts` no CI), com uma diferença: recriar o intérprete custa
-segundos, não microssegundos, então ele fica vivo entre execuções e cada
-uma ganha só um **dicionário de globais novo** — isolado, sem pagar o
-carregamento de novo. Duas armadilhas de bundler resolvidas no
-`vite.config.ts`: os arquivos do Pyodide não entram por `?url` como o
-`.wasm` do sql.js (ele busca os próprios arquivos por um `indexURL` em
-tempo de execução, então `vite-plugin-static-copy` os copia para
-`/pyodide/`), e o formato padrão do worker no build (`iife`) não suporta
-o código dividido que o `pyodide.mjs` carrega dinamicamente — `worker:
-{ format: 'es' }` resolve, sem quebrar o motor de SQL (confirmado por
-`e2e/sql.spec.ts` de novo, depois da mudança). `track-python`, oitava
-etapa do percurso; a aula 1 ("Python Depois de JavaScript") prova o
-motor inteiro — `e2e/python.spec.ts`, no Chromium e no celular. Faltam
-as outras 9 aulas do roadmap. Antes (mesmo dia): os outros dois
-capstones, **Loja com
+**Último trabalho** (2026-09-22): a **Fase 6 fechou** — as 9 aulas que
+faltavam da trilha de Python (condições e laços, funções, listas e
+compreensões, dicionários e conjuntos, strings e f-strings, erros,
+classes, módulos e biblioteca padrão, e um projeto de fechamento),
+completando as 10 aulas do roadmap sobre o motor 8 (Pyodide) já pronto.
+No caminho, um gap de arquitetura real: o worker do navegador interrompe
+um laço sem fim de fora (`worker.terminate()`), mas `python-node.ts` (o
+mesmo motor no CI) roda `runPython` de forma síncrona — sem processo
+externo para matar, um exercício de "encontre o laço sem condição de
+parada" travava o `vitest` para sempre. Resolvido dentro do próprio
+`montarPrograma`: o programa inteiro roda sob um `sys.settrace` que
+confere o relógio a cada linha e lança `TimeoutError` ao passar do prazo
+de sempre (3 s) — vale para navegador e Node com o mesmo código. `e2e/
+python.spec.ts` prova as 10 aulas no Chromium e no celular. **A Fase 6
+está completa.** Antes (mesmo dia): os outros dois capstones, **Loja com
 Carrinho** (`proj-capstone-loja`) e **Blog com Autenticação**
 (`proj-capstone-blog`) — fecham os três capstones do projeto final. A
 loja reaproveita o banco `loja` da trilha de SQL; o pedido confere
@@ -681,7 +677,7 @@ rodar os scripts do dia a dia, e ler o que deu errado.
 
 Fecha a Fase 5 inteira.
 
-### Fase 6 — Python · 10 aulas, 1 de 10 feita
+### Fase 6 — Python · 10 aulas, completa
 Motor **8: Pyodide, ~13,5 MB** — pronto (2026-09-22). Por último entre os
 motores pelo peso, não pela importância — é a primeira linguagem pedida
 pelo dono do projeto ("futuramente quero mais linguagens"). Carregado sob
@@ -705,18 +701,30 @@ como módulo ES (`worker: { format: 'es' }`) porque o `pyodide.mjs`
 carrega código dividido, que o formato padrão do build não suporta —
 mudança que não afetou o motor de SQL.
 
+Uma terceira armadilha, achada só ao escrever um exercício de "encontre o
+laço sem condição de parada": o worker do navegador interrompe de fora
+(`worker.terminate()` no prazo), mas `python-node.ts` roda `runPython` de
+forma síncrona e bloqueante — sem jeito de interromper de fora, um laço
+genuinamente infinito travava o `vitest` para sempre. Resolvida dentro do
+próprio `montarPrograma`, não em quem chama: o programa inteiro (código do
+aluno incluído) roda sob um `sys.settrace` que confere o relógio a cada
+linha e lança `TimeoutError` ao estourar o prazo de sempre — e como
+`sys.settrace` só instrumenta frames abertos depois dele, o frame atual
+(já em execução quando o relógio é armado) precisa do `f_trace` setado à
+mão. Mesmo código nos dois lados, navegador e Node.
+
 | Aula | Assunto |
 | --- | --- |
 | 1 | Python depois de JavaScript: indentação, `print`, tipos, o que muda e o que é igual — **feita** |
-| 2 | Condições e laços: `if/elif/else`, `for` sobre coleções, `range`, `while` |
-| 3 | Funções: parâmetros nomeados, valores padrão, retorno múltiplo, docstring |
-| 4 | Listas e compreensões: o `map`/`filter` do Python |
-| 5 | Dicionários e conjuntos: o objeto e o `Set`, e o que muda |
-| 6 | Strings e f-strings: fatiar, formatar, `split`/`join` |
-| 7 | Erros: `try/except/finally`, exceções com nome, `raise` |
-| 8 | Classes: `__init__`, métodos, `self`, quando uma classe vale a pena |
-| 9 | Módulos e a biblioteca padrão: `import`, `json`, `datetime` |
-| 10 | Projeto: um script que lê dados, transforma e escreve um relatório |
+| 2 | Condições e laços: `if/elif/else`, `for` sobre coleções, `range`, `while` — **feita** |
+| 3 | Funções: parâmetros nomeados, valores padrão, retorno múltiplo, docstring — **feita** |
+| 4 | Listas e compreensões: o `map`/`filter` do Python — **feita** |
+| 5 | Dicionários e conjuntos: o objeto e o `Set`, e o que muda — **feita** |
+| 6 | Strings e f-strings: fatiar, formatar, `split`/`join` — **feita** |
+| 7 | Erros: `try/except/finally`, exceções com nome, `raise` — **feita** |
+| 8 | Classes: `__init__`, métodos, `self`, quando uma classe vale a pena — **feita** |
+| 9 | Módulos e a biblioteca padrão: `import`, `json`, `datetime` — **feita** |
+| 10 | Projeto: um script que lê dados, transforma e escreve um relatório — **feita** |
 
 ### Fase 7 — Projeto final · 5 aulas, 3 capstones
 Do zero a uma aplicação completa, o pedido central do dono do projeto:
@@ -779,7 +787,7 @@ a ordem. Candidatas, com o custo conhecido hoje:
 
 | Linguagem | Motor possível | Custo | Quando |
 | --- | --- | --- | --- |
-| Python | Pyodide (CPython em WebAssembly) | ~13,5 MB, sob demanda | Fase 6 — motor pronto, em andamento |
+| Python | Pyodide (CPython em WebAssembly) | ~13,5 MB, sob demanda | Fase 6 — completa |
 | C# | .NET em WebAssembly (o mesmo do Blazor) | ~15 MB | depois da Fase 7 |
 | Go | TinyGo compilando para WebAssembly num worker | compilação pesada no navegador; a alternativa como serviço precisaria de um servidor, o que o projeto evita | depois da Fase 7 |
 | Java | CheerpJ ou TeaVM | ~20 MB, licença a conferir | a decidir |
@@ -806,10 +814,9 @@ Um por fase, cada um preso ao motor dela:
 
 ## Sobre tamanho
 
-As 134 aulas de hoje levaram bastante tempo para ficar no padrão do projeto.
-As ~9 restantes (o resto de Python) são muitas vezes esse trabalho. Por
-isso a unidade é a fase: cada uma termina numa versão do produto que dá
-para usar. O roadmap escolhe a ordem; não promete prazo.
+As 143 aulas de hoje levaram bastante tempo para ficar no padrão do
+projeto. Por isso a unidade é a fase: cada uma termina numa versão do
+produto que dá para usar. O roadmap escolhe a ordem; não promete prazo.
 
 A Fase 1 foi o primeiro passo por um motivo concreto: era a única que não
 precisava de motor nenhum, e é onde estão os testes por propriedade e os

@@ -1,4 +1,5 @@
 import type { SandboxTest, SandboxTestResult } from './sandbox-core';
+import { EXECUTION_TIMEOUT_MS } from './sandbox';
 
 /**
  * Núcleo de execução do motor de Python (motor 6, Pyodide).
@@ -74,6 +75,16 @@ function indentar(codigo: string): string {
  * chamada a `json.dumps(...)`: o valor de retorno de `runPython` é o valor da
  * última expressão, e ir e voltar por JSON evita lidar com a conversão de
  * `PyProxy` para objeto JavaScript.
+ *
+ * Tudo — o código do aluno incluído — roda dentro de um `try/finally` com um
+ * `sys.settrace` armado: a cada linha executada, ele confere o relógio, e
+ * lança `TimeoutError` se estourar `EXECUTION_TIMEOUT_MS`. Isso existe porque,
+ * ao contrário do worker do navegador (`python.ts`), que interrompe um laço
+ * sem fim de fora, com `worker.terminate()`, o carregador do Node
+ * (`python-node.ts`) roda `runPython` de forma síncrona e bloqueante, sem
+ * jeito de interromper de fora — um laço sem condição de parada travaria o
+ * processo para sempre. O relógio embutido no próprio programa Python resolve
+ * os dois lados com o mesmo código, sem depender de quem chamou.
  */
 export function montarPrograma(code: string, tests: SandboxTest[]): string {
   const definicoes = tests
@@ -84,21 +95,38 @@ export function montarPrograma(code: string, tests: SandboxTest[]): string {
     .map((teste, indice) => `(${JSON.stringify(teste.description)}, __cf_teste_${indice})`)
     .join(', ');
 
-  return `${code}
+  const corpo = `${code}
 
 ${definicoes}
 
-import json as __cf_json
-
 __cf_testes = [${entradas}]
-__cf_resultados = []
 for __cf_desc, __cf_fn in __cf_testes:
     try:
         __cf_fn()
         __cf_resultados.append({"passed": True, "message": __cf_desc})
     except Exception as __cf_e:
         __cf_msg = str(__cf_e) if str(__cf_e) else type(__cf_e).__name__
-        __cf_resultados.append({"passed": False, "message": __cf_msg})
+        __cf_resultados.append({"passed": False, "message": __cf_msg})`;
+
+  return `import sys as __cf_sys
+import time as __cf_time
+import json as __cf_json
+
+__cf_inicio = __cf_time.time()
+__cf_limite_segundos = ${EXECUTION_TIMEOUT_MS / 1000}
+
+def __cf_watchdog(frame, event, arg):
+    if __cf_time.time() - __cf_inicio > __cf_limite_segundos:
+        raise TimeoutError('passou de ' + str(__cf_limite_segundos) + ' segundos')
+    return __cf_watchdog
+
+__cf_resultados = []
+__cf_sys.settrace(__cf_watchdog)
+__cf_sys._getframe().f_trace = __cf_watchdog
+try:
+${indentar(corpo)}
+finally:
+    __cf_sys.settrace(None)
 
 __cf_json.dumps(__cf_resultados)`;
 }
@@ -143,6 +171,8 @@ export function traduzirErroPython(erro: ErroDePython): string {
       return `${detalhe || 'esse módulo não está disponível'}. O Pyodide já traz boa parte da biblioteca padrão do Python, mas não pacotes de fora dela.`;
     case 'RecursionError':
       return 'A função chamou a si mesma sem parar — confira o caso de parada da recursão.';
+    case 'TimeoutError':
+      return `O código passou de ${EXECUTION_TIMEOUT_MS / 1000} segundos e foi interrompido. Isso costuma ser um laço sem condição de parada, ou uma recursão que nunca chega ao caso base.`;
     case 'AssertionError':
       return detalhe || 'a condição do assert é falsa.';
     default:
@@ -172,7 +202,12 @@ export function executarPython(interprete: Interprete, execucao: ExecucaoPython)
     return { logs, testResults };
   } catch (erro) {
     const pythonError = erro as ErroDePython;
-    return { logs, testResults: [], error: traduzirErroPython(pythonError) };
+    return {
+      logs,
+      testResults: [],
+      error: traduzirErroPython(pythonError),
+      timedOut: pythonError.type === 'TimeoutError',
+    };
   } finally {
     dicionario.destroy();
   }

@@ -25,7 +25,7 @@ describe('montarPrograma', () => {
       { description: 'dobra 2', assertion: 'assert dobrar(2) == 4' },
     ]);
 
-    expect(programa).toContain('def __cf_teste_0():\n    assert dobrar(2) == 4');
+    expect(programa).toContain('def __cf_teste_0():\n        assert dobrar(2) == 4');
   });
 });
 
@@ -102,6 +102,16 @@ describe('executarPython', () => {
       { passed: true, message: 'segundo, vê o que o primeiro fez' },
     ]);
   });
+
+  it('um laço sem condição de parada é interrompido, em vez de travar o processo', async () => {
+    const resultado = executarPython(interprete, {
+      code: 'contador = 0\nwhile True:\n    contador = 0',
+      tests: [],
+    });
+
+    expect(resultado.timedOut).toBe(true);
+    expect(resultado.error).toContain('interrompido');
+  }, 15_000);
 });
 
 describe('traduzirErroPython', () => {

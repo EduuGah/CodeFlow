@@ -158,21 +158,17 @@ o banco só guarda fatos, e "viu" não é um).
 
 ## 5. O que ESTÁ SENDO FEITO agora
 
-**Nada em andamento.** O último commit fecha o motor 8 (Pyodide, veja
-B14) e a primeira aula da trilha de Python — o CI está verde, e a árvore
-está limpa. Você começa num ponto estável.
+**Nada em andamento.** O último commit fecha as 9 aulas que faltavam da
+trilha de Python (veja B15), completando a Fase 6 — o CI está verde, e a
+árvore está limpa. Você começa num ponto estável.
 
-**As Fases 5 e 7 estão completas**: Fase 5 (Engenharia, Testes, Git,
-Terminal) e Fase 7 (o projeto final com o motor 7 e os três capstones).
-**A Fase 6 começou**: o motor está pronto e a aula 1 de 10 está
-publicada. O que falta no roadmap inteiro: as outras 9 aulas de Python —
-nenhum motor novo.
+**As Fases 1 a 7 estão completas.** Todo o roadmap de conteúdo planejado
+em `docs/curriculo.md` está feito.
 
 ## 6. O que VAI SER FEITO — e a decisão que precisa ser tomada
 
-O projeto está em **~89%** por aula (134 de ~150 previstas). As Fases 1 a
-5 e 7 estão completas; a Fase 6 (Python) começou — o motor (o oitavo)
-está pronto, faltam 9 das 10 aulas.
+O projeto está em **~95%** por aula (143 de ~150 previstas). As Fases 1 a
+7 estão completas — não há fase em aberto no roadmap de conteúdo.
 
 Há três caminhos, e eles **não são equivalentes**:
 
@@ -475,9 +471,57 @@ projeto: seis trilhas desenroladas numa coluna eram uma parede.
   tipos dinâmicos sem coerção implícita, `None` como único "nada"), 6
   exercícios. `e2e/python.spec.ts` prova a aula inteira no Chromium e no
   celular.
-- Faltam as outras 9 aulas do roadmap: condições e laços, funções,
-  listas, dicionários, strings, erros, classes, módulos, um projeto de
-  fechamento — nenhuma exige mudança no motor.
+- Faltavam as outras 9 aulas do roadmap — fechadas em B15, sem mudança no
+  motor.
+
+### B15) As 9 aulas restantes de Python — feito (2026-09-22), fecha a Fase 6
+
+- 9 aulas (condições e laços, funções, listas e compreensões, dicionários
+  e conjuntos, strings e f-strings, erros, classes, módulos e biblioteca
+  padrão, e um projeto de fechamento), 54 exercícios, mesmo padrão de
+  qualidade das trilhas anteriores — prosa com exemplos `~~~py`, um bloco
+  `example`, exercícios com dicas e explicação, resumo linkando a
+  próxima. `track-python` ganhou 4 `sections` (exigidas a partir de 8
+  aulas) e 9 conceitos novos (`py-condicoes` a `py-projeto`), encadeados a
+  partir de `py-intro`.
+- Um gap de arquitetura real, não um typo de conteúdo: o exercício de
+  "encontre o laço sem condição de parada" (`ex-py-2-laco-sem-fim`) é
+  genuinamente infinito por design — é o ponto da aula. No navegador, o
+  worker interrompe de fora (`worker.terminate()` no prazo de sempre); no
+  Node/CI, `python-node.ts` roda `runPython` de forma **síncrona e
+  bloqueante**, sem processo externo para matar — o `vitest` travou de
+  verdade ao rodar o teste que prova "o programa como está de fato
+  quebra", e precisou matar os processos `node` manualmente para
+  continuar.
+- Resolvido dentro do próprio `montarPrograma` (`python-core.ts`), não em
+  quem chama — corrige os dois lados com o mesmo código: o programa
+  inteiro (código do aluno incluído) roda sob um `sys.settrace` armado
+  por ele mesmo, que confere o relógio a cada linha executada e lança
+  `TimeoutError` ao passar de `EXECUTION_TIMEOUT_MS`. A armadilha dentro
+  da armadilha: `sys.settrace` só instrumenta frames abertos **depois**
+  dele — o frame do módulo já estava em execução quando o relógio foi
+  armado, então a primeira tentativa não pegava o laço nenhuma vez.
+  Faltava também setar `sys._getframe().f_trace = watchdog` no frame
+  atual. Provado por um teste de unidade que roda um `while True` de
+  verdade e espera a interrupção em ~3 s, e pelo próprio
+  `ex-py-2-laco-sem-fim` passando limpo no `content.test.ts`.
+- Três bugs de conteúdo, específicos de escrever markdown dentro de
+  template literal do TypeScript (já tinham aparecido em trilhas
+  anteriores, de outras formas): um `${variavel}` de exemplo (mostrando a
+  sintaxe de template literal do JavaScript) precisou virar `\${variavel}`
+  para não virar interpolação de verdade; uma crase sem escapar na prosa
+  quebrou o parser ~200 linhas depois; e um `find-bug` com `buggyLine`
+  apontando para uma linha em branco (o Zod recusa) foi redesenhado de
+  "import faltando" para "import com nome errado", uma linha com conteúdo
+  de verdade.
+- Vários `assert` sem mensagem própria falhavam a checagem "mensagem
+  curta demais para orientar" do `content.test.ts` (`AssertionError` sozinho
+  tem 14 caracteres) — e um caso mais sutil: `preco_ou_zero(...)` chamado
+  com uma chave ausente lança `KeyError('mochila')`, cujo `str()` (9
+  caracteres) também é curto demais, sem que nenhum `assert` tenha
+  chance de rodar. Resolvido com mensagens explícitas em todo teste, e
+  com `try/except` em volta de chamadas que podem lançar antes da
+  comparação.
 
 ### C) Mais projetos com o motor atual — barato, sem currículo novo
 
@@ -486,19 +530,20 @@ dão prática aplicada. É o caminho de menor risco e menor retorno.
 
 ### Recomendação
 
-A, B, B2 a B14 estão feitos: as Fases 1, 2, 3, 4, 5 e 7 completas — a
-Fase 5 (Engenharia, Testes, Git, Terminal) fechou inteira, a Fase 7 (o
-projeto final, o pedido central do dono do projeto) está completa com o
-motor 7 inteiro **e os três capstones**, e a **Fase 6 começou**: o motor
-8 (Pyodide) está pronto, com a aula 1 de 10 publicada. O que vem agora:
-as outras **9 aulas de Python** (sem motor novo) para fechar a Fase 6, ou
-C, ou os itens de plataforma que ficaram (mapa de tópicos e busca, tutor
-com IA, painel do aluno). Antes de qualquer um, vale o que só o dono do
-projeto pode fazer: usar o aplicativo publicado num telefone de verdade,
-inclusive a aula de Python.
+A, B, B2 a B15 estão feitos: as Fases 1 a 7 completas — a Fase 5
+(Engenharia, Testes, Git, Terminal) fechou inteira, a Fase 7 (o projeto
+final, o pedido central do dono do projeto) está completa com o motor 7
+inteiro **e os três capstones**, e a **Fase 6 (Python) fechou**: as 10
+aulas do roadmap, sobre o motor 8 (Pyodide). Não há fase em aberto no
+roadmap de conteúdo — o que vem agora é C, ou os itens de plataforma que
+ficaram (mapa de tópicos e busca, tutor com IA, painel do aluno). Antes
+de qualquer um, vale o que só o dono do projeto pode fazer: usar o
+aplicativo publicado num telefone de verdade, inclusive a trilha de
+Python inteira.
 
-Se o dono do projeto não indicar o caminho, pergunte antes de começar uma
-fase ou C — são investimentos grandes o bastante para a escolha ser dele.
+Se o dono do projeto não indicar o caminho, pergunte antes de começar C
+ou um item de plataforma grande — são investimentos grandes o bastante
+para a escolha ser dele.
 
 ## 7. Como trabalhar
 

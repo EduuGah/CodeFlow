@@ -166,6 +166,15 @@ import { lessonTerminalScriptsDoPackageJson } from './lessons/terminal-03-script
 import { lessonTerminalLerASaidaDeErro } from './lessons/terminal-04-ler-a-saida-de-erro';
 import { lessonTerminalDiagnosticar } from './lessons/terminal-05-diagnosticar';
 import { lessonPythonDepoisDeJavascript } from './lessons/py-01-python-depois-de-javascript';
+import { lessonPythonCondicoesELacos } from './lessons/py-02-condicoes-e-lacos';
+import { lessonPythonFuncoes } from './lessons/py-03-funcoes';
+import { lessonPythonListasECompreensoes } from './lessons/py-04-listas-e-compreensoes';
+import { lessonPythonDicionariosEConjuntos } from './lessons/py-05-dicionarios-e-conjuntos';
+import { lessonPythonStringsEFStrings } from './lessons/py-06-strings-e-f-strings';
+import { lessonPythonErros } from './lessons/py-07-erros';
+import { lessonPythonClasses } from './lessons/py-08-classes';
+import { lessonPythonModulosEBibliotecaPadrao } from './lessons/py-09-modulos-e-biblioteca-padrao';
+import { lessonPythonProjeto } from './lessons/py-10-projeto';
 import { projetoImc } from './projects/js-imc';
 import { projetoConversor } from './projects/js-conversor';
 import { projetoBoletim } from './projects/js-boletim';
@@ -317,6 +326,15 @@ const lessons: Lesson[] = [
   lessonTerminalLerASaidaDeErro,
   lessonTerminalDiagnosticar,
   lessonPythonDepoisDeJavascript,
+  lessonPythonCondicoesELacos,
+  lessonPythonFuncoes,
+  lessonPythonListasECompreensoes,
+  lessonPythonDicionariosEConjuntos,
+  lessonPythonStringsEFStrings,
+  lessonPythonErros,
+  lessonPythonClasses,
+  lessonPythonModulosEBibliotecaPadrao,
+  lessonPythonProjeto,
 ];
 const projects: Project[] = [
   projetoImc,
