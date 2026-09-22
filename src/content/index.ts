@@ -31,6 +31,7 @@ import { trackProjeto } from './tracks/projeto';
 import { trackTestes } from './tracks/testes';
 import { trackGit } from './tracks/git';
 import { trackTerminal } from './tracks/terminal';
+import { trackPython } from './tracks/python';
 import { lessonVariaveis } from './lessons/js-01-variaveis';
 import { lessonTiposEOperadores } from './lessons/js-02-tipos-e-operadores';
 import { lessonCondicoes } from './lessons/js-03-condicoes';
@@ -164,6 +165,7 @@ import { lessonTerminalVariaveisDeAmbiente } from './lessons/terminal-02-variave
 import { lessonTerminalScriptsDoPackageJson } from './lessons/terminal-03-scripts-do-package-json';
 import { lessonTerminalLerASaidaDeErro } from './lessons/terminal-04-ler-a-saida-de-erro';
 import { lessonTerminalDiagnosticar } from './lessons/terminal-05-diagnosticar';
+import { lessonPythonDepoisDeJavascript } from './lessons/py-01-python-depois-de-javascript';
 import { projetoImc } from './projects/js-imc';
 import { projetoConversor } from './projects/js-conversor';
 import { projetoBoletim } from './projects/js-boletim';
@@ -314,6 +316,7 @@ const lessons: Lesson[] = [
   lessonTerminalScriptsDoPackageJson,
   lessonTerminalLerASaidaDeErro,
   lessonTerminalDiagnosticar,
+  lessonPythonDepoisDeJavascript,
 ];
 const projects: Project[] = [
   projetoImc,
@@ -341,6 +344,7 @@ const tracks: Track[] = [
   trackTestes,
   trackGit,
   trackTerminal,
+  trackPython,
 ];
 
 /**

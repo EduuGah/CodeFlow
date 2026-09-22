@@ -1014,4 +1014,12 @@ export const concepts: Concept[] = [
     prerequisites: ['terminal-scripts', 'terminal-erros'],
     tags: ['terminal'],
   },
+  {
+    id: 'py-intro',
+    title: 'Python depois de JavaScript',
+    summary:
+      'Indentação em vez de chaves define o bloco — errar o recuo é erro de sintaxe, não de estilo; `print()` no lugar de `console.log`; tipos dinâmicos como no JavaScript, mas sem coerção implícita entre eles; comentário com `#`; sem `;` no fim da linha; `None` no lugar de `null`/`undefined`, um só.',
+    prerequisites: ['variaveis', 'funcoes'],
+    tags: ['python'],
+  },
 ];

@@ -87,6 +87,13 @@ export function CodeExerciseStep({
     if (iframeRef.current) iframeRef.current.srcdoc = '';
   }, [exercise.id, exercise.initialCode]);
 
+  // O Pyodide carrega ~10 MB de WebAssembly e biblioteca padrão; começar
+  // enquanto a pessoa lê o enunciado poupa essa espera do primeiro "Executar".
+  useEffect(() => {
+    if (language !== 'python') return;
+    void import('../../lib/python').then(({ prepararMotorPython }) => prepararMotorPython());
+  }, [language]);
+
   const passouTudo =
     resultado !== null &&
     resultado.testResults.length > 0 &&

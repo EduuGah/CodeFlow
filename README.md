@@ -10,7 +10,7 @@ erro, não apenas se acertou.
 
 ## O que tem hoje
 
-**13 trilhas, 133 aulas, 757 exercícios em 10 tipos, 10 projetos, 130 conceitos.**
+**14 trilhas, 134 aulas, 763 exercícios em 10 tipos, 10 projetos, 131 conceitos.**
 Tudo é contado do catálogo; a página pública mostra os mesmos números.
 
 | Etapa | Trilha | Linguagem | Aulas | Exercícios |
@@ -28,14 +28,15 @@ Tudo é contado do catálogo; a página pública mostra os mesmos números.
 | 7 · A profissão | Testes e Qualidade | JavaScript + Node | 8 | 41 |
 | 7 · A profissão | Git e Equipe | JavaScript | 6 | 33 |
 | 7 · A profissão | Terminal e Ferramentas | JavaScript | 5 | 25 |
+| 8 · Outra linguagem | Python | Python | 1 | 6 |
 
-**Os dez tipos de exercício**: escrever o código (144), múltipla escolha (203),
-prever a saída (82), completar a lacuna (86), ordenar os passos (66),
-encontrar o bug (60), escrever o teste (15), refatorar (14), consulta SQL (46)
+**Os dez tipos de exercício**: escrever o código (145), múltipla escolha (205),
+prever a saída (84), completar a lacuna (86), ordenar os passos (66),
+encontrar o bug (61), escrever o teste (15), refatorar (14), consulta SQL (46)
 e servidor (41). Toda aula tem ao menos um dos quatro "de prática de dev" —
 bug, ordenar, teste, refatorar — que pedem o conceito de outro ângulo.
 
-**Os sete motores de execução**, todos no navegador, nenhum servidor no meio:
+**Os oito motores de execução**, todos no navegador, nenhum servidor no meio:
 
 | Motor | O que roda | Como |
 | --- | --- | --- |
@@ -46,6 +47,7 @@ bug, ordenar, teste, refatorar — que pedem o conceito de outro ângulo.
 | SQL | consultas e modelagem | o SQLite em WebAssembly (sql.js) num worker que fica vivo; a correção compara **linhas devolvidas** |
 | Servidor | Node e Express, e projetos de vários arquivos | um Node de mentira no sandbox: `require` (do Express pequeno e dos arquivos que o exercício fornece, resolvido como no Node — `../`, pasta com `index.js`), `process.env`, e um cliente HTTP para os testes; a tela mostra pedidos e respostas, e onde o arquivo do aluno mora |
 | Aplicação inteira | página + API + banco | o servidor simulado com o SQLite do motor de SQL no mesmo worker (`require('./banco')`, `consultar` e `executar` com parâmetros, assíncronos), de pé enquanto a página do aluno roda no iframe: cada `fetch` dela vai ao servidor por mensagens e volta como resposta; a tela mostra o servidor antes, e os pedidos que a página fez depois |
+| Python | a primeira linguagem além do JavaScript | Pyodide (CPython em WebAssembly, ~13 MB) num worker que fica vivo — recarregar custaria segundos; cada execução isola com um dicionário de globais novo, sem recriar o intérprete; testes são `assert` em Python de verdade |
 
 **O que acompanha o aluno**: percurso em etapas com o ponto atual, revisão
 espaçada (Leitner), XP e níveis sem teto, sequência de dias com congelamento,
@@ -110,8 +112,8 @@ Redirect URLs.
 
 ```bash
 npm run typecheck   # tipos, incluindo os testes de navegador
-npm test            # 3.023 testes de unidade, propriedade e componente (Vitest)
-npm run test:e2e    # 406 testes de navegador (Playwright, Chromium, celular e desktop)
+npm test            # 3.046 testes de unidade, propriedade e componente (Vitest)
+npm run test:e2e    # 408 testes de navegador (Playwright, Chromium, celular e desktop)
 ```
 
 O E2E precisa do Chromium uma vez: `npx playwright install chromium`.
@@ -174,7 +176,7 @@ paleta só. O movimento tem motivo e respeita `prefers-reduced-motion`.
 
 ```
 src/content/        Aulas, exercícios, projetos, conceitos, percurso + schema Zod
-  lessons/          Uma aula por arquivo (js-, logica-, web-, pagina-, ts-, react-, sql-, node-, eng-, proj-, testes-, git-, terminal-)
+  lessons/          Uma aula por arquivo (js-, logica-, web-, pagina-, ts-, react-, sql-, node-, eng-, proj-, testes-, git-, terminal-, py-)
   tracks/           As trilhas e a ordem das aulas
   bancos/           Os bancos de exemplo do SQL e do projeto final
 src/client/lib/     Lógica derivada e os motores: sandbox, página, TypeScript,
@@ -191,17 +193,17 @@ docs/               CONTEXTO.md (o mapa do projeto), curriculo.md (o roadmap),
 O roadmap completo, com o estado de cada aula e o custo de cada motor, está em
 [`docs/curriculo.md`](docs/curriculo.md). Em resumo, na ordem:
 
-1. **Python** — a primeira linguagem nova, com o Pyodide (Fase 6). É o único
-   motor que falta.
+1. **O resto da trilha de Python** — 9 aulas (condições e laços, funções,
+   listas, dicionários, strings, erros, classes, módulos, um projeto final).
+   O motor (Pyodide, motor 6) já está de pé, com a primeira aula publicada.
 2. **Mais linguagens**, uma por vez, cada uma com o motor que a roda no
    navegador.
 
 O projeto final — página, API e banco, do desenho à publicação — está
 completo, a Fase 5 (Profissionalização: Engenharia, Testes, Git e Terminal)
-fechou inteira, e os **três capstones** também: lista de tarefas com conta,
-loja com carrinho, blog com autenticação. O tipo `Project` ganhou suporte a
-página + servidor (motor 7) para isso — um projeto aberto, com critérios de
-aceitação, agora pode ser as três camadas juntas, em vez de só um script.
+fechou inteira, os **três capstones** também (lista de tarefas com conta,
+loja com carrinho, blog com autenticação), e a Fase 6 (Python) começou: o
+motor 8 no total, o último que faltava conforme o roadmap original.
 
 ## Licença
 

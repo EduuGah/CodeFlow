@@ -33,15 +33,15 @@ Números lidos do catálogo, não de memória.
 
 | | |
 | --- | --- |
-| Trilhas | 13 — Fundamentos de JavaScript (20 aulas), Lógica (3), Como a Web Funciona (8), A Página (26), TypeScript (10), React (14), SQL e Bancos de Dados (10), Node e APIs (10), Engenharia: Organizar um Projeto (8), Projeto Final (5), Testes e Qualidade (8), Git e Equipe (6), Terminal e Ferramentas (5) |
-| Aulas | 133, somando 3.791 minutos, em blocos por assunto (`Track.sections`) |
-| Exercícios | 757, em 10 tipos — 203 de múltipla escolha, 144 de código, 86 de lacuna, 82 de prever saída, 66 de ordenar passos, 60 de encontrar o bug, 46 de SQL, 41 de servidor, 14 de refatorar, 15 de escrever o teste. 78 exercícios de página (`runtime: 'iframe'`), 42 de componente React (a aula é `language: 'react'`), 16 com trechos de tipo (`typeTests`). **Toda aula tem ao menos um dos quatro tipos de prática de dev** |
-| Verificação | 941 casos fixos + 59 propriedades + 71 verificações de SQL (por linhas devolvidas) |
+| Trilhas | 14 — Fundamentos de JavaScript (20 aulas), Lógica (3), Como a Web Funciona (8), A Página (26), TypeScript (10), React (14), SQL e Bancos de Dados (10), Node e APIs (10), Engenharia: Organizar um Projeto (8), Projeto Final (5), Testes e Qualidade (8), Git e Equipe (6), Terminal e Ferramentas (5), Python (1) |
+| Aulas | 134, somando 3.816 minutos, em blocos por assunto (`Track.sections`) |
+| Exercícios | 763, em 10 tipos — 205 de múltipla escolha, 145 de código, 86 de lacuna, 84 de prever saída, 66 de ordenar passos, 61 de encontrar o bug, 46 de SQL, 41 de servidor, 14 de refatorar, 15 de escrever o teste. 78 exercícios de página (`runtime: 'iframe'`), 42 de componente React (a aula é `language: 'react'`), 16 com trechos de tipo (`typeTests`). **Toda aula tem ao menos um dos quatro tipos de prática de dev** |
+| Verificação | 945 casos fixos + 59 propriedades + 71 verificações de SQL (por linhas devolvidas) |
 | Projetos | 10, com 34 critérios de aceitação — os 3 capstones são página + API + banco (motor 7), os outros 7 são JavaScript puro |
-| Conceitos | 130, com grafo de pré-requisitos |
+| Conceitos | 131, com grafo de pré-requisitos |
 | Flashcards | 22 |
-| Testes | 3.023 de unidade + 406 de navegador |
-| Pacote | 2.385 kB (667 kB comprimido) no chunk principal — o conteúdo vai junto; o Monaco são mais 3.362 kB (869 kB) num chunk à parte, baixado só quando o primeiro editor monta, e o worker de TypeScript (7 MB) só quando um modelo JS/TS abre. O motor de TypeScript não acrescentou arquivo; o de React acrescentou um chunk de 143 kB (47 kB) com o React e o ReactDOM como texto, baixado só por um exercício de React; o de SQL acrescentou o worker (49 kB) e o SQLite em WebAssembly (658 kB), baixados só por um exercício de SQL |
+| Testes | 3.046 de unidade + 408 de navegador |
+| Pacote | 2.385 kB (667 kB comprimido) no chunk principal — o conteúdo vai junto; o Monaco são mais 3.362 kB (869 kB) num chunk à parte, baixado só quando o primeiro editor monta, e o worker de TypeScript (7 MB) só quando um modelo JS/TS abre. O motor de TypeScript não acrescentou arquivo; o de React acrescentou um chunk de 143 kB (47 kB) com o React e o ReactDOM como texto, baixado só por um exercício de React; o de SQL acrescentou o worker (49 kB) e o SQLite em WebAssembly (658 kB), baixados só por um exercício de SQL; o de Python acrescentou o worker (~22 kB) e o Pyodide inteiro (~13,5 MB: o WebAssembly do CPython, a biblioteca padrão zipada, o manifesto de pacotes), copiados para `/pyodide/` na build e baixados só por um exercício de Python |
 
 ## 4. Decisões que não devem ser desfeitas sem motivo forte
 
@@ -767,9 +767,40 @@ senão). `e2e/capstone-tarefas.spec.ts`, `e2e/capstone-loja.spec.ts` e
 `e2e/capstone-blog.spec.ts` provam a solução de referência de cada um
 fechando os critérios no Chromium e no celular. **A Fase 7 está completa.**
 
-**Fase 6 — não iniciada.** Pyodide (Python) é o último motor.
-Investimentos grandes o bastante para a escolha ser do dono do projeto —
-pergunte antes de começar qualquer fase (ver `docs/curriculo.md`).
+**Fase 6 — começou (2026-09-22).** O motor 8 (o oitavo, apesar do nome da
+fase): **Pyodide** — CPython compilado para WebAssembly, ~13,5 MB entre o
+`.wasm`, a biblioteca padrão zipada e o manifesto de pacotes. Arquitetura em
+quatro arquivos, como o motor de SQL: `python-core.ts` (puro — monta o
+programa, uma função por teste com a asserção como corpo, um laço que pega
+a exceção em vez de deixá-la subir; traduz o tipo da exceção para uma frase
+que ensina), `python.worker.ts` (o Pyodide no navegador, carregado de
+`/pyodide/`), `python.ts` (fila, prazo de 90 s para carregar — bem mais que
+o do SQL, o arquivo é vinte vezes maior —, e o de 3 s de sempre para
+executar), `python-node.ts` (o mesmo pacote no CI, sem `indexURL`: o Node
+encontra os arquivos sozinho). A diferença que não tem paralelo no SQL:
+recriar o intérprete custa segundos, não microssegundos, então ele fica
+vivo entre execuções (como o SQL) mas cada execução ganha um **dicionário
+de globais novo** em vez de um intérprete novo — `pyodide.globals.get(
+'dict')()` — isolando uma da outra sem pagar o carregamento de novo.
+
+Duas armadilhas de bundler, ambas no `vite.config.ts`: o Pyodide não é
+importado por caminho estático como o `.wasm` do sql.js (`?url`) — ele
+mesmo busca os próprios arquivos a partir de um `indexURL` em tempo de
+execução —, então `vite-plugin-static-copy` copia os quatro arquivos que
+importam (`pyodide.asm.wasm`, `pyodide.asm.mjs`, `python_stdlib.zip`,
+`pyodide-lock.json`) para `/pyodide/`; e o `pyodide.mjs` importa
+dinamicamente as próprias peças, o que quebra o formato padrão do worker
+no build (`iife`, que não suporta código dividido) — `worker: { format:
+'es' }` resolve, e não quebrou o motor de SQL (confirmado por
+`e2e/sql.spec.ts` depois da mudança).
+
+`track-python`, oitava etapa do percurso ("Outra linguagem"), com a
+primeira aula publicada: "Python Depois de JavaScript" — indentação no
+lugar de chaves, `print()`, tipos dinâmicos sem coerção implícita, `None`
+como único "nada". `e2e/python.spec.ts` prova a aula inteira no Chromium e
+no celular. Faltam as outras 9 aulas do roadmap (condições e laços,
+funções, listas, dicionários, strings, erros, classes, módulos, um
+projeto de fechamento).
 
 ## 9. Pendências do lado do usuário
 

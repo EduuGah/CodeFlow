@@ -46,6 +46,7 @@ consistência visual > qualidade dos exercícios > progressão > gamificação.
 - Vitest (unidade e componente) + Playwright (navegador)
 - Monaco como editor, servido do próprio domínio num chunk sob demanda (`lib/monaco.ts`, `ui/CodeEditor.tsx`)
 - sql.js (SQLite em WebAssembly) num worker, para a trilha de SQL (`lib/sql*.ts`)
+- Pyodide (CPython em WebAssembly) num worker, para a trilha de Python (`lib/python*.ts`)
 - Repositório `EduuGah/CodeFlow`, trabalho direto no `main`, push autorizado, CI
   obrigatório a cada push
 
@@ -157,21 +158,21 @@ o banco só guarda fatos, e "viu" não é um).
 
 ## 5. O que ESTÁ SENDO FEITO agora
 
-**Nada em andamento.** O último commit fecha os outros dois capstones
-(veja B13) — loja com carrinho e blog com autenticação, no mesmo padrão
-do primeiro (B12) —, o CI está verde, e a árvore está limpa. Você começa
-num ponto estável.
+**Nada em andamento.** O último commit fecha o motor 8 (Pyodide, veja
+B14) e a primeira aula da trilha de Python — o CI está verde, e a árvore
+está limpa. Você começa num ponto estável.
 
 **As Fases 5 e 7 estão completas**: Fase 5 (Engenharia, Testes, Git,
 Terminal) e Fase 7 (o projeto final com o motor 7 e os três capstones).
-O que falta no roadmap inteiro: só a Fase 6 (Python, o Pyodide) — o
-único motor que falta.
+**A Fase 6 começou**: o motor está pronto e a aula 1 de 10 está
+publicada. O que falta no roadmap inteiro: as outras 9 aulas de Python —
+nenhum motor novo.
 
 ## 6. O que VAI SER FEITO — e a decisão que precisa ser tomada
 
-O projeto está em **~89%** por aula (133 de ~150 previstas). As Fases 1 a
-5 e 7 estão completas; falta só a Fase 6 (Python, o Pyodide — o único
-motor que falta) e os três capstones do projeto final.
+O projeto está em **~89%** por aula (134 de ~150 previstas). As Fases 1 a
+5 e 7 estão completas; a Fase 6 (Python) começou — o motor (o oitavo)
+está pronto, faltam 9 das 10 aulas.
 
 Há três caminhos, e eles **não são equivalentes**:
 
@@ -400,6 +401,7 @@ projeto: seis trilhas desenroladas numa coluna eram uma parede.
   Reaproveita a API e o banco `tarefas` prontos das aulas 3–5 do projeto
   final, sem mexer neles. `e2e/capstone-tarefas.spec.ts` prova a solução
   de referência fechando os 4 critérios no Chromium e no celular.
+
 ### B13) Os outros dois capstones — feito (2026-09-22)
 
 - **Loja com carrinho**: `proj-capstone-loja`, 4 critérios (catálogo,
@@ -433,6 +435,50 @@ projeto: seis trilhas desenroladas numa coluna eram uma parede.
   O seletor certo para contar só os posts é `#posts > li` (filho direto);
   `li[data-id="..."]` já era específico o bastante e não precisou mudar.
 
+### B14) O motor 8 (Pyodide) e a primeira aula de Python — feito (2026-09-22)
+
+- O dono do projeto confirmou começar a Fase 6. Motor **8: Pyodide**
+  (CPython em WebAssembly, ~13,5 MB) — o oitavo motor apesar do nome da
+  fase, porque o projeto final já tinha reaproveitado dois motores
+  (SQL + servidor) sem ganhar um número próprio.
+- Arquitetura em quatro arquivos, igual ao motor de SQL:
+  `python-core.ts` (puro — `montarPrograma` gera uma `def` por teste com
+  a asserção como corpo, um laço pega a exceção e monta
+  `{passed, message}`; `traduzirErroPython` traduz o **tipo** da exceção,
+  que o Pyodide já devolve limpo, numa frase que ensina),
+  `python.worker.ts` (o Pyodide de verdade, carregado de `/pyodide/`),
+  `python.ts` (fila e prazos no cliente — 90 s para carregar, 20× mais
+  que o SQL porque o arquivo é vinte vezes maior; 3 s para executar, como
+  sempre), `python-node.ts` (o mesmo pacote no CI, sem `indexURL`: o Node
+  acha os arquivos sozinho).
+- A diferença que o SQL não tinha: recriar um banco custa microssegundos
+  (`new Database()`); recarregar o Pyodide custa **segundos**. Por isso
+  ele fica vivo entre execuções (como o SQL), mas cada execução ganha um
+  **dicionário de globais novo** (`pyodide.globals.get('dict')()`) em vez
+  de um intérprete novo — isolamento sem pagar o carregamento de novo.
+  Provado em teste: uma variável de uma execução não existe na próxima.
+- Duas armadilhas de bundler, resolvidas no `vite.config.ts`:
+  1. O Pyodide não é importado por caminho estático como o `.wasm` do
+     sql.js (`?url`) — ele mesmo busca os próprios arquivos
+     (`pyodide.asm.wasm`, `pyodide.asm.mjs`, `python_stdlib.zip`,
+     `pyodide-lock.json`) a partir de um `indexURL`, em tempo de
+     execução. `vite-plugin-static-copy` (instalado na versão 3.1.6 —
+     não a 4.x mais nova, que exige Vite 6+) copia os quatro para
+     `/pyodide/`, tanto em `dev` quanto no build.
+  2. `npm run build` falhou de início: `pyodide.mjs` importa
+     dinamicamente as próprias peças, e o formato padrão do worker no
+     build (`iife`) não suporta código dividido. `worker: { format: 'es'
+     }` resolve — e não quebrou o motor de SQL, confirmado rodando
+     `e2e/sql.spec.ts` de novo depois da mudança (12/12 passando).
+- `track-python`, oitava etapa do percurso ("Outra linguagem"). Aula 1,
+  "Python Depois de JavaScript" (indentação em vez de chaves, `print()`,
+  tipos dinâmicos sem coerção implícita, `None` como único "nada"), 6
+  exercícios. `e2e/python.spec.ts` prova a aula inteira no Chromium e no
+  celular.
+- Faltam as outras 9 aulas do roadmap: condições e laços, funções,
+  listas, dicionários, strings, erros, classes, módulos, um projeto de
+  fechamento — nenhuma exige mudança no motor.
+
 ### C) Mais projetos com o motor atual — barato, sem currículo novo
 
 Existem 10 projetos e o roadmap prevê ~30. Eles usam a mecânica que já existe e
@@ -440,16 +486,16 @@ dão prática aplicada. É o caminho de menor risco e menor retorno.
 
 ### Recomendação
 
-A, B, B2 a B13 estão feitos: as Fases 1, 2, 3, 4, 5 e 7 completas — a
-Fase 5 (Engenharia, Testes, Git, Terminal) fechou inteira, e a Fase 7 (o
+A, B, B2 a B14 estão feitos: as Fases 1, 2, 3, 4, 5 e 7 completas — a
+Fase 5 (Engenharia, Testes, Git, Terminal) fechou inteira, a Fase 7 (o
 projeto final, o pedido central do dono do projeto) está completa com o
-motor 7 inteiro **e os três capstones**. Falta só a **Fase 6** (Python,
-o Pyodide — o único motor que falta) no roadmap de conteúdo. Pergunte ao
-dono do projeto se é hora de começá-la. Ou C, ou os itens de plataforma
-que ficaram (mapa de tópicos e busca, tutor com IA, painel do aluno).
-Antes de qualquer um, vale o que só o dono do projeto pode fazer: usar o
-aplicativo publicado num telefone de verdade, inclusive os três
-capstones novos.
+motor 7 inteiro **e os três capstones**, e a **Fase 6 começou**: o motor
+8 (Pyodide) está pronto, com a aula 1 de 10 publicada. O que vem agora:
+as outras **9 aulas de Python** (sem motor novo) para fechar a Fase 6, ou
+C, ou os itens de plataforma que ficaram (mapa de tópicos e busca, tutor
+com IA, painel do aluno). Antes de qualquer um, vale o que só o dono do
+projeto pode fazer: usar o aplicativo publicado num telefone de verdade,
+inclusive a aula de Python.
 
 Se o dono do projeto não indicar o caminho, pergunte antes de começar uma
 fase ou C — são investimentos grandes o bastante para a escolha ser dele.
@@ -460,8 +506,8 @@ fase ou C — são investimentos grandes o bastante para a escolha ser dele.
 
 ```bash
 npm run typecheck   # inclui e2e/ e playwright.config.ts
-npm test            # 3.023 testes
-npm run test:e2e    # 406 no navegador (antes: npx playwright install chromium)
+npm test            # 3.046 testes
+npm run test:e2e    # 408 no navegador (antes: npx playwright install chromium)
 npm run build
 ```
 

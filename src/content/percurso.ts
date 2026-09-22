@@ -54,4 +54,9 @@ export const ETAPAS_DO_PERCURSO: EtapaDoPercurso[] = [
     description: 'O que separa código que funciona de trabalho em equipe: testes que valem alguma coisa, Git e o fluxo de revisão, o terminal como ferramenta.',
     trackIds: ['track-testes', 'track-git', 'track-terminal'],
   },
+  {
+    title: 'Outra linguagem',
+    description: 'Python, a primeira linguagem além da família JavaScript — o que muda de sintaxe, o que continua sendo o mesmo raciocínio.',
+    trackIds: ['track-python'],
+  },
 ];

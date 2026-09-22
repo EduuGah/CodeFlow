@@ -69,6 +69,14 @@ export async function executarNaLinguagem({
   if (language === 'node') {
     return executeCode(montarCodigoDoServidor(code), tests, properties, { sequencial: true });
   }
+  if (language === 'python') {
+    // Motor 6: o Pyodide, num worker próprio. Sem propriedades — o sorteio
+    // e o encolhimento de `sandbox-core.ts` são JavaScript, e não valeria a
+    // pena reescrevê-los em Python por enquanto.
+    const { executarPythonNoNavegador } = await import('./python');
+    const resultado = await executarPythonNoNavegador({ code, tests });
+    return { output: resultado.logs.join('\n'), ...resultado };
+  }
   if (language !== 'typescript') return executeCode(code, tests, properties);
 
   const compilar = await compiladorDoNavegador();

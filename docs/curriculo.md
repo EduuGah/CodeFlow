@@ -6,7 +6,7 @@ que conclui uma fase.
 
 ## Onde estamos
 
-**Fases 1, 2, 3, 4, 5 e 7 de 8 concluídas · publicado**
+**Fases 1, 2, 3, 4, 5 e 7 de 8 concluídas · Fase 6 (Python): motor pronto, 1/10 aulas · publicado**
 
 ```
 Fase 0  Fundamentos e lógica      ██████████████████████  13/13  pronto
@@ -17,19 +17,37 @@ Fase 2  A página                 ███████████████�
 Fase 3  Tipos e componentes      ██████████████████████  24/24  pronto
 Fase 4  Back-end e dados         ██████████████████████  20/20  pronto
 Fase 5  Profissionalização       ██████████████████████  27/27  pronto
-Fase 6  Python                   ░░░░░░░░░░░░░░░░░░░░░░   0/10  motor 6
+Fase 6  Python                   ██░░░░░░░░░░░░░░░░░░░░   1/10  motor 8 pronto; falta o resto das aulas
 Fase 7  Projeto final            ██████████████████████   5/5   pronto; motor 7 inteiro; 3 capstones prontos
 ```
 
 | | Hoje | Previsto | Feito |
 | --- | ---: | ---: | ---: |
-| Aulas | **133** | ~150 | 89% |
-| Exercícios | **757** | ~800 | 95% |
+| Aulas | **134** | ~150 | 89% |
+| Exercícios | **763** | ~800 | 95% |
 | Tipos de exercício | **10** | 13 | 77% |
-| Motores de execução | **7** | 8 | 88% |
+| Motores de execução | **8** | 8 | 100% |
 | Projetos | **10** | ~20 | 50% |
 
-**Último trabalho** (2026-09-22): os outros dois capstones, **Loja com
+**Último trabalho** (2026-09-22): a **Fase 6 começou** — o motor 8,
+**Pyodide** (CPython em WebAssembly, ~13,5 MB), e a primeira aula da
+trilha de Python. Arquitetura em quatro arquivos, como o motor de SQL
+(`python-core.ts` puro, `python.worker.ts`, `python.ts` no cliente,
+`python-node.ts` no CI), com uma diferença: recriar o intérprete custa
+segundos, não microssegundos, então ele fica vivo entre execuções e cada
+uma ganha só um **dicionário de globais novo** — isolado, sem pagar o
+carregamento de novo. Duas armadilhas de bundler resolvidas no
+`vite.config.ts`: os arquivos do Pyodide não entram por `?url` como o
+`.wasm` do sql.js (ele busca os próprios arquivos por um `indexURL` em
+tempo de execução, então `vite-plugin-static-copy` os copia para
+`/pyodide/`), e o formato padrão do worker no build (`iife`) não suporta
+o código dividido que o `pyodide.mjs` carrega dinamicamente — `worker:
+{ format: 'es' }` resolve, sem quebrar o motor de SQL (confirmado por
+`e2e/sql.spec.ts` de novo, depois da mudança). `track-python`, oitava
+etapa do percurso; a aula 1 ("Python Depois de JavaScript") prova o
+motor inteiro — `e2e/python.spec.ts`, no Chromium e no celular. Faltam
+as outras 9 aulas do roadmap. Antes (mesmo dia): os outros dois
+capstones, **Loja com
 Carrinho** (`proj-capstone-loja`) e **Blog com Autenticação**
 (`proj-capstone-blog`) — fecham os três capstones do projeto final. A
 loja reaproveita o banco `loja` da trilha de SQL; o pedido confere
@@ -663,16 +681,33 @@ rodar os scripts do dia a dia, e ler o que deu errado.
 
 Fecha a Fase 5 inteira.
 
-### Fase 6 — Python · 10 aulas
-Motor **6: Pyodide, ~10 MB**. Por último entre os motores pelo peso, não
-pela importância — é a primeira linguagem pedida pelo dono do projeto
-("futuramente quero mais linguagens"). Carregado sob demanda, só em aula de
-Python, com aquecimento ao montar, como o SQL. A correção continua sendo por
-comportamento: os testes são `assert` em Python rodando no mesmo Pyodide.
+### Fase 6 — Python · 10 aulas, 1 de 10 feita
+Motor **8: Pyodide, ~13,5 MB** — pronto (2026-09-22). Por último entre os
+motores pelo peso, não pela importância — é a primeira linguagem pedida
+pelo dono do projeto ("futuramente quero mais linguagens"). Carregado sob
+demanda, só em aula de Python, com aquecimento ao montar, como o SQL. A
+correção continua sendo por comportamento: os testes são `assert` em
+Python rodando no mesmo Pyodide — uma função por teste, o corpo é a
+asserção, e uma exceção vira falha com mensagem, sem derrubar os outros
+testes.
+
+Arquitetura em quatro arquivos, como o motor de SQL: `python-core.ts`
+(puro), `python.worker.ts` (o Pyodide no navegador), `python.ts` (fila e
+prazos, no cliente), `python-node.ts` (o mesmo pacote no CI). A diferença
+que o SQL não tinha: recriar o intérprete custa segundos, não
+microssegundos, então ele fica vivo entre execuções — mas cada uma ganha
+um **dicionário de globais novo**, não um intérprete novo, isolando uma
+da outra sem pagar o carregamento de novo. No `vite.config.ts`: os
+arquivos do Pyodide são copiados para `/pyodide/` por
+`vite-plugin-static-copy` (ele busca os próprios arquivos por um
+`indexURL`, diferente do `?url` do sql.js), e o worker passou a compilar
+como módulo ES (`worker: { format: 'es' }`) porque o `pyodide.mjs`
+carrega código dividido, que o formato padrão do build não suporta —
+mudança que não afetou o motor de SQL.
 
 | Aula | Assunto |
 | --- | --- |
-| 1 | Python depois de JavaScript: indentação, `print`, tipos, o que muda e o que é igual |
+| 1 | Python depois de JavaScript: indentação, `print`, tipos, o que muda e o que é igual — **feita** |
 | 2 | Condições e laços: `if/elif/else`, `for` sobre coleções, `range`, `while` |
 | 3 | Funções: parâmetros nomeados, valores padrão, retorno múltiplo, docstring |
 | 4 | Listas e compreensões: o `map`/`filter` do Python |
@@ -744,7 +779,7 @@ a ordem. Candidatas, com o custo conhecido hoje:
 
 | Linguagem | Motor possível | Custo | Quando |
 | --- | --- | --- | --- |
-| Python | Pyodide (CPython em WebAssembly) | ~10 MB, sob demanda | Fase 6 |
+| Python | Pyodide (CPython em WebAssembly) | ~13,5 MB, sob demanda | Fase 6 — motor pronto, em andamento |
 | C# | .NET em WebAssembly (o mesmo do Blazor) | ~15 MB | depois da Fase 7 |
 | Go | TinyGo compilando para WebAssembly num worker | compilação pesada no navegador; a alternativa como serviço precisaria de um servidor, o que o projeto evita | depois da Fase 7 |
 | Java | CheerpJ ou TeaVM | ~20 MB, licença a conferir | a decidir |
@@ -771,11 +806,10 @@ Um por fase, cada um preso ao motor dela:
 
 ## Sobre tamanho
 
-As 133 aulas de hoje levaram bastante tempo para ficar no padrão do projeto.
-As ~10 restantes (Python), mais os três
-capstones do projeto final, são muitas vezes esse trabalho. Por isso a
-unidade é a fase: cada uma termina numa versão do produto que dá para usar.
-O roadmap escolhe a ordem; não promete prazo.
+As 134 aulas de hoje levaram bastante tempo para ficar no padrão do projeto.
+As ~9 restantes (o resto de Python) são muitas vezes esse trabalho. Por
+isso a unidade é a fase: cada uma termina numa versão do produto que dá
+para usar. O roadmap escolhe a ordem; não promete prazo.
 
 A Fase 1 foi o primeiro passo por um motivo concreto: era a única que não
 precisava de motor nenhum, e é onde estão os testes por propriedade e os

@@ -1,6 +1,7 @@
 import { defineConfig, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
+import { viteStaticCopy } from 'vite-plugin-static-copy'
 
 /**
  * Sem sourcemap para os arquivos gigantes do serviço de TypeScript do Monaco.
@@ -28,13 +29,45 @@ function semSourcemapNosGigantes(): Plugin {
 }
 
 export default defineConfig({
-  plugins: [react(), tailwindcss(), semSourcemapNosGigantes()],
+  plugins: [
+    react(),
+    tailwindcss(),
+    semSourcemapNosGigantes(),
+    // O Pyodide não é importado por caminho estático (o `?url` do sql.js não
+    // serve aqui): ele mesmo busca os próprios arquivos — o WebAssembly, a
+    // biblioteca padrão zipada, o manifesto de pacotes — a partir de um
+    // `indexURL` em tempo de execução. Copiados para `pyodide/` na raiz do
+    // site, servidos do próprio domínio como tudo mais (nada de CDN), tanto
+    // em `dev` (a cópia entra no meio do servidor do Vite) quanto no build.
+    viteStaticCopy({
+      targets: [
+        {
+          src: [
+            'node_modules/pyodide/pyodide.asm.wasm',
+            'node_modules/pyodide/pyodide.asm.mjs',
+            'node_modules/pyodide/python_stdlib.zip',
+            'node_modules/pyodide/pyodide-lock.json',
+          ],
+          dest: 'pyodide',
+        },
+      ],
+    }),
+  ],
   optimizeDeps: {
-    // O `sql.js` só é importado pelo worker do motor de SQL, e o otimizador
-    // do Vite só o descobre na primeira execução de uma consulta — aí
-    // reempacota e **recarrega a página inteira**, no meio do exercício.
-    // Declarado aqui, ele entra no pacote de dependências logo na partida.
-    include: ['sql.js'],
+    // O `sql.js` só é importado pelo worker do motor de SQL, e o `pyodide` só
+    // pelo do motor de Python — o otimizador do Vite só os descobre na
+    // primeira execução de um exercício, aí reempacota e **recarrega a
+    // página inteira**, no meio do exercício. Declarados aqui, entram no
+    // pacote de dependências logo na partida.
+    include: ['sql.js', 'pyodide'],
+  },
+  worker: {
+    // O `pyodide.mjs` importa dinamicamente as próprias peças (o núcleo de
+    // FFI, por exemplo) — código dividido em pedaços, que o formato padrão
+    // do worker no build (IIFE) não sabe carregar. `'es'` faz o worker do
+    // Python (e o do SQL, que não precisava mas aceita igual) compilar como
+    // módulo ES, que suporta isso nativamente.
+    format: 'es',
   },
   server: {
     host: '0.0.0.0',

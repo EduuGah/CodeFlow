@@ -10,6 +10,7 @@ import { rodarPaginaNoJsdom } from '../client/lib/pagina-jsdom';
 import { compilarNoNode } from '../client/lib/typescript-node';
 import { executarSql, type AbrirBanco } from '../client/lib/sql-core';
 import { abrirBancoNoNode } from '../client/lib/sql-node';
+import { executarPythonNoNode } from '../client/lib/python-node';
 import { montarCodigoDoServidor, subirServidor, type ServidorVivo } from '../client/lib/servidor-core';
 import type { ServidorDaPagina } from './types';
 import { BANCOS } from './bancos';
@@ -108,6 +109,10 @@ async function executar(
   // `process`, `module.exports` — e os testes em série.
   if (linguagem === 'node') {
     return runProgram(montarCodigoDoServidor(codigo), tests, properties, { sequencial: true });
+  }
+
+  if (linguagem === 'python') {
+    return executarPythonNoNode({ code: codigo, tests });
   }
 
   if (linguagem !== 'typescript') {
