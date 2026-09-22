@@ -2,11 +2,15 @@ import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { Link, useParams } from 'react-router-dom';
 
 import { getProject, listProjects } from '../../content';
-import { LANGUAGE_LABELS } from '../../content/types';
+import { LANGUAGE_LABELS, type TestCase } from '../../content/types';
 import { useAuth } from '../contexts/AuthContext';
 import { fetchProgress, markProjectCompleted } from '../lib/progress';
-import { executeCode, type ExecutionResult } from '../lib/sandbox';
+import { executeCode, abrirServidorVivo, type ExecutionResult } from '../lib/sandbox';
+import { executarPagina } from '../lib/pagina';
+import { SANDBOX_DO_IFRAME } from '../lib/pagina-core';
+import { montarCodigoDoServidor } from '../lib/servidor-core';
 import { CheckpointList, type CheckpointResult } from '../components/project/CheckpointList';
+import { Trocas } from '../components/lesson/ServerExerciseStep';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { celebrar } from '../lib/celebrar';
 import { MarkdownReader } from '../components/ui/MarkdownReader';
@@ -69,6 +73,10 @@ export function ProjectWorkspace() {
   const [checkResults, setCheckResults] = useState<Map<string, CheckpointResult>>(new Map());
   const [isVerifying, setIsVerifying] = useState(false);
 
+  const ehPagina = project.runtime === 'iframe';
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const [paginaRenderizada, setPaginaRenderizada] = useState(false);
+
   const verificado = checkResults.size > 0;
   const fechados = project.checkpoints.filter((c) => checkResults.get(c.id)?.passed).length;
   const todosFechados = verificado && fechados === project.checkpoints.length;
@@ -89,12 +97,50 @@ export function ProjectWorkspace() {
     };
   }, [user, project.id]);
 
+  /**
+   * Motor 7: o servidor do projeto sobe num worker antes da página e fica de
+   * pé enquanto ela roda — cada `fetch` dela vai a ele. Sobe do zero a cada
+   * chamada, para nenhum checkpoint herdar dados que outro criou.
+   */
+  const executarPaginaComServidor = async (
+    iframe: HTMLIFrameElement,
+    enviado: string,
+    tests: TestCase[]
+  ): Promise<ExecutionResult> => {
+    const declarado = project.servidor;
+    if (!declarado) return executarPagina(iframe, enviado, tests);
+
+    const servidor = await abrirServidorVivo(
+      montarCodigoDoServidor(declarado.code, { env: declarado.env, arquivos: declarado.arquivos }),
+      declarado.banco !== undefined ? { banco: declarado.banco } : {}
+    );
+    try {
+      if (servidor.error) {
+        return {
+          output: servidor.logs.join('\n'),
+          logs: servidor.logs,
+          testResults: [],
+          error: `O servidor por trás da página não subiu: ${servidor.error}`,
+        };
+      }
+      const execucao = await executarPagina(iframe, enviado, tests, { servidor });
+      const trocas = await servidor.trocas();
+      return trocas.length > 0 ? { ...execucao, trocas } : execucao;
+    } finally {
+      servidor.fechar();
+    }
+  };
+
   const executar = async () => {
     setIsRunning(true);
     setResult(null);
 
-    // Execução livre: mostra o console sem julgar critério.
-    const execucao = await executeCode(code);
+    // Execução livre: mostra o console (ou a página) sem julgar critério.
+    const execucao =
+      ehPagina && iframeRef.current
+        ? await executarPaginaComServidor(iframeRef.current, code, [])
+        : await executeCode(code);
+    if (ehPagina) setPaginaRenderizada(true);
     setResult(execucao);
     setIsRunning(false);
   };
@@ -102,8 +148,9 @@ export function ProjectWorkspace() {
   /**
    * Roda os testes de cada checkpoint contra o código atual.
    *
-   * Um worker por checkpoint: assim um laço infinito num critério não impede os
-   * outros de serem avaliados, e o aluno vê o quadro completo.
+   * Um worker por checkpoint (ou, numa página, um servidor e uma renderização
+   * novos): assim um laço infinito num critério não impede os outros de serem
+   * avaliados, e o aluno vê o quadro completo.
    */
   const verificar = async () => {
     setIsVerifying(true);
@@ -112,7 +159,11 @@ export function ProjectWorkspace() {
     const resultados = new Map<string, CheckpointResult>();
 
     for (const checkpoint of project.checkpoints) {
-      const execucao = await executeCode(code, checkpoint.tests);
+      const execucao =
+        ehPagina && iframeRef.current
+          ? await executarPaginaComServidor(iframeRef.current, code, checkpoint.tests)
+          : await executeCode(code, checkpoint.tests);
+      if (ehPagina) setPaginaRenderizada(true);
 
       const falhas = execucao.error
         ? [execucao.error]
@@ -145,6 +196,16 @@ export function ProjectWorkspace() {
     { id: 'enunciado', label: 'Enunciado', Icone: IconLesson },
     { id: 'codigo', label: 'Código', Icone: IconPlay },
   ];
+
+  const arquivosDoServidor: Array<[string, string]> = project.servidor
+    ? [
+        ...(project.servidor.banco !== undefined
+          ? ([['banco.sql', project.servidor.banco]] as Array<[string, string]>)
+          : []),
+        ['servidor.js', project.servidor.code],
+        ...Object.entries(project.servidor.arquivos ?? {}),
+      ]
+    : [];
 
   const abaRefs = useRef(new Map<Aba, HTMLButtonElement>());
 
@@ -265,6 +326,28 @@ export function ProjectWorkspace() {
           aria-labelledby="aba-codigo"
           className={`flex flex-1 flex-col md:flex ${aba === 'codigo' ? 'flex' : 'hidden'}`}
         >
+          {/* O servidor por trás da página, à vista: o fetch do código do
+              aluno chega aqui — o mesmo painel do exercício de código com
+              servidor, só que fixo acima do editor em vez de dentro da aula. */}
+          {arquivosDoServidor.length > 0 && (
+            <Card padding="none" className="mx-4 mt-4 overflow-hidden">
+              <div className="flex items-baseline justify-between gap-3 border-b border-line px-4 py-2">
+                <SectionLabel as="p">O servidor por trás da página</SectionLabel>
+                <span className="text-xs text-ink-faint">o fetch da sua página chega aqui</span>
+              </div>
+              {arquivosDoServidor.map(([nome, fonte]) => (
+                <details key={nome} className="border-b border-line last:border-b-0">
+                  <summary className="cursor-pointer px-4 py-2.5 font-mono text-sm text-ink hover:bg-sunken">
+                    {nome}
+                  </summary>
+                  <pre className="overflow-x-auto border-t border-line bg-editor p-4 text-xs leading-relaxed">
+                    <code className="font-mono text-white/90">{fonte.trim()}</code>
+                  </pre>
+                </details>
+              ))}
+            </Card>
+          )}
+
           {/* No celular a altura é fixa, de propósito. O `height="100%"` do
               Monaco resolve contra a altura do pai, e `min-height` não conta
               como altura: com `min-h-[320px]` e altura automática, o editor
@@ -278,6 +361,33 @@ export function ProjectWorkspace() {
               onChange={setCode}
             />
           </div>
+
+          {ehPagina && (
+            <Card padding="none" className="mx-4 mt-4 overflow-hidden">
+              <div className="flex items-center justify-between border-b border-line px-4 py-2">
+                <SectionLabel as="p">Página</SectionLabel>
+                {paginaRenderizada && (
+                  <span className="text-xs text-ink-faint">como o navegador mostra</span>
+                )}
+              </div>
+              {/* O iframe existe desde o início — o motor escreve nele — mas
+                  fica coberto por um aviso até a primeira execução, para o
+                  retângulo branco vazio não parecer um erro. */}
+              <div className="relative h-[280px] bg-white">
+                <iframe
+                  ref={iframeRef}
+                  title="Pré-visualização da página"
+                  sandbox={SANDBOX_DO_IFRAME}
+                  className="h-full w-full border-0"
+                />
+                {!paginaRenderizada && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-canvas px-6 text-center text-sm text-ink-faint">
+                    A página aparece aqui quando você rodar ou verificar o código.
+                  </div>
+                )}
+              </div>
+            </Card>
+          )}
 
           <div className="h-48 shrink-0 overflow-y-auto border-t border-line bg-terminal p-4">
             <p className="label-mono mb-2 text-white/40">Console</p>
@@ -314,6 +424,12 @@ export function ProjectWorkspace() {
               </div>
             )}
           </div>
+
+          {result?.trocas && result.trocas.length > 0 && (
+            <div className="mx-4 mb-4">
+              <Trocas trocas={result.trocas} />
+            </div>
+          )}
         </section>
       </div>
 

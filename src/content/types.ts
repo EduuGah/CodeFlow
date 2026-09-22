@@ -491,6 +491,21 @@ export interface Project {
    */
   referenceSolution?: string;
   status: ContentStatus;
+  /**
+   * Padrão `worker`. Com `iframe`, o projeto é uma página: `initialCode` e
+   * `referenceSolution` são o script que monta o DOM (como um exercício
+   * `code` de página), e cada checkpoint roda contra ela dentro de um
+   * `<iframe sandbox>` — a solução de referência substitui o esqueleto por
+   * inteiro, em vez de somar a ele, porque as duas são a página completa.
+   */
+  runtime?: Runtime;
+  /**
+   * Só com `runtime: 'iframe'`: o servidor por trás da página (motor 7) —
+   * código, arquivos, ambiente e banco. Sobe de novo, do zero, para cada
+   * checkpoint, do mesmo jeito que cada checkpoint já ganhava um sandbox
+   * novo — nenhum critério herda estado de dados do anterior.
+   */
+  servidor?: ServidorDaPagina;
 }
 
 export interface Flashcard {

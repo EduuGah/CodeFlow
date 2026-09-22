@@ -18,7 +18,7 @@ Fase 3  Tipos e componentes      ███████████████�
 Fase 4  Back-end e dados         ██████████████████████  20/20  pronto
 Fase 5  Profissionalização       ██████████████████████  27/27  pronto
 Fase 6  Python                   ░░░░░░░░░░░░░░░░░░░░░░   0/10  motor 6
-Fase 7  Projeto final            ██████████████████████   5/5   pronto; motor 7 inteiro; faltam os capstones
+Fase 7  Projeto final            ██████████████████████   5/5   pronto; motor 7 inteiro; capstone 1 de 3
 ```
 
 | | Hoje | Previsto | Feito |
@@ -27,9 +27,20 @@ Fase 7  Projeto final            ███████████████�
 | Exercícios | **757** | ~800 | 95% |
 | Tipos de exercício | **10** | 13 | 77% |
 | Motores de execução | **7** | 8 | 88% |
-| Projetos | **7** | ~20 | 35% |
+| Projetos | **8** | ~20 | 40% |
 
-**Último trabalho** (2026-09-21, noite): a trilha **Terminal e
+**Último trabalho** (2026-09-22): o primeiro capstone, **Lista de Tarefas
+com Conta** (`proj-capstone-tarefas`) — o primeiro projeto aberto de três
+camadas (página + API + banco), em vez de só JavaScript puro. Para isso o
+tipo `Project` ganhou `runtime` e `servidor` (os mesmos campos que o
+exercício `code` de página já tinha); `ProjectWorkspace.tsx` ganhou o
+painel do servidor, o iframe da página, e uma versão de `executar`/
+`verificar` que sobe um servidor novo por checkpoint (a API e o banco
+`tarefas` já prontos da trilha do projeto final, sem nenhuma mudança
+neles). `e2e/capstone-tarefas.spec.ts` prova a solução de referência
+fechando os 4 critérios no Chromium e no celular. Faltam os outros dois
+capstones (loja com carrinho, blog com autenticação) — a plataforma para
+eles já existe. Antes (2026-09-21, noite): a trilha **Terminal e
 Ferramentas**, inteira — 5 aulas e 25 exercícios sobre o shell e caminhos,
 variáveis de ambiente, os scripts do `package.json` na prática, o que ler
 numa saída de erro, e uma aula de fechamento que diagnostica um comando
@@ -701,12 +712,13 @@ exercícios com `banco`; os arquivos da API ficam em
 | 4 | A página sobre a API: a página não sabe nada, o cliente da API num lugar só (token, JSON, erro virando exceção), os quatro estados, a lista como função dos dados, recarregar depois de mudar, o formulário, marcar e apagar por delegação — cada exercício com a API de pé atrás da página — **feita** |
 | 5 | Fechar: a lista do "pronto" vira o roteiro de fumaça (uma página que faz os pedidos e relata), o teste do contrato (`paraApi` com sabotagens), o README com as decisões, publicar (o que muda: ambiente e CORS; o que não muda: nenhuma linha), a ordem de publicar — **feita** |
 
-**Faltam os três capstones**, cada um com critérios de aceitação como os
-projetos de hoje, mas em três camadas — a plataforma para eles (o motor 7)
-já existe; o que falta é decidir a forma: um exercício `code` de página com
-`servidor` por critério, ou um tipo novo de vários arquivos:
+**Um dos três capstones está feito (2026-09-22)**: a forma escolhida foi
+estender o tipo `Project` (não um tipo novo de vários arquivos) — ele
+ganhou `runtime` e `servidor`, os mesmos campos do exercício `code` de
+página, e `ProjectWorkspace.tsx` ganhou o painel do servidor, o iframe e
+uma `verificar()` que sobe um servidor (com banco) novo por checkpoint.
 
-- **Lista de tarefas com conta** — tarefas por usuário, feitas e pendentes, filtro e busca.
+- **Lista de tarefas com conta** — tarefas por usuário, feitas e pendentes, filtro e busca — **feito**: `proj-capstone-tarefas`, reaproveitando a API e o banco `tarefas` prontos das aulas 3–5, sem mexer neles; a página soma filtro por estado e busca por título, os dois no cliente, sobre os dados já carregados.
 - **Loja com carrinho** — o banco da trilha de SQL virando produto: catálogo, carrinho, pedido, estoque que abaixa.
 - **Blog com autenticação** — cadastro, login com token, posts só do dono, comentários.
 

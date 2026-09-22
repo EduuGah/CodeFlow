@@ -29,7 +29,7 @@ import { embaralhar, estaOrdenado } from '../client/lib/ordenar';
 import { avaliarTestes } from '../client/lib/escrever-teste';
 import { corrigirLinha, linhasNumeradas } from '../client/lib/encontrar-bug';
 import { avaliarRestricoes, todasCumpridas } from '../client/lib/refatorar';
-import type { CodeExercise, Exercise, FillBlankExercise, LanguageId, Lesson, ServerExercise, SqlExercise } from './types';
+import type { CodeExercise, Exercise, FillBlankExercise, LanguageId, Lesson, Project, ServerExercise, SqlExercise } from './types';
 
 /**
  * Suíte de integridade do conteúdo.
@@ -136,6 +136,39 @@ async function subirServidorDoExercicio(declarado: ServidorDaPagina): Promise<{ 
   banco.rodar(declarado.banco);
   const servidor = await subirServidor(programa, (p) => runProgram(p, [], [], { sequencial: true, globais: { __cfBancoNativo: banco } }));
   return { servidor, fechar: () => banco.fechar() };
+}
+
+/**
+ * Roda o código de um projeto contra os testes de um checkpoint.
+ *
+ * Um projeto comum é JavaScript puro no sandbox. Um projeto de página
+ * (`runtime: 'iframe'`, os capstones de três camadas) segue o mesmo caminho
+ * de um exercício `code` de página: o servidor sobe no Node com o banco, se
+ * houver, e o código do aluno roda no jsdom fazendo `fetch` para ele.
+ */
+async function executarProjeto(project: Project, codigo: string, tests: SandboxTest[]) {
+  if (project.runtime !== 'iframe') return runProgram(codigo, tests);
+
+  if (!project.servidor) {
+    const r = await rodarPaginaNoJsdom(codigo, tests);
+    return { logs: r.logs, testResults: r.testResults, error: r.error };
+  }
+
+  const { servidor, fechar } = await subirServidorDoExercicio(project.servidor);
+  try {
+    if (servidor.error) {
+      return { logs: servidor.logs, testResults: [], error: `o servidor do projeto não subiu: ${servidor.error}` };
+    }
+    const r = await rodarPaginaNoJsdom(codigo, tests, 8000, { servidor });
+    return { logs: r.logs, testResults: r.testResults, error: r.error };
+  } finally {
+    fechar();
+  }
+}
+
+/** A solução de referência de um projeto de página substitui o esqueleto por inteiro — ver `programaDaSolucao`. */
+function programaDoProjeto(project: Project, codigo: string): string {
+  return project.runtime === 'iframe' ? codigo : project.initialCode + '\n' + codigo;
 }
 
 /**
@@ -1124,9 +1157,9 @@ describe('projetos', () => {
       expect(project.referenceSolution, 'projeto precisa de solução de referência').toBeDefined();
 
       for (const checkpoint of project.checkpoints) {
-        const resultado = await runProgram(
-          `${project.initialCode}
-${project.referenceSolution}`,
+        const resultado = await executarProjeto(
+          project,
+          programaDoProjeto(project, project.referenceSolution ?? ''),
           checkpoint.tests
         );
 
@@ -1145,7 +1178,7 @@ ${project.referenceSolution}`,
       // uma promessa — que é sempre verdadeira, e o teste passaria sempre.
       let todosFecham = true;
       for (const checkpoint of project.checkpoints) {
-        const r = await runProgram(project.initialCode, checkpoint.tests);
+        const r = await executarProjeto(project, project.initialCode, checkpoint.tests);
         const fechou = r.testResults.length > 0 && r.testResults.every((t) => t.passed);
         if (!fechou) {
           todosFecham = false;

@@ -157,14 +157,14 @@ o banco só guarda fatos, e "viu" não é um).
 
 ## 5. O que ESTÁ SENDO FEITO agora
 
-**Nada em andamento.** O último commit fecha a trilha de Terminal e
-Ferramentas (veja B11) — 5 aulas, simuladas em JavaScript comum porque não
-há motor de terminal —, o CI está verde, e a árvore está limpa. Você
-começa num ponto estável.
+**Nada em andamento.** O último commit fecha o primeiro capstone (veja
+B12) — o tipo `Project` ganhou página + servidor, e `proj-capstone-tarefas`
+é o primeiro projeto de três camadas —, o CI está verde, e a árvore está
+limpa. Você começa num ponto estável.
 
 **A Fase 5 está completa**: Engenharia, Testes, Git e Terminal, as quatro
-trilhas. O que falta no roadmap inteiro: a Fase 6 (Python) e os três
-capstones da Fase 7.
+trilhas. O que falta no roadmap inteiro: a Fase 6 (Python) e os outros
+dois capstones da Fase 7 (loja com carrinho, blog com autenticação).
 
 ## 6. O que VAI SER FEITO — e a decisão que precisa ser tomada
 
@@ -318,7 +318,7 @@ projeto: seis trilhas desenroladas numa coluna eram uma parede.
   `CodeExercise.servidor` — a tela mostra o servidor antes e os pedidos da
   página depois. Aulas 4 e 5 escritas; `e2e/projeto.spec.ts` prova a ponte no
   Chromium. Os arquivos da API ficam em `lessons/proj-servidor.ts`.
-- Faltam os três capstones (a lista de tarefas completa, a loja, o blog).
+- Faltavam os três capstones (a lista de tarefas completa, a loja, o blog) — o primeiro está feito, veja B12.
 
 ### B9) A trilha de Testes e Qualidade — feito (2026-09-21)
 
@@ -376,22 +376,51 @@ projeto: seis trilhas desenroladas numa coluna eram uma parede.
   (`diagnosticar`). Nenhum tipo de exercício novo.
 - `e2e/terminal.spec.ts` conclui cada aula no Chromium e no celular.
 
+### B12) O primeiro capstone — feito (2026-09-22)
+
+- O dono do projeto escolheu, entre as duas formas em aberto, **estender o
+  tipo `Project`** (não um tipo de vários arquivos). `Project` ganhou
+  `runtime?: Runtime` e `servidor?: ServidorDaPagina` — os mesmos campos
+  de `CodeExercise` — e, com `runtime: 'iframe'`, `initialCode` e
+  `referenceSolution` são a página inteira (a referência substitui o
+  esqueleto, não soma a ele, como já valia para exercício de página).
+- `ProjectWorkspace.tsx`: `ehPagina`, o iframe, o painel "O servidor por
+  trás da página", e `executarPaginaComServidor()` — a mesma função tanto
+  para "Rodar" (sem testes) quanto para "Verificar critérios" (um
+  checkpoint por vez, cada um com servidor e banco novos, para nenhum
+  critério herdar dado do anterior).
+- `content.test.ts` ganhou `executarProjeto()` e `programaDoProjeto()`,
+  paralelos ao `executar()`/`programaDaSolucao()` de exercício, para as
+  duas checagens de sempre (a referência fecha tudo; o esqueleto, não)
+  também valerem para projeto de página.
+- `proj-capstone-tarefas`: "Lista de Tarefas com Conta", 4 critérios —
+  carregar e listar, adicionar, marcar e apagar, filtrar e buscar (os dois
+  últimos client-side, sobre o array já carregado, sem outro fetch).
+  Reaproveita a API e o banco `tarefas` prontos das aulas 3–5 do projeto
+  final, sem mexer neles. `e2e/capstone-tarefas.spec.ts` prova a solução
+  de referência fechando os 4 critérios no Chromium e no celular.
+- Faltam os outros dois capstones (loja com carrinho, blog com
+  autenticação) — a forma e a plataforma já existem; é reaproveitar o
+  padrão de `proj-capstone-tarefas` com um banco e uma API novos.
+
 ### C) Mais projetos com o motor atual — barato, sem currículo novo
 
-Existem 7 projetos e o roadmap prevê ~30. Eles usam a mecânica que já existe e
+Existem 8 projetos e o roadmap prevê ~30. Eles usam a mecânica que já existe e
 dão prática aplicada. É o caminho de menor risco e menor retorno.
 
 ### Recomendação
 
-A, B, B2 a B11 estão feitos: as Fases 1 a 5 e 7 completas — a Fase 5
-(Engenharia, Testes, Git, Terminal) fechou inteira, e a Fase 7, o projeto
-final, o pedido central do dono do projeto, está completa com o motor 7
-inteiro. O que vem agora: os **três capstones** da Fase 7 (a plataforma
-existe; falta decidir a forma) ou a Fase 6 (Python, o Pyodide — o último
-motor). Pergunte ao dono do projeto. Ou C, ou os itens de plataforma que
-ficaram (mapa de tópicos e busca, tutor com IA, painel do aluno). Antes de
-qualquer um, vale o que só o dono do projeto pode fazer: usar o aplicativo
-publicado num telefone de verdade, inclusive uma aula de Node.
+A, B, B2 a B12 estão feitos: as Fases 1 a 5 e 7 completas — a Fase 5
+(Engenharia, Testes, Git, Terminal) fechou inteira, a Fase 7 (o projeto
+final, o pedido central do dono do projeto) está completa com o motor 7
+inteiro, e o primeiro dos três capstones já usa esse motor como projeto
+aberto. O que vem agora: os **outros dois capstones** (a forma já está
+decidida — estender `Project`; falta só o banco e a API de cada um) ou a
+Fase 6 (Python, o Pyodide — o último motor). Pergunte ao dono do projeto.
+Ou C, ou os itens de plataforma que ficaram (mapa de tópicos e busca,
+tutor com IA, painel do aluno). Antes de qualquer um, vale o que só o dono
+do projeto pode fazer: usar o aplicativo publicado num telefone de
+verdade, inclusive o capstone novo.
 
 Se o dono do projeto não indicar o caminho, pergunte antes de começar uma
 fase ou C — são investimentos grandes o bastante para a escolha ser dele.
@@ -402,8 +431,8 @@ fase ou C — são investimentos grandes o bastante para a escolha ser dele.
 
 ```bash
 npm run typecheck   # inclui e2e/ e playwright.config.ts
-npm test            # 3.017 testes
-npm run test:e2e    # 400 no navegador (antes: npx playwright install chromium)
+npm test            # 3.019 testes
+npm run test:e2e    # 402 no navegador (antes: npx playwright install chromium)
 npm run build
 ```
 
