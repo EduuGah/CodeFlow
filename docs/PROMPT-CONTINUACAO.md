@@ -157,14 +157,15 @@ o banco só guarda fatos, e "viu" não é um).
 
 ## 5. O que ESTÁ SENDO FEITO agora
 
-**Nada em andamento.** O último commit fecha o primeiro capstone (veja
-B12) — o tipo `Project` ganhou página + servidor, e `proj-capstone-tarefas`
-é o primeiro projeto de três camadas —, o CI está verde, e a árvore está
-limpa. Você começa num ponto estável.
+**Nada em andamento.** O último commit fecha os outros dois capstones
+(veja B13) — loja com carrinho e blog com autenticação, no mesmo padrão
+do primeiro (B12) —, o CI está verde, e a árvore está limpa. Você começa
+num ponto estável.
 
-**A Fase 5 está completa**: Engenharia, Testes, Git e Terminal, as quatro
-trilhas. O que falta no roadmap inteiro: a Fase 6 (Python) e os outros
-dois capstones da Fase 7 (loja com carrinho, blog com autenticação).
+**As Fases 5 e 7 estão completas**: Fase 5 (Engenharia, Testes, Git,
+Terminal) e Fase 7 (o projeto final com o motor 7 e os três capstones).
+O que falta no roadmap inteiro: só a Fase 6 (Python, o Pyodide) — o
+único motor que falta.
 
 ## 6. O que VAI SER FEITO — e a decisão que precisa ser tomada
 
@@ -399,28 +400,56 @@ projeto: seis trilhas desenroladas numa coluna eram uma parede.
   Reaproveita a API e o banco `tarefas` prontos das aulas 3–5 do projeto
   final, sem mexer neles. `e2e/capstone-tarefas.spec.ts` prova a solução
   de referência fechando os 4 critérios no Chromium e no celular.
-- Faltam os outros dois capstones (loja com carrinho, blog com
-  autenticação) — a forma e a plataforma já existem; é reaproveitar o
-  padrão de `proj-capstone-tarefas` com um banco e uma API novos.
+### B13) Os outros dois capstones — feito (2026-09-22)
+
+- **Loja com carrinho**: `proj-capstone-loja`, 4 critérios (catálogo,
+  carrinho e total, finalizar diminui o estoque, recusar sem estoque
+  suficiente). Reaproveita o banco `loja` **da própria trilha de SQL**
+  (`clientes`, `produtos`, `pedidos`, `itens`) sem mudar nada nele — é
+  literalmente o banco que a descrição do roadmap já previa. A API
+  (`dados/loja.js`) confere o estoque de **todos** os itens do pedido
+  antes de gravar qualquer um: um item sem estoque recusa o pedido
+  inteiro, e nenhum item — nem os que tinham estoque de sobra — é
+  descontado. Um checkpoint prova exatamente essa garantia de "tudo ou
+  nada" com dois itens no mesmo pedido, um válido e um não.
+- **Blog com autenticação**: `proj-capstone-blog`, 4 critérios (cadastro
+  que já loga, listar posts com autor e comentários, publicar exige
+  login, apagar só o dono e comentar sem exigir ser dono). Banco próprio
+  (`usuarios`, `sessoes`, `posts`, `comentarios`) — não reaproveita
+  `tarefas` nem `loja`, porque nenhum dos dois tinha posts/comentários.
+  Decisão deliberada: `POST /cadastro` já devolve o token — não existe
+  uma tela de "entrar" separada de "criar conta" —, para manter o escopo
+  focado na autenticação por token em si. `DELETE /posts/:id` responde
+  403 para quem não é o dono; comentar não tem essa checagem.
+- Os dois seguem exatamente o padrão de `proj-capstone-tarefas` (B12):
+  `runtime: 'iframe'`, `servidor`, nenhuma mudança no tipo `Project` nem
+  em `ProjectWorkspace.tsx`. `e2e/capstone-loja.spec.ts` e
+  `e2e/capstone-blog.spec.ts` provam as soluções de referência no
+  Chromium e no celular.
+- **Os três capstones da Fase 7 estão prontos.** Armadilha encontrada e
+  corrigida ao escrever os testes do blog: um seletor CSS `#posts li`
+  casava também os `<li>` dos comentários **dentro** de cada post (são
+  descendentes, não só filhos diretos) — contando 4 "posts" onde havia 3.
+  O seletor certo para contar só os posts é `#posts > li` (filho direto);
+  `li[data-id="..."]` já era específico o bastante e não precisou mudar.
 
 ### C) Mais projetos com o motor atual — barato, sem currículo novo
 
-Existem 8 projetos e o roadmap prevê ~30. Eles usam a mecânica que já existe e
+Existem 10 projetos e o roadmap prevê ~30. Eles usam a mecânica que já existe e
 dão prática aplicada. É o caminho de menor risco e menor retorno.
 
 ### Recomendação
 
-A, B, B2 a B12 estão feitos: as Fases 1 a 5 e 7 completas — a Fase 5
-(Engenharia, Testes, Git, Terminal) fechou inteira, a Fase 7 (o projeto
-final, o pedido central do dono do projeto) está completa com o motor 7
-inteiro, e o primeiro dos três capstones já usa esse motor como projeto
-aberto. O que vem agora: os **outros dois capstones** (a forma já está
-decidida — estender `Project`; falta só o banco e a API de cada um) ou a
-Fase 6 (Python, o Pyodide — o último motor). Pergunte ao dono do projeto.
-Ou C, ou os itens de plataforma que ficaram (mapa de tópicos e busca,
-tutor com IA, painel do aluno). Antes de qualquer um, vale o que só o dono
-do projeto pode fazer: usar o aplicativo publicado num telefone de
-verdade, inclusive o capstone novo.
+A, B, B2 a B13 estão feitos: as Fases 1, 2, 3, 4, 5 e 7 completas — a
+Fase 5 (Engenharia, Testes, Git, Terminal) fechou inteira, e a Fase 7 (o
+projeto final, o pedido central do dono do projeto) está completa com o
+motor 7 inteiro **e os três capstones**. Falta só a **Fase 6** (Python,
+o Pyodide — o único motor que falta) no roadmap de conteúdo. Pergunte ao
+dono do projeto se é hora de começá-la. Ou C, ou os itens de plataforma
+que ficaram (mapa de tópicos e busca, tutor com IA, painel do aluno).
+Antes de qualquer um, vale o que só o dono do projeto pode fazer: usar o
+aplicativo publicado num telefone de verdade, inclusive os três
+capstones novos.
 
 Se o dono do projeto não indicar o caminho, pergunte antes de começar uma
 fase ou C — são investimentos grandes o bastante para a escolha ser dele.
@@ -431,8 +460,8 @@ fase ou C — são investimentos grandes o bastante para a escolha ser dele.
 
 ```bash
 npm run typecheck   # inclui e2e/ e playwright.config.ts
-npm test            # 3.019 testes
-npm run test:e2e    # 402 no navegador (antes: npx playwright install chromium)
+npm test            # 3.023 testes
+npm run test:e2e    # 406 no navegador (antes: npx playwright install chromium)
 npm run build
 ```
 

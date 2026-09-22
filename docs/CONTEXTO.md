@@ -37,10 +37,10 @@ Números lidos do catálogo, não de memória.
 | Aulas | 133, somando 3.791 minutos, em blocos por assunto (`Track.sections`) |
 | Exercícios | 757, em 10 tipos — 203 de múltipla escolha, 144 de código, 86 de lacuna, 82 de prever saída, 66 de ordenar passos, 60 de encontrar o bug, 46 de SQL, 41 de servidor, 14 de refatorar, 15 de escrever o teste. 78 exercícios de página (`runtime: 'iframe'`), 42 de componente React (a aula é `language: 'react'`), 16 com trechos de tipo (`typeTests`). **Toda aula tem ao menos um dos quatro tipos de prática de dev** |
 | Verificação | 941 casos fixos + 59 propriedades + 71 verificações de SQL (por linhas devolvidas) |
-| Projetos | 8, com 26 critérios de aceitação — 1 deles (o capstone) é página + API + banco (motor 7), os outros 7 são JavaScript puro |
+| Projetos | 10, com 34 critérios de aceitação — os 3 capstones são página + API + banco (motor 7), os outros 7 são JavaScript puro |
 | Conceitos | 130, com grafo de pré-requisitos |
 | Flashcards | 22 |
-| Testes | 3.019 de unidade + 402 de navegador |
+| Testes | 3.023 de unidade + 406 de navegador |
 | Pacote | 2.385 kB (667 kB comprimido) no chunk principal — o conteúdo vai junto; o Monaco são mais 3.362 kB (869 kB) num chunk à parte, baixado só quando o primeiro editor monta, e o worker de TypeScript (7 MB) só quando um modelo JS/TS abre. O motor de TypeScript não acrescentou arquivo; o de React acrescentou um chunk de 143 kB (47 kB) com o React e o ReactDOM como texto, baixado só por um exercício de React; o de SQL acrescentou o worker (49 kB) e o SQLite em WebAssembly (658 kB), baixados só por um exercício de SQL |
 
 ## 4. Decisões que não devem ser desfeitas sem motivo forte
@@ -749,18 +749,23 @@ página tem o campo `servidor`. O CI abre para essa trilha a exceção de SQL
 numa aula `node`, e sobe o servidor de cada exercício de página no Node
 antes do jsdom. `e2e/projeto.spec.ts` conclui as cinco aulas no Chromium e
 prova "O banco depois" e a página listando tarefas vindas do servidor de
-pé. **O primeiro capstone está feito (2026-09-22)**: "Lista de Tarefas com
-Conta" (`proj-capstone-tarefas`), o primeiro projeto de três camadas. Para
-isso o tipo `Project` ganhou `runtime` e `servidor` (os mesmos campos do
-exercício `code` de página); `ProjectWorkspace.tsx` ganhou o painel do
-servidor, o iframe da página e uma versão de `executar`/`verificar` que
-sobe um servidor novo (com o banco `tarefas` de exemplo) por checkpoint —
-nenhum critério herda dado do anterior. `content.test.ts` ganhou
-`executarProjeto()`, que despacha pelo `runtime` do jeito que o `executar()`
-de exercício já fazia. `e2e/capstone-tarefas.spec.ts` prova a solução de
-referência fechando os 4 critérios no Chromium e no celular. Faltam os
-outros dois capstones (loja com carrinho, blog com autenticação) — a
-plataforma para eles já existe.
+pé. **Os três capstones estão feitos (2026-09-22)**. O tipo `Project`
+ganhou `runtime` e `servidor` (os mesmos campos do exercício `code` de
+página); `ProjectWorkspace.tsx` ganhou o painel do servidor, o iframe da
+página e uma versão de `executar`/`verificar` que sobe um servidor novo
+por checkpoint — nenhum critério herda dado do anterior.
+`content.test.ts` ganhou `executarProjeto()`, que despacha pelo `runtime`
+do jeito que o `executar()` de exercício já fazia. Os três: **"Lista de
+Tarefas com Conta"** (`proj-capstone-tarefas`, o primeiro, com o banco
+`tarefas` do projeto final), **"Loja com Carrinho"**
+(`proj-capstone-loja`, com o banco `loja` da trilha de SQL — o pedido
+confere estoque de **todos** os itens antes de gravar qualquer um, para
+não descontar parte de um pedido recusado) e **"Blog com Autenticação"**
+(`proj-capstone-blog`, banco próprio; cadastro já devolve o token — não
+há tela de login separada —, e só o dono de um post pode apagá-lo, 403
+senão). `e2e/capstone-tarefas.spec.ts`, `e2e/capstone-loja.spec.ts` e
+`e2e/capstone-blog.spec.ts` provam a solução de referência de cada um
+fechando os critérios no Chromium e no celular. **A Fase 7 está completa.**
 
 **Fase 6 — não iniciada.** Pyodide (Python) é o último motor.
 Investimentos grandes o bastante para a escolha ser do dono do projeto —

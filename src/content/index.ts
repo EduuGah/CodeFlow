@@ -172,6 +172,8 @@ import { projetoTarefas } from './projects/js-tarefas';
 import { projetoSenha } from './projects/js-senha';
 import { projetoEstoque } from './projects/js-estoque';
 import { projetoCapstoneTarefas } from './projects/capstone-tarefas';
+import { projetoCapstoneLoja } from './projects/capstone-loja';
+import { projetoCapstoneBlog } from './projects/capstone-blog';
 
 /**
  * Registro de conteúdo. Esta é a única fronteira que as páginas conhecem — se
@@ -322,6 +324,8 @@ const projects: Project[] = [
   projetoSenha,
   projetoEstoque,
   projetoCapstoneTarefas,
+  projetoCapstoneLoja,
+  projetoCapstoneBlog,
 ];
 const tracks: Track[] = [
   trackJsFundamentos,

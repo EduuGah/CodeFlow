@@ -18,7 +18,7 @@ Fase 3  Tipos e componentes      ███████████████�
 Fase 4  Back-end e dados         ██████████████████████  20/20  pronto
 Fase 5  Profissionalização       ██████████████████████  27/27  pronto
 Fase 6  Python                   ░░░░░░░░░░░░░░░░░░░░░░   0/10  motor 6
-Fase 7  Projeto final            ██████████████████████   5/5   pronto; motor 7 inteiro; capstone 1 de 3
+Fase 7  Projeto final            ██████████████████████   5/5   pronto; motor 7 inteiro; 3 capstones prontos
 ```
 
 | | Hoje | Previsto | Feito |
@@ -27,20 +27,33 @@ Fase 7  Projeto final            ███████████████�
 | Exercícios | **757** | ~800 | 95% |
 | Tipos de exercício | **10** | 13 | 77% |
 | Motores de execução | **7** | 8 | 88% |
-| Projetos | **8** | ~20 | 40% |
+| Projetos | **10** | ~20 | 50% |
 
-**Último trabalho** (2026-09-22): o primeiro capstone, **Lista de Tarefas
-com Conta** (`proj-capstone-tarefas`) — o primeiro projeto aberto de três
-camadas (página + API + banco), em vez de só JavaScript puro. Para isso o
-tipo `Project` ganhou `runtime` e `servidor` (os mesmos campos que o
-exercício `code` de página já tinha); `ProjectWorkspace.tsx` ganhou o
-painel do servidor, o iframe da página, e uma versão de `executar`/
-`verificar` que sobe um servidor novo por checkpoint (a API e o banco
-`tarefas` já prontos da trilha do projeto final, sem nenhuma mudança
-neles). `e2e/capstone-tarefas.spec.ts` prova a solução de referência
-fechando os 4 critérios no Chromium e no celular. Faltam os outros dois
-capstones (loja com carrinho, blog com autenticação) — a plataforma para
-eles já existe. Antes (2026-09-21, noite): a trilha **Terminal e
+**Último trabalho** (2026-09-22): os outros dois capstones, **Loja com
+Carrinho** (`proj-capstone-loja`) e **Blog com Autenticação**
+(`proj-capstone-blog`) — fecham os três capstones do projeto final. A
+loja reaproveita o banco `loja` da trilha de SQL; o pedido confere
+estoque de **todos** os itens do carrinho antes de gravar qualquer um,
+para um item sem estoque não descontar os outros ("tudo ou nada"). O
+blog tem banco próprio (`usuarios`, `sessoes`, `posts`, `comentarios`):
+`POST /cadastro` já devolve o token — não existe tela de login separada
+—, e só o dono de um post pode apagá-lo (403 senão); comentar não exige
+ser dono de nada. Os dois seguem exatamente o padrão de
+`proj-capstone-tarefas` (mesmo dia, veja abaixo): `runtime: 'iframe'`,
+`servidor`, checkpoints isolados por servidor novo.
+`e2e/capstone-loja.spec.ts` e `e2e/capstone-blog.spec.ts` provam as
+soluções de referência no Chromium e no celular. **Os três capstones da
+Fase 7 estão prontos.** Antes (mesmo dia): o primeiro capstone, **Lista
+de Tarefas com Conta** (`proj-capstone-tarefas`) — o primeiro projeto
+aberto de três camadas (página + API + banco), em vez de só JavaScript
+puro. Para isso o tipo `Project` ganhou `runtime` e `servidor` (os
+mesmos campos que o exercício `code` de página já tinha);
+`ProjectWorkspace.tsx` ganhou o painel do servidor, o iframe da página,
+e uma versão de `executar`/`verificar` que sobe um servidor novo por
+checkpoint (a API e o banco `tarefas` já prontos da trilha do projeto
+final, sem nenhuma mudança neles). `e2e/capstone-tarefas.spec.ts` prova
+a solução de referência fechando os 4 critérios no Chromium e no
+celular. Antes (2026-09-21, noite): a trilha **Terminal e
 Ferramentas**, inteira — 5 aulas e 25 exercícios sobre o shell e caminhos,
 variáveis de ambiente, os scripts do `package.json` na prática, o que ler
 numa saída de erro, e uma aula de fechamento que diagnostica um comando
@@ -712,15 +725,15 @@ exercícios com `banco`; os arquivos da API ficam em
 | 4 | A página sobre a API: a página não sabe nada, o cliente da API num lugar só (token, JSON, erro virando exceção), os quatro estados, a lista como função dos dados, recarregar depois de mudar, o formulário, marcar e apagar por delegação — cada exercício com a API de pé atrás da página — **feita** |
 | 5 | Fechar: a lista do "pronto" vira o roteiro de fumaça (uma página que faz os pedidos e relata), o teste do contrato (`paraApi` com sabotagens), o README com as decisões, publicar (o que muda: ambiente e CORS; o que não muda: nenhuma linha), a ordem de publicar — **feita** |
 
-**Um dos três capstones está feito (2026-09-22)**: a forma escolhida foi
+**Os três capstones estão feitos (2026-09-22)**: a forma escolhida foi
 estender o tipo `Project` (não um tipo novo de vários arquivos) — ele
 ganhou `runtime` e `servidor`, os mesmos campos do exercício `code` de
 página, e `ProjectWorkspace.tsx` ganhou o painel do servidor, o iframe e
 uma `verificar()` que sobe um servidor (com banco) novo por checkpoint.
 
 - **Lista de tarefas com conta** — tarefas por usuário, feitas e pendentes, filtro e busca — **feito**: `proj-capstone-tarefas`, reaproveitando a API e o banco `tarefas` prontos das aulas 3–5, sem mexer neles; a página soma filtro por estado e busca por título, os dois no cliente, sobre os dados já carregados.
-- **Loja com carrinho** — o banco da trilha de SQL virando produto: catálogo, carrinho, pedido, estoque que abaixa.
-- **Blog com autenticação** — cadastro, login com token, posts só do dono, comentários.
+- **Loja com carrinho** — o banco da trilha de SQL virando produto: catálogo, carrinho, pedido, estoque que abaixa — **feito**: `proj-capstone-loja`, reaproveitando o banco `loja` da trilha de SQL (`clientes`, `produtos`, `pedidos`, `itens`) sem mudar nada nele; `POST /pedidos` confere o estoque de **todos** os itens antes de gravar qualquer um — um item sem estoque recusa o pedido inteiro, sem descontar os que tinham estoque de sobra.
+- **Blog com autenticação** — cadastro, login com token, posts só do dono, comentários — **feito**: `proj-capstone-blog`, com banco próprio (`usuarios`, `sessoes`, `posts`, `comentarios`); `POST /cadastro` já devolve o token — a decisão deliberada foi não ter uma tela de login separada, para manter o escopo focado no que o cabeçalho `Authorization` faz — e `DELETE /posts/:id` responde 403 para quem não é o dono, enquanto comentar não exige ser dono de nada.
 
 Plataforma, além do motor 7: fechar as pontas do CodeFlow — desempenho do
 pacote, revisão num telefone real, passagem final de acessibilidade.

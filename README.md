@@ -10,7 +10,7 @@ erro, não apenas se acertou.
 
 ## O que tem hoje
 
-**13 trilhas, 133 aulas, 757 exercícios em 10 tipos, 8 projetos, 130 conceitos.**
+**13 trilhas, 133 aulas, 757 exercícios em 10 tipos, 10 projetos, 130 conceitos.**
 Tudo é contado do catálogo; a página pública mostra os mesmos números.
 
 | Etapa | Trilha | Linguagem | Aulas | Exercícios |
@@ -110,8 +110,8 @@ Redirect URLs.
 
 ```bash
 npm run typecheck   # tipos, incluindo os testes de navegador
-npm test            # 3.019 testes de unidade, propriedade e componente (Vitest)
-npm run test:e2e    # 402 testes de navegador (Playwright, Chromium, celular e desktop)
+npm test            # 3.023 testes de unidade, propriedade e componente (Vitest)
+npm run test:e2e    # 406 testes de navegador (Playwright, Chromium, celular e desktop)
 ```
 
 O E2E precisa do Chromium uma vez: `npx playwright install chromium`.
@@ -191,17 +191,17 @@ docs/               CONTEXTO.md (o mapa do projeto), curriculo.md (o roadmap),
 O roadmap completo, com o estado de cada aula e o custo de cada motor, está em
 [`docs/curriculo.md`](docs/curriculo.md). Em resumo, na ordem:
 
-1. **Os outros dois capstones do projeto final** — loja com carrinho, blog
-   com autenticação. O primeiro (lista de tarefas com conta) já está pronto.
-2. **Python** — a primeira linguagem nova, com o Pyodide (Fase 6).
-3. **Mais linguagens**, uma por vez, cada uma com o motor que a roda no
+1. **Python** — a primeira linguagem nova, com o Pyodide (Fase 6). É o único
+   motor que falta.
+2. **Mais linguagens**, uma por vez, cada uma com o motor que a roda no
    navegador.
 
 O projeto final — página, API e banco, do desenho à publicação — está
-completo, e a Fase 5 (Profissionalização: Engenharia, Testes, Git e
-Terminal) fechou inteira. O tipo `Project` ganhou suporte a página + servidor
-(motor 7) para os capstones — um projeto aberto, com critérios de aceitação,
-agora pode ser as três camadas juntas, em vez de só um script.
+completo, a Fase 5 (Profissionalização: Engenharia, Testes, Git e Terminal)
+fechou inteira, e os **três capstones** também: lista de tarefas com conta,
+loja com carrinho, blog com autenticação. O tipo `Project` ganhou suporte a
+página + servidor (motor 7) para isso — um projeto aberto, com critérios de
+aceitação, agora pode ser as três camadas juntas, em vez de só um script.
 
 ## Licença
 
