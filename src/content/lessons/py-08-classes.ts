@@ -58,6 +58,35 @@ Ao **chamar** \`conta.depositar(50)\`, você não passa o \`self\` — Python o 
 
 Não existe sintaxe especial para método além de estar indentado dentro do \`class\` e receber \`self\`. Chamar \`conta.depositar(50)\` é açúcar sintático para \`ContaBancaria.depositar(conta, 50)\` — o objeto que vem antes do ponto vira o primeiro argumento.
 
+## Imprimir um objeto direto mostra algo estranho — até definir __str__
+
+~~~py
+class ContaBancaria:
+    def __init__(self, titular, saldo=0):
+        self.titular = titular
+        self.saldo = saldo
+
+conta = ContaBancaria('Ana', 100)
+print(conta)   # <__main__.ContaBancaria object at 0x7f2b1c0a4d90> — não é isso que você queria
+~~~
+
+Sem ajuda, \`print\` num objeto mostra o endereço dele na memória — informação inútil para quem lê. Definir \`__str__\` ensina a classe a se descrever:
+
+~~~py
+class ContaBancaria:
+    def __init__(self, titular, saldo=0):
+        self.titular = titular
+        self.saldo = saldo
+
+    def __str__(self):
+        return f'Conta de {self.titular}, saldo R$ {self.saldo}'
+
+conta = ContaBancaria('Ana', 100)
+print(conta)   # Conta de Ana, saldo R$ 100
+~~~
+
+\`__str__\` é chamado automaticamente por \`print()\` e por \`str(objeto)\` — outro método especial de dois underscores, como \`__init__\`, só que para descrever o objeto em vez de criá-lo.
+
 ## Quando uma classe vale a pena
 
 Uma classe faz sentido quando **dados e comportamento andam sempre juntos** — o saldo de uma conta e as operações que o mudam, por exemplo. Não vale a pena só para "agrupar" funções que não compartilham estado nenhum: um módulo com funções soltas (como a trilha de Engenharia já ensinou) resolve isso mais simples, sem a cerimônia de \`self\` e \`__init__\`.
@@ -223,9 +252,52 @@ print(s.falar())`,
       },
     },
     {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-py-8-str-legivel',
+        type: 'code',
+        prompt:
+          'A classe `Produto` já tem `__init__(self, nome, preco)`. Adicione `__str__(self)` para que `print(produto)` mostre exatamente `"Produto: Caderno (R$ 12.5)"` — no formato `"Produto: {nome} (R$ {preco})"`.',
+        concepts: ['py-classes'],
+        difficulty: 'intermediario',
+        tags: ['python', 'str', 'classes'],
+        initialCode: `class Produto:
+    def __init__(self, nome, preco):
+        self.nome = nome
+        self.preco = preco
+
+    # adicione __str__ aqui
+`,
+        tests: [
+          {
+            description: 'str(produto) usa o formato certo',
+            assertion: `p = Produto('Caderno', 12.5)
+assert str(p) == 'Produto: Caderno (R$ 12.5)', "esperava 'Produto: Caderno (R$ 12.5)', veio " + str(p)`,
+          },
+          {
+            description: 'funciona com outro produto',
+            assertion: `p = Produto('Caneta', 2)
+assert str(p) == 'Produto: Caneta (R$ 2)', "esperava 'Produto: Caneta (R$ 2)', veio " + str(p)`,
+          },
+        ],
+        solution: `class Produto:
+    def __init__(self, nome, preco):
+        self.nome = nome
+        self.preco = preco
+
+    def __str__(self):
+        return f'Produto: {self.nome} (R$ {self.preco})'
+`,
+        hints: [
+          '`__str__(self)` é um método como qualquer outro — só precisa devolver uma string.',
+          'Uma f-string resolve numa linha só: `f\'Produto: {self.nome} (R$ {self.preco})\'`.',
+        ],
+      },
+    },
+    {
       kind: 'summary',
       markdown: `
-\`__init__\` é o construtor; \`self\` é o \`this\`, mas escrito por extenso — todo método precisa declará-lo como primeiro parâmetro, e Python o preenche sozinho na hora de chamar. Método é só uma função dentro da classe, chamada com \`objeto.metodo()\`.
+\`__init__\` é o construtor; \`self\` é o \`this\`, mas escrito por extenso — todo método precisa declará-lo como primeiro parâmetro, e Python o preenche sozinho na hora de chamar. Método é só uma função dentro da classe, chamada com \`objeto.metodo()\`. \`__str__\` ensina o objeto a se descrever para \`print()\` — sem ele, aparece só o endereço na memória.
 
 Uma classe vale a pena quando dados e comportamento andam sempre juntos — não para agrupar funções que não compartilham estado.
 

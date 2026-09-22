@@ -51,6 +51,61 @@ for (let i = 1; i <= 10; i--) {   // i diminui, nunca chega a 10
 As três causas quase sempre são: o passo vai na direção errada, o passo foi esquecido, ou a condição usa uma variável que o corpo não altera.
 
 Aqui na plataforma um laço infinito é interrompido depois de 3 segundos, e você recebe um aviso em vez de uma aba congelada. Fora daqui, o navegador simplesmente para de responder.
+
+## while: quando o número de voltas não é conhecido
+
+O \`for\` é ideal quando você sabe, de antemão, quantas vezes repetir — "de 1 até n". Mas às vezes a parada depende de algo que só se descobre durante a repetição, como ler itens de uma fila até ela esvaziar. Aí o \`while\` é mais direto, porque não força as três partes numa linha só:
+
+~~~javascript
+let saldo = 100;
+let saques = 0;
+
+while (saldo > 0) {
+  saldo -= 30;
+  saques++;
+}
+
+console.log(saques); // 4 — o saldo fica negativo depois do quarto saque
+~~~
+
+A regra de ouro é a mesma do \`for\`: alguma coisa dentro do corpo precisa, eventualmente, tornar a condição falsa. No \`for\` isso é o **passo**, que fica visível na própria declaração; no \`while\`, é fácil esquecer — o \`saldo -= 30\` está solto no meio do corpo, e apagar essa linha por engano cria um laço infinito sem nenhum aviso visual na declaração.
+
+## break e continue: sair ou pular uma volta
+
+Duas palavras-chave mudam o fluxo normal de um loop:
+
+~~~javascript
+const numeros = [4, 7, 2, 9, 5];
+
+// break: para o loop inteiro na hora
+for (const n of numeros) {
+  if (n > 8) break;      // para assim que encontra um maior que 8
+  console.log(n);        // imprime 4, 7, 2 — e para, sem chegar no 9
+}
+
+// continue: pula só esta volta, o loop continua
+for (const n of numeros) {
+  if (n % 2 !== 0) continue;   // pula os ímpares
+  console.log(n);              // imprime 4, 2 — os pares
+}
+~~~
+
+\`break\` é útil para parar de procurar assim que se encontra o que precisa — continuar depois disso seria trabalho desperdiçado. \`continue\` é útil para pular casos que não interessam sem aninhar o resto do corpo dentro de um \`if\`. Os dois só afetam o loop mais próximo — um \`break\` dentro de um loop dentro de outro loop para só o de dentro.
+
+## for...of: percorrer sem contar
+
+O bug mais comum com \`for\` clássico é o de "um a mais" (a última linha desta aula mostra um). Quando o objetivo é só visitar cada item de uma lista, sem precisar do índice, \`for...of\` elimina essa classe inteira de erro:
+
+~~~javascript
+const nomes = ["ana", "bia", "caio"];
+
+for (const nome of nomes) {
+  console.log(nome.toUpperCase());
+}
+// não existe índice para errar — o JavaScript garante parar no último item
+~~~
+
+Use \`for\` clássico quando precisar do índice (para comparar posições, por exemplo) ou controlar o passo (de 2 em 2, de trás para frente); use \`for...of\` sempre que só precisar do valor.
 `.trim(),
     },
     {
@@ -284,8 +339,33 @@ console.log(gritados);`,
       },
     },
     {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-js-4-break-continue',
+        type: 'predict-output',
+        prompt: 'O que este programa imprime? Repare no que cada palavra-chave faz.',
+        concepts: ['loops'],
+        difficulty: 'iniciante',
+        tags: ['javascript', 'loops', 'break', 'continue'],
+        code: `const numeros = [3, 8, 2, 10, 6];
+
+for (const n of numeros) {
+  if (n % 2 !== 0) continue;
+  if (n > 9) break;
+  console.log(n);
+}`,
+        expectedOutput: '8\n2',
+        explanation:
+          '3 é ímpar: `continue` pula, sem imprimir. 8 é par e não passa de 9: imprime. 2 é par e não passa de 9: imprime. 10 é par, mas passa de 9: `break` para o loop inteiro ali — o 6, que viria depois, nunca chega a ser testado.',
+        hints: [
+          '`continue` pula só a volta atual; `break` para o loop de vez, sem olhar o resto da lista.',
+          'Teste cada número na ordem: primeiro o `continue`, depois o `break`.',
+        ],
+      },
+    },
+    {
       kind: 'summary',
-      markdown: `Todo loop precisa de uma condição que **em algum momento fica falsa**. Quando usar um acumulador, declare-o antes do loop — dentro, ele reinicia a cada volta.`,
+      markdown: `Todo loop precisa de uma condição que **em algum momento fica falsa**. Quando usar um acumulador, declare-o antes do loop — dentro, ele reinicia a cada volta. \`while\` serve quando a parada não depende de um contador; \`break\` sai do loop na hora, \`continue\` pula só a volta atual; e \`for...of\` evita o erro de "um a mais" quando só se precisa do valor, não do índice.`,
     },
   ],
 };

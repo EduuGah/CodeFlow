@@ -215,6 +215,27 @@ if (calcularDescontoTotal(pedidoRelatado) > 0.3) {
       },
     },
     {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-testes-8-nomear-a-combinacao',
+        type: 'multiple-choice',
+        prompt: 'Qual destes nomes de teste de regressão é o MAIS útil daqui a um ano?',
+        concepts: ['testes-regressao'],
+        difficulty: 'iniciante',
+        tags: ['testes', 'regressao', 'nomes'],
+        options: [
+          '"cupom PROMO10 combinado com 5+ itens não pode passar do desconto máximo de 30%"',
+          '"teste do bug #482"',
+          '"regressão"',
+          '"não quebrar de novo"',
+        ],
+        correctIndex: 0,
+        explanation:
+          '"Teste do bug #482" (ou "regressão", ou "não quebrar de novo") só faz sentido para quem já sabia o que era o bug 482 — e daqui a um ano, ninguém lembra. Nomear a **combinação** que causou o problema (cupom + quantidade, no exemplo) explica a regra sozinho, sem precisar consultar um chamado antigo.',
+        hints: ['Imagine ler esse nome de teste daqui a um ano, sem lembrar de nada sobre o bug original.'],
+      },
+    },
+    {
       kind: 'summary',
       markdown: `
 Um bug relatado merece um **teste de regressão**: escrito antes do conserto, visto **falhando** contra o código com o defeito (prova que testa a coisa certa), e mantido na suíte para sempre depois de consertado.

@@ -246,6 +246,64 @@ depois: 2`,
       },
     },
     {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-testes-5-so-o-corpo',
+        type: 'multiple-choice',
+        prompt:
+          'Este teste confere só o corpo da resposta:\n\n```js\nconst res = await pedir(app, "POST", "/tarefas", { body: {} });\nassert(res.body.erro === "titulo é obrigatório", "a mensagem de erro está certa");\n```\n\nO que esse teste deixaria passar sem perceber?',
+        concepts: ['testes-servidor'],
+        difficulty: 'intermediario',
+        tags: ['testes', 'servidor', 'status'],
+        options: [
+          'Uma rota que responde `500` (erro interno) por acidente, mas ainda assim com esse corpo específico',
+          'Nada — conferir o corpo já garante que a rota está correta',
+          'Uma rota que não existe de jeito nenhum',
+          'Um `body` que não é um objeto JSON válido',
+        ],
+        correctIndex: 0,
+        explanation:
+          'Sem conferir `res.status`, o teste aceitaria qualquer código de status, desde que o corpo batesse — inclusive um `500` genuíno que por acaso tivesse essa mensagem. Quem chama a API real, porém, lê o status primeiro: um `400` (erro do cliente) e um `500` (erro do servidor) pedem reações bem diferentes de quem consome a rota.',
+        hints: ['Existe algum `assert` sobre o código de status nesse teste?'],
+      },
+    },
+    {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-testes-5-dois-casos-uma-rota',
+        type: 'predict-output',
+        prompt: 'Dois pedidos seguidos, contra a mesma rota. O que este programa imprime?',
+        concepts: ['testes-servidor'],
+        difficulty: 'iniciante',
+        tags: ['testes', 'servidor'],
+        code: `const express = require('express');
+const app = express();
+app.use(express.json());
+
+app.post('/tarefas', (req, res) => {
+  const { titulo } = req.body;
+  if (typeof titulo !== 'string' || titulo.trim() === '') {
+    return res.status(400).json({ erro: 'titulo é obrigatório' });
+  }
+  res.status(201).json({ titulo });
+});
+
+app.listen(3000);
+
+async function rodar() {
+  const valido = await pedir(app, 'POST', '/tarefas', { body: { titulo: 'Estudar' } });
+  console.log(valido.status);
+  const invalido = await pedir(app, 'POST', '/tarefas', { body: {} });
+  console.log(invalido.status);
+}
+rodar();`,
+        expectedOutput: '201\n400',
+        explanation:
+          'O primeiro pedido manda um título válido: a rota cria a tarefa e responde `201`. O segundo manda um corpo vazio — `titulo` é `undefined`, falha a checagem `typeof titulo !== "string"`, e a rota responde `400`. É o caminho feliz e o caso de erro da mesma rota, exatamente os dois comportamentos que merecem um teste cada.',
+        hints: ['O que a rota faz quando `titulo` não é uma string — a segunda chamada envia um `titulo`?'],
+      },
+    },
+    {
       kind: 'summary',
       markdown: `
 Testar uma rota é **arrange** (o \`app\` já montado), **act** (\`await pedir(app, método, caminho, opções)\`), **assert** (\`status\` e \`body\`, sempre os dois). Um teste por rota **e** por caso da rota — caminho feliz e cada erro.

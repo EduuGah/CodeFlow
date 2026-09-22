@@ -188,6 +188,50 @@ true`,
       },
     },
     {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-testes-7-variavel-interna',
+        type: 'multiple-choice',
+        prompt:
+          'Uma função de cache guarda os resultados numa variável interna `_cache` — um detalhe de implementação, não uma promessa da função. Qual teste é frágil por causa dela?',
+        concepts: ['testes-fragil'],
+        difficulty: 'intermediario',
+        tags: ['testes', 'fragil'],
+        options: [
+          'assert(buscarPreco._cache["1"] === 42, "guardou o preço no cache")',
+          'assert(buscarPreco(1) === 42, "busca o preço do produto 1")',
+          'assert(buscarPreco(1) === buscarPreco(1), "a segunda chamada devolve o mesmo valor")',
+          'assert(typeof buscarPreco(1) === "number", "devolve um número")',
+        ],
+        correctIndex: 0,
+        explanation:
+          'Acessar `_cache` diretamente prende o teste a um detalhe interno — se alguém trocar o cache por outra estrutura de dados (um `Map`, ou nenhum cache), esse teste quebra mesmo que `buscarPreco` continue devolvendo o preço certo. Os outros três testam o comportamento observável de fora: o valor devolvido, e a consistência dele entre chamadas.',
+        hints: ['Qual desses testes acessa algo que não faz parte do que a função promete devolver?'],
+      },
+    },
+    {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-testes-7-quando-deveria-quebrar',
+        type: 'multiple-choice',
+        prompt:
+          'Você refatorou `calcularDesconto` e um teste dela quebrou. Antes de mexer no teste, o que você deveria checar primeiro?',
+        concepts: ['testes-fragil'],
+        difficulty: 'iniciante',
+        tags: ['testes', 'fragil'],
+        options: [
+          'Se o comportamento (o valor que a função devolve para cada entrada) realmente mudou, ou se o teste só espiava o "como"',
+          'Apagar o teste, já que ele está atrapalhando a refatoração',
+          'Trocar o valor esperado no teste para o que a função passou a devolver, sem investigar',
+          'Nada — um teste que quebra depois de uma refatoração está sempre errado',
+        ],
+        correctIndex: 0,
+        explanation:
+          'Um teste quebrar depois de uma mudança não é, por si só, prova de que o teste está errado — pode ser um bug de verdade introduzido na refatoração. A pergunta certa é sempre "o comportamento mudou de propósito, ou o teste dependia de um detalhe de implementação?". Só quando a resposta é a segunda o teste é que precisa ser corrigido, não a função.',
+        hints: ['Um teste que quebra pode estar certo (pegou um bug de verdade) ou errado (era frágil). Como diferenciar os dois casos?'],
+      },
+    },
+    {
       kind: 'summary',
       markdown: `
 Um teste **frágil** verifica **como** o código faz algo — o texto-fonte, uma variável interna, uma ordem que nunca foi prometida — e por isso quebra numa refatoração que não mudou o comportamento.

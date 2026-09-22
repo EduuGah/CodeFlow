@@ -196,6 +196,50 @@ assert(formatarMoeda(12.05) === 'R$ 12,05', 'centavos de um digito ganham zero a
       },
     },
     {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-testes-6-como-vs-o-que',
+        type: 'multiple-choice',
+        prompt:
+          'Uma função que soma uma lista foi reescrita: trocaram um `for` por `.reduce()`, mas o resultado continua idêntico para qualquer entrada. Qual destes testes quebra com a reescrita, mesmo sem nenhum bug?',
+        concepts: ['testes-cobertura'],
+        difficulty: 'intermediario',
+        tags: ['testes', 'cobertura', 'implementacao'],
+        options: [
+          'Um teste que inspeciona o código-fonte da função (via `toString()`) procurando a palavra "reduce"',
+          'assert(somarLista([1, 2, 3]) === 6, \'soma os itens\')',
+          "assert(somarLista([]) === 0, 'lista vazia soma zero')",
+          'assert(somarLista([5]) === 5, \'um item só soma ele mesmo\')',
+        ],
+        correctIndex: 0,
+        explanation:
+          'Testar "como" a função foi escrita por dentro (procurando `reduce` no código-fonte) prende o teste a um detalhe de implementação que não afeta o resultado — ele quebra na troca de `for` por `reduce` mesmo que a soma continue certa. Os outros três testam "o quê" a função devolve, e continuam válidos não importa como ela é escrita por dentro.',
+        hints: ['Qual destes testes olha para dentro da função, em vez de olhar só para o que ela devolve?'],
+      },
+    },
+    {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-testes-6-cobertura-enganosa',
+        type: 'multiple-choice',
+        prompt:
+          'Este "teste" dá 100% de cobertura de `aplicarDesconto` — toda linha dela roda — e passaria mesmo com o desconto calculado errado. O que falta?\n\n```javascript\nfunction aplicarDesconto(preco, percentual) {\n  return preco - preco * (percentual / 100);\n}\n\nconst resultado = aplicarDesconto(100, 20);\nconsole.log(\'rodou sem lançar erro\');\n```',
+        concepts: ['testes-cobertura'],
+        difficulty: 'intermediario',
+        tags: ['testes', 'cobertura'],
+        options: [
+          'Um `assert` que confira se `resultado` vale 80 — sem ele, nada verifica o valor devolvido',
+          'Nada — cobertura de 100% já garante que a função está correta',
+          'Um `console.log` a mais, mostrando o valor de `resultado`',
+          'Trocar `preco` por `precoOriginal` para ficar mais claro',
+        ],
+        correctIndex: 0,
+        explanation:
+          'A função inteira executa (cobertura 100%), mas nada confere se `resultado` vale 80. Uma versão com bug — por exemplo, `preco - percentual` em vez do cálculo do percentual — passaria por este "teste" do mesmo jeito, porque não há `assert` nenhum. Cobertura alta não substitui uma verificação de resultado; `console.log` mostra o valor, mas não afirma que ele está certo — só um `assert` faz isso.',
+        hints: ['O código roda até o fim sem erro — mas isso prova alguma coisa sobre o valor de `resultado`?'],
+      },
+    },
+    {
       kind: 'summary',
       markdown: `
 **Cobertura mede execução, não verificação**: uma linha "coberta" pode não ter sido conferida por nenhum \`assert\`. **Cobertura é pista** de onde não há teste nenhum — não é meta a perseguir até 100%.

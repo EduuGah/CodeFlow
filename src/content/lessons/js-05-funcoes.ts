@@ -70,6 +70,32 @@ function verificar(idade) {
 É por isso que uma sequência de \`return\` dispensa \`else\`: se o primeiro passou, o resto nem é alcançado. Isso deixa o código mais raso e mais fácil de ler.
 
 E uma função sem \`return\` devolve \`undefined\` — não devolve nada por acidente, devolve \`undefined\` de propósito.
+
+## Função de seta: outra forma de escrever a mesma coisa
+
+Toda função acima usou a palavra \`function\`. Existe uma segunda sintaxe, a **função de seta** (\`=>\`), que faz exatamente a mesma coisa com menos texto — e que você vai ver o tempo todo mais adiante, dentro de \`.map()\`, \`.filter()\` e outros métodos:
+
+~~~javascript
+function dobro(numero) {
+  return numero * 2;
+}
+
+const dobroSeta = (numero) => {
+  return numero * 2;
+};
+~~~
+
+As duas são chamadas do mesmo jeito — \`dobro(5)\` e \`dobroSeta(5)\` devolvem 10. A diferença é só na declaração: a de seta é guardada numa variável (\`const\`), e o \`function\`/nome vira parâmetros \`=>\` corpo.
+
+Quando o corpo é só um \`return\`, dá para encurtar ainda mais, tirando as chaves e o próprio \`return\` — o valor da expressão já é o que a função devolve:
+
+~~~javascript
+const dobroCurta = (numero) => numero * 2;
+
+dobroCurta(5);   // 10 — sem chaves, sem return, mesmo resultado
+~~~
+
+Essa forma curta só funciona quando o corpo inteiro é **uma única expressão**. Se precisar de mais de uma linha, de um \`if\`, ou de uma variável intermediária, as chaves e o \`return\` explícito voltam a ser necessários. E com um único parâmetro, os parênteses ao redor dele são opcionais: \`numero => numero * 2\` funciona igual a \`(numero) => numero * 2\`.
 `.trim(),
     },
     {
@@ -306,8 +332,33 @@ if (Math.abs(r - 1.6666666666666667) > 1e-9) throw new Error("media(1, 2, 2) dev
       },
     },
     {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-js-5-seta-equivalente',
+        type: 'multiple-choice',
+        prompt:
+          'Qual função de seta é equivalente a esta?\n\n```javascript\nfunction triplo(n) {\n  return n * 3;\n}\n```',
+        concepts: ['funcoes'],
+        difficulty: 'iniciante',
+        tags: ['javascript', 'funcoes', 'arrow-function'],
+        options: [
+          'const triplo = (n) => n * 3;',
+          'const triplo = (n) => { n * 3 };',
+          'const triplo = (n) { return n * 3; };',
+          'const triplo => (n) { n * 3 };',
+        ],
+        correctIndex: 0,
+        explanation:
+          'A forma curta (sem chaves) faz da expressão o próprio valor devolvido — `(n) => n * 3` já é `return n * 3` implícito. A segunda opção tem chaves sem `return`: isso faz da função um bloco comum, que devolve `undefined`, com `n * 3` calculado e descartado. As outras duas trocam a posição da seta ou misturam a sintaxe de `function` com a de seta, o que não é válido.',
+        hints: [
+          'Sem chaves, o valor da expressão já é o retorno — não precisa (nem pode) escrever `return` junto.',
+          'Com chaves, a função volta a precisar de `return` explícito, como qualquer outra.',
+        ],
+      },
+    },
+    {
       kind: 'summary',
-      markdown: `Função recebe por **parâmetros** e devolve por **\`return\`**. Se você só imprime, o valor não volta para quem chamou — e a função não pode ser combinada com outras.`,
+      markdown: `Função recebe por **parâmetros** e devolve por **\`return\`**. Se você só imprime, o valor não volta para quem chamou — e a função não pode ser combinada com outras. A função de seta (\`=>\`) é outra sintaxe para a mesma coisa — mais curta, e sem chaves/\`return\` quando o corpo é uma expressão só.`,
     },
   ],
 };

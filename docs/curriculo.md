@@ -19,6 +19,8 @@ Fase 4  Back-end e dados         ███████████████�
 Fase 5  Profissionalização       ██████████████████████  27/27  pronto
 Fase 6  Python                   ██████████████████████  10/10  pronto
 Fase 7  Projeto final            ██████████████████████   5/5   pronto; motor 7 inteiro; 3 capstones prontos
+Fase 8  C# (proposta)             ░░░░░░░░░░░░░░░░░░░░░░   0/10  motor não iniciado — veja "Depois: mais linguagens"
+Fase 9  Java (proposta)           ░░░░░░░░░░░░░░░░░░░░░░   0/10  motor não iniciado — veja "Depois: mais linguagens"
 ```
 
 | | Hoje | Previsto | Feito |
@@ -788,15 +790,55 @@ a ordem. Candidatas, com o custo conhecido hoje:
 | Linguagem | Motor possível | Custo | Quando |
 | --- | --- | --- | --- |
 | Python | Pyodide (CPython em WebAssembly) | ~13,5 MB, sob demanda | Fase 6 — completa |
-| C# | .NET em WebAssembly (o mesmo do Blazor) | ~15 MB | depois da Fase 7 |
-| Go | TinyGo compilando para WebAssembly num worker | compilação pesada no navegador; a alternativa como serviço precisaria de um servidor, o que o projeto evita | depois da Fase 7 |
-| Java | CheerpJ ou TeaVM | ~20 MB, licença a conferir | a decidir |
+| C# | .NET em WebAssembly (o mesmo do Blazor, via `dotnet.wasm` ou o pacote `dotnet-wasi`) | ~15–20 MB, sob demanda | **próxima candidata** |
+| Java | CheerpJ (roda um JRE completo no navegador) ou TeaVM (compila para JS/Wasm antes, mais leve mas exige um passo de build por execução) | ~20 MB (CheerpJ) com licença comercial a conferir para uso fora de código aberto; TeaVM é mais barato mas o "compilar a cada Executar" muda a experiência do aluno | candidata, depois de C# |
+| Go | TinyGo compilando para WebAssembly num worker | compilação pesada no navegador a cada execução; a alternativa como serviço precisaria de um servidor, o que o projeto evita | candidata, sem motor conhecido tão maduro quanto Pyodide/.NET |
 | Rust | o compilador não roda no navegador; só serviço externo | não cabe na regra "tudo no navegador" | não previsto |
 
 A regra que já valeu para SQL e Node vale para todas: **o código que o aluno
 escreve aqui é o mesmo que rodaria fora**, e a correção é por comportamento.
 Uma linguagem cujo motor exigiria um servidor no meio quebra a regra e fica
 para depois.
+
+#### Fase 8 (proposta) — C#
+Motor candidato: **.NET em WebAssembly** — o runtime que também sustenta
+Blazor, então bem mantido e testado em produção por fora deste projeto.
+Arquitetura esperada, pelo padrão dos motores 6, 7 e 8 atuais: um
+`csharp-core.ts` puro (monta o programa, um método por teste, tradução do
+tipo da exceção), um worker no navegador, um cliente com fila e prazo, e um
+carregador para o CI — a única pergunta em aberto é se o runtime do .NET
+roda direto em Node (como o Pyodide) ou exige `dotnet-wasi`/um host próprio;
+isso decide se `csharp-node.ts` é tão simples quanto `python-node.ts` ou
+precisa de um passo a mais.
+
+Esboço de 10 aulas, no espírito de "Python Depois de JavaScript" — o que
+muda e o que é igual, partindo do que o aluno já sabe:
+
+| Aula | Assunto |
+| --- | --- |
+| 1 | C# depois de JavaScript: tipagem estática (`int`, `string`, `bool` declarados), `Console.WriteLine`, ponto e vírgula obrigatório, chaves como em JS |
+| 2 | Condições e laços: `if/else`, `switch` com padrões, `for`, `while`, `foreach` sobre coleções |
+| 3 | Métodos: parâmetros com tipo, sobrecarga, `out`/`ref`, retorno void vs tipado |
+| 4 | Listas e LINQ: `List<T>`, `.Where()`/`.Select()` como o `filter`/`map` do JS, mas fortemente tipado |
+| 5 | Dicionários e coleções: `Dictionary<K,V>`, `HashSet<T>` |
+| 6 | Strings: interpolação (`$"{variavel}"`, o `${}` do C#), `string` imutável, `StringBuilder` |
+| 7 | Exceções: `try/catch/finally`, exceções com nome (`class MinhaExcecao : Exception`) |
+| 8 | Classes: propriedades (`{ get; set; }`), construtores, `this`, structs vs classes |
+| 9 | Namespaces e a biblioteca padrão: `using System.Text.Json`, `System.Linq`, `DateTime` |
+| 10 | Projeto de fechamento, no mesmo formato do de Python |
+
+#### Fase 9 (proposta) — Java
+Mesma lógica de motor candidato (CheerpJ ou TeaVM, custo/trade-off na
+tabela acima) e mesmo formato de 10 aulas — tipagem estática mais verbosa
+que C# (sem inferência de tipo em variável local antes do `var`, getters e
+setters explícitos em vez de propriedades), coleções (`ArrayList`, `HashMap`),
+interfaces e classes abstratas, exceções checadas vs não checadas (um
+conceito que não existe em JavaScript nem em C#, e vale uma aula própria em
+vez de dividir espaço com `try/catch`).
+
+Comparado com C#, Java tem o motor mais caro e menos maduro hoje (CheerpJ
+tem custo de licença a conferir; TeaVM muda a experiência de execução) —
+por isso vem depois na fila, não por menor valor de ensino.
 
 ### Tipos de exercício que faltam
 Um por fase, cada um preso ao motor dela:

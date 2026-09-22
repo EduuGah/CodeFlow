@@ -191,6 +191,58 @@ assert(classificarIdade(18) === 'adulto', '18 ja e adulto');`,
       },
     },
     {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-testes-3-sinal-de-dividir',
+        type: 'multiple-choice',
+        prompt:
+          'Qual destas mensagens de teste é sinal de que deveria virar dois testes, não um?',
+        concepts: ['testes-comportamento'],
+        difficulty: 'iniciante',
+        tags: ['testes', 'nomes'],
+        options: [
+          '"calcula o desconto certo e não deixa o total ficar negativo"',
+          '"aplica 10% de desconto sobre o preço"',
+          '"idade negativa lança erro"',
+          '"lista vazia devolve zero"',
+        ],
+        correctIndex: 0,
+        explanation:
+          'O "e" no meio junta duas regras diferentes — calcular o desconto certo é uma regra; não deixar o total negativo é outra, provavelmente um caso extremo separado. Se qualquer uma das duas quebrar, a mesma mensagem aparece, e quem lê a falha não sabe qual das duas foi. As outras três descrevem uma regra só, cada uma.',
+        hints: ['Procure a conjunção "e" ligando duas afirmações diferentes dentro da mesma mensagem.'],
+      },
+    },
+    {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-testes-3-qual-quebrou',
+        type: 'predict-output',
+        prompt:
+          'As quatro linhas abaixo testam `classificarIdade` (a mesma da aula, mas com um bug: alguém trocou `idade < 18` por `idade < 17`). O que cada `console.log` imprime?',
+        concepts: ['testes-comportamento'],
+        difficulty: 'intermediario',
+        tags: ['testes', 'limites'],
+        code: `function classificarIdade(idade) {
+  if (idade < 0) throw new Error('idade não pode ser negativa');
+  if (idade < 12) return 'criança';
+  if (idade < 17) return 'adolescente';   // deveria ser 18
+  return 'adulto';
+}
+
+console.log(classificarIdade(11) === 'criança');
+console.log(classificarIdade(15) === 'adolescente');
+console.log(classificarIdade(17) === 'adolescente');
+console.log(classificarIdade(30) === 'adulto');`,
+        expectedOutput: 'true\ntrue\nfalse\ntrue',
+        explanation:
+          'Só o teste do limite (17) percebe o bug: com `idade < 17`, `classificarIdade(17)` já cai em "adulto", não "adolescente". Os testes de 11, 15 e 30 — todos no meio de uma faixa — continuam passando normalmente, porque a troca de `18` por `17` só muda o resultado bem no limite. É exatamente por isso que testar os limites exatos vale mais do que testar o meio de cada faixa.',
+        hints: [
+          'Só um destes quatro números está na faixa que mudou de dono.',
+          '17 deveria ser "adolescente" pela regra original — o que a versão com bug devolve para 17?',
+        ],
+      },
+    },
+    {
       kind: 'summary',
       markdown: `
 **Um teste por comportamento**: quando a mensagem de um teste teria "e" no meio, são dois testes. Cada falha aponta direto para a regra que quebrou.

@@ -58,6 +58,36 @@ lista.indexOf('a');     // 1     — em qual posição? (-1 se não achar)
 ~~~
 
 Repare que \`indexOf\` devolve \`-1\` quando não encontra, e não \`undefined\`. Como \`-1\` é um número válido, esquecer de checar produz um bug silencioso: \`lista[-1]\` devolve \`undefined\` em vez de reclamar.
+
+## slice recorta, splice corta e cola
+
+\`slice\` devolve um **pedaço novo**, sem alterar o array original. \`splice\` **altera o original** — remove, insere, ou as duas coisas:
+
+~~~javascript
+const letras = ['a', 'b', 'c', 'd'];
+
+letras.slice(1, 3);     // ['b', 'c'] — um array novo, do índice 1 até (sem incluir) o 3
+letras;                 // ['a', 'b', 'c', 'd'] — o original não mudou
+
+letras.splice(1, 2);    // ['b', 'c'] — remove 2 itens a partir do índice 1...
+letras;                 // ['a', 'd'] — ...e altera o original de verdade
+~~~
+
+Os nomes parecidos e o comportamento oposto (um preserva, o outro modifica) tornam esse par uma fonte clássica de bug: usar \`splice\` esperando o comportamento de \`slice\` apaga dados sem avisar.
+
+## Arrays são comparados por referência, não por valor
+
+Dois arrays com os mesmos itens **não são iguais** para o \`===\`:
+
+~~~javascript
+const a = [1, 2, 3];
+const b = [1, 2, 3];
+
+console.log(a === b);   // false — são dois arrays diferentes, mesmo com o mesmo conteúdo
+console.log(a === a);   // true  — é o mesmo array, comparado com ele mesmo
+~~~
+
+\`===\` em arrays (e em objetos, adiante) pergunta "é o mesmo array na memória?", não "tem o mesmo conteúdo?". Para comparar conteúdo, item a item, seria preciso um loop comparando cada posição — não existe um jeito embutido de comparar dois arrays por igualdade de valor.
 `.trim(),
     },
     {
@@ -327,8 +357,32 @@ assert(media([]) === null, 'lista vazia nao tem media');`,
       },
     },
     {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-js-6-referencia',
+        type: 'predict-output',
+        prompt: 'O que este programa imprime?',
+        concepts: ['arrays'],
+        difficulty: 'intermediario',
+        tags: ['javascript', 'arrays', 'referencia'],
+        code: `const x = [1, 2];
+const y = [1, 2];
+const z = x;
+
+console.log(x === y);
+console.log(x === z);`,
+        expectedOutput: 'false\ntrue',
+        explanation:
+          '`x` e `y` são dois arrays diferentes que por acaso têm o mesmo conteúdo — `===` compara identidade, não conteúdo, então dá `false`. Já `z = x` não cria um array novo: `z` aponta para o **mesmo** array que `x`, então `x === z` é `true`.',
+        hints: [
+          '`===` em arrays pergunta se são o mesmo array na memória, não se têm os mesmos itens.',
+          '`const z = x` copia a referência, não o conteúdo — os dois nomes apontam para um único array.',
+        ],
+      },
+    },
+    {
       kind: 'summary',
-      markdown: `Índices começam em **zero**, então o último é \`length - 1\` e a condição do loop é \`i < length\`. Ao procurar o maior valor, comece pelo primeiro item da lista — nunca por zero.`,
+      markdown: `Índices começam em **zero**, então o último é \`length - 1\` e a condição do loop é \`i < length\`. Ao procurar o maior valor, comece pelo primeiro item da lista — nunca por zero. \`slice\` recorta sem alterar o original; \`splice\` altera de verdade. E \`===\` em arrays compara identidade, não conteúdo — dois arrays iguais em valor não são "iguais" para o JavaScript.`,
     },
   ],
 };

@@ -3,14 +3,14 @@
 Plataforma de ensino de programação em português, do zero até uma aplicação
 completa — e até o projeto que outra pessoa consegue manter. Aulas curtas em
 passos, código do aluno rodando **dentro do navegador** — JavaScript,
-TypeScript, React, HTML/CSS, SQL e Node — e correção que explica o porquê do
-erro, não apenas se acertou.
+TypeScript, React, HTML/CSS, SQL, Node e Python — e correção que explica o
+porquê do erro, não apenas se acertou.
 
 > Você não aprende a programar lendo. Aprende resolvendo.
 
 ## O que tem hoje
 
-**14 trilhas, 143 aulas, 807 exercícios em 10 tipos, 10 projetos, 139 conceitos.**
+**14 trilhas, 143 aulas, 823 exercícios em 10 tipos, 10 projetos, 139 conceitos.**
 Tudo é contado do catálogo; a página pública mostra os mesmos números.
 
 | Etapa | Trilha | Linguagem | Aulas | Exercícios |
@@ -30,8 +30,8 @@ Tudo é contado do catálogo; a página pública mostra os mesmos números.
 | 7 · A profissão | Terminal e Ferramentas | JavaScript | 5 | 25 |
 | 8 · Outra linguagem | Python | Python | 10 | 50 |
 
-**Os dez tipos de exercício**: escrever o código (160), múltipla escolha (216),
-prever a saída (93), completar a lacuna (86), ordenar os passos (66),
+**Os dez tipos de exercício**: escrever o código (161), múltipla escolha (226),
+prever a saída (98), completar a lacuna (86), ordenar os passos (66),
 encontrar o bug (70), escrever o teste (15), refatorar (14), consulta SQL (46)
 e servidor (41). Toda aula tem ao menos um dos quatro "de prática de dev" —
 bug, ordenar, teste, refatorar — que pedem o conceito de outro ângulo.
@@ -193,7 +193,9 @@ docs/               CONTEXTO.md (o mapa do projeto), curriculo.md (o roadmap),
 O roadmap completo, com o estado de cada aula e o custo de cada motor, está em
 [`docs/curriculo.md`](docs/curriculo.md). As oito fases previstas estão
 **completas** — o que vem a seguir é **mais linguagens**, uma por vez, cada
-uma com o motor que a roda no navegador.
+uma com o motor que a roda no navegador. As próximas candidatas são **C#**
+(.NET em WebAssembly) e **Java** (CheerpJ ou TeaVM), com um esboço de 10
+aulas cada já em `docs/curriculo.md`.
 
 O projeto final — página, API e banco, do desenho à publicação — está
 completo, a Fase 5 (Profissionalização: Engenharia, Testes, Git e Terminal)

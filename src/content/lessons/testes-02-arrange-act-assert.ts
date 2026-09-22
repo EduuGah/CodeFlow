@@ -226,6 +226,31 @@ function assert(condicao, mensagem) {
       },
     },
     {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-testes-2-arrange-tardio',
+        type: 'multiple-choice',
+        prompt:
+          'Este teste passa — mas passaria mesmo se `adicionarItem` estivesse quebrada. O que há de errado?\n\n```javascript\nfunction adicionarItem(carrinho, item) {\n  carrinho.push(item);\n  return carrinho;\n}\n\nconst carrinho = [\'caneta\'];\nconst resultado = adicionarItem(carrinho, \'caderno\');\nassert(carrinho.length === 2, \'depois de adicionar, tem dois itens\');\n```',
+        concepts: ['testes-aaa'],
+        difficulty: 'intermediario',
+        tags: ['testes', 'aaa'],
+        options: [
+          'O assert confere `carrinho`, a variável do arrange — não `resultado`, o que o act (a chamada) devolveu',
+          'Falta um segundo item no array inicial',
+          '`push` não existe em JavaScript',
+          'A mensagem do assert está em português, e deveria estar em inglês',
+        ],
+        correctIndex: 0,
+        explanation:
+          'O **act** foi `adicionarItem(carrinho, \'caderno\')`, cujo resultado é `resultado` — é ele que o teste deveria conferir. Como `push` também altera o array original por efeito colateral, o teste passa por acidente. Se `adicionarItem` fosse reescrita para devolver uma cópia nova (sem alterar `carrinho`), esse teste continuaria "passando" mesmo com a função quebrada, porque `carrinho` nunca mudaria. Um assert precisa verificar o valor que o act devolveu, não uma variável que só por coincidência também mudou.',
+        hints: [
+          'Qual variável guarda o valor de retorno da função que está sendo testada — o "act"?',
+          'Um teste que confere a variável errada pode passar mesmo quando a função está quebrada.',
+        ],
+      },
+    },
+    {
       kind: 'summary',
       markdown: `
 **Arrange** monta o cenário, **act** faz a chamada que está sendo testada, **assert** afirma o resultado. Separar as três partes — mesmo quando alguma cabe numa palavra — é o que faz a falha apontar direto para a causa.

@@ -28,6 +28,15 @@ sqrt(16)            # 4.0 — importou só o nome, sem prefixo
 
 \`import modulo\` traz o módulo inteiro, e cada uso precisa do prefixo — mais claro sobre de onde cada coisa vem. \`from modulo import nome\` traz um nome específico direto, sem prefixo — mais curto, mas menos óbvio de onde \`sqrt\` veio ao ler o código isolado. Os dois são comuns; o segundo costuma ser reservado para poucos nomes bem conhecidos.
 
+Uma terceira forma dá um apelido ao módulo importado, com \`as\`:
+
+~~~py
+import math as m
+m.sqrt(16)   # 4.0 — mesmo módulo, nome mais curto
+~~~
+
+\`import numpy as np\` e \`import pandas as pd\` são os apelidos mais famosos do ecossistema Python — tão comuns que viraram convenção, mesmo sem nenhuma regra da linguagem exigindo. O Pyodide desta plataforma só traz a biblioteca padrão (o que já vem com o Python, sem instalar nada); pacotes de fora dela, como \`numpy\`, não estão disponíveis aqui.
+
 ## json: o JSON.parse / JSON.stringify do Python
 
 ~~~py

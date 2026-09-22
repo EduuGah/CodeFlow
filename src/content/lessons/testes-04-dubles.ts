@@ -240,6 +240,54 @@ assert(chamadas.length === 0, 'sem email, o envio nunca e chamado');`,
       },
     },
     {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-testes-4-stub-fixo',
+        type: 'predict-output',
+        prompt: 'O que este programa imprime? Repare que o dublê nem consulta um banco de verdade.',
+        concepts: ['testes-dubles'],
+        difficulty: 'intermediario',
+        tags: ['testes', 'dubles', 'stub'],
+        code: `function buscarDesconto(usuarioId, consultarBanco) {
+  const usuario = consultarBanco(usuarioId);
+  return usuario.vip ? 0.2 : 0;
+}
+
+function dubleSempreComum(usuarioId) {
+  return { vip: false };
+}
+
+console.log(buscarDesconto(99, dubleSempreComum));
+console.log(buscarDesconto(1, dubleSempreComum));`,
+        expectedOutput: '0\n0',
+        explanation:
+          '`dubleSempreComum` ignora completamente o `usuarioId` recebido e sempre devolve `{ vip: false }` — é um dublê fixo (um "stub"), não um espião. Por isso as duas chamadas, com ids diferentes, dão o mesmo resultado: o dublê não tem lógica nenhuma de verdade, só entrega o valor que o teste decidiu de antemão.',
+        hints: ['O dublê olha para o `usuarioId` que recebeu, ou sempre devolve a mesma coisa?'],
+      },
+    },
+    {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-testes-4-nao-dublar',
+        type: 'multiple-choice',
+        prompt:
+          'Uma função `calcularTotal(itens)` soma `preco * quantidade` de cada item — puro cálculo, sem tocar em banco, e-mail ou rede. Faz sentido criar um dublê para testá-la?',
+        concepts: ['testes-dubles'],
+        difficulty: 'iniciante',
+        tags: ['testes', 'dubles'],
+        options: [
+          'Não — ela não depende de nada externo, então se testa chamando a função de verdade, sem dublê nenhum',
+          'Sim — todo teste deveria usar um dublê, mesmo sem dependência externa',
+          'Sim, mas só um espião — nunca um stub',
+          'Não é possível testar essa função de jeito nenhum',
+        ],
+        correctIndex: 0,
+        explanation:
+          'Dublê existe para substituir uma dependência **externa** — e-mail, banco, relógio, rede. `calcularTotal` não tem nenhuma: é lógica pura, testável chamando ela mesma diretamente. Criar um dublê aqui não protegeria de nada, e esconderia justamente a conta que o teste deveria provar.',
+        hints: ['Dublê substitui o quê, exatamente? Esta função toca em algo de fora dela mesma?'],
+      },
+    },
+    {
       kind: 'summary',
       markdown: `
 Uma função que depende de algo externo — e-mail, banco, relógio, rede — recebe essa dependência **por fora** (injeção de dependência), e o teste passa um **dublê** no lugar da coisa de verdade.
