@@ -8,6 +8,10 @@ porquê do erro, não apenas se acertou.
 
 > Você não aprende a programar lendo. Aprende resolvendo.
 
+**[Abrir o CodeFlow](https://codeflow-three-kappa.vercel.app)** — para testar sem conta Google, use
+os botões da tela de entrada ou digite usuário `aluno` / senha `aluno` (aluno) ou `admin` / `admin`
+(administrador, só leitura).
+
 ## O que tem hoje
 
 **14 trilhas, 143 aulas, 823 exercícios em 10 tipos, 10 projetos, 139 conceitos.**
@@ -94,6 +98,7 @@ no SQL Editor do Supabase. Todas são idempotentes.
 | `0005_admin.sql` | Papel de administrador e view de desempenho |
 | `0006_promote_admin.sql` | Conserta o gatilho que impedia promover alguém a administrador |
 | `0007_perfil_e_loja.sql` | Perfil editável (nome, avatar, tema), a tabela `purchases` da loja e o bucket `avatars` do Storage para a foto |
+| `0008_contas_demo.sql` | Contas de demonstração `aluno`/`aluno` e `admin`/`admin`, para testar sem conta Google |
 
 Sem a 0007, o aplicativo carrega, mas editar o perfil, comprar na loja e
 enviar foto falham — e a própria tela diz qual migração rodar.
@@ -104,7 +109,9 @@ Para se tornar administrador depois de entrar pela primeira vez:
 update public.users set role = 'admin' where email = 'SEU-EMAIL';
 ```
 
-O login é Google OAuth pelo Supabase. Em Authentication › URL Configuration,
+O login é Google OAuth pelo Supabase; as contas de demonstração da 0008 entram
+por e-mail e senha, então o provedor Email precisa estar ligado em
+Authentication › Providers › Email (vem ligado por padrão). Em Authentication › URL Configuration,
 adicione a origem da aplicação (`http://localhost:3000` em desenvolvimento) às
 Redirect URLs.
 

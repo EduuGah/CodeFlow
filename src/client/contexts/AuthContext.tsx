@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session, AuthError } from '@supabase/supabase-js';
 import { supabase, supabaseConfigError, isSupabaseConfigured } from '../lib/supabase';
+import { emailDoUsuario } from '../lib/demo';
 
 interface AuthContextType {
   user: User | null;
@@ -12,6 +13,8 @@ interface AuthContextType {
   isConfigured: boolean;
   clearAuthError: () => void;
   signInWithGoogle: () => Promise<void>;
+  /** Entrada por usuário (ou e-mail) e senha — usada pelas contas de demonstração. */
+  signInWithPassword: (usuario: string, senha: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -36,6 +39,22 @@ function describeAuthError(error: unknown): string {
   }
 
   return 'Não foi possível entrar com o Google. Tente novamente.';
+}
+
+function describePasswordError(error: unknown): string {
+  if (error instanceof AuthError) {
+    if (/invalid login credentials/i.test(error.message)) {
+      return 'Usuário ou senha incorretos. As contas de teste são aluno/aluno e admin/admin.';
+    }
+
+    if (/email logins are disabled|provider is not enabled/i.test(error.message)) {
+      return 'A entrada por e-mail e senha está desligada no seu projeto Supabase. Ative em Authentication › Providers › Email.';
+    }
+
+    return `Não foi possível entrar: ${error.message}`;
+  }
+
+  return describeAuthError(error);
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -97,6 +116,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const signInWithPassword = async (usuario: string, senha: string) => {
+    if (!supabase) {
+      setAuthError(supabaseConfigError);
+      return;
+    }
+
+    setAuthError(null);
+
+    // No sucesso, o onAuthStateChange acima preenche `user` e a tela de login
+    // leva para /app sozinha.
+    const { error } = await supabase.auth.signInWithPassword({
+      email: emailDoUsuario(usuario),
+      password: senha,
+    });
+
+    if (error) {
+      console.error('Erro no login com senha (Supabase):', error);
+      setAuthError(describePasswordError(error));
+      throw error;
+    }
+  };
+
   const logout = async () => {
     if (!supabase) return;
 
@@ -118,6 +159,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isConfigured: isSupabaseConfigured,
         clearAuthError,
         signInWithGoogle,
+        signInWithPassword,
         logout,
       }}
     >
