@@ -97,6 +97,38 @@ export const concepts: Concept[] = [
     tags: ['logica', 'debugging'],
   },
   {
+    id: 'estruturas-big-o',
+    title: 'Big O: comparar soluções',
+    summary:
+      'O(1) não muda com o tamanho da entrada; O(n) cresce junto (um loop simples); O(n²) cresce com o quadrado (um loop dentro de outro, cada um sobre a mesma entrada); O(log n) cresce bem mais devagar, cortando a entrada pela metade a cada passo. Big O descreve como o tempo cresce, não quantos milissegundos algo leva.',
+    prerequisites: ['loops', 'arrays'],
+    tags: ['estruturas-de-dados', 'algoritmos'],
+  },
+  {
+    id: 'estruturas-recursao',
+    title: 'Recursão',
+    summary:
+      'Uma função que chama a si mesma, sempre com um problema menor, até um caso base que para a cadeia sem chamar de novo — sem caso base, ou sem o problema encolher a cada chamada, a recursão nunca termina. Cada chamada empilha na pilha de chamadas; uma cadeia funda demais estoura essa pilha.',
+    prerequisites: ['estruturas-big-o', 'funcoes'],
+    tags: ['estruturas-de-dados', 'algoritmos'],
+  },
+  {
+    id: 'estruturas-pilha-fila',
+    title: 'Pilha e fila',
+    summary:
+      'Pilha (LIFO): o último que entra é o primeiro que sai — push/pop no mesmo topo, como o histórico de "voltar" do navegador. Fila (FIFO): o primeiro que entra é o primeiro que sai — entra num lado, sai no outro, como uma fila de atendimento. As duas são um array usado com uma disciplina específica, não uma estrutura nova da linguagem.',
+    prerequisites: ['arrays'],
+    tags: ['estruturas-de-dados'],
+  },
+  {
+    id: 'estruturas-busca-e-mapas',
+    title: 'Busca binária, Set e Map',
+    summary:
+      'Busca binária corta pela metade a cada passo — O(log n) — mas só funciona em array ordenado. Set guarda valores únicos, sem posição; Map é um par chave-valor com qualquer tipo de chave (um objeto comum só aceita string ou symbol) e mantém a ordem de inserção — os dois com busca em O(1) na prática, contra O(n) de percorrer um array procurando.',
+    prerequisites: ['estruturas-big-o', 'objetos'],
+    tags: ['estruturas-de-dados'],
+  },
+  {
     id: 'escopo',
     title: 'Escopo',
     summary: 'Onde cada nome existe, e por que uma variável some fora do bloco onde nasceu.',

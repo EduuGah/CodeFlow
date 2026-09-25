@@ -33,6 +33,7 @@ import { trackGit } from './tracks/git';
 import { trackTerminal } from './tracks/terminal';
 import { trackPython } from './tracks/python';
 import { trackDeploy } from './tracks/deploy';
+import { trackEstruturas } from './tracks/estruturas';
 import { lessonVariaveis } from './lessons/js-01-variaveis';
 import { lessonTiposEOperadores } from './lessons/js-02-tipos-e-operadores';
 import { lessonCondicoes } from './lessons/js-03-condicoes';
@@ -56,6 +57,10 @@ import { lessonRegex } from './lessons/js-20-regex';
 import { lessonDecompor } from './lessons/logica-01-decompor';
 import { lessonCasosExtremos } from './lessons/logica-02-casos-extremos';
 import { lessonSimular } from './lessons/logica-03-simular';
+import { lessonEstruturasBigO } from './lessons/estruturas-01-big-o';
+import { lessonEstruturasRecursao } from './lessons/estruturas-02-recursao';
+import { lessonEstruturasPilhaEFila } from './lessons/estruturas-03-pilha-e-fila';
+import { lessonEstruturasBuscaBinariaSetEMap } from './lessons/estruturas-04-busca-binaria-set-e-map';
 import { lessonClienteServidor } from './lessons/web-01-cliente-servidor';
 import { lessonHttp } from './lessons/web-02-http';
 import { lessonCabecalhos } from './lessons/web-03-cabecalhos';
@@ -220,6 +225,10 @@ const lessons: Lesson[] = [
   lessonDecompor,
   lessonCasosExtremos,
   lessonSimular,
+  lessonEstruturasBigO,
+  lessonEstruturasRecursao,
+  lessonEstruturasPilhaEFila,
+  lessonEstruturasBuscaBinariaSetEMap,
   lessonClienteServidor,
   lessonHttp,
   lessonCabecalhos,
@@ -360,6 +369,7 @@ const projects: Project[] = [
 const tracks: Track[] = [
   trackJsFundamentos,
   trackLogica,
+  trackEstruturas,
   trackGit,
   trackWeb,
   trackPagina,

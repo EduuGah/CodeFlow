@@ -22,7 +22,7 @@ export const ETAPAS_DO_PERCURSO: EtapaDoPercurso[] = [
   {
     title: 'A base',
     description: 'Escrever programas que decidem, repetem e resolvem problemas — e raciocinar antes de codar.',
-    trackIds: ['track-js-fundamentos', 'track-logica'],
+    trackIds: ['track-js-fundamentos', 'track-logica', 'track-estruturas'],
   },
   {
     title: 'Registrar o trabalho',
