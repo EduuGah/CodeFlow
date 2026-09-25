@@ -22,7 +22,7 @@ pelo usuário. CI obrigatório a cada push.
 
 - React 18 + Vite 5 + TypeScript + Tailwind v4 (tokens em `@theme`)
 - Express apenas para servir (tsx em dev, esbuild no build)
-- Supabase: autenticação Google + Postgres com RLS
+- Supabase: autenticação Google (e senha só para as contas de demonstração) + Postgres com RLS
 - Vitest (unidade e componente) + Playwright (navegador)
 - Monaco como editor, servido do próprio domínio num chunk sob demanda
 - sql.js (SQLite em WebAssembly) para a trilha de SQL, num worker próprio
@@ -340,7 +340,8 @@ src/client/pages/app/   Início é a aula da vez + o percurso; Trilhas é o
                         `/aparencia`, `/progresso` (XP com a partição, barra
                         por trilha, domínio por conceito)
 e2e/                    Playwright; `fixtures.ts` tem o dublê do Supabase
-supabase/migrations/    0001 a 0007, aplicadas em ordem (0007: perfil, loja, fotos)
+supabase/migrations/    0001 a 0008, aplicadas em ordem (0007: perfil, loja, fotos;
+                        0008: contas de demonstração)
 docs/curriculo.md       Roadmap de conteúdo — fonte canônica
 ```
 
@@ -842,6 +843,12 @@ JavaScript, Página, Git, Terminal, TypeScript, Web e o resto de Python.
 
 ## 9. Pendências do lado do usuário
 
+- **Rodar `supabase/migrations/0008_contas_demo.sql` no SQL Editor.** Cria as
+  contas de demonstração `aluno`/`aluno` e `admin`/`admin` (o endereço interno é
+  `usuario@demo.codeflow.app`, montado em `src/client/lib/demo.ts`). A tela de
+  entrada tem um botão para cada uma, para quem chega pelo portfólio testar sem
+  conta Google. Pode rodar de novo: as senhas voltam ao padrão. O progresso do
+  aluno de demonstração é compartilhado entre todos os visitantes.
 - **Rodar `supabase/migrations/0007_perfil_e_loja.sql` no SQL Editor.** Ela
   acrescenta as colunas do perfil (`display_name`, `avatar`, `theme`,
   `accent`), cria a tabela `purchases` (a loja) e o bucket `avatars` do
@@ -855,7 +862,7 @@ JavaScript, Página, Git, Terminal, TypeScript, Web e o resto de Python.
   exercício de código, que agora depende do editor servido pela Vercel, uma
   aula da trilha "A Página" (a página do aluno num iframe) e uma de React (o
   componente montado no mesmo iframe).
-- Informar a URL pública de produção, para entrar aqui e no README.
+- URL pública de produção: https://codeflow-three-kappa.vercel.app
 
 ## 10. Preferências já estabelecidas
 

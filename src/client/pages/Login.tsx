@@ -1,6 +1,8 @@
 import { Navigate } from 'react-router-dom';
-import { IconAlert, IconLogo, IconSpinner } from '../components/ui/Icon';
+import { IconAlert, IconLock, IconLogo, IconSpinner } from '../components/ui/Icon';
 import { Button } from '../components/ui/Button';
+import { Input } from '../components/ui/Input';
+import { DEMO_ACCOUNTS } from '../lib/demo';
 import { useAuth } from '../contexts/AuthContext';
 import { useState } from 'react';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
@@ -9,8 +11,13 @@ import { CenaEditor } from '../components/ui/Cena';
 
 export function Login() {
   useDocumentTitle('Entrar');
-  const { user, signInWithGoogle, loading, authError, isConfigured } = useAuth();
+  const { user, signInWithGoogle, signInWithPassword, loading, authError, isConfigured } = useAuth();
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  // Qual entrada com senha está em andamento: o usuário de um botão de
+  // demonstração, ou 'formulario' para o que foi digitado.
+  const [entrandoComSenha, setEntrandoComSenha] = useState<string | null>(null);
+  const [usuario, setUsuario] = useState('');
+  const [senha, setSenha] = useState('');
 
   if (loading) {
     return (
@@ -37,6 +44,18 @@ export function Login() {
     }
   };
 
+  const entrarComSenha = async (origem: string, u: string, s: string) => {
+    try {
+      setEntrandoComSenha(origem);
+      await signInWithPassword(u, s);
+    } catch {
+      // A mensagem amigável já vem do AuthContext em `authError`.
+      setEntrandoComSenha(null);
+    }
+  };
+
+  const ocupado = isLoggingIn || entrandoComSenha !== null || !isConfigured;
+
   return (
     <main className="min-h-screen bg-canvas flex flex-col items-center justify-center p-4">
       <div className="w-full max-w-sm space-y-8">
@@ -59,7 +78,7 @@ export function Login() {
             className="w-full gap-2" 
             variant="outline" 
             onClick={handleGoogleSignIn}
-            disabled={isLoggingIn || !isConfigured}
+            disabled={ocupado}
           >
             {isLoggingIn ? (
               <IconSpinner size={18} className="animate-spin" />
@@ -90,6 +109,89 @@ export function Login() {
             </span>
           </div>
         </div>
+
+        {/* Para quem chega pelo portfólio: ver a plataforma por dentro sem
+            entregar a conta Google. As contas vêm da migração 0008. */}
+        <section
+          aria-labelledby="demo-titulo"
+          className="rounded-2xl border border-dashed border-line-strong bg-surface p-5 space-y-4"
+        >
+          <div className="space-y-1">
+            <h2 id="demo-titulo" className="flex items-center gap-2 text-sm font-semibold text-ink">
+              <IconLock size={16} className="text-brand-500" />
+              Testar sem criar conta
+            </h2>
+            <p className="text-xs leading-relaxed text-ink-faint">
+              Uma conta de aluno com progresso compartilhado e uma de administrador, só leitura.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2">
+            {DEMO_ACCOUNTS.map((conta) => (
+              <Button
+                key={conta.usuario}
+                variant="secondary"
+                size="sm"
+                title={conta.descricao}
+                disabled={ocupado}
+                onClick={() => entrarComSenha(conta.usuario, conta.usuario, conta.senha)}
+              >
+                {entrandoComSenha === conta.usuario ? (
+                  <IconSpinner size={16} className="animate-spin" />
+                ) : (
+                  conta.rotulo
+                )}
+              </Button>
+            ))}
+          </div>
+
+          <form
+            className="space-y-2"
+            onSubmit={(e) => {
+              e.preventDefault();
+              entrarComSenha('formulario', usuario, senha);
+            }}
+          >
+            <p className="text-xs text-ink-faint">
+              Ou digite: usuário <strong className="text-ink">admin</strong>, senha{' '}
+              <strong className="text-ink">admin</strong>.
+            </p>
+            <div className="grid grid-cols-2 gap-2">
+              <label className="sr-only" htmlFor="demo-usuario">Usuário</label>
+              <Input
+                id="demo-usuario"
+                autoComplete="username"
+                autoCapitalize="none"
+                spellCheck={false}
+                placeholder="Usuário"
+                value={usuario}
+                onChange={(e) => setUsuario(e.target.value)}
+              />
+              <label className="sr-only" htmlFor="demo-senha">Senha</label>
+              <Input
+                id="demo-senha"
+                type="password"
+                autoComplete="current-password"
+                placeholder="Senha"
+                value={senha}
+                onChange={(e) => setSenha(e.target.value)}
+              />
+            </div>
+            <Button
+              type="submit"
+              variant="outline"
+              size="sm"
+              className="w-full"
+              disabled={ocupado || !usuario || !senha}
+            >
+              {entrandoComSenha === 'formulario' ? (
+                <IconSpinner size={16} className="animate-spin" />
+              ) : (
+                'Entrar com usuário e senha'
+              )}
+            </Button>
+          </form>
+        </section>
 
         {/* Os avatares de verdade, os que a pessoa escolhe depois de entrar:
             uma prévia do que é seu lá dentro, sem inventar nada. */}
