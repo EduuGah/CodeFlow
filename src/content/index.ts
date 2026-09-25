@@ -32,6 +32,7 @@ import { trackTestes } from './tracks/testes';
 import { trackGit } from './tracks/git';
 import { trackTerminal } from './tracks/terminal';
 import { trackPython } from './tracks/python';
+import { trackDeploy } from './tracks/deploy';
 import { lessonVariaveis } from './lessons/js-01-variaveis';
 import { lessonTiposEOperadores } from './lessons/js-02-tipos-e-operadores';
 import { lessonCondicoes } from './lessons/js-03-condicoes';
@@ -165,6 +166,10 @@ import { lessonTerminalVariaveisDeAmbiente } from './lessons/terminal-02-variave
 import { lessonTerminalScriptsDoPackageJson } from './lessons/terminal-03-scripts-do-package-json';
 import { lessonTerminalLerASaidaDeErro } from './lessons/terminal-04-ler-a-saida-de-erro';
 import { lessonTerminalDiagnosticar } from './lessons/terminal-05-diagnosticar';
+import { lessonDeployAmbientesEBuild } from './lessons/deploy-01-ambientes-e-build';
+import { lessonDeploySegredosEmProducao } from './lessons/deploy-02-segredos-em-producao';
+import { lessonDeployPublicarAAplicacao } from './lessons/deploy-03-publicar-a-aplicacao';
+import { lessonDeployBancoDominioEHttps } from './lessons/deploy-04-banco-dominio-e-https';
 import { lessonPythonDepoisDeJavascript } from './lessons/py-01-python-depois-de-javascript';
 import { lessonPythonCondicoesELacos } from './lessons/py-02-condicoes-e-lacos';
 import { lessonPythonFuncoes } from './lessons/py-03-funcoes';
@@ -306,6 +311,10 @@ const lessons: Lesson[] = [
   lessonProjApi,
   lessonProjPagina,
   lessonProjFechar,
+  lessonDeployAmbientesEBuild,
+  lessonDeploySegredosEmProducao,
+  lessonDeployPublicarAAplicacao,
+  lessonDeployBancoDominioEHttps,
   lessonTestesPorQueTestar,
   lessonTestesArrangeActAssert,
   lessonTestesUmComportamento,
@@ -359,6 +368,7 @@ const tracks: Track[] = [
   trackNode,
   trackEngenharia,
   trackProjeto,
+  trackDeploy,
   trackTestes,
   trackGit,
   trackTerminal,

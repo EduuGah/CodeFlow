@@ -1015,6 +1015,38 @@ export const concepts: Concept[] = [
     tags: ['terminal'],
   },
   {
+    id: 'deploy-ambientes',
+    title: 'Ambientes e build',
+    summary:
+      'Dev roda com dados de teste e erros detalhados; produção roda com dados reais e some com os detalhes do erro na tela de quem usa. Build é o passo que transforma o código-fonte no que roda de fato — minificado, sem comentários — e roda antes do deploy de propósito: um erro no build pára ali, antes que qualquer pessoa veja.',
+    prerequisites: ['node-config'],
+    tags: ['deploy'],
+  },
+  {
+    id: 'deploy-segredos',
+    title: 'Segredos em produção',
+    summary:
+      'Um segredo de produção vive no painel do host ou num gerenciador de segredos, nunca no código nem no `.env` commitado. Variável de build (embutida no pacote enviado ao navegador) é pública mesmo minificada; variável lida só pelo servidor em produção nunca chega ao cliente — a diferença entre as duas é a diferença entre exposto e protegido.',
+    prerequisites: ['deploy-ambientes'],
+    tags: ['deploy'],
+  },
+  {
+    id: 'deploy-publicar',
+    title: 'Publicar o frontend e o backend',
+    summary:
+      'Frontend publicado é arquivo estático (HTML, CSS, JS já compilados) servido por um host de arquivos; backend publicado é um processo que fica de pé, ouvindo a porta que o host atribui em `process.env.PORT` — nunca um número fixo escolhido no código. O host reinicia o processo quando ele cai e guarda o que ele escreve como log.',
+    prerequisites: ['deploy-ambientes', 'node-projeto'],
+    tags: ['deploy'],
+  },
+  {
+    id: 'deploy-banco-dominio',
+    title: 'Banco em produção, domínio e HTTPS',
+    summary:
+      'Mudar o schema de um banco em produção é uma migration registrada e revisável, nunca um ALTER TABLE digitado direto; dado real pede backup antes de qualquer mudança arriscada. Um domínio existe porque o DNS traduz um nome para o endereço de um servidor; HTTPS cifra o que trafega entre o navegador e ele, com um certificado que a maioria dos hosts hoje emite sozinha.',
+    prerequisites: ['deploy-publicar', 'sql-modelar'],
+    tags: ['deploy'],
+  },
+  {
     id: 'py-intro',
     title: 'Python depois de JavaScript',
     summary:
