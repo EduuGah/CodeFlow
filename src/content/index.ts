@@ -378,9 +378,9 @@ const tracks: Track[] = [
   trackSql,
   trackNode,
   trackEngenharia,
+  trackTestes,
   trackProjeto,
   trackDeploy,
-  trackTestes,
   trackTerminal,
   trackPython,
 ];

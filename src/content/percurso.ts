@@ -50,6 +50,11 @@ export const ETAPAS_DO_PERCURSO: EtapaDoPercurso[] = [
     trackIds: ['track-engenharia'],
   },
   {
+    title: 'Testes que valem alguma coisa',
+    description: 'A forma de um teste, um comportamento por vez, dublês, testar o servidor — antes do projeto final, para escrevê-lo com essa rede de segurança, não depois dele.',
+    trackIds: ['track-testes'],
+  },
+  {
     title: 'O projeto final',
     description: 'Tela, API e banco de uma aplicação de verdade, juntos — do desenho à publicação.',
     trackIds: ['track-projeto'],
@@ -61,8 +66,8 @@ export const ETAPAS_DO_PERCURSO: EtapaDoPercurso[] = [
   },
   {
     title: 'A profissão',
-    description: 'O que separa código que funciona de trabalho em equipe: testes que valem alguma coisa, e o terminal como ferramenta do dia a dia.',
-    trackIds: ['track-testes', 'track-terminal'],
+    description: 'O terminal como ferramenta do dia a dia: se localizar, configurar pelo ambiente, rodar os scripts do projeto e entender o que deu errado.',
+    trackIds: ['track-terminal'],
   },
   {
     title: 'Outra linguagem',
