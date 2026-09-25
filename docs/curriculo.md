@@ -6,32 +6,91 @@ que conclui uma fase.
 
 ## Onde estamos
 
-**Fases 1 a 7 de 8 concluídas · publicado**
+**Fases 1 a 7 de 8 concluídas · publicado · mais três trilhas fora da numeração de fase (Estruturas de Dados, ORM, Deploy)**
 
 ```
 Fase 0  Fundamentos e lógica      ██████████████████████  13/13  pronto
+        Estruturas de Dados/Big O ██████████████████████   4/4  pronto — nova, dentro de "A base"
 Fase 1  JavaScript real          ██████████████████████  10/10  pronto
         Como a web funciona      ██████████████████████   8/8  pronto
         Plataforma                ██████████████████████   7/7  pronto
 Fase 2  A página                 ██████████████████████  26/26  pronto
 Fase 3  Tipos e componentes      ██████████████████████  24/24  pronto
 Fase 4  Back-end e dados         ██████████████████████  20/20  pronto
+        ORM                       ██████████████████████   3/3  pronto — nova, depois de Node
 Fase 5  Profissionalização       ██████████████████████  27/27  pronto
 Fase 6  Python                   ██████████████████████  10/10  pronto
 Fase 7  Projeto final            ██████████████████████   5/5   pronto; motor 7 inteiro; 3 capstones prontos
+        Deploy                    ██████████████████████   4/4  pronto — nova, depois do projeto final
 Fase 8  C# (proposta)             ░░░░░░░░░░░░░░░░░░░░░░   0/10  motor não iniciado — veja "Depois: mais linguagens"
 Fase 9  Java (proposta)           ░░░░░░░░░░░░░░░░░░░░░░   0/10  motor não iniciado — veja "Depois: mais linguagens"
 ```
 
 | | Hoje | Previsto | Feito |
 | --- | ---: | ---: | ---: |
-| Aulas | **143** | ~150 | 95% |
-| Exercícios | **807** | ~800 | 100% |
+| Aulas | **154** | ~150 | 100%+ |
+| Exercícios | **888** | ~800 | 100%+ |
 | Tipos de exercício | **10** | 13 | 77% |
 | Motores de execução | **8** | 8 | 100% |
 | Projetos | **10** | ~20 | 50% |
+| Trilhas | **17** | — | — |
+| Flashcards de revisão | **67** | — | — |
 
-**Último trabalho** (2026-09-22): a **Fase 6 fechou** — as 9 aulas que
+**Último trabalho** (2026-09-24): uma auditoria completa da trilha contra o
+que um Desenvolvedor Full Stack Júnior precisa saber (pedida pelo dono do
+projeto, com um roteiro de 50 partes) apontou lacunas concretas — a maior
+delas, o curso nunca chegava a publicar nada de verdade. Sete itens
+corrigidos, em ordem:
+
+1. **Trilha nova, Deploy** (`track-deploy`, 4 aulas) — ambientes e build,
+   segredos em produção, publicar frontend e backend, banco em produção com
+   domínio e HTTPS. Como Git e Terminal, simulada em JavaScript comum: não
+   há motor de deploy de verdade no sandbox. Etapa própria do percurso,
+   "Publicar", logo depois do projeto final.
+2. **Git movida para mais cedo.** `track-git` só depende de "funções" —
+   não havia razão para vir depois de React, Node e Engenharia, e o aluno
+   terminava o projeto final inteiro sem nunca ter versionado nada. Agora é
+   a segunda etapa do percurso, logo após "A base". Terminal **não** pôde
+   mover: `terminal-03` cita de propósito o que a trilha de Engenharia
+   ensina sobre `package.json`, e Engenharia depende de Node — mover só o
+   Terminal quebraria essa referência. Fica registrado como dívida.
+3. **Trilha nova, Estruturas de Dados e Big O** (`track-estruturas`, 4
+   aulas) — o(1)/O(n)/O(n²)/O(log n), recursão, pilha e fila, busca binária
+   com Set e Map. JavaScript de verdade, não simulado — são features reais
+   da linguagem. Dentro de "A base", logo depois de Lógica.
+4. **Testes movida para antes do capstone.** `testes-servidor` depende de
+   `node-rotas` e `testes-fragil` depende de `eng-funcoes` — o mais cedo
+   possível sem quebrar pré-requisito é logo depois de Engenharia, etapa
+   própria. Antes disso o aluno construía a API do projeto final inteira
+   sem nunca ter visto arrange/act/assert.
+5. **Trilha nova, ORM** (`track-orm`, 3 aulas) — o que um ORM resolve e o
+   que esconde, schema e migrations, queries traduzidas para o SQL que
+   roda por baixo (findMany/create/update/delete) e o problema de N+1
+   consultas. Simulada, como Deploy. Depois de Node (ORM se usa a partir
+   do backend), antes de Engenharia.
+6. **Segurança expandida.** `web-08-seguranca` cobria XSS e SQL injection
+   bem e parava aí — ganhou uma seção sobre CSRF (o cookie de sessão indo
+   sozinho num pedido de outra origem), os três atributos de um cookie de
+   sessão (HttpOnly, Secure, SameSite) e rate limiting contra força bruta.
+7. **Nota de pré-requisito nos capstones extras.** Os capstones de loja e
+   blog ficam soltos em `listProjects()`, fora da sequência de etapas — o
+   tipo `Project` não tem `trackId` nem `prerequisites`, então não há como
+   bloquear o acesso de verdade sem mudar o modelo de dados. Cada um ganhou
+   "Recomendado depois de..." no início da própria descrição, já visível
+   na listagem.
+
+No mesmo dia, três frentes de plataforma que a auditoria não pediu, mas o
+uso revelou: as **conquistas** (41 → 67, com uma seção de destaque "Quase
+lá" mostrando as mais perto de fechar, e trilhas/etapas viraram uma parede
+compacta de emblemas em vez de cards grandes repetidos — 19 trilhas e 12
+etapas não cabiam mais como card grande sem virar parede monótona); os
+**flashcards** (22 → 67, cobrindo pela primeira vez TypeScript, React,
+Node, SQL, Git, Terminal, Engenharia, Testes, Segurança, ORM, Deploy,
+Estruturas de Dados e Python, que nunca tinham um cartão de revisão); e a
+**sessão de revisão** passou a embaralhar os cartões empatados em
+prioridade — antes, o mesmo array de conteúdo sempre saía na mesma ordem.
+
+Antes (2026-09-22): a **Fase 6 fechou** — as 9 aulas que
 faltavam da trilha de Python (condições e laços, funções, listas e
 compreensões, dicionários e conjuntos, strings e f-strings, erros,
 classes, módulos e biblioteca padrão, e um projeto de fechamento),
@@ -274,6 +333,22 @@ opcional).
 ### Fase 0 — Fundamentos e lógica · PRONTO
 13 aulas, 7 projetos. Motor: Web Worker sem DOM.
 
+**Estruturas de Dados e Big O — 4 de 4** (2026-09-24). Trilha própria,
+`track-estruturas`, JavaScript real — ao contrário de Git, Terminal, Deploy
+e ORM, não é simulada: recursão, pilha/fila, Set e Map são funcionalidades
+de verdade da linguagem, então os exercícios rodam no motor de sempre sem
+precisar de nada novo. Dentro de "A base", logo depois de Lógica: o
+vocabulário para comparar duas soluções corretas e dizer qual escala
+melhor, faltava desde a auditoria de currículo de 2026-09-24 (a lacuna
+"estruturas de dados/Big O ausentes", prioridade alta).
+
+| Aula | Assunto |
+| --- | --- |
+| 1 | Big O: O(1)/O(n)/O(n²)/O(log n), o que cada um mede, reconhecer no código (loop simples vs. loop dentro de loop) |
+| 2 | Recursão: caso base, passo recursivo, a pilha de chamadas, por que falta de caso base estoura a pilha |
+| 3 | Pilha e fila: LIFO e FIFO como disciplina de acesso a um array comum (push/pop vs. push/shift) |
+| 4 | Busca binária, Set e Map: o exemplo concreto de O(log n), e como Set/Map trocam O(n) de array por O(1) na prática |
+
 ### Fase 1 — Aprofundar o que já roda · 18 aulas · PRONTO
 Motor: **nenhum novo**.
 
@@ -311,7 +386,7 @@ inteira caber no motor que já existe.
 | 5 | Autenticação contra autorização, 401 contra 403 | 5 |
 | 6 | Tokens: base64 não é segredo, e o exp em segundos | 5 |
 | 7 | CORS: origem, verificação prévia, e onde corrigir | 5 |
-| 8 | Injeção, escape de HTML, e nunca confiar no cliente | 5 |
+| 8 | Injeção, escape de HTML, e nunca confiar no cliente | 5 (+4, 2026-09-24: CSRF, atributos de cookie HttpOnly/Secure/SameSite, rate limiting) |
 
 **Plataforma**
 
@@ -560,6 +635,19 @@ inicial não passa, e que toda verificação com `pedir` fez o pedido.
 | 9 | Configuração e segredos: `process.env` é texto e pode faltar, converter e dar padrão, falhar cedo sem a chave, `.env` fora do Git e `.env.example` dentro, módulo de configuração congelado, `NODE_ENV`, segredo não entra em código/commit/log/resposta/URL |
 | 10 | Projeto: a tabela de recursos antes do código (toda tarefa tem dono), um arquivo por responsabilidade, dependência num sentido só, a ordem de construção, o `servidor.js` que só monta a corrente, CORS quando a página chamar; módulos prontos em `arquivos` e o aluno escreve as rotas e o servidor |
 
+**ORM — 3 de 3** (2026-09-24). Trilha própria, `track-orm`, simulada em
+JavaScript (como Git, Terminal e Deploy — nenhum ORM de verdade roda no
+sandbox). Lacuna crítica da auditoria: SQL era ensinado bem, mas o Node e
+o capstone usavam SQL cru direto, sem nunca introduzir o que a maioria das
+vagas júnior encontra no trabalho real. Etapa própria do percurso, "ORM",
+depois de Node (ORM se usa a partir do backend) e antes de Engenharia.
+
+| Aula | Assunto |
+| --- | --- |
+| 1 | O que um ORM resolve: mapeamento linha-objeto, o SQL repetitivo que ele poupa, o risco de esconder demais o que roda por baixo (N+1) |
+| 2 | Schema e migrations: a sintaxe de modelo/relação (Prisma como referência), como uma migration nasce da diferença entre dois schemas |
+| 3 | Queries e o SQL por baixo: findMany/create/update/delete traduzidos pro SQL equivalente, e o problema de N+1 consultas |
+
 ## O que o dono do projeto pediu em 2026-09-17
 
 Depois de uma rodada inteira de plataforma (gamificação, perfil, temas,
@@ -642,15 +730,29 @@ usado: `refactor` (testes que sobrevivem a uma reescrita) e `find-bug`
 | 7 | Testes frágeis: comportamento (a porta) contra implementação (o como); código-fonte, variável interna e ordem não garantida como armadilhas |
 | 8 | O teste que pega o bug de ontem: reproduzir antes de consertar, ver falhar primeiro, manter para sempre; nomear a combinação, não o chamado |
 
+**Movida em 2026-09-24** (auditoria de currículo): `testes-servidor`
+depende de `node-rotas` e `testes-fragil` depende de `eng-funcoes` — o mais
+cedo possível sem quebrar pré-requisito é logo depois de Engenharia, e é
+para lá que a trilha foi, numa etapa própria ("Testes que valem alguma
+coisa"), **antes** do projeto final. Antes disso o aluno construía a API do
+capstone inteira sem nunca ter visto arrange/act/assert.
+
 **Git e equipe — 6 de 6** (2026-09-21). Trilha própria, `track-git`, em
 JavaScript puro (motor 1) — não existe motor de Git; os exercícios simulam
 o raciocínio (mensagens como texto, branches como listas, conflitos como
 marcadores num arquivo), porque a habilidade ensinada é a decisão, não a
-sintaxe do comando. Sétima etapa do percurso, "A profissão", ao lado de
-Testes e Qualidade. Mistura os tipos já existentes — `code`, `find-bug`,
+sintaxe do comando. Mistura os tipos já existentes — `code`, `find-bug`,
 `multiple-choice`, `order-steps`, `predict-output` e um `write-test`
 (escrever asserções sobre um `squash` de commits correto) — sem exigir
 nenhum novo.
+
+**Movida em 2026-09-24** (auditoria de currículo): `git-commit` só depende
+de "funções", então não havia razão para a trilha vir depois de React, Node
+e Engenharia — o aluno terminava o projeto final inteiro sem nunca ter
+versionado nada. Agora é a **segunda etapa** do percurso, "Registrar o
+trabalho", logo após "A base". Terminal não pôde acompanhar: `terminal-03`
+cita de propósito o que Engenharia ensina sobre `package.json`, e
+Engenharia depende de Node — Terminal continua na etapa "A profissão".
 
 | Aula | Assunto |
 | --- | --- |
@@ -782,6 +884,22 @@ uma `verificar()` que sobe um servidor (com banco) novo por checkpoint.
 
 Plataforma, além do motor 7: fechar as pontas do CodeFlow — desempenho do
 pacote, revisão num telefone real, passagem final de acessibilidade.
+
+### Fase 7½ — Deploy · 4 aulas, nova (2026-09-24)
+A lacuna mais crítica da auditoria de currículo: o curso ensinava
+fundamentos, frontend, backend e banco de ponta a ponta, mas nunca chegava
+a publicar nada de verdade. Trilha própria, `track-deploy`, simulada em
+JavaScript — como Git e Terminal, não há uma plataforma de deploy de
+verdade no sandbox, então os exercícios simulam o raciocínio, comparando
+cada decisão com o equivalente real. Etapa própria do percurso, "Publicar",
+logo depois do projeto final.
+
+| Aula | Assunto |
+| --- | --- |
+| 1 | Ambientes: dev vs. produção, o que é build e por que ele falha antes do deploy, de propósito |
+| 2 | Segredos em produção: onde um segredo mora fora do código, por que variável de build (`VITE_`) é pública mesmo minificada |
+| 3 | Publicar o frontend e o backend: arquivo estático vs. processo em pé, por que a porta vem de `process.env.PORT`, nunca fixa no código |
+| 4 | Banco em produção, domínio e HTTPS: migration em vez de `ALTER TABLE` direto, o que existe entre um domínio e uma resposta cifrada |
 
 ### Depois: mais linguagens
 Cada linguagem nova custa um motor que a rode no navegador, e o motor decide

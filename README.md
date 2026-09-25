@@ -14,29 +14,33 @@ os botões da tela de entrada ou digite usuário `aluno` / senha `aluno` (aluno)
 
 ## O que tem hoje
 
-**14 trilhas, 143 aulas, 823 exercícios em 10 tipos, 10 projetos, 139 conceitos.**
-Tudo é contado do catálogo; a página pública mostra os mesmos números.
+**17 trilhas, 154 aulas, 888 exercícios em 10 tipos, 10 projetos, 151 conceitos,
+67 flashcards de revisão.** Tudo é contado do catálogo; a página pública
+mostra os mesmos números.
 
 | Etapa | Trilha | Linguagem | Aulas | Exercícios |
 | --- | --- | --- | ---: | ---: |
-| 1 · A base | Fundamentos de JavaScript | JavaScript | 20 | 115 |
+| 1 · A base | Fundamentos de JavaScript | JavaScript | 20 | 123 |
 | 1 · A base | Lógica e Resolução de Problemas | JavaScript | 3 | 19 |
-| 2 · A web | Como a Web Funciona | JavaScript | 8 | 40 |
-| 2 · A web | A Página (HTML, CSS, DOM) | HTML | 26 | 156 |
-| 3 · As ferramentas do trabalho | TypeScript | TypeScript | 10 | 59 |
-| 3 · As ferramentas do trabalho | React | React (TSX) | 14 | 84 |
-| 3 · As ferramentas do trabalho | SQL e Bancos de Dados | SQL | 10 | 59 |
-| 4 · A aplicação inteira | Node e APIs | Node | 10 | 64 |
-| 5 · O ofício | Engenharia: Organizar um Projeto | Node | 8 | 48 |
-| 6 · O projeto final | Projeto Final: A Aplicação Inteira | Node + SQL + página | 5 | 27 |
-| 7 · A profissão | Testes e Qualidade | JavaScript + Node | 8 | 28 |
-| 7 · A profissão | Git e Equipe | JavaScript | 6 | 33 |
-| 7 · A profissão | Terminal e Ferramentas | JavaScript | 5 | 25 |
-| 8 · Outra linguagem | Python | Python | 10 | 50 |
+| 1 · A base | Estruturas de Dados e Big O | JavaScript | 4 | 20 |
+| 2 · Registrar o trabalho | Git e Equipe | JavaScript | 6 | 33 |
+| 3 · A web | Como a Web Funciona | JavaScript | 8 | 45 |
+| 3 · A web | A Página (HTML, CSS, DOM) | HTML | 26 | 156 |
+| 4 · As ferramentas do trabalho | TypeScript | TypeScript | 10 | 59 |
+| 4 · As ferramentas do trabalho | React | React (TSX) | 14 | 84 |
+| 4 · As ferramentas do trabalho | SQL e Bancos de Dados | SQL | 10 | 59 |
+| 5 · A aplicação inteira | Node e APIs | Node | 10 | 64 |
+| 6 · ORM | ORM | JavaScript | 3 | 12 |
+| 7 · O ofício | Engenharia: Organizar um Projeto | Node | 8 | 48 |
+| 8 · Testes que valem alguma coisa | Testes e Qualidade | JavaScript + Node | 8 | 40 |
+| 9 · O projeto final | Projeto Final: A Aplicação Inteira | Node + SQL + página | 5 | 27 |
+| 10 · Publicar | Deploy | JavaScript | 4 | 20 |
+| 11 · A profissão | Terminal e Ferramentas | JavaScript | 5 | 28 |
+| 12 · Outra linguagem | Python | Python | 10 | 51 |
 
-**Os dez tipos de exercício**: escrever o código (161), múltipla escolha (226),
-prever a saída (98), completar a lacuna (86), ordenar os passos (66),
-encontrar o bug (70), escrever o teste (15), refatorar (14), consulta SQL (46)
+**Os dez tipos de exercício**: escrever o código (169), múltipla escolha (260),
+prever a saída (108), completar a lacuna (86), ordenar os passos (74),
+encontrar o bug (74), escrever o teste (15), refatorar (15), consulta SQL (46)
 e servidor (41). Toda aula tem ao menos um dos quatro "de prática de dev" —
 bug, ordenar, teste, refatorar — que pedem o conceito de outro ângulo.
 
@@ -54,10 +58,12 @@ bug, ordenar, teste, refatorar — que pedem o conceito de outro ângulo.
 | Python | a primeira linguagem além do JavaScript | Pyodide (CPython em WebAssembly, ~13 MB) num worker que fica vivo — recarregar custaria segundos; cada execução isola com um dicionário de globais novo, sem recriar o intérprete; testes são `assert` em Python de verdade |
 
 **O que acompanha o aluno**: percurso em etapas com o ponto atual, revisão
-espaçada (Leitner), XP e níveis sem teto, sequência de dias com congelamento,
-moedas e loja (dobro de XP, temas, avatares), desafios do dia e da semana,
-30 conquistas, perfil com nome e foto, modo escuro e quatro cores de destaque,
-avisos de novidade ao voltar — tudo **derivado do histórico**, nada é contador.
+espaçada (Leitner) com a sessão embaralhada a cada vez, XP e níveis sem teto,
+sequência de dias com congelamento, moedas e loja (dobro de XP, temas,
+avatares), desafios do dia e da semana, 67 conquistas (com um destaque para
+as mais perto de fechar, e trilhas/etapas numa parede compacta de emblemas),
+perfil com nome e foto, modo escuro e quatro cores de destaque, avisos de
+novidade ao voltar — tudo **derivado do histórico**, nada é contador.
 
 ## Rodando o projeto
 
@@ -119,7 +125,7 @@ Redirect URLs.
 
 ```bash
 npm run typecheck   # tipos, incluindo os testes de navegador
-npm test            # 3.046 testes de unidade, propriedade e componente (Vitest)
+npm test            # 3.317 testes de unidade, propriedade e componente (Vitest)
 npm run test:e2e    # 408 testes de navegador (Playwright, Chromium, celular e desktop)
 ```
 
@@ -182,8 +188,8 @@ paleta só. O movimento tem motivo e respeita `prefers-reduced-motion`.
 ## Estrutura
 
 ```
-src/content/        Aulas, exercícios, projetos, conceitos, percurso + schema Zod
-  lessons/          Uma aula por arquivo (js-, logica-, web-, pagina-, ts-, react-, sql-, node-, eng-, proj-, testes-, git-, terminal-, py-)
+src/content/        Aulas, exercícios, projetos, conceitos, flashcards, percurso + schema Zod
+  lessons/          Uma aula por arquivo (js-, logica-, estruturas-, web-, pagina-, ts-, react-, sql-, node-, orm-, eng-, testes-, proj-, deploy-, git-, terminal-, py-)
   tracks/           As trilhas e a ordem das aulas
   bancos/           Os bancos de exemplo do SQL e do projeto final
 src/client/lib/     Lógica derivada e os motores: sandbox, página, TypeScript,
@@ -209,6 +215,13 @@ completo, a Fase 5 (Profissionalização: Engenharia, Testes, Git e Terminal)
 fechou inteira, os **três capstones** também (lista de tarefas com conta,
 loja com carrinho, blog com autenticação), e a Fase 6 (Python) fechou: as
 10 aulas do roadmap sobre o motor 8 (Pyodide), o último motor previsto.
+
+Uma auditoria completa de currículo (2026-09-24), comparando a trilha contra
+o que um Desenvolvedor Full Stack Júnior precisa saber, resultou em três
+trilhas novas — **Estruturas de Dados e Big O**, **ORM** e **Deploy** — e no
+reordenamento de Git (agora logo no início, não mais depois do projeto
+final) e Testes (agora antes do capstone, não depois). Detalhes de cada
+lacuna e a decisão tomada estão no topo de `docs/curriculo.md`.
 
 ## Licença
 
