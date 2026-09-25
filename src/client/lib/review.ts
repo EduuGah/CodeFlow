@@ -94,13 +94,26 @@ export interface DueCard {
   priority: boolean;
 }
 
+/** Embaralha uma cópia do array (Fisher-Yates); o original não é alterado. */
+function embaralhar<T>(itens: T[]): T[] {
+  const copia = [...itens];
+  for (let i = copia.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copia[i], copia[j]] = [copia[j], copia[i]];
+  }
+  return copia;
+}
+
 /**
  * Monta a sessão de revisão.
  *
- * A ordem não é aleatória nem fixa: primeiro os cartões de conceitos que o aluno
- * vem errando **nos exercícios** — porque a revisão deve responder ao desempenho
- * real, não só ao calendário. Depois os vencidos há mais tempo, e por último os
- * nunca vistos.
+ * A ordem segue uma prioridade — primeiro os cartões de conceitos que o aluno
+ * vem errando **nos exercícios**, porque a revisão deve responder ao desempenho
+ * real, não só ao calendário; depois os vencidos há mais tempo; por último os
+ * nunca vistos — mas **dentro** de cada empate (mesma prioridade, mesmo dia de
+ * vencimento, ou o grupo inteiro de nunca vistos) a ordem é embaralhada a cada
+ * sessão. Sem isso, os cartões novos sempre apareceriam na mesma ordem — a do
+ * array de conteúdo —, e as primeiras posições nunca mudariam de card.
  */
 export function buildReviewSession(
   cards: Flashcard[],
@@ -111,7 +124,7 @@ export function buildReviewSession(
   const hojeStr = diaLocal(hoje);
   const prioritarios = new Set(conceptsToPrioritize);
 
-  return cards
+  return embaralhar(cards)
     .map((card) => {
       const state = cardState(card.id, reviews);
       return {

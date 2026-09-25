@@ -2,6 +2,7 @@ import type { ComponentType } from 'react';
 
 import type { Achievement } from '../../lib/gamification';
 import {
+  IconAlert,
   IconAward,
   IconBolt,
   IconCalendar,
@@ -9,14 +10,17 @@ import {
   IconCheckCircle,
   IconChecklist,
   IconChart,
+  IconClock,
   IconCompass,
   IconComponent,
   IconDatabase,
   IconDevice,
+  IconEdit,
   IconFlag,
   IconLayers,
   IconLesson,
   IconMedal,
+  IconMoon,
   IconNoHint,
   IconPalette,
   IconPlay,
@@ -24,6 +28,7 @@ import {
   IconRetry,
   IconReview,
   IconStreak,
+  IconSun,
   IconTarget,
   IconTrack,
   IconTrophy,
@@ -70,6 +75,14 @@ const POR_CONQUISTA: Record<string, ComponentType<IconProps>> = {
   'vinte-aulas': IconLesson,
   'cem-aulas': IconTrophy,
   'todos-os-projetos': IconTrophy,
+  coruja: IconMoon,
+  'cedo-da-manha': IconSun,
+  retomada: IconClock,
+  detetive: IconAlert,
+  refatorador: IconEdit,
+  professor: IconChecklist,
+  'trilha-sem-dica': IconNoHint,
+  perfeccionista: IconCheckCircle,
 };
 
 export function iconeDaConquista(conquista: Pick<Achievement, 'id' | 'categoria'>): ComponentType<IconProps> {

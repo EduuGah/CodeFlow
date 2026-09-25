@@ -1,4 +1,4 @@
-import { listProjects, listTracks } from '../../content';
+import { getExercises, getLessonsOfTrack, listProjects, listTracks } from '../../content';
 import { ETAPAS_DO_PERCURSO } from '../../content/percurso';
 import type { Attempt } from './mastery';
 import type { FlashcardReview } from './review';
@@ -274,6 +274,38 @@ export function computeAchievements(
   const diarios = desafios.filter((d) => d.periodo === 'dia').length;
   const semanais = desafios.filter((d) => d.periodo === 'semana').length;
 
+  // Tipo de cada exercício, por id — para as conquistas por formato de exercício.
+  const tipoDoExercicio = new Map<string, string>();
+  for (const t of trilhas) {
+    for (const licao of getLessonsOfTrack(t.id)) {
+      for (const exercicio of getExercises(licao)) tipoDoExercicio.set(exercicio.id, exercicio.type);
+    }
+  }
+  const tiposResolvidos = new Set([...exerciciosResolvidos].map((id) => tipoDoExercicio.get(id)));
+
+  // Hora local de cada tentativa — para as conquistas de horário.
+  const horas = attempts.map((a) => new Date(a.createdAt).getHours());
+  const madrugada = horas.some((h) => h >= 0 && h < 5);
+  const cedoDaManha = horas.some((h) => h >= 5 && h < 7);
+
+  // Retomada: um hiato de 14+ dias entre duas tentativas seguidas, e voltou depois dele.
+  const tempos = attempts.map((a) => new Date(a.createdAt).getTime()).sort((a, b) => a - b);
+  const HIATO_MS = 14 * 24 * 60 * 60 * 1000;
+  const teveRetomada = tempos.some((t, i) => i > 0 && t - tempos[i - 1] >= HIATO_MS);
+
+  // Perfeccionista: uma aula concluída em que nenhuma tentativa errou.
+  const aulaSemErro = completedLessons.some((id) => {
+    const daAula = attempts.filter((a) => a.lessonId === id);
+    return daAula.length > 0 && daAula.every((a) => a.correct);
+  });
+
+  // Uma trilha concluída em que nenhum acerto usou dica nenhuma.
+  const trilhaSemDica = trilhasConcluidas.some((t) => {
+    const idsDaTrilha = new Set(t.lessonIds);
+    const daTrilha = acertos.filter((a) => idsDaTrilha.has(a.lessonId));
+    return daTrilha.length > 0 && daTrilha.every((a) => a.hintsUsed === 0);
+  });
+
   const contagem = (atual: number, meta: number) => ({ atual: Math.min(atual, meta), meta });
 
   return [
@@ -338,6 +370,27 @@ export function computeAchievements(
       description: 'Você cumpriu um desafio semanal.',
       categoria: 'habitos',
       unlocked: semanais >= 1,
+    },
+    {
+      id: 'coruja',
+      title: 'Coruja',
+      description: 'Você resolveu algo entre meia-noite e cinco da manhã.',
+      categoria: 'habitos',
+      unlocked: madrugada,
+    },
+    {
+      id: 'cedo-da-manha',
+      title: 'Começou cedo',
+      description: 'Você resolveu algo entre cinco e sete da manhã.',
+      categoria: 'habitos',
+      unlocked: cedoDaManha,
+    },
+    {
+      id: 'retomada',
+      title: 'Voltou depois de um tempo',
+      description: 'Você ficou duas semanas ou mais sem estudar, e voltou.',
+      categoria: 'habitos',
+      unlocked: teveRetomada,
     },
 
     // Habilidades
@@ -437,6 +490,34 @@ export function computeAchievements(
       unlocked: LINGUAGENS_DO_CATALOGO.every((linguagem) => aulasPorLinguagem(linguagem)),
       progresso: contagem(LINGUAGENS_DO_CATALOGO.filter((linguagem) => aulasPorLinguagem(linguagem)).length, LINGUAGENS_DO_CATALOGO.length),
     },
+    {
+      id: 'detetive',
+      title: 'Achou o bug',
+      description: 'Você resolveu um exercício de encontrar o bug.',
+      categoria: 'habilidades',
+      unlocked: tiposResolvidos.has('find-bug'),
+    },
+    {
+      id: 'refatorador',
+      title: 'Melhorou sem quebrar',
+      description: 'Você resolveu um exercício de refatoração — o código continuou passando nos testes depois de reescrito.',
+      categoria: 'habilidades',
+      unlocked: tiposResolvidos.has('refactor'),
+    },
+    {
+      id: 'professor',
+      title: 'Testou de verdade',
+      description: 'Você resolveu um exercício de escrever o teste — e ele pegou as sabotagens.',
+      categoria: 'habilidades',
+      unlocked: tiposResolvidos.has('write-test'),
+    },
+    {
+      id: 'trilha-sem-dica',
+      title: 'Uma trilha, nenhuma dica',
+      description: 'Você concluiu uma trilha inteira sem abrir uma dica sequer.',
+      categoria: 'habilidades',
+      unlocked: trilhaSemDica,
+    },
 
     // Trilhas
     {
@@ -483,6 +564,13 @@ export function computeAchievements(
       description: 'Você atendeu todos os critérios de aceitação de um projeto.',
       categoria: 'marcos',
       unlocked: completedProjects.length > 0,
+    },
+    {
+      id: 'perfeccionista',
+      title: 'Sem errar uma vez',
+      description: 'Você concluiu uma aula inteira sem nenhuma tentativa errada.',
+      categoria: 'marcos',
+      unlocked: aulaSemErro,
     },
     {
       id: 'cinquenta',
