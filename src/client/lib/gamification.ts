@@ -1,4 +1,5 @@
 import { listProjects, listTracks } from '../../content';
+import { ETAPAS_DO_PERCURSO } from '../../content/percurso';
 import type { Attempt } from './mastery';
 import type { FlashcardReview } from './review';
 import { emDobro, janelasDeDobro, type Purchase } from './economia';
@@ -211,12 +212,16 @@ export function levelFromXp(xp: number): LevelInfo {
   };
 }
 
-export type CategoriaDeConquista = 'habitos' | 'habilidades' | 'trilhas' | 'marcos';
+/** As linguagens do catálogo, na ordem em que a conquista "Poliglota" as lista. */
+const LINGUAGENS_DO_CATALOGO = ['javascript', 'typescript', 'react', 'sql', 'node', 'python', 'html'] as const;
+
+export type CategoriaDeConquista = 'habitos' | 'habilidades' | 'trilhas' | 'etapas' | 'marcos';
 
 export const CATEGORIAS_DE_CONQUISTA: Record<CategoriaDeConquista, string> = {
   habitos: 'Hábitos',
   habilidades: 'Habilidades',
   trilhas: 'Trilhas',
+  etapas: 'Etapas do percurso',
   marcos: 'Marcos',
 };
 
@@ -403,6 +408,35 @@ export function computeAchievements(
       categoria: 'habilidades',
       unlocked: aulasPorLinguagem('sql'),
     },
+    {
+      id: 'subiu-servidor',
+      title: 'Subiu um servidor',
+      description: 'Você concluiu uma aula de Node.',
+      categoria: 'habilidades',
+      unlocked: aulasPorLinguagem('node'),
+    },
+    {
+      id: 'cobra',
+      title: 'Trocou de linguagem',
+      description: 'Você concluiu uma aula de Python — a primeira fora da família JavaScript.',
+      categoria: 'habilidades',
+      unlocked: aulasPorLinguagem('python'),
+    },
+    {
+      id: 'desenhou-a-pagina',
+      title: 'Desenhou uma página',
+      description: 'Você concluiu uma aula de HTML, CSS ou DOM.',
+      categoria: 'habilidades',
+      unlocked: aulasPorLinguagem('html'),
+    },
+    {
+      id: 'poliglota',
+      title: 'Poliglota',
+      description: 'Ao menos uma aula concluída em cada linguagem do catálogo: JS, TS, React, SQL, Node, Python e HTML.',
+      categoria: 'habilidades',
+      unlocked: LINGUAGENS_DO_CATALOGO.every((linguagem) => aulasPorLinguagem(linguagem)),
+      progresso: contagem(LINGUAGENS_DO_CATALOGO.filter((linguagem) => aulasPorLinguagem(linguagem)).length, LINGUAGENS_DO_CATALOGO.length),
+    },
 
     // Trilhas
     {
@@ -429,6 +463,19 @@ export function computeAchievements(
       progresso: contagem(trilhasConcluidas.length, trilhas.length),
     },
 
+    // Etapas do percurso: uma por etapa, quando todas as trilhas dela fecham.
+    ...ETAPAS_DO_PERCURSO.map((etapa, indice) => {
+      const fechadas = etapa.trackIds.filter((id) => trilhasConcluidas.some((t) => t.id === id)).length;
+      return {
+        id: `etapa-${indice}`,
+        title: etapa.title,
+        description: etapa.description,
+        categoria: 'etapas' as const,
+        unlocked: fechadas === etapa.trackIds.length,
+        progresso: contagem(fechadas, etapa.trackIds.length),
+      };
+    }),
+
     // Marcos
     {
       id: 'primeiro-projeto',
@@ -446,6 +493,14 @@ export function computeAchievements(
       progresso: contagem(exerciciosResolvidos.size, 50),
     },
     {
+      id: 'cem',
+      title: 'Cem exercícios',
+      description: 'Cem exercícios diferentes resolvidos.',
+      categoria: 'marcos',
+      unlocked: exerciciosResolvidos.size >= 100,
+      progresso: contagem(exerciciosResolvidos.size, 100),
+    },
+    {
       id: 'duzentos',
       title: 'Duzentos exercícios',
       description: 'Duzentos exercícios diferentes resolvidos.',
@@ -460,6 +515,14 @@ export function computeAchievements(
       categoria: 'marcos',
       unlocked: completedLessons.length >= 20,
       progresso: contagem(completedLessons.length, 20),
+    },
+    {
+      id: 'cem-aulas',
+      title: 'Cem aulas',
+      description: 'Cem aulas concluídas — mais da metade do catálogo.',
+      categoria: 'marcos',
+      unlocked: completedLessons.length >= 100,
+      progresso: contagem(completedLessons.length, 100),
     },
     {
       id: 'todos-os-projetos',

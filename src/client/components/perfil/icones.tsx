@@ -2,18 +2,23 @@ import type { ComponentType } from 'react';
 
 import type { Achievement } from '../../lib/gamification';
 import {
+  IconAward,
+  IconBolt,
   IconCalendar,
   IconCalendarCheck,
   IconCheckCircle,
   IconChecklist,
+  IconChart,
   IconCompass,
   IconComponent,
   IconDatabase,
+  IconDevice,
   IconFlag,
   IconLayers,
   IconLesson,
   IconMedal,
   IconNoHint,
+  IconPalette,
   IconPlay,
   IconProject,
   IconRetry,
@@ -52,17 +57,24 @@ const POR_CONQUISTA: Record<string, ComponentType<IconProps>> = {
   tipado: IconTypes,
   componente: IconComponent,
   consultou: IconDatabase,
+  'subiu-servidor': IconDevice,
+  cobra: IconChart,
+  'desenhou-a-pagina': IconPalette,
+  poliglota: IconBolt,
   'primeira-aula': IconLesson,
   'percurso-inteiro': IconFlag,
   'primeiro-projeto': IconProject,
   cinquenta: IconChecklist,
+  cem: IconAward,
   duzentos: IconTrophy,
   'vinte-aulas': IconLesson,
+  'cem-aulas': IconTrophy,
   'todos-os-projetos': IconTrophy,
 };
 
 export function iconeDaConquista(conquista: Pick<Achievement, 'id' | 'categoria'>): ComponentType<IconProps> {
   if (conquista.id.startsWith('trilha-')) return IconTrack;
+  if (conquista.id.startsWith('etapa-')) return IconFlag;
   return POR_CONQUISTA[conquista.id] ?? IconMedal;
 }
 

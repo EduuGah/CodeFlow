@@ -11,15 +11,21 @@
 export const CORES_DAS_TRILHAS: Record<string, string> = {
   'track-js-fundamentos': '#8f6a12',
   'track-logica': '#5b5f8f',
+  'track-estruturas': '#6b4fa0',
+  'track-git': '#8a3a4a',
   'track-web': '#557a2f',
   'track-pagina': '#b04e22',
   'track-typescript': '#3178c6',
   'track-react': '#157a8c',
   'track-sql': '#7a3f8a',
   'track-node': '#35753c',
+  'track-orm': '#a05a2c',
   'track-engenharia': '#4a5d78',
-  'track-projeto': '#9a3f5c',
   'track-testes': '#256e56',
+  'track-projeto': '#9a3f5c',
+  'track-deploy': '#146b56',
+  'track-terminal': '#4a4a4a',
+  'track-python': '#2d6a8f',
 };
 
 const PADRAO = '#55605d';
