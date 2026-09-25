@@ -48,7 +48,7 @@ export const projetoCapstoneTarefas: Project = {
   id: 'proj-capstone-tarefas',
   title: 'Capstone: Lista de Tarefas com Conta',
   description:
-    'Página, API e banco juntos: cada pessoa vê só as suas tarefas, filtra por feitas e pendentes, e busca por título.',
+    'Recomendado depois de A Página, Node e SQL. Página, API e banco juntos: cada pessoa vê só as suas tarefas, filtra por feitas e pendentes, e busca por título.',
   difficulty: 'avancado',
   language: 'html',
   concepts: ['proj-pagina', 'dom-fetch', 'dom-delegacao'],

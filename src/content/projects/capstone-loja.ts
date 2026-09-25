@@ -123,7 +123,7 @@ export const projetoCapstoneLoja: Project = {
   id: 'proj-capstone-loja',
   title: 'Capstone: Loja com Carrinho',
   description:
-    'O banco da trilha de SQL virando produto: catálogo, carrinho, pedido — e o estoque que de fato abaixa quando alguém compra.',
+    'Recomendado depois de A Página, Node e SQL. O banco da trilha de SQL virando produto: catálogo, carrinho, pedido — e o estoque que de fato abaixa quando alguém compra.',
   difficulty: 'avancado',
   language: 'html',
   concepts: ['proj-pagina', 'dom-fetch', 'dom-delegacao'],

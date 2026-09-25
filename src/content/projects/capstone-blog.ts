@@ -243,7 +243,7 @@ export const projetoCapstoneBlog: Project = {
   id: 'proj-capstone-blog',
   title: 'Capstone: Blog com Autenticação',
   description:
-    'Cadastro que já loga, posts que só o dono apaga, e comentários — a autenticação por token de ponta a ponta, numa página só.',
+    'Recomendado depois de A Página, Node, SQL e Autenticação. Cadastro que já loga, posts que só o dono apaga, e comentários — a autenticação por token de ponta a ponta, numa página só.',
   difficulty: 'avancado',
   language: 'html',
   concepts: ['proj-pagina', 'dom-fetch', 'dom-delegacao'],
