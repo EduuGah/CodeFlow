@@ -424,6 +424,28 @@ console.log(lerCabecalhos(bruto));`,
       },
     },
     {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-web-3-accept-vs-content-type',
+        type: 'multiple-choice',
+        prompt:
+          'Um cliente manda `Accept: application/json` num `GET`, sem corpo nenhum no pedido. O que esse cabeçalho está dizendo ao servidor?',
+        concepts: ['http'],
+        difficulty: 'iniciante',
+        tags: ['web', 'http'],
+        options: [
+          '"Prefiro receber a resposta em JSON, se você conseguir"',
+          '"O corpo que estou mandando é JSON"',
+          '"Só aceito conexões seguras (HTTPS)"',
+          '"Estou autenticado e posso receber dados sensíveis"',
+        ],
+        correctIndex: 0,
+        explanation:
+          '`Accept` é sempre sobre o que o **cliente** quer **receber** de volta — o oposto de `Content-Type`, que descreve o que está sendo **enviado**. Um `GET` normalmente não tem corpo, então `Content-Type` nem faria sentido no pedido; `Accept` continua valendo porque a resposta vai ter um corpo, e o cliente está dizendo em que formato prefere recebê-lo.',
+        hints: ['Quem descreve o corpo que está indo, e quem pede o formato do que vai voltar?'],
+      },
+    },
+    {
       kind: 'summary',
       markdown: `Cabeçalhos são pares \`Nome: valor\` que descrevem a mensagem, e é neles que mora a maior parte dos problemas de integração. \`Content-Type\` **descreve o corpo que está indo** — não é um pedido, é um aviso —, enquanto \`Accept\` é que pede formato de resposta; confundir os dois rende um \`400\` difícil de entender. Nomes de cabeçalho não diferenciam maiúsculas, então normalize os **dois** lados antes de comparar: normalizar só um funciona no seu teste e falha em produção. E o valor de \`Content-Type\` quase sempre traz \`; charset=utf-8\` grudado, o que faz a comparação exata falhar — pergunte com \`startsWith\`.`,
     },

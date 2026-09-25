@@ -174,6 +174,21 @@ O sintoma em produção é cruel: a validação funciona no primeiro item de uma
 ## Quando não usar
 
 Expressão regular é ótima para formato e péssima para estrutura aninhada. **Não** tente validar HTML, JSON ou e-mail com uma. O padrão oficial de e-mail tem centenas de caracteres e ainda erra — para e-mail, verifique se há um \`@\` com texto dos dois lados e mande a confirmação por mensagem, que é o único teste que vale.
+
+## Outras marcas: i para ignorar maiúsculas, m para texto em várias linhas
+
+Depois da barra de fechamento, além do \`g\` já visto, duas marcas comuns:
+
+~~~javascript
+/python/.test('Python é ótimo');     // false — P maiúsculo não bate com p
+/python/i.test('Python é ótimo');    // true  — i ignora a diferença de caixa
+
+const texto = 'linha um\\nlinha dois';
+/^linha/.test(texto);                // true — ^ bate só no começo do texto inteiro
+/^linha/m.test(texto);                // true — m faz ^ e $ baterem no começo/fim de CADA linha
+~~~
+
+As marcas se combinam: \`/python/gi\` busca todas as ocorrências (\`g\`) ignorando maiúsculas (\`i\`). A ordem entre elas não importa.
 `.trim(),
     },
     {
@@ -345,6 +360,26 @@ assert(ehCep("cep: 12345-678") === false, 'com texto em volta nao vale');
 assert(ehCep("12345-6789") === false, 'quatro digitos no fim nao vale');`,
         explanation:
           'Testar uma expressão regular é, sobretudo, testar o que ela **recusa**: o formato certo passa em quase qualquer versão. Cada asserção de recusa mira um pedaço da expressão — as âncoras `^` e `$` (texto em volta), o hífen obrigatório (dígitos colados), o `{3}` exato (um dígito a mais). Se você conseguiu escrever essas três, você leu a expressão regular pedaço por pedaço, que é a única forma de ler uma.',
+      },
+    },
+    {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-js-20-flag-i',
+        type: 'predict-output',
+        prompt: 'O que este programa imprime?',
+        concepts: ['strings'],
+        difficulty: 'iniciante',
+        tags: ['javascript', 'regex'],
+        code: `const contemPython = /python/;
+const contemPythonSemCaixa = /python/i;
+
+console.log(contemPython.test('Amo Python'));
+console.log(contemPythonSemCaixa.test('Amo Python'));`,
+        expectedOutput: 'false\ntrue',
+        explanation:
+          'Sem a marca `i`, o padrão `/python/` só bate com "python" em minúsculas exatas — "Python", com P maiúsculo, não casa. Com `/python/i`, a marca faz a comparação ignorar a diferença entre maiúsculas e minúsculas.',
+        hints: ['Qual das duas expressões tem a marca que ignora maiúsculas de minúsculas?'],
       },
     },
     {

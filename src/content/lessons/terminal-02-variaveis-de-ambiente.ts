@@ -36,6 +36,18 @@ Mas repare num detalhe: \`||\` cai no padrão para **qualquer** valor falso — 
 const prefixo = process.env.PREFIXO !== undefined ? process.env.PREFIXO : '';
 ~~~
 
+## Definindo uma variável no próprio terminal
+
+Antes de rodar um comando, dá para definir uma variável só para aquela execução, colocando \`NOME=valor\` na frente:
+
+~~~
+PORTA=4000 node servidor.js
+~~~
+
+Isso roda \`servidor.js\` com \`process.env.PORTA\` valendo \`'4000'\` — sem alterar nada fora daquele comando específico. É diferente de editar o \`.env\`: dura só aquela execução, e é útil para testar um valor pontual sem mexer em arquivo nenhum.
+
+A variável mais comum desse tipo é \`NODE_ENV\`: por convenção (não uma regra do Node em si, mas seguida por quase toda ferramenta do ecossistema), \`NODE_ENV=production\` liga otimizações e desliga avisos de desenvolvimento, enquanto \`NODE_ENV=development\` (ou a ausência da variável) mantém mensagens de erro detalhadas. Rodar em produção sem definir \`NODE_ENV=production\` é um erro de configuração comum — o programa funciona, só que mais devagar e mais falante do que deveria.
+
 ## PATH: onde o shell procura um comando
 
 Quando você digita \`npm\` no terminal, o shell não sabe de cor onde o programa \`npm\` está instalado — ele procura numa lista de pastas guardada na variável de ambiente \`PATH\`, na **ordem** em que aparecem, e usa a primeira que tiver um arquivo com esse nome. É por isso que ter duas versões de uma ferramenta instaladas em pastas diferentes pode dar um resultado surpreendente: a que "vence" é a que aparece primeiro no \`PATH\`, não necessariamente a mais nova.
@@ -183,9 +195,31 @@ console.log(lerPorta({}));`,
       },
     },
     {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-terminal-2-node-env',
+        type: 'multiple-choice',
+        prompt:
+          'Uma aplicação está rodando em produção, mas ninguém definiu `NODE_ENV=production` ao iniciá-la. O que costuma acontecer?',
+        concepts: ['terminal-env'],
+        difficulty: 'iniciante',
+        tags: ['terminal', 'ambiente'],
+        options: [
+          'O programa continua funcionando, mas mais devagar e com mensagens de desenvolvimento que não deveriam aparecer em produção',
+          'O programa recusa iniciar até `NODE_ENV` ser definida',
+          'O Node define `NODE_ENV=production` sozinho sempre que detecta um servidor real',
+          'Nada muda: `NODE_ENV` não tem efeito nenhum fora de testes automatizados',
+        ],
+        correctIndex: 0,
+        explanation:
+          '`NODE_ENV` é uma convenção que praticamente todo o ecossistema (Express, React, bibliotecas de build) respeita para ligar otimizações e desligar avisos de desenvolvimento — mas é só uma variável comum, o Node não obriga nem define nada sozinho. Esquecer de configurá-la em produção não impede o programa de rodar; só faz ele rodar em modo de desenvolvimento sem ninguém perceber.',
+        hints: ['`NODE_ENV` não é imposta pelo Node — é uma convenção que outras ferramentas escolhem respeitar.'],
+      },
+    },
+    {
       kind: 'summary',
       markdown: `
-Uma variável de ambiente vive fora do código e é lida por ele — o mesmo programa roda diferente em dev e produção sem mudar uma linha, e um segredo não precisa ficar em texto no repositório. Ler com \`!== undefined\`, em vez de \`||\`, distingue "não definida" de "definida como vazia".
+Uma variável de ambiente vive fora do código e é lida por ele — o mesmo programa roda diferente em dev e produção sem mudar uma linha, e um segredo não precisa ficar em texto no repositório. Ler com \`!== undefined\`, em vez de \`||\`, distingue "não definida" de "definida como vazia". \`NOME=valor comando\` define uma variável só para aquela execução — é assim que \`NODE_ENV=production\` costuma ser ligado.
 
 O \`PATH\` é a lista de pastas onde o shell procura um comando, na ordem — a primeira que tiver o programa vence.
 

@@ -16,6 +16,20 @@ export const lessonTerminalLerASaidaDeErro: Lesson = {
       markdown: `
 Um comando termina com um **código de saída**: \`0\` significa sucesso, qualquer outro número significa algum tipo de falha (\`1\` é o genérico; \`127\`, por exemplo, costuma indicar "comando não encontrado"). É esse número que \`&&\` verifica para decidir se continua a corrente — a mesma ideia da aula anterior.
 
+## Duas saídas, não uma
+
+Todo programa de terminal tem, na verdade, **dois** fluxos de saída, não um: **stdout** (saída padrão), para o resultado normal, e **stderr** (saída de erro), separada, para mensagens de erro e aviso. É por isso que \`console.log\` (vai para stdout) e \`console.error\` (vai para stderr) existem como funções diferentes, mesmo as duas "imprimindo na tela" — no terminal, os dois fluxos aparecem misturados, mas são canais distintos por baixo.
+
+A separação importa na prática porque dá para redirecionar cada um para um lugar diferente:
+
+~~~
+node script.js > saida.txt        # só o stdout vai para o arquivo
+node script.js 2> erros.txt       # só o stderr vai para o arquivo
+node script.js > saida.txt 2>&1   # os dois juntos no mesmo arquivo
+~~~
+
+Um script que usa \`console.error\` para avisos consegue ter sua saída "de verdade" redirecionada para um arquivo sem misturar os avisos junto — e é assim que ferramentas de linha de comando decidem, internamente, o que é resultado e o que é diagnóstico.
+
 ## Ler antes de reagir
 
 O instinto mais comum diante de uma tela cheia de texto vermelho é rolar até o fim procurando "a resposta" — ou, pior, copiar só a primeira linha e ignorar o resto. As duas coisas perdem informação. Uma mensagem de erro tem duas partes que interessam:

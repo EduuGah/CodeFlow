@@ -194,6 +194,75 @@ if (!quantidade) return 'informe a quantidade';
 ~~~
 
 Uma quantidade **zero** — legítima, o usuário digitou 0 — cai no mesmo caminho de "não informou". Quando o zero é um valor válido, teste o que você realmente quer saber: \`quantidade === undefined\`.
+
+## Ternário: um if/else que cabe numa expressão
+
+Quando as duas únicas coisas que um \`if\`/\`else\` faz são **devolver** ou **atribuir** um valor, o operador ternário (\`condição ? seVerdadeiro : seFalso\`) diz a mesma coisa numa linha:
+
+~~~javascript
+// Com if/else — duas linhas para uma decisão simples
+let status;
+if (idade >= 18) {
+  status = 'adulto';
+} else {
+  status = 'menor';
+}
+
+// Com ternário — a mesma decisão, numa expressão
+const status2 = idade >= 18 ? 'adulto' : 'menor';
+~~~
+
+O nome vem de ter **três** partes: a condição, o valor se verdadeira, o valor se falsa — separadas por \`?\` e \`:\`. Dá para encadear, como um \`else if\`, mas fica difícil de ler passando de dois ou três:
+
+~~~javascript
+const faixa = nota >= 9 ? 'excelente' : nota >= 7 ? 'aprovado' : 'reprovado';
+~~~
+
+Use ternário para uma decisão curta que produz um valor; volte para \`if\`/\`else if\`/\`else\` quando o corpo de cada caminho faz mais de uma coisa, ou quando o encadeamento passaria de duas perguntas.
+
+## switch: uma variável, muitos valores possíveis
+
+Uma sequência de \`if\`/\`else if\` que compara a **mesma variável** contra vários valores tem uma forma alternativa, o \`switch\`:
+
+~~~javascript
+const dia = 3;
+let nome;
+
+switch (dia) {
+  case 1:
+    nome = 'segunda';
+    break;
+  case 2:
+    nome = 'terça';
+    break;
+  case 3:
+    nome = 'quarta';
+    break;
+  default:
+    nome = 'dia inválido';
+}
+
+console.log(nome); // quarta
+~~~
+
+\`switch (dia)\` compara \`dia\` com \`===\` contra cada \`case\`, na ordem, até achar um igual; \`default\` roda se nenhum \`case\` bateu — é o \`else\` do \`switch\`, e não é obrigatório, mas evitar deixá-lo de fora é mais seguro.
+
+**\`break\` é o detalhe que mais gera bug em quem começa com \`switch\`.** Sem ele, a execução **continua** para o próximo \`case\`, mesmo que a condição dele não tenha sido testada — chamado de "fall-through":
+
+~~~javascript
+switch (dia) {
+  case 1:
+    nome = 'segunda';
+  case 2:                    // sem break acima, cai aqui também
+    nome = 'terça';
+    break;
+  default:
+    nome = 'dia inválido';
+}
+// com dia = 1, "nome" termina como 'terça', não 'segunda' — o break faltou no case 1
+~~~
+
+Fora casos raros e intencionais (vários \`case\` seguidos sem \`break\`, para tratar o mesmo jeito), todo \`case\` deveria terminar em \`break\` ou \`return\`. \`switch\` vale a pena quando há **três ou mais** valores para a mesma variável; para duas opções, um \`if\`/\`else\` simples já resolve mais curto.
 `.trim(),
     },
     {
@@ -346,8 +415,65 @@ if (resultado !== false) throw new Error("um visitante foi tratado como administ
       },
     },
     {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-js-3-ternario',
+        type: 'predict-output',
+        prompt: 'O que este programa imprime?',
+        concepts: ['condicoes'],
+        difficulty: 'iniciante',
+        tags: ['javascript', 'ternario'],
+        code: `const idades = [10, 18, 25];
+
+for (const idade of idades) {
+  const status = idade >= 18 ? 'adulto' : 'menor';
+  console.log(idade, status);
+}`,
+        expectedOutput: '10 menor\n18 adulto\n25 adulto',
+        explanation:
+          'O ternário `idade >= 18 ? \'adulto\' : \'menor\'` é avaliado a cada volta: 10 é menor que 18 (menor), 18 já satisfaz `>=` (adulto), 25 também (adulto). É a mesma lógica de um `if`/`else` de duas linhas, só que como uma expressão que já produz o valor de `status`.',
+        hints: ['Antes do `?` está a condição; entre `?` e `:` o valor se verdadeira; depois de `:` o valor se falsa.'],
+      },
+    },
+    {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-js-3-switch-fall-through',
+        type: 'predict-output',
+        prompt:
+          'Este `switch` deveria imprimir "dia de semana" para os dias 1 a 5, e "fim de semana" para 6 e 7. O que ele realmente imprime? Preste atenção no `case 5`.',
+        concepts: ['condicoes'],
+        difficulty: 'intermediario',
+        tags: ['javascript', 'switch'],
+        code: `const dia = 5;
+let tipo;
+
+switch (dia) {
+  case 5:
+    tipo = 'dia de semana';
+  case 6:
+    tipo = 'fim de semana';
+    break;
+  case 7:
+    tipo = 'fim de semana';
+    break;
+  default:
+    tipo = 'dia de semana';
+}
+
+console.log(tipo);`,
+        expectedOutput: 'fim de semana',
+        explanation:
+          'O `case 5` não termina em `break` — a execução "cai" (fall-through) direto para o `case 6`, que sobrescreve `tipo` para `\'fim de semana\'`. Sem erro nenhum: o `switch` roda até o fim normalmente, só que com o valor errado. Faltou um `break` depois de `tipo = \'dia de semana\';` no `case 5`, para a execução parar ali em vez de continuar para o próximo caso.',
+        hints: [
+          'O que acontece quando um `case` não termina em `break`?',
+          'Compare o `case 5` com os outros dois — o que ele tem a menos?',
+        ],
+      },
+    },
+    {
       kind: 'summary',
-      markdown: `Condições escolhem caminhos, e o JavaScript **para na primeira verdadeira** — por isso encadeamentos vão da faixa mais restritiva para a mais ampla. Compare com \`===\`, nunca com \`=\`, que atribui e faz a condição passar sempre. Qualquer valor pode ir num \`if\`: só seis são falsos, e o zero entre eles é a armadilha — quando zero é uma resposta legítima, teste \`=== undefined\` em vez de \`!valor\`.`,
+      markdown: `Condições escolhem caminhos, e o JavaScript **para na primeira verdadeira** — por isso encadeamentos vão da faixa mais restritiva para a mais ampla. Compare com \`===\`, nunca com \`=\`, que atribui e faz a condição passar sempre. Qualquer valor pode ir num \`if\`: só seis são falsos, e o zero entre eles é a armadilha — quando zero é uma resposta legítima, teste \`=== undefined\` em vez de \`!valor\`. O ternário (\`? :\`) resolve um if/else curto numa expressão só; o \`switch\` compara uma variável contra vários valores — e todo \`case\` precisa de \`break\`, ou a execução "cai" para o próximo.`,
     },
   ],
 };

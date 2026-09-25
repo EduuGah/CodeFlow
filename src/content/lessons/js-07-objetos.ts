@@ -83,6 +83,43 @@ pedido.itens[0].produto;     // 'Pão'
 ~~~
 
 Nada de novo aqui: é a mesma regra aplicada em camadas. O que muda é que cada nível é uma chance a mais de encontrar \`undefined\`.
+
+## Desestruturação: extrair campos numa linha só
+
+Ler vários campos do mesmo objeto, um por um, repete o nome do objeto várias vezes:
+
+~~~javascript
+const usuario = { nome: 'Ana', idade: 28, email: 'ana@email.com' };
+
+const nome = usuario.nome;
+const idade = usuario.idade;
+~~~
+
+A **desestruturação** faz as duas atribuições numa linha, casando os nomes das variáveis com as chaves do objeto:
+
+~~~javascript
+const { nome, idade } = usuario;
+
+console.log(nome);   // 'Ana'
+console.log(idade);  // 28
+~~~
+
+\`{ nome, idade }\` do lado esquerdo não cria um objeto novo — é sintaxe própria de desestruturação, que só existe nesse contexto (depois de \`const\`/\`let\`, ou como parâmetro de função). Uma chave que não existe no objeto vira \`undefined\`, do mesmo jeito que \`usuario.telefone\` seria:
+
+~~~javascript
+const { telefone } = usuario;
+console.log(telefone);   // undefined — sem erro
+~~~
+
+Funciona também direto num parâmetro de função — muito comum ao receber um objeto de configuração:
+
+~~~javascript
+function saudar({ nome, idade }) {
+  return \`Olá, \${nome}, \${idade} anos\`;
+}
+
+saudar(usuario);   // 'Olá, Ana, 28 anos' — sem precisar de usuario.nome dentro da função
+~~~
 `.trim(),
     },
     {
@@ -291,8 +328,67 @@ console.log(traduzir("ola"));`,
       },
     },
     {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-js-7-desestruturar',
+        type: 'refactor',
+        prompt:
+          'Reescreva `resumo(produto)` usando **desestruturação** no parâmetro (em vez de `produto.nome` e `produto.preco` no corpo), para devolver `"Caderno: R$ 12.5"`. Os testes continuam os mesmos — só a forma de acessar os campos muda.',
+        concepts: ['objetos'],
+        difficulty: 'intermediario',
+        tags: ['javascript', 'objetos', 'desestruturacao'],
+        initialCode: `function resumo(produto) {
+  return produto.nome + ': R$ ' + produto.preco;
+}`,
+        constraints: [
+          { description: 'Sem `produto.`', forbidden: 'produto.' },
+          { description: 'Usa desestruturação no parâmetro', required: '{ nome' },
+        ],
+        hints: [
+          'Troque o parâmetro `produto` por `{ nome, preco }` — a desestruturação já extrai os dois campos.',
+          'Com o parâmetro desestruturado, o corpo usa `nome` e `preco` direto, sem `produto.`.',
+        ],
+        tests: [
+          {
+            description: 'resumo funciona com o desestruturado no parâmetro',
+            assertion: `const r = resumo({ nome: 'Caderno', preco: 12.5 }); if (r !== 'Caderno: R$ 12.5') throw new Error("Esperava 'Caderno: R$ 12.5', veio " + JSON.stringify(r) + ".");`,
+          },
+          {
+            description: 'funciona com outro produto',
+            assertion: `const r = resumo({ nome: 'Caneta', preco: 2 }); if (r !== 'Caneta: R$ 2') throw new Error("Esperava 'Caneta: R$ 2', veio " + JSON.stringify(r) + ".");`,
+          },
+        ],
+        solution: `function resumo({ nome, preco }) {
+  return nome + ': R$ ' + preco;
+}`,
+        explanation:
+          'Trocar o parâmetro `produto` por `{ nome, preco }` extrai os dois campos direto na entrada da função — o corpo passa a usar `nome` e `preco` como variáveis normais, sem repetir `produto.` em cada acesso. O comportamento não muda: os mesmos testes que passavam antes continuam passando, só a forma de acessar os campos é outra.',
+      },
+    },
+    {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-js-7-prever-desestruturar',
+        type: 'predict-output',
+        prompt: 'O que este programa imprime?',
+        concepts: ['objetos'],
+        difficulty: 'iniciante',
+        tags: ['javascript', 'objetos', 'desestruturacao'],
+        code: `const pedido = { id: 42, total: 99.9, cliente: 'Ana' };
+
+const { id, cupom } = pedido;
+
+console.log(id);
+console.log(cupom);`,
+        expectedOutput: '42\nundefined',
+        explanation:
+          '`id` casa com a chave `id` do objeto, e recebe `42`. `cupom` não existe em `pedido` — a desestruturação de uma chave ausente devolve `undefined`, do mesmo jeito que `pedido.cupom` devolveria.',
+        hints: ['A desestruturação de uma chave que não existe no objeto se comporta como acessá-la com ponto.'],
+      },
+    },
+    {
       kind: 'summary',
-      markdown: `Objetos guardam dados por **nome**, não por posição. Chave inexistente devolve \`undefined\` em silêncio — e o erro só estoura quando você tenta ler algo dentro desse \`undefined\`. Verifique o nível de cima antes de descer.`,
+      markdown: `Objetos guardam dados por **nome**, não por posição. Chave inexistente devolve \`undefined\` em silêncio — e o erro só estoura quando você tenta ler algo dentro desse \`undefined\`. Verifique o nível de cima antes de descer. A desestruturação (\`const { chave } = objeto\`) extrai campos numa linha só, e funciona também direto num parâmetro de função.`,
     },
   ],
 };

@@ -61,6 +61,20 @@ Dentro de um único script, \`&&\` roda o próximo comando **só se** o anterior
 ~~~
 
 Se \`lint\` falhar, nem \`test\` nem \`build\` chegam a rodar — é a mesma lógica dos hooks \`pre\`/\`post\`, mas escrita explicitamente. \`;\` (ponto e vírgula), em contraste, roda o próximo comando de qualquer jeito, dando certo ou não o anterior — raramente é o que se quer numa sequência de verificações.
+
+## Passando argumentos extras com --
+
+\`npm run test -- --watch\` roda o script \`test\` (\`vitest run\`, por exemplo) e **acrescenta** \`--watch\` no fim do comando de verdade — como se você tivesse escrito \`vitest run --watch\` direto no terminal.
+
+~~~
+npm run test -- --watch
+                 └────┘
+                 vai depois do comando do script, não substitui nada
+~~~
+
+O \`--\` sozinho é o sinal: tudo **antes** dele é argumento do \`npm\`; tudo **depois** é repassado para o comando do script, sem o \`npm\` tentar interpretar nada. Sem o \`--\`, \`npm run test --watch\` tentaria passar \`--watch\` como opção do próprio \`npm\`, não do \`vitest\` — e na maioria das vezes isso não faz o que parece que faria.
+
+\`npm run\`, sem nenhum nome depois, também tem um uso à parte: lista todos os scripts disponíveis no \`package.json\` — útil quando você chega num projeto novo e não sabe o que já existe.
 `.trim(),
     },
     {
@@ -238,9 +252,31 @@ console.log(comandoDoScript({ build: 'vite build' }, 'deploy'));`,
       },
     },
     {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-terminal-3-dois-tracos',
+        type: 'multiple-choice',
+        prompt:
+          'O `package.json` tem `"scripts": { "test": "vitest run" }`. Você quer rodar os testes em modo observador (a opção `--watch` do vitest). Qual comando faz isso?',
+        concepts: ['terminal-scripts'],
+        difficulty: 'intermediario',
+        tags: ['terminal', 'scripts'],
+        options: [
+          '`npm run test -- --watch`',
+          '`npm run test --watch`',
+          '`npm --watch run test`',
+          'Não dá para passar opções extras para um script do npm',
+        ],
+        correctIndex: 0,
+        explanation:
+          'O `--` marca onde terminam os argumentos do `npm` e começam os do comando de verdade — tudo depois dele é repassado sem interpretação, então `vitest run` recebe `--watch` como se tivesse sido digitado ali. Sem o `--`, o `npm` tentaria entender `--watch` como opção dele mesmo, não do vitest.',
+        hints: ['Existe um sinal específico que separa "argumentos do npm" de "argumentos do comando do script".'],
+      },
+    },
+    {
       kind: 'summary',
       markdown: `
-Um script guarda um comando uma vez, para todo o time rodar igual. \`pre<nome>\` e \`post<nome>\` entram sozinhos, antes e depois; \`&&\` encadeia comandos que só continuam se o anterior teve sucesso, e para na primeira falha.
+Um script guarda um comando uma vez, para todo o time rodar igual. \`pre<nome>\` e \`post<nome>\` entram sozinhos, antes e depois; \`&&\` encadeia comandos que só continuam se o anterior teve sucesso, e para na primeira falha. \`npm run <nome> -- <opções>\` repassa argumentos extras para o comando de verdade — tudo depois do \`--\` vai direto, sem o \`npm\` tentar interpretar.
 
 Na próxima aula, o que ler quando um desses comandos falha de verdade: a **saída de erro**.
 `.trim(),

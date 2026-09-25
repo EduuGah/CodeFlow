@@ -24,6 +24,17 @@ O terminal é uma janela de texto; o **shell** é o programa que roda dentro del
 
 Praticamente toda sessão de terminal é uma sequência desses três: olhar onde está, olhar o que tem, e se mover.
 
+## Criar, copiar, mover e apagar
+
+Além de navegar, o shell também manipula arquivos e pastas — os comandos que substituem clicar com o botão direito num explorador de arquivos:
+
+- \`mkdir nome\` (*make directory*): cria uma pasta nova.
+- \`cp origem destino\` (*copy*): copia um arquivo — o original continua existindo.
+- \`mv origem destino\` (*move*): move ou renomeia — é a mesma operação; renomear é "mover para o mesmo lugar com outro nome".
+- \`rm arquivo\` (*remove*): apaga um arquivo, **sem ir para lixeira**. \`rm -r pasta\` apaga uma pasta inteira, recursivamente.
+
+\`rm\` é o mais perigoso dos quatro: não existe "desfazer" depois. Apagar o arquivo errado com \`rm\` é definitivo do jeito que apagar pelo explorador de arquivos do sistema operacional não costuma ser.
+
 ## Caminho absoluto e caminho relativo
 
 Um **caminho absoluto** começa na raiz do sistema de arquivos (\`/\`, no Linux e no macOS) e não depende de onde você está — \`/home/ana/projeto/src\` sempre aponta para o mesmo lugar, de qualquer diretório.
@@ -205,9 +216,30 @@ console.log(juntarCaminho('/home/ana', 'notas.txt'));`,
       },
     },
     {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-terminal-1-mv-ou-rm',
+        type: 'multiple-choice',
+        prompt: 'Qual desses comandos é seguro de desfazer se você errar o nome do arquivo?',
+        concepts: ['terminal-shell'],
+        difficulty: 'iniciante',
+        tags: ['terminal', 'arquivos'],
+        options: [
+          '`mv arquivo.txt novo-nome.txt` — dá para rodar `mv novo-nome.txt arquivo.txt` de volta',
+          '`rm arquivo.txt` — sempre dá para recuperar depois',
+          'Nenhum dos dois pode ser desfeito de jeito nenhum',
+          '`rm -r pasta` — pastas vão para uma lixeira automática',
+        ],
+        correctIndex: 0,
+        explanation:
+          '`mv` só move/renomeia — o conteúdo continua existindo em algum lugar, e um segundo `mv` reverte. `rm` apaga de verdade, sem lixeira: uma vez rodado, não há comando para trazer o arquivo de volta. É por isso que `rm` merece mais cuidado antes de apertar Enter do que `mv` ou `cp`.',
+        hints: ['Qual dos dois comandos faz o arquivo deixar de existir, e qual só muda onde/como ele existe?'],
+      },
+    },
+    {
       kind: 'summary',
       markdown: `
-O shell sempre tem um diretório atual; \`pwd\` mostra, \`cd\` muda, \`ls\` lista. Um caminho **absoluto** começa em \`/\` e aponta para o mesmo lugar sempre; um **relativo** parte de onde você está — e \`.\`, \`..\` e \`~\` são os atalhos mais comuns dentro dele.
+O shell sempre tem um diretório atual; \`pwd\` mostra, \`cd\` muda, \`ls\` lista — e \`mkdir\`, \`cp\`, \`mv\` e \`rm\` criam, copiam, movem e apagam. \`rm\` não tem lixeira: é definitivo. Um caminho **absoluto** começa em \`/\` e aponta para o mesmo lugar sempre; um **relativo** parte de onde você está — e \`.\`, \`..\` e \`~\` são os atalhos mais comuns dentro dele.
 
 A mesma lógica de resolução vale para \`require('./x')\` dentro do código, não só para comandos no terminal.
 
