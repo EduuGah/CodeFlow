@@ -791,6 +791,30 @@ export const concepts: Concept[] = [
     tags: ['node'],
   },
   {
+    id: 'orm-mapeamento',
+    title: 'O que um ORM resolve',
+    summary:
+      'Um ORM mapeia linha de tabela para objeto e objeto para linha, poupando o SQL repetitivo de todo CRUD; o preço é uma camada a mais entre o código e o banco, que pode esconder demais o que de fato roda — inclusive gerar mais consultas do que parece (o problema de N+1).',
+    prerequisites: ['sql-modelar', 'node-servidor'],
+    tags: ['orm'],
+  },
+  {
+    id: 'orm-schema-migrations',
+    title: 'Schema e migrations de um ORM',
+    summary:
+      'O schema descreve os modelos (e as relações entre eles) numa linguagem própria, não em SQL direto; uma migration nasce da diferença entre o schema novo e o anterior, gerada pela ferramenta, revisada antes de rodar — a mesma disciplina de migration da aula de banco em produção, agora automatizada a partir do schema.',
+    prerequisites: ['orm-mapeamento'],
+    tags: ['orm'],
+  },
+  {
+    id: 'orm-queries',
+    title: 'Queries de um ORM, e o SQL por baixo',
+    summary:
+      'Métodos como findMany, create, update e delete traduzem para SELECT, INSERT, UPDATE e DELETE — saber essa tradução evita depender do ORM sem entender o que ele está fazendo. Buscar uma lista e, para cada item, buscar algo relacionado num loop gera uma consulta por item (N+1); pedir a relação junto na mesma busca resolve com uma consulta só.',
+    prerequisites: ['orm-schema-migrations', 'sql-join'],
+    tags: ['orm'],
+  },
+  {
     id: 'eng-separar',
     title: 'Por que separar',
     summary:

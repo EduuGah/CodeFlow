@@ -45,6 +45,11 @@ export const ETAPAS_DO_PERCURSO: EtapaDoPercurso[] = [
     trackIds: ['track-node'],
   },
   {
+    title: 'ORM',
+    description: 'O que um ORM resolve e o que ele esconde, schema e migrations, e os métodos mais comuns traduzidos para o SQL que roda por baixo.',
+    trackIds: ['track-orm'],
+  },
+  {
     title: 'O ofício',
     description: 'As práticas que fazem um projeto continuar entendível depois de funcionar: onde cada coisa mora, como se chama, como falha.',
     trackIds: ['track-engenharia'],

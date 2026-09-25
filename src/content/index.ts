@@ -34,6 +34,7 @@ import { trackTerminal } from './tracks/terminal';
 import { trackPython } from './tracks/python';
 import { trackDeploy } from './tracks/deploy';
 import { trackEstruturas } from './tracks/estruturas';
+import { trackOrm } from './tracks/orm';
 import { lessonVariaveis } from './lessons/js-01-variaveis';
 import { lessonTiposEOperadores } from './lessons/js-02-tipos-e-operadores';
 import { lessonCondicoes } from './lessons/js-03-condicoes';
@@ -139,6 +140,9 @@ import { lessonNodeCrud } from './lessons/node-07-crud';
 import { lessonNodeAssincrono } from './lessons/node-08-assincrono';
 import { lessonNodeConfiguracao } from './lessons/node-09-configuracao';
 import { lessonNodeProjeto } from './lessons/node-10-projeto';
+import { lessonOrmOQueUmOrmResolve } from './lessons/orm-01-o-que-um-orm-resolve';
+import { lessonOrmSchemaEMigrations } from './lessons/orm-02-schema-e-migrations';
+import { lessonOrmQueriesEOSqlPorBaixo } from './lessons/orm-03-queries-e-o-sql-por-baixo';
 import { lessonEngPorQueSeparar } from './lessons/eng-01-por-que-separar';
 import { lessonEngModulos } from './lessons/eng-02-modulos';
 import { lessonEngPastas } from './lessons/eng-03-pastas';
@@ -307,6 +311,9 @@ const lessons: Lesson[] = [
   lessonNodeAssincrono,
   lessonNodeConfiguracao,
   lessonNodeProjeto,
+  lessonOrmOQueUmOrmResolve,
+  lessonOrmSchemaEMigrations,
+  lessonOrmQueriesEOSqlPorBaixo,
   lessonEngPorQueSeparar,
   lessonEngModulos,
   lessonEngPastas,
@@ -377,6 +384,7 @@ const tracks: Track[] = [
   trackReact,
   trackSql,
   trackNode,
+  trackOrm,
   trackEngenharia,
   trackTestes,
   trackProjeto,
