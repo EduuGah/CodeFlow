@@ -229,6 +229,14 @@ export const concepts: Concept[] = [
     tags: ['web', 'seguranca'],
   },
   {
+    id: 'seguranca-csrf-cookies',
+    title: 'CSRF, cookies e limite de tentativas',
+    summary:
+      'CSRF é outro site fazendo o navegador de quem está logado enviar um pedido sem querer — o cookie de sessão vai junto sozinho; um token que só o site legítimo conhece, exigido no corpo do pedido, é a defesa. Cookie de sessão pede três atributos: HttpOnly (JavaScript não lê), Secure (só viaja por HTTPS), SameSite (não vai em pedido vindo de outro site). Rate limiting barra tentativa repetida (login, recuperação de senha) antes que a força bruta funcione por paciência.',
+    prerequisites: ['seguranca-web', 'autenticacao'],
+    tags: ['web', 'seguranca'],
+  },
+  {
     id: 'html',
     title: 'HTML semântico',
     summary:

@@ -6,10 +6,10 @@ export const lessonSegurancaWeb: Lesson = {
   title: 'Segurança: Não Confie no Cliente',
   language: 'javascript',
   objective:
-    'Reconhecer a forma comum das falhas de injeção, escapar dado que vem de fora, e saber o que nunca vai para o navegador.',
-  concepts: ['seguranca-web', 'strings'],
+    'Reconhecer a forma comum das falhas de injeção, escapar dado que vem de fora, saber o que nunca vai para o navegador, e defender uma sessão com os atributos certos de cookie, proteção contra CSRF e limite de tentativas.',
+  concepts: ['seguranca-web', 'seguranca-csrf-cookies', 'strings'],
   status: 'published',
-  estimatedMinutes: 30,
+  estimatedMinutes: 38,
   blocks: [
     {
       kind: 'prose',
@@ -446,8 +446,161 @@ assert(escaparHtml('"x"') === '&quot;x&quot;', 'as aspas tambem');`,
       },
     },
     {
+      kind: 'prose',
+      markdown: `
+## CSRF: o pedido que você não mandou
+
+Depois de fazer login, o navegador guarda um cookie de sessão — e o navegador manda esse cookie em **todo** pedido para aquele site, de qualquer aba, de qualquer página que o tenha provocado. É esse comportamento que a **CSRF** (Cross-Site Request Forgery — falsificação de pedido entre sites) explora: um site malicioso faz seu navegador enviar um pedido para o site onde você está logado, e o cookie de sessão vai junto sozinho, sem você ter feito nada além de abrir uma página.
+
+~~~html
+<!-- Numa página completamente diferente, enquanto você está logado no seu banco -->
+<img src="https://banco.com/transferir?para=atacante&valor=1000">
+~~~
+
+Se \`banco.com\` aceitar essa transferência só porque o cookie de sessão chegou válido, o pedido é processado como se você tivesse pedido — porque, do ponto de vista do servidor, veio autenticado. A defesa: exigir, além do cookie, um **token CSRF** — um valor que o servidor gerou e só a página legítima conhece, enviado no corpo do pedido (não como cookie, que iria junto de qualquer forma). Um site atacante não tem como adivinhar esse token, então o pedido forjado falha.
+
+## Os três atributos que protegem um cookie de sessão
+
+~~~
+Set-Cookie: sessao=abc123; HttpOnly; Secure; SameSite=Strict
+~~~
+
+- **HttpOnly**: o JavaScript da página (inclusive um script injetado por XSS) não consegue ler esse cookie. Sem ele, um XSS que já rodou na sua origem rouba a sessão inteira com \`document.cookie\`.
+- **Secure**: o cookie só viaja por HTTPS — nunca em texto puro por uma conexão HTTP comum, onde qualquer um na rede o leria.
+- **SameSite**: controla se o cookie vai junto num pedido que **partiu de outro site** — \`Strict\` ou \`Lax\` reduzem exatamente o cenário de CSRF descrito acima, porque o cookie deixa de acompanhar o pedido nesses casos.
+
+Os três resolvem problemas diferentes; um cookie de sessão sem os três está com uma porta aberta que os outros dois não cobrem.
+
+## Rate limiting: um limite de tentativas
+
+Uma tela de login sem limite de tentativas aceita qualquer número de senhas erradas, na velocidade que um script conseguir mandar — e uma senha comum cai em minutos por força bruta pura. **Rate limiting** barra isso: depois de um número de tentativas falhas (5, digamos) numa janela de tempo, o servidor recusa novas tentativas daquele IP ou daquela conta por um tempo. A mesma ideia protege a recuperação de senha e qualquer endpoint que aceite um segredo adivinhável aos poucos.
+`.trim(),
+    },
+    {
+      kind: 'example',
+      language: 'javascript',
+      code: `// Simulação: um cookie de sessão sem os três atributos, e com eles.
+const cookieFraco = 'sessao=abc123';
+const cookieForte = 'sessao=abc123; HttpOnly; Secure; SameSite=Strict';
+
+// Sem HttpOnly, um XSS que já rodou na página faz isto:
+// document.cookie // 'sessao=abc123' — a sessão inteira, exposta ao script do atacante
+
+// Rate limiting: recusar depois de N tentativas falhas na janela de tempo.
+function podeTentar(tentativasFalhas, limite) {
+  return tentativasFalhas < limite;
+}
+podeTentar(4, 5); // true  — ainda pode tentar
+podeTentar(5, 5); // false — bloqueado até a janela passar`,
+      caption: 'HttpOnly fecha a porta que XSS abriria; Secure e SameSite fecham as outras duas.',
+    },
+    {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-web-8-o-que-e-csrf',
+        type: 'multiple-choice',
+        prompt: 'O que a CSRF (Cross-Site Request Forgery) explora, precisamente?',
+        concepts: ['seguranca-csrf-cookies'],
+        difficulty: 'intermediario',
+        tags: ['web', 'seguranca', 'csrf'],
+        options: [
+          'O navegador manda o cookie de sessão em qualquer pedido para aquele site, mesmo quando o pedido foi provocado por outra página — e o servidor aceita porque o cookie chegou válido',
+          'Uma senha fraca demais para resistir a tentativas repetidas',
+          'Um SQL mal escapado que aceita comando dentro do dado',
+          'Um certificado HTTPS expirado',
+        ],
+        correctIndex: 0,
+        explanation:
+          'CSRF usa o próprio comportamento normal do navegador — enviar o cookie de sessão em todo pedido para o site dono dele — para fazer o servidor aceitar um pedido que a vítima nunca pediu de propósito. A defesa central é um token que o cookie sozinho não carrega.',
+        hints: ['Pense em qual informação o navegador manda automaticamente, sem perguntar, sempre que você acessa um site onde já está logado.'],
+      },
+    },
+    {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-web-8-atributos-do-cookie',
+        type: 'order-steps',
+        prompt: 'Associe cada atributo de cookie ao que ele especificamente impede — coloque na ordem: HttpOnly, depois Secure, depois SameSite.',
+        concepts: ['seguranca-csrf-cookies'],
+        difficulty: 'intermediario',
+        tags: ['web', 'seguranca', 'cookies'],
+        steps: [
+          { id: 'httponly', text: 'HttpOnly: impede que JavaScript da página leia o cookie com document.cookie', ordem: 1 },
+          { id: 'secure', text: 'Secure: impede que o cookie viaje por uma conexão HTTP comum, sem cifra', ordem: 2 },
+          { id: 'samesite', text: 'SameSite: impede que o cookie acompanhe um pedido que partiu de outro site', ordem: 3 },
+        ],
+        explanation:
+          'Os três atacam ameaças diferentes: HttpOnly fecha a porta que um XSS já rodando na página abriria; Secure fecha a escuta de rede; SameSite fecha o cenário de CSRF. Nenhum substitui o outro.',
+        hints: ['Pense em quem cada atributo bloqueia: um script na própria página, alguém escutando a rede, ou um pedido vindo de fora.'],
+      },
+    },
+    {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-web-8-cookie-sem-httponly',
+        type: 'find-bug',
+        prompt: 'Este cookie de sessão está sendo criado sem um atributo essencial, e um XSS já confirmado no site consegue roubar a sessão inteira lendo `document.cookie`. Aponte a linha que precisa mudar.',
+        concepts: ['seguranca-csrf-cookies'],
+        difficulty: 'intermediario',
+        tags: ['web', 'seguranca', 'cookies', 'bug'],
+        code: `function montarCookieDeSessao(id) {
+  const cookie = 'sessao=' + id + '; Secure; SameSite=Strict';
+  if (cookie.indexOf('HttpOnly') === -1) throw new Error('cookie de sessao sem HttpOnly: XSS consegue ler document.cookie');
+  return cookie;
+}
+
+montarCookieDeSessao('abc123');`,
+        buggyLine: 2,
+        fix: "  const cookie = 'sessao=' + id + '; HttpOnly; Secure; SameSite=Strict';",
+        explanation:
+          'O cookie tinha `Secure` e `SameSite`, mas não `HttpOnly` — o único atributo dos três que impede um script (inclusive um injetado por XSS) de ler o cookie via `document.cookie`. Sem ele, um XSS que já conseguiu rodar na página tem acesso direto à sessão inteira, mesmo com os outros dois atributos presentes.',
+        hints: [
+          'Dos três atributos que protegem um cookie de sessão, qual especificamente impede leitura por JavaScript?',
+          'A mensagem de erro já nomeia o atributo que falta.',
+        ],
+      },
+    },
+    {
+      kind: 'exercise',
+      exercise: {
+        id: 'ex-web-8-rate-limiting',
+        type: 'code',
+        prompt: 'Escreva `podeTentar(tentativasFalhas, limite)`: devolve `true` se ainda for permitido tentar (o número de falhas é menor que o limite), `false` caso contrário.',
+        concepts: ['seguranca-csrf-cookies'],
+        difficulty: 'iniciante',
+        tags: ['web', 'seguranca', 'rate-limiting'],
+        initialCode: `function podeTentar(tentativasFalhas, limite) {
+  // Seu código aqui
+}`,
+        tests: [
+          {
+            description: 'Abaixo do limite, ainda pode tentar',
+            assertion: `const r = podeTentar(3, 5); if (r !== true) throw new Error('esperava true, veio ' + JSON.stringify(r));`,
+          },
+          {
+            description: 'No limite exato, não pode mais tentar',
+            assertion: `const r = podeTentar(5, 5); if (r !== false) throw new Error('esperava false, veio ' + JSON.stringify(r));`,
+          },
+          {
+            description: 'Acima do limite, não pode tentar',
+            assertion: `const r = podeTentar(9, 5); if (r !== false) throw new Error('esperava false, veio ' + JSON.stringify(r));`,
+          },
+          {
+            description: 'Zero tentativas falhas, pode tentar',
+            assertion: `const r = podeTentar(0, 5); if (r !== true) throw new Error('esperava true, veio ' + JSON.stringify(r));`,
+          },
+        ],
+        solution: `function podeTentar(tentativasFalhas, limite) {
+  return tentativasFalhas < limite;
+}`,
+        hints: ['Uma comparação simples: o número de falhas precisa ser MENOR que o limite para ainda poder tentar — no limite exato, já não pode mais.'],
+      },
+    },
+    {
       kind: 'summary',
-      markdown: `Quase toda falha de segurança em web tem a mesma forma: **um dado foi lido como se fosse instrução**. Injeção de SQL e XSS são o mesmo mecanismo em interpretadores diferentes. A defesa boa não é caçar caracteres perigosos — essa lista nunca acaba —, é **separar o canal do dado do canal da instrução**: consulta parametrizada no banco, \`textContent\` em vez de \`innerHTML\` na tela. Quando precisar mesmo montar HTML, escape — e o \`&\` vem primeiro, porque ele aparece dentro das substituições dos outros. Do lado da confiança: validar no cliente é experiência, validar no servidor é proteção, e o servidor recalcula tudo que importa, porque o pedido não precisa vir da sua tela. E nada secreto vai para o navegador: tudo que chega ao cliente é público, e minificado não é escondido.`,
+      markdown: `Quase toda falha de segurança em web tem a mesma forma: **um dado foi lido como se fosse instrução**. Injeção de SQL e XSS são o mesmo mecanismo em interpretadores diferentes. A defesa boa não é caçar caracteres perigosos — essa lista nunca acaba —, é **separar o canal do dado do canal da instrução**: consulta parametrizada no banco, \`textContent\` em vez de \`innerHTML\` na tela. Quando precisar mesmo montar HTML, escape — e o \`&\` vem primeiro, porque ele aparece dentro das substituições dos outros. Do lado da confiança: validar no cliente é experiência, validar no servidor é proteção, e o servidor recalcula tudo que importa, porque o pedido não precisa vir da sua tela. E nada secreto vai para o navegador: tudo que chega ao cliente é público, e minificado não é escondido.
+
+CSRF explora o cookie de sessão indo junto sozinho num pedido de outra origem — um token que só o site legítimo conhece resolve. Cookie de sessão pede HttpOnly (JavaScript não lê), Secure (só por HTTPS) e SameSite (não acompanha pedido de outro site) — os três, não um só. E rate limiting barra tentativa repetida antes que a força bruta funcione por paciência.`,
     },
   ],
 };
