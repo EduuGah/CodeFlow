@@ -25,6 +25,11 @@ export const ETAPAS_DO_PERCURSO: EtapaDoPercurso[] = [
     trackIds: ['track-js-fundamentos', 'track-logica'],
   },
   {
+    title: 'Registrar o trabalho',
+    description: 'Um commit como frase, uma branch por assunto, revisão de verdade e conflito sem pânico — o hábito de versionar, cedo, antes de qualquer projeto grande o exigir.',
+    trackIds: ['track-git'],
+  },
+  {
     title: 'A web',
     description: 'Entender o que acontece entre o clique e a tela, e construir a página que o navegador mostra.',
     trackIds: ['track-web', 'track-pagina'],
@@ -56,8 +61,8 @@ export const ETAPAS_DO_PERCURSO: EtapaDoPercurso[] = [
   },
   {
     title: 'A profissão',
-    description: 'O que separa código que funciona de trabalho em equipe: testes que valem alguma coisa, Git e o fluxo de revisão, o terminal como ferramenta.',
-    trackIds: ['track-testes', 'track-git', 'track-terminal'],
+    description: 'O que separa código que funciona de trabalho em equipe: testes que valem alguma coisa, e o terminal como ferramenta do dia a dia.',
+    trackIds: ['track-testes', 'track-terminal'],
   },
   {
     title: 'Outra linguagem',

@@ -360,6 +360,7 @@ const projects: Project[] = [
 const tracks: Track[] = [
   trackJsFundamentos,
   trackLogica,
+  trackGit,
   trackWeb,
   trackPagina,
   trackTypescript,
@@ -370,7 +371,6 @@ const tracks: Track[] = [
   trackProjeto,
   trackDeploy,
   trackTestes,
-  trackGit,
   trackTerminal,
   trackPython,
 ];
