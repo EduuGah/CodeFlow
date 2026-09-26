@@ -56,45 +56,45 @@ begin
     raise exception 'id_invalido' using errcode = '22023';
   end if;
 
+  -- O resultado é relido por atribuição, e não gravado pelo próprio comando
+  -- numa variável: o editor do Supabase confunde essa forma com criação de
+  -- tabela e corta a função no meio. O UPDATE trava a linha até o fim da
+  -- transação, então a leitura logo depois vê exatamente o que ele fez.
   if p_coluna = 'completed_lessons' then
     update public.users
        set completed_lessons = case
              when p_id = any(completed_lessons) then completed_lessons
              else array_append(completed_lessons, p_id)
            end
-     where id = auth.uid()
-    returning completed_lessons into lista;
+     where id = auth.uid();
+    -- Sem linha ainda (o gatilho da 0001 não rodou para esta conta): cria.
+    if not found then
+      insert into public.users (id, completed_lessons) values (auth.uid(), array[p_id])
+      on conflict (id) do update
+        set completed_lessons = case
+              when p_id = any(public.users.completed_lessons) then public.users.completed_lessons
+              else array_append(public.users.completed_lessons, p_id)
+            end;
+    end if;
+    lista := (select completed_lessons from public.users where id = auth.uid());
   elsif p_coluna = 'completed_projects' then
     update public.users
        set completed_projects = case
              when p_id = any(completed_projects) then completed_projects
              else array_append(completed_projects, p_id)
            end
-     where id = auth.uid()
-    returning completed_projects into lista;
-  else
-    raise exception 'coluna_invalida' using errcode = '22023';
-  end if;
-
-  -- Sem linha ainda (o gatilho da 0001 não rodou para esta conta): cria.
-  if lista is null then
-    if p_coluna = 'completed_lessons' then
-      insert into public.users (id, completed_lessons) values (auth.uid(), array[p_id])
-      on conflict (id) do update
-        set completed_lessons = case
-              when p_id = any(public.users.completed_lessons) then public.users.completed_lessons
-              else array_append(public.users.completed_lessons, p_id)
-            end
-      returning completed_lessons into lista;
-    else
+     where id = auth.uid();
+    if not found then
       insert into public.users (id, completed_projects) values (auth.uid(), array[p_id])
       on conflict (id) do update
         set completed_projects = case
               when p_id = any(public.users.completed_projects) then public.users.completed_projects
               else array_append(public.users.completed_projects, p_id)
-            end
-      returning completed_projects into lista;
+            end;
     end if;
+    lista := (select completed_projects from public.users where id = auth.uid());
+  else
+    raise exception 'coluna_invalida' using errcode = '22023';
   end if;
 
   return lista;
@@ -354,7 +354,7 @@ declare
   v_uid uuid := auth.uid();
   v_item public.store_items;
   v_gasto integer;
-  v_compra public.purchases;
+  v_id uuid := gen_random_uuid();
 begin
   if v_uid is null then
     raise exception 'sem_sessao' using errcode = '28000';
@@ -362,13 +362,15 @@ begin
 
   perform pg_advisory_xact_lock(hashtextextended('comprar:' || v_uid::text, 0));
 
-  select * into v_item
-    from public.store_items
-   where id = p_item
-     and ativo
-     and (disponivel_de is null or disponivel_de <= now())
-     and (disponivel_ate is null or disponivel_ate > now());
-  if not found then
+  -- Atribuições, pelo mesmo motivo de `concluir`.
+  v_item := (
+    select s from public.store_items s
+     where s.id = p_item
+       and s.ativo
+       and (s.disponivel_de is null or s.disponivel_de <= now())
+       and (s.disponivel_ate is null or s.disponivel_ate > now())
+  );
+  if v_item.id is null then
     raise exception 'item_indisponivel' using errcode = 'P0001';
   end if;
 
@@ -378,16 +380,16 @@ begin
     raise exception 'item_ja_possuido' using errcode = 'P0001';
   end if;
 
-  select coalesce(sum(price), 0) into v_gasto from public.purchases where user_id = v_uid;
+  v_gasto := (select coalesce(sum(price), 0) from public.purchases where user_id = v_uid);
   if v_gasto + v_item.price > public.teto_de_moedas(v_uid) then
     raise exception 'saldo_insuficiente' using errcode = 'P0001';
   end if;
 
-  insert into public.purchases (user_id, item, price)
-  values (v_uid, v_item.id, v_item.price)
-  returning * into v_compra;
+  -- O id vem daqui para a linha gravada ser relida por ele.
+  insert into public.purchases (id, user_id, item, price)
+  values (v_id, v_uid, v_item.id, v_item.price);
 
-  return v_compra;
+  return (select p from public.purchases p where p.id = v_id);
 end;
 $$;
 
@@ -415,10 +417,18 @@ as $$
 declare
   recentes integer;
 begin
-  execute format(
-    'select count(*) from public.%I where user_id = $1 and created_at > now() - interval ''1 minute''',
-    tg_table_name
-  ) into recentes using new.user_id;
+  -- Uma consulta por tabela, e não SQL montado, pelo mesmo motivo de `concluir`.
+  if tg_table_name = 'exercise_attempts' then
+    recentes := (
+      select count(*) from public.exercise_attempts
+       where user_id = new.user_id and created_at > now() - interval '1 minute'
+    );
+  else
+    recentes := (
+      select count(*) from public.flashcard_reviews
+       where user_id = new.user_id and created_at > now() - interval '1 minute'
+    );
+  end if;
 
   if recentes >= 120 then
     raise exception 'ritmo_excedido' using errcode = '54000';

@@ -346,3 +346,19 @@ describe('o caderno no banco', () => {
     expect(zero10).toContain(`not in ('alternativa', 'linha', 'ordem')`);
   });
 });
+
+describe('o editor do Supabase consegue rodar cada migração', () => {
+  it('nenhum comando grava o resultado numa variável com INTO (só `insert into` de tabela)', () => {
+    // O SQL Editor tem um ajudante de RLS que lê `select … into x`,
+    // `returning … into x` e `execute … into x` como criação da tabela `x`, e
+    // injeta comandos no meio do corpo `$$` da função: ela chega cortada ao
+    // banco ("unterminated dollar-quoted string"). Foi o que aconteceu com a
+    // 0009. A forma que ele não confunde é a atribuição: `x := (select …)`.
+    for (const { nome, texto } of sql) {
+      const semBlocos = semComentarios(texto).replace(/\/\*[\s\S]*?\*\//g, '');
+      for (const m of semBlocos.matchAll(/(\w+)\s+into\s+\w+/gi)) {
+        expect(m[1].toLowerCase(), `${nome}: "${m[0]}"`).toBe('insert');
+      }
+    }
+  });
+});

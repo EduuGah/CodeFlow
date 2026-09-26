@@ -70,10 +70,13 @@ begin
 
   update public.users
      set role = new_role
-   where email = target_email
-  returning * into alterado;
+   where email = target_email;
 
   perform set_config('app.allow_role_change', 'off', true);
+
+  -- Relido por atribuição: o editor do Supabase corta a função quando o
+  -- próprio comando grava o resultado numa variável.
+  alterado := (select u from public.users u where u.email = target_email limit 1);
 
   if alterado.id is null then
     raise exception 'nenhum usuário com o e-mail %. Ele já entrou na aplicação ao menos uma vez?', target_email;

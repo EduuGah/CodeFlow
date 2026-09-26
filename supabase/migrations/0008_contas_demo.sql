@@ -21,7 +21,9 @@ begin
   -- padrão. Mesmo desenho do `app.allow_role_change` da 0006.
   perform set_config('app.allow_demo_reset', 'on', true);
 
-  select id into v_id from auth.users where lower(email) = lower(p_email);
+  -- Atribuição, e não o resultado gravado pelo próprio comando: o editor do
+  -- Supabase corta a função nessa outra forma.
+  v_id := (select id from auth.users where lower(email) = lower(p_email) limit 1);
 
   if v_id is null then
     v_id := gen_random_uuid();

@@ -41,7 +41,7 @@ Números lidos do catálogo, não de memória.
 | Projetos | 10, com 34 critérios de aceitação — os 3 capstones são página + API + banco (motor 7), os outros 7 são JavaScript puro |
 | Conceitos | 151, com grafo de pré-requisitos |
 | Flashcards | 67 (93 conceitos ainda sem cartão) |
-| Testes | 3.471 de unidade + ~452 de navegador |
+| Testes | 3.472 de unidade + ~452 de navegador |
 | Pacote | 3.095 kB (851 kB comprimido) no chunk principal — o corpo das aulas vai junto (é quase metade), e separá-lo é o maior problema de performance aberto (P2-1b do roadmap). Aula, revisão, refazer erros, projeto e admin são rotas sob demanda (`App.tsx`), e o Zod só entra no chunk do admin; o Monaco são mais 3.362 kB (869 kB) num chunk à parte, baixado só quando o primeiro editor monta, e o worker de TypeScript (7 MB) só quando um modelo JS/TS abre. O motor de TypeScript não acrescentou arquivo; o de React acrescentou um chunk de 143 kB (47 kB) com o React e o ReactDOM como texto, baixado só por um exercício de React; o de SQL acrescentou o worker (49 kB) e o SQLite em WebAssembly (658 kB), baixados só por um exercício de SQL; o de Python acrescentou o worker (~22 kB) e o Pyodide inteiro (~13,5 MB: o WebAssembly do CPython, a biblioteca padrão zipada, o manifesto de pacotes), copiados para `/pyodide/` na build e baixados só por um exercício de Python |
 
 ## 4. Decisões que não devem ser desfeitas sem motivo forte
@@ -427,7 +427,7 @@ docs/curriculo.md       Roadmap de conteúdo — fonte canônica
 ```bash
 npm run typecheck   # inclui e2e/ e playwright.config.ts
 npm run lint        # ESLint mínimo: typescript-eslint + react-hooks
-npm test            # 3.471 testes
+npm test            # 3.472 testes
 npm run test:e2e    # ~410 no navegador (antes: npx playwright install chromium;
                     # com um Chromium já instalado: PW_CHROMIUM=/caminho/do/chrome)
 npm run build
@@ -753,6 +753,15 @@ Cada uma custou tempo. Não repita.
   leitura nova com `.eq`/`.not` recebe o histórico inteiro, e a tela parece
   certa pelo motivo errado. A leitura do caderno ganhou os dois filtros dela
   em `fixtures.ts`; uma leitura filtrada nova precisa do mesmo.
+- **O SQL Editor do Supabase corta função que grava resultado com INTO.** Um
+  ajudante de RLS do editor lê `select … into x`, `returning … into x` e
+  `execute … into x` como criação da tabela `x` e injeta comandos no meio do
+  corpo `$$`: a função chega cortada ("unterminated dollar-quoted string" —
+  aconteceu com a 0009 no primeiro uso). Em migração, use atribuição:
+  `x := (select …)`; para reler a linha inserida, gere o id antes. O Postgres
+  aceita as duas formas — só o editor não —, então a verificação local passa
+  com qualquer uma; quem segura é o teste "o editor do Supabase consegue rodar
+  cada migração" em `migrations.test.ts`. Nem em comentário escreva a forma.
 - **Um laço sem fim de verdade num teste de jsdom trava o próprio `vitest`**:
   o jsdom roda os scripts na mesma thread, e o prazo do teste precisa dela
   para disparar. Para provar a guarda de laço, os testes usam um laço que
