@@ -13,7 +13,7 @@ import { useStudentData } from '../../../contexts/StudentDataContext';
 import { useDocumentTitle } from '../../../hooks/useDocumentTitle';
 import { corDaTrilha } from '../../../lib/cores-das-trilhas';
 import { proximaFaixa, xpMinimoDoNivel } from '../../../lib/gamification';
-import { MASTERY_LABELS, type ConceptMastery } from '../../../lib/mastery';
+import { DIAS_PARA_CONFIRMAR, MASTERY_LABELS, MOTIVOS_DA_REVISAO, type ConceptMastery } from '../../../lib/mastery';
 
 /**
  * Progresso: os números com a evidência que os gerou.
@@ -174,7 +174,9 @@ export function PerfilProgresso() {
               Domínio por conceito
             </SectionLabel>
             <p className="mb-3 text-sm leading-relaxed text-ink-soft">
-              Vem das suas tentativas, não das aulas concluídas.
+              Vem das suas tentativas, não das aulas concluídas. "Dominando" pede dois exercícios resolvidos sem
+              dica e um acerto de novo pelo menos {DIAS_PARA_CONFIRMAR} dias depois do primeiro — lembrar depois é o
+              que mostra que ficou.
             </p>
 
             {comHistorico.length === 0 ? (
@@ -195,6 +197,11 @@ export function PerfilProgresso() {
                         {m.correctAttempts} de {m.attempts}{' '}
                         {m.attempts === 1 ? 'tentativa' : 'tentativas'} · {m.exercisesSolved}{' '}
                         {m.exercisesSolved === 1 ? 'exercício resolvido' : 'exercícios resolvidos'}
+                        {m.motivoDaRevisao
+                          ? ` · ${MOTIVOS_DA_REVISAO[m.motivoDaRevisao]}`
+                          : m.aguardandoConfirmacao
+                            ? ' · falta acertar de novo daqui a alguns dias'
+                            : ''}
                       </span>
                     </span>
 

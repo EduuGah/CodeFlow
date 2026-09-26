@@ -62,9 +62,11 @@ jobs:
       # O CI roda em UTC e a máquina de quem escreve, não. Um exercício de datas
       # que dependa do fuso passa de um lado e falha do outro — e o pior caso é
       # passar nos dois por acaso, ensinando errado. Kiritimati é UTC+14, o
-      # extremo oposto do CI.
-      - name: Conteúdo em outro fuso horário
-        run: npm test -- src/content/content.test.ts
+      # extremo oposto do CI. A lógica do aluno também conta dias (sequência,
+      # desafios, caderno, domínio): em UTC, o dia local e o de Greenwich são
+      # o mesmo, e um engano de fuso passa despercebido.
+      - name: Conteúdo e datas em outro fuso horário
+        run: npm test -- src/content/content.test.ts src/client/lib
         env:
           TZ: Pacific/Kiritimati
 

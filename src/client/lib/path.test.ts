@@ -31,7 +31,10 @@ function dominio(conceptId: string, level: ConceptMastery['level']): ConceptMast
     exercisesSolved: 0,
     accuracy: 0,
     solvedUnaided: false,
+    confirmadoNoTempo: false,
+    aguardandoConfirmacao: false,
     needsReview: false,
+    motivoDaRevisao: null,
   };
 }
 

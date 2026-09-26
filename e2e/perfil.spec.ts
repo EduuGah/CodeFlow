@@ -189,3 +189,19 @@ test('o perfil abre com o anel do nível e uma porta por assunto', async ({ loga
   await page.getByRole('link', { name: 'Perfil' }).first().click();
   await expect(page).toHaveURL(/\/app\/perfil$/);
 });
+
+test('o domínio diz o que falta: três acertos na mesma manhã ainda não são domínio', async ({
+  logado: page,
+  banco,
+}) => {
+  // "variaveis": três exercícios resolvidos sem dica, mas todos num dia só.
+  // É a memória de curto prazo respondendo; "dominando" pede voltar dias depois.
+  semear(banco);
+  await page.goto('/app/perfil/progresso');
+  await esperarConteudo(page);
+
+  const { getConcept } = await import('../src/content');
+  const linha = page.getByRole('listitem').filter({ hasText: getConcept('variaveis')!.title });
+  await expect(linha.getByText('Praticando', { exact: true })).toBeVisible();
+  await expect(linha).toContainText('falta acertar de novo daqui a alguns dias');
+});

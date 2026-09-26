@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 
 import { getConcept } from '../../../content';
 import { useStudentData } from '../../contexts/StudentDataContext';
-import { MASTERY_LABELS } from '../../lib/mastery';
+import { MASTERY_LABELS, MOTIVOS_DA_REVISAO } from '../../lib/mastery';
 import { resumoDoCaderno, type EntradaDoCaderno } from '../../lib/caderno';
 import { IconArrowRight, IconPractice } from '../../components/ui/Icon';
 import { CenaCartoes } from '../../components/ui/Cena';
@@ -27,6 +27,12 @@ import { useDocumentTitle } from '../../hooks/useDocumentTitle';
  * onde o aluno está de fato travado. Por último a contagem de pendentes, que
  * é informação, não urgência.
  */
+/**
+ * Os mais fracos primeiro, e poucos: quem volta depois de meses tem dezenas de
+ * conceitos parados, e uma lista de trinta não diz por onde começar.
+ */
+const CONCEITOS_NA_LISTA = 6;
+
 export function Practice() {
   useDocumentTitle('Praticar');
   const { loading, dueCards, cards, conceptsToReview, pendingExercises, totalExercises, stats, caderno } =
@@ -114,22 +120,31 @@ export function Practice() {
           </p>
 
           <Card as="ul" padding="none" className="divide-y divide-line overflow-hidden">
-            {conceptsToReview.map((m) => (
+            {conceptsToReview.slice(0, CONCEITOS_NA_LISTA).map((m) => (
               <li key={m.conceptId} className="flex flex-wrap items-center gap-x-4 gap-y-2 p-4">
                 <span className="min-w-0 flex-1">
                   <span className="block font-semibold text-ink">
                     {getConcept(m.conceptId)?.title ?? m.conceptId}
                   </span>
-                  {/* A evidência, não só o veredito. */}
+                  {/* A evidência, não só o veredito — e o porquê. */}
                   <span className="block text-sm text-ink-soft">
                     {m.correctAttempts} de {m.attempts}{' '}
                     {m.attempts === 1 ? 'tentativa' : 'tentativas'}
+                    {m.motivoDaRevisao && ` · ${MOTIVOS_DA_REVISAO[m.motivoDaRevisao]}`}
                   </span>
                 </span>
                 <Badge tone="caution">{MASTERY_LABELS[m.level]}</Badge>
               </li>
             ))}
           </Card>
+          {conceptsToReview.length > CONCEITOS_NA_LISTA && (
+            <p className="mt-3 text-sm text-ink-soft">
+              E mais {conceptsToReview.length - CONCEITOS_NA_LISTA}.{' '}
+              <Link to="/app/perfil/progresso" className="inline-flex min-h-6 items-center font-semibold text-brand-700 hover:underline">
+                Ver todos no progresso
+              </Link>
+            </p>
+          )}
         </section>
       )}
 

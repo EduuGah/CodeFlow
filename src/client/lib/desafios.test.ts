@@ -84,7 +84,9 @@ describe('progresso e conclusão', () => {
     const ctxDia = DESAFIOS_DO_DIA.find((d) => d.id === 'dia-resolver-3')!;
     const { dia } = desafiosAtuais({ attempts, reviews: [], completedLessons: [], hoje: HOJE });
     // Independe do sorteio: avalia a definição direto.
-    const tentativasDeHoje = attempts.filter((a) => a.createdAt.startsWith('2026-03-10'));
+    // O dia local, como o produto conta: a data da string ISO é a de Greenwich,
+    // e em UTC+14 as 10h do dia 10 ainda são dia 9 nela.
+    const tentativasDeHoje = attempts.filter((a) => diaLocal(new Date(a.createdAt)) === '2026-03-10');
     expect(ctxDia.progresso({ tentativas: tentativasDeHoje, jaErrados: new Set(), revisoes: [], aulasConcluidas: 0 })).toBe(2);
     expect(dia.every((d) => d.progresso <= d.desafio.meta)).toBe(true);
   });

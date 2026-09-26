@@ -118,9 +118,13 @@ A fazer, nesta ordem:
    produto — um produto de grandezas sem unidade comum dá uma ordem que
    ninguém consegue explicar ao aluno. Sessões de até 10, com os componentes
    da aula e a regra dela (sem "pular").
-3. **Domínio com tempo**: a evidência envelhece; "dominando" pede um acerto
-   depois de N dias. Mantém os quatro níveis e a evidência à vista — nada de
-   porcentagem com casas decimais.
+3. [x] **Domínio com tempo**: "dominando" pede um acerto 3 dias (ou mais)
+   depois do primeiro; parado 60 dias, continua dominando e pede revisão
+   (motivo "tempo"). Os motivos da revisão (pouca precisão, regressão, tempo)
+   aparecem na tela, e quem só espera o tempo lê "falta acertar de novo daqui
+   a alguns dias". Mantidos os quatro níveis e a evidência à vista. De
+   carona: dia de estudo contado no fuso de quem estuda, e `src/client/lib`
+   também em UTC+14 no CI.
 4. **P2-14** dicas: CI cobra ≥ 3 níveis nos exercícios de produção; rodada de
    conteúdo trilha por trilha, começando por Fundamentos de JavaScript.
 5. Flashcards para os 93 conceitos sem cartão, começando pelos que são

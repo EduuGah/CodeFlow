@@ -819,9 +819,10 @@ Sem dependência nova:
   para frases que ensinam.
 - **Repetição e revisão:** P2-15. O domínio por conceito já existe em quatro
   níveis (não iniciado, conhecendo, praticando, dominando), com a evidência à
-  vista — é a forma certa de evitar falsa precisão. Falta o tempo: "dominando"
-  hoje é para sempre; a evidência deveria envelhecer e uma revisão acertada
-  depois de N dias confirmar o domínio.
+  vista — é a forma certa de evitar falsa precisão. Faltava o tempo:
+  "dominando" era para sempre, e dois acertos na mesma tarde bastavam.
+  **Feito (2026-09-26):** o domínio pede um acerto 3 dias depois do primeiro,
+  envelhece em 60 dias (pede revisão, não rebaixa), e a tela diz o motivo.
 - **Projetos:** 10, com critérios de aceitação executáveis; os capstones são
   o ponto alto. Faltam projetos intermediários para as trilhas de TypeScript e
   React.

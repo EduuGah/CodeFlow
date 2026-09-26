@@ -41,7 +41,7 @@ Números lidos do catálogo, não de memória.
 | Projetos | 10, com 34 critérios de aceitação — os 3 capstones são página + API + banco (motor 7), os outros 7 são JavaScript puro |
 | Conceitos | 151, com grafo de pré-requisitos |
 | Flashcards | 67 (93 conceitos ainda sem cartão) |
-| Testes | 3.418 de unidade + ~440 de navegador |
+| Testes | 3.425 de unidade + ~440 de navegador |
 | Pacote | 3.095 kB (851 kB comprimido) no chunk principal — o corpo das aulas vai junto (é quase metade), e separá-lo é o maior problema de performance aberto (P2-1b do roadmap). Aula, revisão, refazer erros, projeto e admin são rotas sob demanda (`App.tsx`), e o Zod só entra no chunk do admin; o Monaco são mais 3.362 kB (869 kB) num chunk à parte, baixado só quando o primeiro editor monta, e o worker de TypeScript (7 MB) só quando um modelo JS/TS abre. O motor de TypeScript não acrescentou arquivo; o de React acrescentou um chunk de 143 kB (47 kB) com o React e o ReactDOM como texto, baixado só por um exercício de React; o de SQL acrescentou o worker (49 kB) e o SQLite em WebAssembly (658 kB), baixados só por um exercício de SQL; o de Python acrescentou o worker (~22 kB) e o Pyodide inteiro (~13,5 MB: o WebAssembly do CPython, a biblioteca padrão zipada, o manifesto de pacotes), copiados para `/pyodide/` na build e baixados só por um exercício de Python |
 
 ## 4. Decisões que não devem ser desfeitas sem motivo forte
@@ -105,6 +105,15 @@ pedido do dono do projeto (2026-09-17): convidava a passar reto pelo
 exercício, que é onde a aula acontece. Nos testes, "passar por um
 exercício" é responder errado: `pages/aula.test-utils.tsx` e
 `responderErrado`/`passarPelaAula`/`irAteOExercicio` em `e2e/fixtures.ts`.
+
+**Domínio pede tempo.** "Dominando" (`lib/mastery.ts`) exige dois exercícios
+distintos resolvidos, precisão ≥ 50%, um acerto sem dica **e** um acerto pelo
+menos `DIAS_PARA_CONFIRMAR` (3) dias depois do primeiro — dois exercícios na
+mesma tarde provam que a aula foi entendida, não que ficou. Quem tem tudo
+menos o tempo está "aguardando confirmação", e a tela diz o que falta. Um
+domínio sem nenhuma tentativa há `DIAS_PARA_ENVELHECER` (60) dias continua
+dominando, mas pede revisão (`motivoDaRevisao: 'tempo'`); os outros motivos
+são pouca precisão e regressão, e a tela mostra o motivo, não só o selo.
 
 **O Caderno de Erros é derivado; a evidência é à parte.** Não há tabela de
 caderno: `lib/caderno.ts` monta tudo das tentativas — um item por exercício
@@ -293,7 +302,8 @@ src/client/lib/         Lógica pura e testada
   pagina-core.ts        …e a PONTE: o fetch que vai ao servidor vivo por
                         postMessage, `interpretarPedido`, `mensagemDeResposta`
   fill-blank.ts         Molde com lacunas: dividir, preencher, validar
-  mastery.ts            Domínio por conceito, em 4 níveis
+  mastery.ts            Domínio por conceito, em 4 níveis; "dominando" pede
+                        um acerto dias depois do primeiro, e envelhece
   review.ts             Repetição espaçada, Leitner [1,3,7,14,30,60] dias
   caderno.ts            O Caderno de Erros: estado de cada erro (pendente,
                         revisar, em dia, dominado), a fila de refazer, a sessão
@@ -403,7 +413,7 @@ docs/curriculo.md       Roadmap de conteúdo — fonte canônica
 ```bash
 npm run typecheck   # inclui e2e/ e playwright.config.ts
 npm run lint        # ESLint mínimo: typescript-eslint + react-hooks
-npm test            # 3.418 testes
+npm test            # 3.425 testes
 npm run test:e2e    # ~410 no navegador (antes: npx playwright install chromium;
                     # com um Chromium já instalado: PW_CHROMIUM=/caminho/do/chrome)
 npm run build
@@ -729,6 +739,11 @@ Cada uma custou tempo. Não repita.
   leitura nova com `.eq`/`.not` recebe o histórico inteiro, e a tela parece
   certa pelo motivo errado. A leitura do caderno ganhou os dois filtros dela
   em `fixtures.ts`; uma leitura filtrada nova precisa do mesmo.
+- **Teste de data que filtra pela string ISO passa em UTC e mente fora dele.**
+  `createdAt.startsWith('2026-03-10')` é o dia de Greenwich; o produto conta
+  o dia local. Em UTC+14 as 10h do dia 10 são dia 9 na string. O CI agora roda
+  `src/client/lib` também em Kiritimati — foi assim que um teste de desafios
+  que só passava em UTC apareceu.
 - **O teto em bytes do banco tem de caber o pior caso do navegador**, não o
   caso médio: 20 lacunas de 500 caracteres com acento passavam de 30 KiB num
   teto de 16. `migrations.test.ts` mede o pior caso de cada tipo contra o
