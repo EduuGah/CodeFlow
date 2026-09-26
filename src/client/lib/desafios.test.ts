@@ -101,7 +101,25 @@ describe('progresso e conclusão', () => {
     expect(def.progresso({ tentativas, historico: tentativas, revisoes: [], aulasConcluidas: 0 })).toBe(4);
   });
 
-  it('a conclusão de aula é datada pela última tentativa certa nela', () => {
+  it('refazer um exercício de uma aula antiga não a "conclui" de novo', () => {
+    // Antes a aula era datada pela última tentativa certa: refazer um
+    // exercício antigo mudava o dia da conclusão — cumpria "conclua uma aula
+    // hoje" e, de quebra, desfazia o desafio do dia original.
+    // Os dois dias têm "uma aula inteira" no sorteio; sem isso o teste seria vazio.
+    for (const dia of ['2026-03-04', '2026-03-09']) {
+      expect(desafiosDoDia(dia).map((d) => d.id), dia).toContain('dia-aula-1');
+    }
+    const attempts = [
+      t('2026-03-04', { lessonId: 'l-1', exerciseId: 'a' }),
+      t('2026-03-04', { lessonId: 'l-1', exerciseId: 'b' }),
+      t('2026-03-09', { lessonId: 'l-1', exerciseId: 'a' }),
+    ];
+    const concluidos = desafiosConcluidos({ attempts, reviews: [], completedLessons: ['l-1'], hoje: HOJE });
+    const aula = concluidos.filter((c) => c.id === 'dia-aula-1').map((c) => c.dia);
+    expect(aula).toEqual(['2026-03-04']);
+  });
+
+  it('a conclusão de aula é datada pelo primeiro acerto do último exercício que faltava', () => {
     const attempts = [t('2026-03-08', { lessonId: 'l-1', exerciseId: 'a' }), t('2026-03-10', { lessonId: 'l-1', exerciseId: 'b' })];
     const def = DESAFIOS_DO_DIA.find((d) => d.id === 'dia-aula-1')!;
     // A função de contexto é interna; provamos pelo caminho público.

@@ -5,6 +5,7 @@ import type { FlashcardReview } from './review';
 import { emDobro, janelasDeDobro, type Purchase } from './economia';
 import { desafiosConcluidos, type DesafioConcluido } from './desafios';
 import { calcularSequencia, correntesDaHistoria } from './sequencia';
+import { fechamentoDasAulas } from './study';
 
 /**
  * XP, níveis e conquistas.
@@ -88,8 +89,6 @@ export function computeXp(entrada: GamificationInput): XpBreakdown {
   }
 
   let exercicios = 0;
-  // A última tentativa certa em cada aula: é quando a aula "fechou".
-  const fechamentoDaAula = new Map<string, string>();
 
   for (const tentativas of porExercicio.values()) {
     const acertos = tentativas.filter((t) => t.correct);
@@ -102,13 +101,10 @@ export function computeXp(entrada: GamificationInput): XpBreakdown {
     if (acertos.some((t) => t.hintsUsed === 0)) base += XP.bonusSemDica;
     if (tentativas.some((t) => !t.correct)) base += XP.bonusPersistencia;
     exercicios += somar(base, primeiroAcerto.createdAt);
-
-    for (const t of acertos) {
-      const atual = fechamentoDaAula.get(t.lessonId);
-      if (atual === undefined || t.createdAt > atual) fechamentoDaAula.set(t.lessonId, t.createdAt);
-    }
   }
 
+  // Quando cada aula fechou — um instante fixo, que refazer não move.
+  const fechamentoDaAula = fechamentoDasAulas(attempts);
   let aulas = 0;
   for (const id of completedLessons) {
     aulas += somar(XP.porAulaConcluida, fechamentoDaAula.get(id) ?? null);

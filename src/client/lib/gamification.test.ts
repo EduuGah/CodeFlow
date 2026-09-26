@@ -178,6 +178,39 @@ describe('dobro de XP', () => {
     expect(xp.dobrado).toBe(0);
   });
 
+  it('reabrir uma aula já concluída dentro da janela não dobra os 50 XP dela', () => {
+    // O exploit da auditoria de 2026-09-26: a aula era datada pela ÚLTIMA
+    // tentativa certa, então comprar o dobro e refazer um exercício de cada
+    // aula antiga dobrava o XP de todas as aulas já concluídas.
+    const xp = computeXp(
+      entrada({
+        completedLessons: ['lesson-1'],
+        attempts: [
+          t({ exerciseId: 'a', createdAt: '2026-03-01T10:00:00.000Z' }),
+          t({ exerciseId: 'b', createdAt: '2026-03-01T10:05:00.000Z' }),
+          t({ exerciseId: 'a', createdAt: '2026-03-10T12:00:00.000Z' }),
+        ],
+        purchases: [compra('2026-03-10T10:00:00.000Z')],
+      })
+    );
+    expect(xp.aulas).toBe(XP.porAulaConcluida);
+    expect(xp.dobrado).toBe(0);
+  });
+
+  it('a aula que fecha dentro da janela dobra: o último exercício foi resolvido nela', () => {
+    const xp = computeXp(
+      entrada({
+        completedLessons: ['lesson-1'],
+        attempts: [
+          t({ exerciseId: 'a', createdAt: '2026-03-01T10:00:00.000Z' }),
+          t({ exerciseId: 'b', createdAt: '2026-03-10T12:00:00.000Z' }),
+        ],
+        purchases: [compra('2026-03-10T10:00:00.000Z')],
+      })
+    );
+    expect(xp.aulas).toBe(2 * XP.porAulaConcluida);
+  });
+
   it('projeto não dobra: não tem hora registrada', () => {
     const xp = computeXp(entrada({ completedProjects: ['p1'], purchases: [compra('2026-03-10T10:00:00.000Z')] }));
     expect(xp.projetos).toBe(XP.porProjetoEntregue);

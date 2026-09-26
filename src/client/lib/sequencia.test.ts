@@ -105,3 +105,52 @@ describe('correntes da história', () => {
     expect(correntes).toEqual([3]);
   });
 });
+
+const atual = (attempts: Attempt[], dia: Date) => calcularSequencia(attempts, [], dia).atual;
+
+describe('sequência de estudos sem congelamento (a antiga `currentStreak`, que era uma segunda cópia desta conta)', () => {
+  it('sem histórico, a sequência é zero', () => {
+    expect(atual([], hoje)).toBe(0);
+  });
+
+  it('estudando hoje, a sequência começa em um', () => {
+    expect(atual([em('2026-03-10')], hoje)).toBe(1);
+  });
+
+  it('conta dias consecutivos terminando hoje', () => {
+    const attempts = [em('2026-03-08'), em('2026-03-09'), em('2026-03-10')];
+    expect(atual(attempts, hoje)).toBe(3);
+  });
+
+  it('várias tentativas no mesmo dia contam como um dia só', () => {
+    const attempts = [em('2026-03-10', '08:00'), em('2026-03-10', '14:00'), em('2026-03-10', '22:00')];
+    expect(atual(attempts, hoje)).toBe(1);
+  });
+
+  it('a sequência sobrevive se a última atividade foi ontem', () => {
+    // Quem estudou ontem à noite e ainda não abriu hoje não perde a sequência.
+    const attempts = [em('2026-03-08'), em('2026-03-09')];
+    expect(atual(attempts, hoje)).toBe(2);
+  });
+
+  it('dois dias sem estudar quebram a sequência', () => {
+    expect(atual([em('2026-03-07'), em('2026-03-08')], hoje)).toBe(0);
+  });
+
+  it('conta apenas o trecho consecutivo mais recente', () => {
+    const attempts = [
+      em('2026-03-01'), // bloco antigo, interrompido
+      em('2026-03-02'),
+      em('2026-03-09'), // bloco atual
+      em('2026-03-10'),
+    ];
+    expect(atual(attempts, hoje)).toBe(2);
+  });
+
+  it('atravessa a virada de mês', () => {
+    const fimDeMes = new Date('2026-03-02T12:00:00');
+    const attempts = [em('2026-02-28'), em('2026-03-01'), em('2026-03-02')];
+    expect(atual(attempts, fimDeMes)).toBe(3);
+  });
+});
+

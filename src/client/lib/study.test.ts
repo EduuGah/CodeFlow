@@ -3,7 +3,6 @@ import { describe, expect, it } from 'vitest';
 import type { Attempt } from './mastery';
 import {
   abandonedExerciseIds,
-  currentStreak,
   daysSinceLastStudy,
   lastActivity,
   unsolvedExerciseIds,
@@ -29,52 +28,6 @@ function em(dia: string, hora = '10:00', over: Partial<Attempt> = {}): Attempt {
 }
 
 const hoje = new Date('2026-03-10T15:00:00');
-
-describe('sequência de estudos', () => {
-  it('sem histórico, a sequência é zero', () => {
-    expect(currentStreak([], hoje)).toBe(0);
-  });
-
-  it('estudando hoje, a sequência começa em um', () => {
-    expect(currentStreak([em('2026-03-10')], hoje)).toBe(1);
-  });
-
-  it('conta dias consecutivos terminando hoje', () => {
-    const attempts = [em('2026-03-08'), em('2026-03-09'), em('2026-03-10')];
-    expect(currentStreak(attempts, hoje)).toBe(3);
-  });
-
-  it('várias tentativas no mesmo dia contam como um dia só', () => {
-    const attempts = [em('2026-03-10', '08:00'), em('2026-03-10', '14:00'), em('2026-03-10', '22:00')];
-    expect(currentStreak(attempts, hoje)).toBe(1);
-  });
-
-  it('a sequência sobrevive se a última atividade foi ontem', () => {
-    // Quem estudou ontem à noite e ainda não abriu hoje não perde a sequência.
-    const attempts = [em('2026-03-08'), em('2026-03-09')];
-    expect(currentStreak(attempts, hoje)).toBe(2);
-  });
-
-  it('dois dias sem estudar quebram a sequência', () => {
-    expect(currentStreak([em('2026-03-07'), em('2026-03-08')], hoje)).toBe(0);
-  });
-
-  it('conta apenas o trecho consecutivo mais recente', () => {
-    const attempts = [
-      em('2026-03-01'), // bloco antigo, interrompido
-      em('2026-03-02'),
-      em('2026-03-09'), // bloco atual
-      em('2026-03-10'),
-    ];
-    expect(currentStreak(attempts, hoje)).toBe(2);
-  });
-
-  it('atravessa a virada de mês', () => {
-    const fimDeMes = new Date('2026-03-02T12:00:00');
-    const attempts = [em('2026-02-28'), em('2026-03-01'), em('2026-03-02')];
-    expect(currentStreak(attempts, fimDeMes)).toBe(3);
-  });
-});
 
 describe('tempo desde o último estudo', () => {
   it('devolve null quando nunca houve atividade', () => {

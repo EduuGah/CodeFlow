@@ -1,5 +1,4 @@
 import type {
-  CodeExercise,
   Concept,
   Exercise,
   Flashcard,
@@ -562,6 +561,3 @@ export const getExercises = (lesson: Lesson): Exercise[] =>
     .filter((b): b is Extract<LessonBlock, { kind: 'exercise' }> => b.kind === 'exercise')
     .map((b) => b.exercise);
 
-/** O exercício de código de uma aula — o que alimenta o editor e o sandbox. */
-export const getPrimaryCodeExercise = (lesson: Lesson): CodeExercise | undefined =>
-  getExercises(lesson).find((e): e is CodeExercise => e.type === 'code');

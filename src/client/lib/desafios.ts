@@ -2,6 +2,7 @@ import type { Attempt } from './mastery';
 import type { FlashcardReview } from './review';
 import { diaLocal, somarDias } from './sequencia';
 import { MOEDAS } from './economia';
+import { fechamentoDasAulas } from './study';
 
 /**
  * Desafios diários e semanais.
@@ -200,15 +201,12 @@ export interface EntradaDeDesafios {
   hoje?: Date;
 }
 
-/** O dia em que cada aula concluída foi fechada: a última tentativa certa nela. */
+/** O dia em que cada aula concluída fechou (`fechamentoDasAulas`), no fuso local. */
 function diaDeConclusaoPorAula(attempts: Attempt[], completedLessons: string[]): Map<string, string> {
   const concluidas = new Set(completedLessons);
   const dia = new Map<string, string>();
-  for (const a of attempts) {
-    if (!a.correct || !concluidas.has(a.lessonId)) continue;
-    const d = diaLocal(new Date(a.createdAt));
-    const atual = dia.get(a.lessonId);
-    if (atual === undefined || d > atual) dia.set(a.lessonId, d);
+  for (const [aula, instante] of fechamentoDasAulas(attempts)) {
+    if (concluidas.has(aula)) dia.set(aula, diaLocal(new Date(instante)));
   }
   return dia;
 }
