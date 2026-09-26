@@ -195,7 +195,7 @@ Legenda de estado: **Corrigido** (com teste, nesta rodada), **Parcial**,
 | P2-9 | Ferramentas de dev com vulnerabilidades (Vite 5, Vitest 2); DOMPurify via Monaco | Pendente |
 | P2-10 | Fontes servidas pelo Google (terceiro, privacidade, falha offline) | Corrigido |
 | P2-11 | Quatro telas sem `<h1>` (trilha, aula, revisão, projeto) | Corrigido |
-| P2-12 | Sem ESLint (as regras de hooks pegariam P1-8 na origem) | Pendente |
+| P2-12 | Sem ESLint | Corrigido |
 | P2-13 | Camada de persistência e `StudentDataContext` sem testes | Corrigido |
 | P2-14 | 85% dos exercícios com ≤ 2 dicas; a diretriz pede 4 níveis | Pendente |
 | P2-15 | Nenhum caminho para refazer um exercício errado; 62% dos conceitos sem flashcard | Pendente |
@@ -490,11 +490,16 @@ Legenda de estado: **Corrigido** (com teste, nesta rodada), **Parcial**,
 Trilha (`TrackBanner`), aula, revisão e projeto não tinham título de nível 1 —
 leitor de tela navega por títulos. Agora têm, sem mudança visual.
 
-#### P2-12 · Sem lint — Pendente
-Não há ESLint nem script `lint`. As regras de hooks (`exhaustive-deps`) teriam
-apontado P1-8 nos cinco lugares. É um caso em que a dependência se justifica:
-`eslint` + `typescript-eslint` + `eslint-plugin-react-hooks`, configuração
-mínima, rodando no CI antes dos testes.
+#### P2-12 · Sem lint — Corrigido
+Não havia ESLint nem script `lint`. Entrou o mínimo — `eslint` +
+`typescript-eslint` recomendado + `eslint-plugin-react-hooks` com
+`exhaustive-deps` como erro —, `npm run lint`, e o passo no CI antes dos
+testes. Achou três coisas: dois falsos positivos (o `use` das fixtures do
+Playwright) e uma interface vazia. Correção de uma afirmação desta
+auditoria: o `exhaustive-deps` **não** teria pegado o P1-8 — ele aponta
+dependência esquecida, não dependência a mais (depender do objeto `user`
+inteiro passa; conferido com um arquivo de prova). Para o P1-8, a proteção
+é o `AuthContext` mantendo a referência do usuário.
 
 #### P2-13 · Persistência sem testes — Corrigido
 `progress.ts` e `perfil.ts` ganharam 16 testes com um cliente dublado, e o

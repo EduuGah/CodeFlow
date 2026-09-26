@@ -369,6 +369,7 @@ docs/curriculo.md       Roadmap de conteúdo — fonte canônica
 
 ```bash
 npm run typecheck   # inclui e2e/ e playwright.config.ts
+npm run lint        # ESLint mínimo: typescript-eslint + react-hooks
 npm test            # 3.370 testes
 npm run test:e2e    # ~410 no navegador (antes: npx playwright install chromium;
                     # com um Chromium já instalado: PW_CHROMIUM=/caminho/do/chrome)
@@ -379,7 +380,7 @@ npm run build
 PGHOST=localhost PGUSER=postgres PGPASSWORD=postgres bash supabase/verificacao/rodar.sh
 ```
 
-CI: tipos → testes → build, as migrações num Postgres de serviço
+CI: tipos → lint → testes → build, as migrações num Postgres de serviço
 (`supabase/verificacao/`), e o E2E num job separado depois.
 
 **Método que tem funcionado, e vale manter:**

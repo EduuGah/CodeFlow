@@ -51,8 +51,9 @@ A fazer, nesta ordem:
 
 ## Fase 3 — Código e arquitetura
 
-1. **P2-12** ESLint mínimo (`typescript-eslint` + `react-hooks`), no CI antes
-   dos testes; corrigir o que ele apontar, sem desligar regra.
+1. [x] **P2-12** ESLint mínimo (`typescript-eslint` + `react-hooks`), no CI
+   antes dos testes; três achados corrigidos, nenhuma regra desligada fora o
+   `rules-of-hooks` nas fixtures do Playwright (o `use` de lá não é hook).
 2. [x] **P2-13** testes do `StudentDataContext` (`incompleto`, recarga, compra
    dupla, recusa do banco, sessão renovada).
 3. [x] **Migrações num Postgres de verdade no CI** — `supabase/verificacao/`:

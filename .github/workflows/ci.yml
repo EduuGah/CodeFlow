@@ -31,6 +31,9 @@ jobs:
       - name: Verificar tipos
         run: npm run typecheck
 
+      - name: Lint
+        run: npm run lint
+
       # A suíte que mais importa aqui: um exercício com teste errado não quebra
       # a aplicação, ele ensina errado — e nada mais nesta lista pegaria isso.
       #
