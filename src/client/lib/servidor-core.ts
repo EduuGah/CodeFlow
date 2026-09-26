@@ -357,9 +357,6 @@ export function montarCodigoDoServidor(codigo: string, opcoes: OpcoesDoServidor 
   return `${preludio}\n${codigo}`;
 }
 
-/** Quantas linhas o prelúdio ocupa: para um erro na linha N do aluno ser a linha N. */
-export const LINHAS_DO_PRELUDIO = PRELUDIO.split('\n').length;
-
 /** Um pedido que a página faz ao servidor vivo, pelo `fetch` de mentira. */
 export interface PedidoAoServidor {
   metodo: string;

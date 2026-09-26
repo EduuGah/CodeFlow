@@ -205,7 +205,7 @@ Legenda de estado: **Corrigido** (com teste, nesta rodada), **Parcial**,
 | P3-1 | Código morto (funções, ícones, constantes) | Parcial |
 | P3-2 | Dependências sem uso e sobras do AI Studio | Corrigido |
 | P3-3 | Dois lockfiles (`bun.lock` e `package-lock.json`) | Pendente — investigar |
-| P3-4 | `Lesson.tsx` repete dez blocos quase iguais | Pendente |
+| P3-4 | `Lesson.tsx` repete dez blocos quase iguais | Corrigido |
 | P3-5 | Links soltos com 20 px de altura (WCAG 2.5.8) | Pendente |
 | P3-6 | Nome e avatar sem limite no banco | Corrigido (0009) |
 | P3-7 | Login ignorava a rota de origem | Corrigido |
@@ -529,9 +529,10 @@ Só `console.error`. Proposta na seção "Observabilidade".
 - **P3-3 · Dois lockfiles — Pendente.** `bun.lock` e `package-lock.json`
   divergem com o tempo; o CI usa `npm ci`. Confirmar se alguém usa Bun e ficar
   com um.
-- **P3-4 · `Lesson.tsx` repetitivo — Pendente.** Dez blocos
-  `passo.exercise.type === 'x' && <X key … />` com as mesmas props; um mapa
-  tipo → componente reduz ~100 linhas e impede o 11º tipo de esquecer a `key`.
+- **P3-4 · `Lesson.tsx` repetitivo — Corrigido.** Os dez blocos
+  `passo.exercise.type === 'x' && <X key … />` viraram `ExercicioDoPasso`, um
+  `switch` exaustivo (o compilador recusa um 11º tipo sem componente) com a
+  `key` num lugar só; `Lesson.tsx` caiu de 569 para 494 linhas.
 - **P3-5 · Alvos de toque de 20 px — Pendente.** Links "← Perfil", "Ver as
   trilhas", "Todas as trilhas", "Desafios da semana" e os títulos de trilha em
   Progresso medem 20–22 px de altura no celular. WCAG 2.2 (2.5.8) pede 24 px
@@ -560,9 +561,12 @@ Só `console.error`. Proposta na seção "Observabilidade".
 ## Código morto
 
 **Pode remover com segurança** (zero referências fora do arquivo):
-- `IconShop` (`ui/Icon.tsx`)
-- `LINHAS_DO_PRELUDIO` (`servidor-core.ts`)
-- `VERSAO_DO_TYPESCRIPT_NO_NAVEGADOR` (`typescript.ts`)
+- `IconShop` (`ui/Icon.tsx`) — mantido de propósito: o atalho da loja e do
+  inventário da Loja 2.0 vai usá-lo
+- ~~`LINHAS_DO_PRELUDIO`~~ (`servidor-core.ts`) — removido
+- ~~`VERSAO_DO_TYPESCRIPT_NO_NAVEGADOR`~~ (`typescript.ts`) — removido; o
+  comentário dizia que a suíte o comparava com o pacote `typescript`, mas o
+  teste de versão lê os metadados do Monaco direto
 - ~~`getPrimaryCodeExercise`~~, ~~`currentStreak`~~, ~~`firebase`~~,
   ~~`react-hook-form`~~, ~~`@hookform/resolvers`~~, ~~arquivos do AI Studio~~ —
   removidos nesta rodada
@@ -593,7 +597,7 @@ Só `console.error`. Proposta na seção "Observabilidade".
 | Sequência de dias (duas implementações) | `study.ts` × `sequencia.ts` | **Removida** a de `study.ts` |
 | `diaLocal` / `somarDias` | `study.ts` × `sequencia.ts` | **Unificado** |
 | Bloqueio de globais do worker | `sandbox.worker.ts` × `servidor-banco.worker.ts` | **Unificado** |
-| Dez blocos de exercício | `Lesson.tsx` | Mapa tipo → componente (P3-4) |
+| Dez blocos de exercício | `Lesson.tsx` | **Unificado** em `ExercicioDoPasso` |
 | Leitura com `useAuth()` + efeito + `ativo` | `Review`, `ProjectWorkspace`, `AdminContent`, `useUserRole`, `Lesson` | Aceitável; se crescer, um `useLeitura(fn, deps)` |
 | Mensagem de erro em `<p role="alert" className="rounded-lg border border-danger-200 …">` | `Loja`, `EditarPerfil`, `Aparencia` | Um `Card tone="danger"` já existe — usar |
 | Faixa "Perfil ←" + cabeçalho de seção | páginas do perfil | já é `CabecalhoDaSecao` — ok |

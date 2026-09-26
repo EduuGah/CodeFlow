@@ -16,17 +16,8 @@ import {
 import { celebrar } from '../lib/celebrar';
 import { corDaTrilha } from '../lib/cores-das-trilhas';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
-import { CodeExerciseStep } from '../components/lesson/CodeExerciseStep';
-import { FillBlank } from '../components/lesson/FillBlank';
-import { FindBug } from '../components/lesson/FindBug';
+import { ExercicioDoPasso } from '../components/lesson/ExercicioDoPasso';
 import { LessonBlocks } from '../components/lesson/LessonBlocks';
-import { MultipleChoice } from '../components/lesson/MultipleChoice';
-import { OrderSteps } from '../components/lesson/OrderSteps';
-import { PredictOutput } from '../components/lesson/PredictOutput';
-import { Refactor } from '../components/lesson/Refactor';
-import { ServerExerciseStep } from '../components/lesson/ServerExerciseStep';
-import { SqlExerciseStep } from '../components/lesson/SqlExerciseStep';
-import { WriteTest } from '../components/lesson/WriteTest';
 import { Button, buttonClasses } from '../components/ui/Button';
 import { Card, SectionLabel } from '../components/ui/Card';
 import { MarkdownReader } from '../components/ui/MarkdownReader';
@@ -448,93 +439,8 @@ export function Lesson() {
             com a resposta do primeiro já enviada, dizia "Resposta correta" para
             uma pergunta que ninguém respondeu, e — como o estado não mudava — a
             aula nunca ficava sabendo dele. Ficava 5/6 para sempre. */}
-        {passo.kind === 'exercise' && passo.exercise.type === 'code' && (
-          <CodeExerciseStep
-            key={passo.exercise.id}
-            exercise={passo.exercise}
-            lessonId={lesson.id}
-            language={lesson.language}
-            onEstado={(estado) => registrarEstado(passo.exercise.id, estado)}
-          />
-        )}
-
-        {passo.kind === 'exercise' && passo.exercise.type === 'fill-blank' && (
-          <FillBlank
-            key={passo.exercise.id}
-            exercise={passo.exercise}
-            lessonId={lesson.id}
-            language={lesson.language}
-            onEstado={(estado) => registrarEstado(passo.exercise.id, estado)}
-          />
-        )}
-
-        {passo.kind === 'exercise' && passo.exercise.type === 'multiple-choice' && (
-          <MultipleChoice
-            key={passo.exercise.id}
-            exercise={passo.exercise}
-            lessonId={lesson.id}
-            onEstado={(estado) => registrarEstado(passo.exercise.id, estado)}
-          />
-        )}
-
-        {passo.kind === 'exercise' && passo.exercise.type === 'order-steps' && (
-          <OrderSteps
-            key={passo.exercise.id}
-            exercise={passo.exercise}
-            lessonId={lesson.id}
-            onEstado={(estado) => registrarEstado(passo.exercise.id, estado)}
-          />
-        )}
-
-        {passo.kind === 'exercise' && passo.exercise.type === 'sql' && (
-          <SqlExerciseStep
-            key={passo.exercise.id}
-            exercise={passo.exercise}
-            lessonId={lesson.id}
-            onEstado={(estado) => registrarEstado(passo.exercise.id, estado)}
-          />
-        )}
-
-        {passo.kind === 'exercise' && passo.exercise.type === 'server' && (
-          <ServerExerciseStep
-            key={passo.exercise.id}
-            exercise={passo.exercise}
-            lessonId={lesson.id}
-            onEstado={(estado) => registrarEstado(passo.exercise.id, estado)}
-          />
-        )}
-
-        {passo.kind === 'exercise' && passo.exercise.type === 'refactor' && (
-          <Refactor
-            key={passo.exercise.id}
-            exercise={passo.exercise}
-            lessonId={lesson.id}
-            language={lesson.language}
-            onEstado={(estado) => registrarEstado(passo.exercise.id, estado)}
-          />
-        )}
-
-        {passo.kind === 'exercise' && passo.exercise.type === 'find-bug' && (
-          <FindBug
-            key={passo.exercise.id}
-            exercise={passo.exercise}
-            lessonId={lesson.id}
-            onEstado={(estado) => registrarEstado(passo.exercise.id, estado)}
-          />
-        )}
-
-        {passo.kind === 'exercise' && passo.exercise.type === 'write-test' && (
-          <WriteTest
-            key={passo.exercise.id}
-            exercise={passo.exercise}
-            lessonId={lesson.id}
-            language={lesson.language}
-            onEstado={(estado) => registrarEstado(passo.exercise.id, estado)}
-          />
-        )}
-
-        {passo.kind === 'exercise' && passo.exercise.type === 'predict-output' && (
-          <PredictOutput
+        {passo.kind === 'exercise' && (
+          <ExercicioDoPasso
             key={passo.exercise.id}
             exercise={passo.exercise}
             lessonId={lesson.id}

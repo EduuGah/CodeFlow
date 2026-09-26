@@ -61,10 +61,10 @@ A fazer, nesta ordem:
    papéis da API (conclusão, compra, painel de admin, anônimo, ritmo, formato,
    foto, contas demo). Sabotado: a policy ampla de admin, o gatilho das contas
    demo e o INSERT direto em compras, de volta, são pegos.
-4. **P3-4** mapa tipo → componente em `Lesson.tsx`.
-5. **P3-1** remover `IconShop`, `LINHAS_DO_PRELUDIO`,
-   `VERSAO_DO_TYPESCRIPT_NO_NAVEGADOR`, `getDefaultTrack`; decidir `bun.lock`
-   (P3-3).
+4. [x] **P3-4** `ExercicioDoPasso`: `switch` exaustivo no lugar dos dez blocos.
+5. [x] **P3-1** removidos `LINHAS_DO_PRELUDIO` e
+   `VERSAO_DO_TYPESCRIPT_NO_NAVEGADOR`; `IconShop` fica para a Loja 2.0;
+   `getDefaultTrack` fica (o E2E do painel usa). Falta decidir `bun.lock` (P3-3).
 6. **P2-17** reescrever `docs/context/04` e `05` para o que existe.
 
 ## Fase 4 — Performance

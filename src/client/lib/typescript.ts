@@ -1,6 +1,5 @@
 import {
   typescriptDefaults,
-  typescriptVersion,
   type TypeScriptWorker,
 } from 'monaco-editor/languages/features/typescript/register';
 import TsWorker from 'monaco-editor/languages/features/typescript/ts.worker?worker';
@@ -169,6 +168,3 @@ export async function compilarNoNavegador(
     modelo.dispose();
   }
 }
-
-/** A versão que o Monaco embute — a suíte a compara com a do pacote `typescript`. */
-export const VERSAO_DO_TYPESCRIPT_NO_NAVEGADOR = typescriptVersion;

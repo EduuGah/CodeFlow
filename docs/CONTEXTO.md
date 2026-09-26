@@ -338,7 +338,10 @@ src/client/components/  Componentes
                         diz qual ícone cada conquista e desafio leva;
                         `AnelDeNivel` e `CabecalhoDaSecao`
   lesson/               Um componente por tipo de exercício; `ExerciseAction`
-                        e `ExerciseFeedback` são o botão e o retorno de todos
+                        e `ExerciseFeedback` são o botão e o retorno de todos;
+                        `ExercicioDoPasso` escolhe o componente pelo tipo
+                        (`switch` exaustivo — tipo novo sem componente não
+                        compila)
   lesson/SqlExerciseStep  O exercício de SQL: painel de tabelas do banco (e o
                         `setup` do exercício), editor, resultado em tabela
   lesson/ServerExerciseStep  O exercício de servidor: arquivos e ambiente do
