@@ -41,7 +41,7 @@ Números lidos do catálogo, não de memória.
 | Projetos | 10, com 34 critérios de aceitação — os 3 capstones são página + API + banco (motor 7), os outros 7 são JavaScript puro |
 | Conceitos | 151, com grafo de pré-requisitos |
 | Flashcards | 67 (93 conceitos ainda sem cartão) |
-| Testes | 3.425 de unidade + ~440 de navegador |
+| Testes | 3.459 de unidade + ~440 de navegador |
 | Pacote | 3.095 kB (851 kB comprimido) no chunk principal — o corpo das aulas vai junto (é quase metade), e separá-lo é o maior problema de performance aberto (P2-1b do roadmap). Aula, revisão, refazer erros, projeto e admin são rotas sob demanda (`App.tsx`), e o Zod só entra no chunk do admin; o Monaco são mais 3.362 kB (869 kB) num chunk à parte, baixado só quando o primeiro editor monta, e o worker de TypeScript (7 MB) só quando um modelo JS/TS abre. O motor de TypeScript não acrescentou arquivo; o de React acrescentou um chunk de 143 kB (47 kB) com o React e o ReactDOM como texto, baixado só por um exercício de React; o de SQL acrescentou o worker (49 kB) e o SQLite em WebAssembly (658 kB), baixados só por um exercício de SQL; o de Python acrescentou o worker (~22 kB) e o Pyodide inteiro (~13,5 MB: o WebAssembly do CPython, a biblioteca padrão zipada, o manifesto de pacotes), copiados para `/pyodide/` na build e baixados só por um exercício de Python |
 
 ## 4. Decisões que não devem ser desfeitas sem motivo forte
@@ -255,8 +255,12 @@ src/client/lib/         Lógica pura e testada
   sandbox.ts            executeCode(). Dois relógios: 20s para o worker
                         existir, e só então os 3s do código do aluno
   pagina-core.ts        Motor de página, parte pura: monta o documento
-                        (CSP, captura de console, testes no load) e lê a
-                        mensagem de volta. Roda no Node com jsdom
+                        (CSP, captura de console, guarda de laço, testes no
+                        load) e lê a mensagem de volta. Roda no Node com jsdom
+  protecao-de-laco.ts   A guarda de laço da página: cada condição de `while`,
+                        `do…while` e `for` dos `<script>` do aluno passa por
+                        ela, e ela lança depois de 1,5 s sem soltar a thread
+                        (no celular o iframe é a thread da aba)
   pagina.ts             executarPagina(): escreve o documento num <iframe
                         sandbox>, espera a mensagem, cuida do prazo
   pagina-jsdom.ts       O executor do CI: mesmo documento, no jsdom. Sem
@@ -413,7 +417,7 @@ docs/curriculo.md       Roadmap de conteúdo — fonte canônica
 ```bash
 npm run typecheck   # inclui e2e/ e playwright.config.ts
 npm run lint        # ESLint mínimo: typescript-eslint + react-hooks
-npm test            # 3.425 testes
+npm test            # 3.459 testes
 npm run test:e2e    # ~410 no navegador (antes: npx playwright install chromium;
                     # com um Chromium já instalado: PW_CHROMIUM=/caminho/do/chrome)
 npm run build
@@ -739,6 +743,11 @@ Cada uma custou tempo. Não repita.
   leitura nova com `.eq`/`.not` recebe o histórico inteiro, e a tela parece
   certa pelo motivo errado. A leitura do caderno ganhou os dois filtros dela
   em `fixtures.ts`; uma leitura filtrada nova precisa do mesmo.
+- **Um laço sem fim de verdade num teste de jsdom trava o próprio `vitest`**:
+  o jsdom roda os scripts na mesma thread, e o prazo do teste precisa dela
+  para disparar. Para provar a guarda de laço, os testes usam um laço que
+  termina sozinho depois do dobro do limite — sem a guarda ele só demora, e o
+  teste falha pela mensagem que faltou, em vez de travar o CI.
 - **Teste de data que filtra pela string ISO passa em UTC e mente fora dele.**
   `createdAt.startsWith('2026-03-10')` é o dia de Greenwich; o produto conta
   o dia local. Em UTC+14 as 10h do dia 10 são dia 9 na string. O CI agora roda

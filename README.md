@@ -49,7 +49,7 @@ bug, ordenar, teste, refatorar — que pedem o conceito de outro ângulo.
 | Motor | O que roda | Como |
 | --- | --- | --- |
 | Sandbox | JavaScript puro | Web Worker descartável, 3 s de limite, sem rede |
-| Página | HTML, CSS, DOM | `<iframe sandbox>` de origem opaca; os testes veem o `document` |
+| Página | HTML, CSS, DOM | `<iframe sandbox>` de origem opaca; os testes veem o `document`; cada laço do aluno passa por uma guarda que o interrompe em 1,5 s (no celular, o iframe divide a thread com a aba) |
 | TypeScript | TypeScript | o compilador (o mesmo do editor) na frente do sandbox; os erros de tipo viram retorno |
 | React | componentes TSX | compilado e montado no iframe da página, com o React embutido |
 | SQL | consultas e modelagem | o SQLite em WebAssembly (sql.js) num worker que fica vivo; a correção compara **linhas devolvidas** |
@@ -132,7 +132,7 @@ Redirect URLs.
 
 ```bash
 npm run typecheck   # tipos, incluindo os testes de navegador
-npm test            # 3.425 testes de unidade, propriedade e componente (Vitest)
+npm test            # 3.459 testes de unidade, propriedade e componente (Vitest)
 npm run test:e2e    # 408 testes de navegador (Playwright, Chromium, celular e desktop)
 ```
 

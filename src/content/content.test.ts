@@ -27,11 +27,22 @@ import {
   localizarExercicio,
 } from './index';
 import { preencher } from '../client/lib/fill-blank';
+import { NOME_DA_GUARDA, protegerLacos } from '../client/lib/protecao-de-laco';
 import { embaralhar, estaOrdenado } from '../client/lib/ordenar';
 import { avaliarTestes } from '../client/lib/escrever-teste';
 import { corrigirLinha, linhasNumeradas } from '../client/lib/encontrar-bug';
 import { avaliarRestricoes, todasCumpridas } from '../client/lib/refatorar';
-import type { CodeExercise, Exercise, FillBlankExercise, LanguageId, Lesson, Project, ServerExercise, SqlExercise } from './types';
+import type {
+  CodeExercise,
+  Exercise,
+  FillBlankExercise,
+  LanguageId,
+  Lesson,
+  PredictOutputExercise,
+  Project,
+  ServerExercise,
+  SqlExercise,
+} from './types';
 
 /**
  * Suíte de integridade do conteúdo.
@@ -376,6 +387,52 @@ describe('exercícios de lacuna', () => {
           ).toBe(false);
         }
       }
+    }
+  );
+});
+
+describe('a proteção de laço da página não muda o que o código certo faz (P2-6)', () => {
+  // O catálogo de página só tem `for…of`, que a proteção deixa passar — os
+  // testes de página provam que nada quebra, mas não exercitam um laço
+  // instrumentado. Os programas de JavaScript têm alguns `for` e `while`
+  // clássicos (poucos: o curso prefere `for…of` e métodos de lista):
+  // instrumentados como a página instrumentaria, com uma guarda que nunca
+  // lança, precisam fazer exatamente o mesmo.
+  const guarda = `const ${NOME_DA_GUARDA} = () => true;\n`;
+  const instrumenta = (codigo: string) => protegerLacos(codigo) !== codigo;
+  const ehJs = (exercise: Exercise) => linguagemDe.get(exercise) === 'javascript';
+
+  const solucoes = codeExercises.filter(
+    ({ exercise }) => ehJs(exercise) && exercise.runtime !== 'iframe' && instrumenta(programaDaSolucao(exercise))
+  );
+  const previsoes = allExercises.filter(
+    (item): item is { lesson: Lesson; exercise: PredictOutputExercise } =>
+      item.exercise.type === 'predict-output' && ehJs(item.exercise) && instrumenta(item.exercise.code)
+  );
+
+  it('há programas com laço de verdade para a prova', () => {
+    expect(solucoes.length + previsoes.length).toBeGreaterThanOrEqual(8);
+  });
+
+  it.each(solucoes.map(({ exercise }) => [exercise.id, exercise] as const))(
+    '%s: a solução instrumentada passa nos mesmos testes',
+    async (_id, exercise) => {
+      const codigo = guarda + protegerLacos(programaDaSolucao(exercise));
+      const resultado = await runProgram(codigo, exercise.tests, exercise.properties ?? []);
+
+      expect(resultado.error).toBeUndefined();
+      expect(resultado.testResults.filter((t) => !t.passed).map((t) => t.message)).toEqual([]);
+    }
+  );
+
+  it.each(previsoes.map(({ exercise }) => [exercise.id, exercise] as const))(
+    '%s: o programa instrumentado imprime o mesmo',
+    async (_id, exercise) => {
+      const original = await runProgram(exercise.code, [], []);
+      const instrumentado = await runProgram(guarda + protegerLacos(exercise.code), [], []);
+
+      expect(instrumentado.error).toBe(original.error);
+      expect(instrumentado.logs).toEqual(original.logs);
     }
   );
 });

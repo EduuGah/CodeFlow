@@ -1,4 +1,5 @@
 import { montarDocumento } from './pagina-core';
+import { protegerLacos } from './protecao-de-laco';
 import type { SandboxTest } from './sandbox-core';
 
 /**
@@ -357,9 +358,11 @@ export function montarDocumentoReact(
     `<script>${bibliotecas.react}</script>`,
     `<script>${bibliotecas.reactDom}</script>`,
     `<script>${AJUDANTES_DO_REACT}</script>`,
-    `<script>${js.replace(/<\/script/gi, '<\\/script')}</script>`,
+    `<script>${protegerLacos(js).replace(/<\/script/gi, '<\\/script')}</script>`,
     `<script>${montagem}</script>`,
   ].join('\n');
 
-  return montarDocumento(corpo, tests);
+  // Só o JavaScript do aluno ganha a guarda: as bibliotecas vão no mesmo
+  // corpo, e instrumentar o React seria pagar por laços que não são dele.
+  return montarDocumento(corpo, tests, { lacosJaProtegidos: true });
 }

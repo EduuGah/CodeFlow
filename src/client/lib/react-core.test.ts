@@ -6,6 +6,13 @@ import { rodarPaginaNoJsdom } from './pagina-jsdom';
 import { COMPONENTE_RAIZ, montarDocumentoReact } from './react-core';
 import { BIBLIOTECAS_DO_REACT } from './react-umd';
 import { compilarNoNode } from './typescript-node';
+import {
+  LIMITE_DO_LACO_MS,
+  MENSAGEM_DO_LACO,
+  NOME_DA_GUARDA,
+  NOME_DO_ERRO_DO_LACO,
+  scriptDaGuarda,
+} from './protecao-de-laco';
 
 /** Compila o TSX como o CI faz e roda o componente no jsdom. */
 async function rodar(tsx: string, tests: Array<{ description: string; assertion: string }>) {
@@ -113,6 +120,24 @@ describe('o componente no jsdom', () => {
       [{ description: 'x', assertion: 'void 0;' }]
     );
     expect(r.error).toMatch(/TypeError/);
+  });
+
+  it('um laço sem fim no componente é interrompido, e o erro diz qual é (P2-6)', async () => {
+    // Só o JavaScript do aluno ganha a guarda; o laço que só termina depois
+    // do dobro do limite prova que ela está lá sem arriscar travar o teste.
+    const r = await rodar(
+      `function App() { const fim = Date.now() + ${LIMITE_DO_LACO_MS * 2}; while (Date.now() < fim) {} return <p>x</p>; }`,
+      [{ description: 'x', assertion: 'void 0;' }]
+    );
+    expect(r.error).toBe(`${NOME_DO_ERRO_DO_LACO}: ${MENSAGEM_DO_LACO}`);
+  });
+
+  it('as bibliotecas do React não são instrumentadas: só o código do aluno', () => {
+    const doc = montarDocumentoReact('function App() { while (x) {} return null; }', [], BIBLIOTECAS_DO_REACT);
+    expect(doc.split(NOME_DA_GUARDA).length - 1).toBe(
+      // As menções da definição da guarda, e uma só do código: o laço do aluno.
+      scriptDaGuarda().split(NOME_DA_GUARDA).length - 1 + 1
+    );
   });
 
   it('o efeito roda e vê o DOM que o iframe tem', async () => {

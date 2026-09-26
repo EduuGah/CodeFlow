@@ -1,3 +1,4 @@
+import { protegerScripts, scriptDaGuarda } from './protecao-de-laco';
 import { buildProgram, type SandboxTest, type SandboxTestResult } from './sandbox-core';
 import type { PedidoAoServidor, RespostaDoServidor } from './servidor-core';
 
@@ -17,9 +18,11 @@ import type { PedidoAoServidor, RespostaDoServidor } from './servidor-core';
  *
  * Como o documento é montado:
  *
- * 1. `<head>` nosso, com a CSP e a captura de `console` e de erros — instalada
- *    ANTES de qualquer código do aluno.
- * 2. O código do aluno, dentro do `<body>`. Se ele escrever um documento
+ * 1. `<head>` nosso, com a CSP, a captura de `console` e de erros e a guarda
+ *    de laço (`protecao-de-laco.ts`) — instaladas ANTES de qualquer código do
+ *    aluno.
+ * 2. O código do aluno, dentro do `<body>`, com a condição de cada laço dos
+ *    `<script>` passando pela guarda. Se ele escrever um documento
  *    inteiro (`<html lang>`, `<title>`, `<style>`), o analisador de HTML
  *    tolera: atributos de `<html>` e `<body>` são mesclados nos elementos que
  *    já existem, e `<title>`, `<meta>` e `<style>` funcionam de dentro do
@@ -286,7 +289,17 @@ export function interpretarPedido(data: unknown): PedidoDaPagina | null {
 export function montarDocumento(
   codigoDoAluno: string,
   tests: SandboxTest[],
-  { comServidor = false }: { comServidor?: boolean } = {}
+  {
+    comServidor = false,
+    lacosJaProtegidos = false,
+  }: {
+    comServidor?: boolean;
+    /**
+     * O código já vem com os laços protegidos — o do React, que protege só o
+     * JavaScript do aluno e não as bibliotecas que vão no mesmo corpo.
+     */
+    lacosJaProtegidos?: boolean;
+  } = {}
 ): string {
   // Em série: os testes compartilham o DOM, e um clique de um não pode
   // atropelar o que o outro está lendo.
@@ -329,10 +342,11 @@ export function montarDocumento(
     `<meta http-equiv="Content-Security-Policy" content="${CSP_DA_PAGINA}">`,
     '<meta name="viewport" content="width=device-width, initial-scale=1">',
     `<script>${CAPTURA}</script>`,
+    `<script>${scriptDaGuarda()}</script>`,
     ...(comServidor ? [`<script>${PONTE}</script>`] : []),
     '</head>',
     '<body>',
-    codigoDoAluno,
+    lacosJaProtegidos ? codigoDoAluno : protegerScripts(codigoDoAluno),
     `<script>${corredor}</script>`,
     '</body>',
     '</html>',

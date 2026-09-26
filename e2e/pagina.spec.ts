@@ -111,6 +111,29 @@ test('um <script> que quebra vira mensagem, e não trava a aula', async ({ logad
   await expect(page.getByText('Todos os testes passaram')).toBeVisible();
 });
 
+test('um laço sem fim na página é interrompido: a aula não congela (P2-6)', async ({ logado: page }) => {
+  // No celular o iframe roda na thread da aba: sem a guarda, este `while`
+  // congelava tudo — inclusive o prazo que deveria salvá-la.
+  test.setTimeout(120_000);
+
+  await page.goto(`/lesson/${AULA}`);
+  await irAteOEditor(page);
+
+  await page.evaluate(() => {
+    window.monaco!.editor
+      .getModels()[0]
+      .setValue('<article><h1>Receita de pão</h1><p>Uma frase inteira aqui.</p></article><script>let i = 0; while (i < 10) { }</script>');
+  });
+  await page.getByRole('button', { name: /Rodar a página/ }).click();
+
+  await expect(page.getByText(/Laço sem fim: rodou por mais de 1,5 segundo/)).toBeVisible({ timeout: 20_000 });
+  // A página existia antes do laço: os testes sobre ela ainda rodaram.
+  await expect(page.getByText('Todos os testes passaram')).toBeVisible();
+  // E a aula responde: o editor aceita texto de novo.
+  await page.evaluate(() => window.monaco!.editor.getModels()[0].setValue('<p>de volta</p>'));
+  await expect(page.locator('.monaco-editor')).toContainText('de volta');
+});
+
 test('toda aula da trilha tem ao menos um exercício de página', () => {
   // Uma trilha "da página" cujas aulas rodassem só no Worker seria a trilha
   // errada; o motor existe para ser usado.

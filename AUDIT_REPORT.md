@@ -189,7 +189,7 @@ Legenda de estado: **Corrigido** (com teste, nesta rodada), **Parcial**,
 | P2-3 | O histórico inteiro é baixado a cada entrada no aplicativo | Parcial |
 | P2-4 | Bloqueio de rede dos workers contornável pelo protótipo; código duplicado | Corrigido |
 | P2-5 | Motor de Python sem bloqueio de rede (`from js import fetch`) | Corrigido |
-| P2-6 | Laço infinito numa página do aluno pode congelar a aba no celular | Pendente |
+| P2-6 | Laço infinito numa página do aluno pode congelar a aba no celular | Corrigido |
 | P2-7 | Sem cabeçalhos de segurança HTTP | Parcial |
 | P2-8 | `service_role` legada não era reconhecida como chave secreta | Corrigido |
 | P2-9 | Ferramentas de dev com vulnerabilidades (Vite 5, Vitest 2); DOMPurify via Monaco | Pendente |
@@ -443,7 +443,7 @@ Legenda de estado: **Corrigido** (com teste, nesta rodada), **Parcial**,
   novo em `e2e/python.spec.ts` roda `js.fetch(...)` numa aula — antes a saída
   dizia "REDE: aberta", agora "fechada" —, e as 10 aulas continuam fechando.
 
-#### P2-6 · Laço infinito no motor de página — Pendente
+#### P2-6 · Laço infinito no motor de página — Corrigido
 - **Arquivo:** `pagina.ts`
 - **Por quê:** o iframe `sandbox` de `srcdoc` roda no mesmo processo da página
   na maior parte dos celulares (o isolamento de iframes sandbox é de desktop).
@@ -452,6 +452,17 @@ Legenda de estado: **Corrigido** (com teste, nesta rodada), **Parcial**,
 - **Solução:** instrumentar laços do código do aluno (checar o relógio a cada
   volta e lançar ao passar do prazo) usando o compilador que o motor 2 já
   carrega, como fazem CodePen e JS Bin.
+- **Feito (2026-09-26):** `lib/protecao-de-laco.ts`. Sem compilador: um leitor
+  de símbolos (textos, modelos, regex, comentários) acha `while (`/`for (` de
+  verdade e põe a guarda **na condição** — `while (guarda() && (cond))` —,
+  o que dispensa achar o fim do corpo e deixa a guarda fora de qualquer `try`
+  do aluno. A guarda mede o tempo sem a thread ser solta (um `setTimeout(0)`
+  zera a conta) e lança "Laço sem fim: …" em 1,5 s. Página e React (só o
+  código do aluno; as bibliotecas não). `for…of`/`for…in` ficam de fora, por
+  decisão. Provas: 20 testes de forma, jsdom (carregamento e clique), React,
+  os programas de JavaScript do catálogo instrumentados fazendo o mesmo, e E2E
+  no Chromium (celular e desktop) com `while` sem fim; sabotados a forma e a
+  ligação no documento.
 
 #### P2-7 · Sem cabeçalhos de segurança — Parcial
 - **Arquivo:** `vercel.json`
@@ -682,7 +693,7 @@ a compra agora também tem trava no contexto e no banco.
 | Motor | Isolamento | Prazo | Rede | Observação |
 | --- | --- | --- | --- | --- |
 | Sandbox JS | Worker descartável | 3 s depois do `pronto` + 2 s por teste | trancada (**agora na cadeia inteira**) | sem DOM; `postMessage` forjável só engana o próprio aluno |
-| Página/React | iframe `sandbox` sem `allow-same-origin`, CSP `default-src 'none'` | prazo na thread principal | CSP + `fetch` dublado | laço infinito pode congelar a aba no celular (P2-6); `allow-modals` permite `alert` em laço (autoinfligido) |
+| Página/React | iframe `sandbox` sem `allow-same-origin`, CSP `default-src 'none'` | guarda de laço (1,5 s) + prazo na thread principal | CSP + `fetch` dublado | `for…of` sobre gerador infinito não é guardado (raro); `allow-modals` permite `alert` em laço (autoinfligido) |
 | TypeScript | compilação no worker do Monaco, execução no sandbox JS | idem | idem | — |
 | SQL | worker vivo com sql.js | 3 s, worker descartado ao estourar | sem rede | — |
 | Servidor/aplicação | sandbox JS ou worker com SQLite | idem | trancada (agora na cadeia) | — |

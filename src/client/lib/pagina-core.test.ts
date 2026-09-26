@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { interpretarMensagem, montarDocumento, TIPO_DA_MENSAGEM } from './pagina-core';
 import { rodarPaginaNoJsdom } from './pagina-jsdom';
+import { LIMITE_DO_LACO_MS, MENSAGEM_DO_LACO, NOME_DO_ERRO_DO_LACO } from './protecao-de-laco';
 
 /**
  * O motor de página, rodando de verdade — no jsdom, com o mesmo documento que
@@ -206,5 +207,43 @@ describe('o que a página do aluno recebe no lugar do que a origem opaca não te
     );
     expect(r.error).toBeUndefined();
     expect(r.testResults[0].passed).toBe(true);
+  });
+});
+
+describe('laço sem fim na página (P2-6)', () => {
+  // Um laço que só termina depois do dobro do limite: sem a guarda, ele
+  // demora e o teste falha pela mensagem ausente — um `while (true)` de
+  // verdade travaria o próprio executor de testes, que roda na mesma thread.
+  const LACO_LONGO = `const fim = Date.now() + ${LIMITE_DO_LACO_MS * 2}; while (Date.now() < fim) {}`;
+
+  it('o laço no carregamento é interrompido, com a mensagem, e os testes ainda rodam', async () => {
+    const r = await rodarPaginaNoJsdom(`<h1>x</h1><script>${LACO_LONGO}</script>`, [
+      { description: 'o h1 está lá', assertion: `if (!document.querySelector('h1')) throw new Error('sem h1');` },
+    ]);
+
+    expect(r.error).toBe(`${NOME_DO_ERRO_DO_LACO}: ${MENSAGEM_DO_LACO}`);
+    expect(r.testResults[0].passed).toBe(true);
+  });
+
+  it('o laço num clique é interrompido: a página continua, e o erro aparece', async () => {
+    // Exceção de manipulador não volta para quem chamou `click()` — vai para o
+    // `error` da janela, como no navegador. O teste segue e confere o efeito
+    // que o laço impediu.
+    const r = await rodarPaginaNoJsdom(
+      `<button id="b">ir</button>
+       <script>
+         const b = document.getElementById('b');
+         b.addEventListener('click', () => { ${LACO_LONGO}; b.textContent = 'feito'; });
+       </script>`,
+      [
+        {
+          description: 'clicar termina o trabalho',
+          assertion: `const b = document.getElementById('b'); b.click(); if (b.textContent !== 'feito') throw new Error('o clique não terminou');`,
+        },
+      ]
+    );
+
+    expect(r.error).toBe(`${NOME_DO_ERRO_DO_LACO}: ${MENSAGEM_DO_LACO}`);
+    expect(r.testResults[0].passed).toBe(false);
   });
 });
