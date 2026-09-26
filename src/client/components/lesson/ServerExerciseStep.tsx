@@ -7,6 +7,7 @@ import { executarServidor } from '../../lib/servidor';
 import type { Troca } from '../../lib/servidor-core';
 import type { RetratoDeTabela } from '../../lib/sql-core';
 import { useRecordAttempt } from '../../hooks/useRecordAttempt';
+import { primeiraFalha } from '../../lib/resposta';
 import { useReportarEstado } from '../../hooks/useReportarEstado';
 import { Button } from '../ui/Button';
 import { Card, SectionLabel } from '../ui/Card';
@@ -168,6 +169,8 @@ export function ServerExerciseStep({ exercise, lessonId, onEstado }: ServerExerc
         concepts: exercise.concepts,
         correct: acertou,
         hintsUsed: dicasAbertas,
+        resposta: { tipo: 'codigo', codigo: enviado },
+        feedback: primeiraFalha(execucao),
       });
     }
   };

@@ -228,6 +228,7 @@ export function OrderSteps({
       concepts: exercise.concepts,
       correct: acertou,
       hintsUsed: dicasAbertas,
+      resposta: { tipo: 'ordem', ids: arranjo.map((p) => p.id) },
     });
   };
 

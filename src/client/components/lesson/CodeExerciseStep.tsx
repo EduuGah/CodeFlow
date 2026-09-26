@@ -8,6 +8,7 @@ import { SANDBOX_DO_IFRAME } from '../../lib/pagina-core';
 import { abrirServidorVivo, type ExecutionResult } from '../../lib/sandbox';
 import { montarCodigoDoServidor } from '../../lib/servidor-core';
 import { useRecordAttempt } from '../../hooks/useRecordAttempt';
+import { primeiraFalha } from '../../lib/resposta';
 import { useReportarEstado } from '../../hooks/useReportarEstado';
 import { Button } from '../ui/Button';
 import { Card, SectionLabel } from '../ui/Card';
@@ -148,6 +149,8 @@ export function CodeExerciseStep({
         concepts: exercise.concepts,
         correct: acertou,
         hintsUsed: dicasAbertas,
+        resposta: { tipo: 'codigo', codigo: enviado },
+        feedback: primeiraFalha(execucao),
       });
     }
   };

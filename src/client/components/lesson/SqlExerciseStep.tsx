@@ -6,6 +6,7 @@ import type { ExerciseState, OnExerciseState } from '../../lib/exercise-state';
 import { executarSqlNoNavegador, prepararMotorSql } from '../../lib/sql';
 import type { ResultadoSql, Saida } from '../../lib/sql-core';
 import { useRecordAttempt } from '../../hooks/useRecordAttempt';
+import { primeiraFalha } from '../../lib/resposta';
 import { useReportarEstado } from '../../hooks/useReportarEstado';
 import { Button } from '../ui/Button';
 import { Card, SectionLabel } from '../ui/Card';
@@ -108,6 +109,8 @@ export function SqlExerciseStep({ exercise, lessonId, onEstado }: SqlExerciseSte
         concepts: exercise.concepts,
         correct: acertou,
         hintsUsed: dicasAbertas,
+        resposta: { tipo: 'codigo', codigo: enviado },
+        feedback: primeiraFalha(execucao),
       });
     }
   };

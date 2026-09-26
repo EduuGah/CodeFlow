@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest';
 
 import { ITENS, MOEDAS } from '../src/client/lib/economia';
 import { POR_PERIODO, RECOMPENSA } from '../src/client/lib/desafios';
+import { type RespostaEnviada, resumirFeedback, resumirResposta } from '../src/client/lib/resposta';
 
 /**
  * Conferência estática das migrações.
@@ -126,6 +127,15 @@ describe('as tabelas esperadas existem', () => {
     for (const coluna of ['user_id', 'exercise_id', 'lesson_id', 'concepts', 'correct', 'hints_used', 'created_at']) {
       expect(TABELAS.get('exercise_attempts'), `exercise_attempts.${coluna}`).toContain(coluna);
     }
+  });
+
+  it('exercise_attempts guarda o que o Caderno de Erros mostra', () => {
+    // Os nomes usados em `recordAttempt` e `fetchAttempts`.
+    for (const coluna of ['resposta', 'feedback']) {
+      expect(TABELAS.get('exercise_attempts'), `exercise_attempts.${coluna}`).toContain(coluna);
+    }
+    // A evidência também não se reescreve.
+    expect(tudo).not.toMatch(/on public\.exercise_attempts\s+for (update|delete)/i);
   });
 });
 
@@ -291,5 +301,48 @@ describe('a loja no banco', () => {
     }
     // O agregado responde só a admin.
     expect(zero9).toMatch(/function public\.desempenho_por_exercicio[\s\S]*?where public\.is_admin\(\)/i);
+  });
+});
+
+describe('o caderno no banco', () => {
+  const zero10 = semComentarios(sql.find((f) => f.nome.startsWith('0010'))!.texto);
+  const tetoDaResposta = Number(zero10.match(/octet_length\(resposta::text\) <= (\d+)/)![1]);
+  const tetoDoFeedback = Number(zero10.match(/char_length\(feedback\) <= (\d+)/)![1]);
+
+  /** Os bytes do JSON como o Postgres imprime um jsonb: com espaço depois de `:` e `,`. */
+  function bytesNoBanco(resposta: RespostaEnviada): number {
+    return Buffer.byteLength(JSON.stringify(resposta)) + 2 * Object.keys(resposta).length;
+  }
+
+  it('o pior caso que o navegador manda cabe no teto do banco', () => {
+    // Um teto abaixo disso faria a tentativa perder a resposta sem ninguém
+    // perceber (`recordAttempt` grava sem ela quando o banco recusa). O pior
+    // caso: cada caractere o mais caro possível em UTF-8 ou em escape.
+    const caros = ['中', '"', '\\', '\n'];
+    for (const c of caros) {
+      const longo = c.repeat(20_000);
+      const casos: RespostaEnviada[] = [
+        { tipo: 'codigo', codigo: longo },
+        { tipo: 'previsao', texto: longo },
+        { tipo: 'lacunas', valores: Array.from({ length: 100 }, () => longo) },
+        { tipo: 'ordem', ids: Array.from({ length: 100 }, () => longo) },
+      ];
+      for (const caso of casos) {
+        expect(bytesNoBanco(resumirResposta(caso)), `${caso.tipo} com ${JSON.stringify(c)}`).toBeLessThanOrEqual(
+          tetoDaResposta
+        );
+      }
+    }
+  });
+
+  it('o retorno mais longo que o navegador manda cabe no teto do banco', () => {
+    expect(resumirFeedback('x'.repeat(10_000))!.length).toBeLessThanOrEqual(tetoDoFeedback);
+  });
+
+  it('a conta de demonstração não guarda texto livre', () => {
+    // A conta `aluno` é uma só para todo visitante: o que um escreve apareceria
+    // no caderno do próximo.
+    expect(zero10).toMatch(/create trigger resposta_da_demo\s+before insert on public\.exercise_attempts/i);
+    expect(zero10).toContain(`not in ('alternativa', 'linha', 'ordem')`);
   });
 });

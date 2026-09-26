@@ -6,6 +6,7 @@ import { avaliarRestricoes, todasCumpridas, type ResultadoDeRestricao } from '..
 import { executarNaLinguagem } from '../../lib/executar';
 import type { ExecutionResult } from '../../lib/sandbox';
 import { useRecordAttempt } from '../../hooks/useRecordAttempt';
+import { primeiraFalha } from '../../lib/resposta';
 import { useReportarEstado } from '../../hooks/useReportarEstado';
 import { IconCheck, IconClose, IconPlay } from '../ui/Icon';
 import { Card, SectionLabel } from '../ui/Card';
@@ -99,12 +100,19 @@ export function Refactor({
       execucao.testResults.length > 0 && execucao.testResults.every((t) => t.passed);
 
     if (enviado !== codigoVerificado) {
+      const restricoes = avaliarRestricoes(enviado, exercise.constraints);
+      const naoCumprida = restricoes.find((r) => !r.cumprida);
       registrar({
         exerciseId: exercise.id,
         lessonId,
         concepts: exercise.concepts,
-        correct: passouTudo && todasCumpridas(avaliarRestricoes(enviado, exercise.constraints)),
+        correct: passouTudo && todasCumpridas(restricoes),
         hintsUsed: dicasAbertas,
+        resposta: { tipo: 'codigo', codigo: enviado },
+        // O comportamento vem antes da forma: é o que a tela mostra primeiro.
+        feedback:
+          primeiraFalha(execucao) ??
+          (naoCumprida ? `${naoCumprida.description}: ${naoCumprida.motivo ?? 'não cumprida'}` : undefined),
       });
     }
   };

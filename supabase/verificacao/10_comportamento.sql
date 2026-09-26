@@ -180,6 +180,65 @@ select verificacao.recusa(
   'ritmo_excedido', 'a 121ª tentativa no mesmo minuto'
 );
 
+-- ------------------------------------------------------------ caderno
+-- A (não D: o ritmo dele acabou de estourar) grava o que respondeu.
+select set_config('request.jwt.claims', '{"sub": "00000000-0000-4000-8000-00000000000a", "email": "a@teste.local"}', true);
+insert into public.exercise_attempts (user_id, exercise_id, lesson_id, correct, resposta, feedback)
+values (auth.uid(), 'ex-cad', 'aula-1', false, '{"tipo": "codigo", "codigo": "return 1"}', 'Esperado 2, recebido 1.');
+select verificacao.ok(
+  (select resposta->>'codigo' from public.exercise_attempts where user_id = auth.uid() and exercise_id = 'ex-cad') = 'return 1',
+  'a tentativa guarda o que foi enviado'
+);
+select verificacao.recusa(
+  $$insert into public.exercise_attempts (user_id, exercise_id, lesson_id, correct, resposta) values (auth.uid(), 'ex-cad', 'aula-1', false, jsonb_build_object('tipo', 'codigo', 'codigo', repeat('x', 20000)))$$,
+  'exercise_attempts_resposta_formato', 'resposta acima do teto em bytes'
+);
+select verificacao.recusa(
+  $$insert into public.exercise_attempts (user_id, exercise_id, lesson_id, correct, resposta) values (auth.uid(), 'ex-cad', 'aula-1', false, '[1, 2]')$$,
+  'exercise_attempts_resposta_formato', 'resposta que não é objeto'
+);
+select verificacao.recusa(
+  $$insert into public.exercise_attempts (user_id, exercise_id, lesson_id, correct, feedback) values (auth.uid(), 'ex-cad', 'aula-1', false, repeat('x', 601))$$,
+  'exercise_attempts_resposta_formato', 'retorno acima do teto'
+);
+-- Sem policy de update, o RLS não deixa a linha ser alcançada: o UPDATE passa
+-- e não muda nada.
+update public.exercise_attempts set resposta = null, feedback = null where user_id = auth.uid();
+select verificacao.ok(
+  (select resposta is not null and feedback is not null from public.exercise_attempts where user_id = auth.uid() and exercise_id = 'ex-cad'),
+  'a evidência não se reescreve'
+);
+
+-- Um aluno não lê o caderno de outro.
+select set_config('request.jwt.claims', '{"sub": "00000000-0000-4000-8000-00000000000b", "email": "b@teste.local"}', true);
+select verificacao.ok(
+  (select count(*) from public.exercise_attempts where exercise_id = 'ex-cad') = 0,
+  'o caderno de A não aparece para B'
+);
+
+-- A conta de demonstração (a da 0008): o que é texto livre não fica.
+reset role;
+select set_config(
+  'request.jwt.claims',
+  json_build_object('sub', (select id from auth.users where email = 'aluno@demo.codeflow.app'), 'email', 'aluno@demo.codeflow.app')::text,
+  true
+);
+set local role authenticated;
+insert into public.exercise_attempts (user_id, exercise_id, lesson_id, correct, resposta, feedback) values
+  (auth.uid(), 'ex-codigo', 'aula-1', false, '{"tipo": "codigo", "codigo": "o que um visitante escreveu"}', 'recebido: o que um visitante escreveu'),
+  (auth.uid(), 'ex-escolha', 'aula-1', false, '{"tipo": "alternativa", "indice": 2}', 'Quase.');
+select verificacao.ok(
+  (select resposta is null and feedback is null from public.exercise_attempts where user_id = auth.uid() and exercise_id = 'ex-codigo'),
+  'demo: código e retorno não ficam'
+);
+select verificacao.ok(
+  (select resposta->>'indice' = '2' and feedback is null from public.exercise_attempts where user_id = auth.uid() and exercise_id = 'ex-escolha'),
+  'demo: a alternativa fica; o retorno, não'
+);
+
+-- De volta a D, que é quem as verificações seguintes usam.
+select set_config('request.jwt.claims', '{"sub": "00000000-0000-4000-8000-00000000000d", "email": "d@teste.local"}', true);
+
 -- ------------------------------------------------------------ perfil
 select verificacao.recusa(
   $$update public.users set display_name = repeat('n', 61) where id = auth.uid()$$,

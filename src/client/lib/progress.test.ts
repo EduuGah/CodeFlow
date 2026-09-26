@@ -38,6 +38,7 @@ const dublê = vi.hoisted(() => {
         return construtor;
       },
       eq: () => construtor,
+      not: () => construtor,
       order: () => construtor,
       range(de: number, ate: number) {
         c.faixa = [de, ate];
@@ -77,7 +78,8 @@ const dublê = vi.hoisted(() => {
 
 vi.mock('./supabase', () => ({ supabase: dublê.cliente }));
 
-const { fetchAttempts, fetchExercisePerformance, LINHAS_POR_PAGINA, markLessonCompleted } = await import('./progress');
+const { fetchAttempts, fetchEvidencias, fetchExercisePerformance, LINHAS_POR_PAGINA, markLessonCompleted, recordAttempt } =
+  await import('./progress');
 const { fetchPurchases, recordPurchase } = await import('./perfil');
 
 const SEM_FUNCAO = { code: 'PGRST202', message: 'Could not find the function public.concluir in the schema cache' };
@@ -271,5 +273,100 @@ describe('o desempenho do painel de administração', () => {
     await fetchExercisePerformance();
 
     expect(dublê.estado.chamadas.map((c) => c.rpc ?? c.tabela)).toEqual(['desempenho_por_exercicio', 'exercise_performance']);
+  });
+});
+
+describe('a tentativa e o que foi respondido (Caderno de Erros)', () => {
+  const base = { exerciseId: 'ex-1', lessonId: 'aula-1', concepts: ['laços'], hintsUsed: 0 };
+  const inserts = () => dublê.estado.chamadas.filter((c) => c.op === 'insert').map((c) => c.corpo as Record<string, unknown>);
+
+  it('errou: a resposta e o retorno vão junto, já cortados', async () => {
+    await recordAttempt('u1', {
+      ...base,
+      correct: false,
+      resposta: { tipo: 'codigo', codigo: 'x'.repeat(10_000) },
+      feedback: '  Esperado 2, recebido 1.  ',
+    });
+
+    const [corpo] = inserts();
+    expect((corpo.resposta as { codigo: string }).codigo.length).toBeLessThan(10_000);
+    expect(corpo.feedback).toBe('Esperado 2, recebido 1.');
+  });
+
+  it('acertou: só o fato — o caderno só mostra erro', async () => {
+    await recordAttempt('u1', { ...base, correct: true, resposta: { tipo: 'alternativa', indice: 1 }, feedback: 'ok' });
+
+    const [corpo] = inserts();
+    expect(corpo).not.toHaveProperty('resposta');
+    expect(corpo).not.toHaveProperty('feedback');
+  });
+
+  it('banco sem a 0010: grava a tentativa de novo, sem a resposta', async () => {
+    // A tentativa conta para sequência, XP e domínio; perder a evidência não
+    // pode levar o fato junto.
+    dublê.estado.responder = (c) =>
+      c.op === 'insert' && (c.corpo as Record<string, unknown>).resposta
+        ? { data: null, error: { code: 'PGRST204', message: "Could not find the 'resposta' column of 'exercise_attempts'" } }
+        : { data: null, error: null };
+
+    await recordAttempt('u1', { ...base, correct: false, resposta: { tipo: 'alternativa', indice: 1 } });
+
+    const feitos = inserts();
+    expect(feitos).toHaveLength(2);
+    expect(feitos[1]).not.toHaveProperty('resposta');
+    expect(feitos[1]).toMatchObject({ exercise_id: 'ex-1', correct: false });
+  });
+
+  it('resposta acima do teto do banco: também grava sem ela', async () => {
+    dublê.estado.responder = (c) =>
+      c.op === 'insert' && (c.corpo as Record<string, unknown>).resposta
+        ? { data: null, error: { code: '23514', message: 'new row violates check constraint "exercise_attempts_resposta_formato"' } }
+        : { data: null, error: null };
+
+    await recordAttempt('u1', { ...base, correct: false, resposta: { tipo: 'codigo', codigo: '\u0001'.repeat(4000) } });
+
+    expect(inserts()).toHaveLength(2);
+  });
+
+  it('qualquer outra recusa não vira segunda gravação', async () => {
+    // O ritmo estourado, a rede: tentar de novo sem a resposta não resolveria,
+    // e dobraria a escrita.
+    dublê.estado.responder = () => ({ data: null, error: { code: '54000', message: 'ritmo_excedido' } });
+
+    await recordAttempt('u1', { ...base, correct: false, resposta: { tipo: 'alternativa', indice: 1 } });
+
+    expect(inserts()).toHaveLength(1);
+  });
+
+  it('a leitura traz o que foi respondido e recusa o que não tem formato', async () => {
+    dublê.estado.responder = () => ({
+      data: [
+        { exercise_id: 'ex-1', resposta: { tipo: 'linha', linha: 3 }, feedback: 'O sintoma.', created_at: '2026-03-02' },
+        { exercise_id: 'ex-2', resposta: { tipo: 'inventado' }, feedback: null, created_at: '2026-03-01' },
+      ],
+      error: null,
+      count: 2,
+    });
+
+    const { dados, erro } = await fetchEvidencias('u1');
+
+    expect(erro).toBeUndefined();
+    expect(dados.map((d) => d.resposta)).toEqual([{ tipo: 'linha', linha: 3 }, null]);
+    expect(dados[0].feedback).toBe('O sintoma.');
+  });
+
+  it('banco sem a 0010: a leitura volta vazia e sem erro — não há o que mostrar, e isso não é falha', async () => {
+    dublê.estado.responder = () => ({
+      data: null,
+      error: { code: '42703', message: 'column exercise_attempts.resposta does not exist' },
+    });
+
+    expect(await fetchEvidencias('u1')).toEqual({ dados: [] });
+  });
+
+  it('uma falha de rede, sim, é dita', async () => {
+    dublê.estado.responder = () => ({ data: null, error: { message: 'Failed to fetch' } });
+
+    expect((await fetchEvidencias('u1')).erro).toMatch(/Não foi possível/);
   });
 });

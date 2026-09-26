@@ -97,6 +97,13 @@ export function WriteTest({
         concepts: exercise.concepts,
         correct: resultado.aprovado,
         hintsUsed: dicasAbertas,
+        resposta: { tipo: 'codigo', codigo: enviado },
+        feedback: !resultado.referenciaPassou
+          ? `Recusam a implementação correta — ${resultado.erroNaReferencia ?? ''}`
+          : resultado.sabotagens
+              .filter((s) => !s.pego)
+              .map((s) => `Não percebem: ${s.description}`)
+              .join('\n') || undefined,
       });
     }
   };

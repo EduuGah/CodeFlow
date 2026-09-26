@@ -8,6 +8,7 @@ import { executarPagina } from '../../lib/pagina';
 import { SANDBOX_DO_IFRAME } from '../../lib/pagina-core';
 import type { ExecutionResult } from '../../lib/sandbox';
 import { useRecordAttempt } from '../../hooks/useRecordAttempt';
+import { primeiraFalha } from '../../lib/resposta';
 import { useFocusRescue } from '../../hooks/useFocusRescue';
 import { useReportarEstado } from '../../hooks/useReportarEstado';
 import { IconCheck, IconClose, IconPlay } from '../ui/Icon';
@@ -132,6 +133,8 @@ export function FillBlank({
         concepts: exercise.concepts,
         correct: acertou,
         hintsUsed: dicasAbertas,
+        resposta: { tipo: 'lacunas', valores: respostas },
+        feedback: primeiraFalha(execucao),
       });
     }
   };

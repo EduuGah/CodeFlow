@@ -5,7 +5,8 @@ import { describe, expect, it, vi } from 'vitest';
 import type { FindBugExercise } from '../../../content/types';
 import { FindBug } from './FindBug';
 
-vi.mock('../../hooks/useRecordAttempt', () => ({ useRecordAttempt: () => () => {} }));
+const registrar = vi.hoisted(() => vi.fn());
+vi.mock('../../hooks/useRecordAttempt', () => ({ useRecordAttempt: () => registrar }));
 
 const EXERCICIO: FindBugExercise = {
   id: 'ex-teste-bug',
@@ -158,5 +159,23 @@ describe('estado reportado à aula', () => {
 
     expect(vistos[vistos.length - 1]).toBe('errou');
     expect(vistos).not.toContain('acertou');
+  });
+});
+
+describe('o que fica registrado para o Caderno de Erros', () => {
+  it('a linha apontada, e o retorno próprio de quem aponta o sintoma', async () => {
+    registrar.mockClear();
+    const user = userEvent.setup();
+    render(<FindBug exercise={EXERCICIO} lessonId="aula" />);
+
+    await apontar(user, 4);
+
+    expect(registrar).toHaveBeenCalledWith(
+      expect.objectContaining({
+        correct: false,
+        resposta: { tipo: 'linha', linha: 4 },
+        feedback: EXERCICIO.symptomFeedback,
+      })
+    );
   });
 });

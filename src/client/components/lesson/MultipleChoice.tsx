@@ -64,6 +64,7 @@ export function MultipleChoice({
       concepts: exercise.concepts,
       correct: selecionada === exercise.correctIndex,
       hintsUsed: dicasAbertas,
+      resposta: { tipo: 'alternativa', indice: selecionada },
     });
   };
 

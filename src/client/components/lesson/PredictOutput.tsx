@@ -85,6 +85,8 @@ export function PredictOutput({
       concepts: exercise.concepts,
       correct: normalizar(previsao) === normalizar(real),
       hintsUsed: dicasAbertas,
+      resposta: { tipo: 'previsao', texto: previsao },
+      feedback: `Resultado real: ${real || '(nenhuma saída)'}`,
     });
   };
 

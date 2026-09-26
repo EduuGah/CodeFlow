@@ -101,6 +101,16 @@ describe('resposta errada', () => {
       expect.objectContaining({ exerciseId: 'ex-teste', correct: false, hintsUsed: 0 })
     );
   });
+
+  it('registra qual alternativa foi marcada, para o Caderno de Erros', async () => {
+    const { user } = montar();
+
+    await user.click(screen.getByRole('radio', { name: 'Seis' }));
+    await user.click(verificar());
+
+    // "Seis" é a terceira de `options`: o índice é o do catálogo, não o da tela.
+    expect(registrar).toHaveBeenCalledWith(expect.objectContaining({ resposta: { tipo: 'alternativa', indice: 2 } }));
+  });
 });
 
 describe('resposta certa', () => {

@@ -75,6 +75,8 @@ export function FindBug({
       concepts: exercise.concepts,
       correct: escolhida === exercise.buggyLine,
       hintsUsed: dicasAbertas,
+      resposta: { tipo: 'linha', linha: escolhida },
+      feedback: escolhida === exercise.symptomLine ? exercise.symptomFeedback : undefined,
     });
   };
 

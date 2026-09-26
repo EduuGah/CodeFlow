@@ -2,6 +2,7 @@ import { supabase } from './supabase';
 import type { Attempt } from './mastery';
 import type { FlashcardReview, ReviewRating } from './review';
 import type { ExercisePerformance } from './admin';
+import { lerResposta, resumirFeedback, resumirResposta, type EvidenciaDoErro, type RespostaEnviada } from './resposta';
 
 export interface UserProgress {
   completedLessons: string[];
@@ -170,6 +171,24 @@ export interface AttemptInput {
   concepts: string[];
   correct: boolean;
   hintsUsed: number;
+  /** O que foi enviado. Só é gravado quando errou: é para o Caderno de Erros. */
+  resposta?: RespostaEnviada;
+  /** O retorno que a pessoa leu — a primeira falha, a mensagem do sintoma. */
+  feedback?: string;
+}
+
+/**
+ * A recusa que autoriza gravar a tentativa sem a resposta: o banco ainda sem a
+ * 0010 (coluna que não existe), ou uma resposta que passou do teto dela. A
+ * tentativa é o fato — conta para sequência, XP e domínio; a resposta é só a
+ * evidência, e perder a evidência não pode levar o fato junto.
+ */
+function semLugarParaResposta(error: { code?: string; message?: string }): boolean {
+  return (
+    error.code === 'PGRST204' || // coluna fora do schema cache
+    error.code === '42703' || // undefined_column
+    /exercise_attempts_resposta_formato/.test(error.message ?? '')
+  );
 }
 
 /**
@@ -182,14 +201,26 @@ export interface AttemptInput {
 export async function recordAttempt(userId: string, attempt: AttemptInput): Promise<void> {
   if (!supabase) return;
 
-  const { error } = await supabase.from('exercise_attempts').insert({
+  const linha = {
     user_id: userId,
     exercise_id: attempt.exerciseId,
     lesson_id: attempt.lessonId,
     concepts: attempt.concepts,
     correct: attempt.correct,
     hints_used: attempt.hintsUsed,
-  });
+  };
+  const feedback = resumirFeedback(attempt.feedback);
+  const evidencia = attempt.correct
+    ? {}
+    : {
+        ...(attempt.resposta ? { resposta: resumirResposta(attempt.resposta) } : {}),
+        ...(feedback ? { feedback } : {}),
+      };
+
+  let { error } = await supabase.from('exercise_attempts').insert({ ...linha, ...evidencia });
+  if (error && Object.keys(evidencia).length > 0 && semLugarParaResposta(error)) {
+    ({ error } = await supabase.from('exercise_attempts').insert(linha));
+  }
 
   if (error) console.error('Falha ao registrar tentativa:', error.message);
 }
@@ -261,6 +292,54 @@ export async function fetchAttempts(userId: string): Promise<Leitura<Attempt>> {
       concepts: row.concepts ?? [],
       correct: row.correct,
       hintsUsed: row.hints_used ?? 0,
+      createdAt: row.created_at,
+    })),
+  };
+}
+
+/**
+ * O que a pessoa enviou nas tentativas erradas, da mais recente para a mais
+ * antiga — para o Caderno de Erros.
+ *
+ * Fora de `fetchAttempts` de propósito: aquela leitura alimenta o aplicativo
+ * inteiro, e o código enviado é o que ela tem de mais pesado. Esta só roda na
+ * tela do caderno, e só traz as erradas que têm o que mostrar.
+ */
+export async function fetchEvidencias(userId: string): Promise<Leitura<EvidenciaDoErro>> {
+  if (!supabase) return { dados: [] };
+  const cliente = supabase;
+
+  const leitura = await lerTodasAsPaginas<{
+    exercise_id: string;
+    resposta: unknown;
+    feedback: string | null;
+    created_at: string;
+  }>((de, ate) =>
+    cliente
+      .from('exercise_attempts')
+      .select('exercise_id, resposta, feedback, created_at', { count: de === 0 ? 'exact' : undefined })
+      .eq('user_id', userId)
+      .eq('correct', false)
+      .not('resposta', 'is', null)
+      .order('created_at', { ascending: false })
+      .order('id', { ascending: false })
+      .range(de, ate)
+  );
+
+  if (leitura.erro) {
+    // Banco sem a 0010: não há evidência para mostrar, e isso não é falha.
+    if (/resposta|feedback/.test(leitura.erro) && /does not exist|could not find/i.test(leitura.erro)) {
+      return { dados: [] };
+    }
+    console.error('Falha ao buscar o que foi respondido:', leitura.erro);
+  }
+
+  return {
+    erro: leitura.erro ? 'Não foi possível carregar o que você respondeu.' : undefined,
+    dados: leitura.dados.map((row) => ({
+      exerciseId: row.exercise_id,
+      resposta: lerResposta(row.resposta),
+      feedback: row.feedback,
       createdAt: row.created_at,
     })),
   };

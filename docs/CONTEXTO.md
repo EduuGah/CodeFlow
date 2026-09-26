@@ -361,10 +361,11 @@ src/client/pages/app/   Início é a aula da vez + o percurso; Trilhas é o
                         `/aparencia`, `/progresso` (XP com a partição, barra
                         por trilha, domínio por conceito)
 e2e/                    Playwright; `fixtures.ts` tem o dublê do Supabase
-supabase/migrations/    0001 a 0009, aplicadas em ordem (0009: conclusão atômica,
-                        admin sem PII, demo imutável, compra no servidor,
-                        ritmo de escrita; 0007: perfil, loja, fotos;
-                        0008: contas de demonstração)
+supabase/migrations/    0001 a 0010, aplicadas em ordem (0010: o que foi
+                        respondido em cada erro, para o Caderno de Erros;
+                        0009: conclusão atômica, admin sem PII, demo imutável,
+                        compra no servidor, ritmo de escrita; 0007: perfil,
+                        loja, fotos; 0008: contas de demonstração)
 docs/curriculo.md       Roadmap de conteúdo — fonte canônica
 ```
 
@@ -916,6 +917,12 @@ JavaScript, Página, Git, Terminal, TypeScript, Web e o resto de Python.
 
 ## 9. Pendências do lado do usuário
 
+- **Rodar `supabase/migrations/0010_caderno_de_erros.sql` no SQL Editor.** Duas
+  colunas opcionais em `exercise_attempts` (`resposta`, `feedback`) com teto de
+  tamanho, e um gatilho que não guarda texto livre da conta de demonstração
+  (compartilhada entre visitantes). Sem ela, a tentativa é gravada sem a
+  resposta (`recordAttempt` tenta de novo sem as colunas) e o Caderno de Erros
+  mostra os erros sem "o que você respondeu".
 - **Rodar `supabase/migrations/0009_integridade.sql` no SQL Editor.** Conclusão
   atômica (`concluir`), painel de admin por agregado (as policies que deixavam a
   conta `admin`/`admin` ler e-mail e nome de todo mundo saem), contas de

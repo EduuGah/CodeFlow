@@ -106,11 +106,13 @@ no SQL Editor do Supabase. Todas são idempotentes.
 | `0007_perfil_e_loja.sql` | Perfil editável (nome, avatar, tema), a tabela `purchases` da loja e o bucket `avatars` do Storage para a foto |
 | `0008_contas_demo.sql` | Contas de demonstração `aluno`/`aluno` e `admin`/`admin`, para testar sem conta Google |
 | `0009_integridade.sql` | Conclusão de aula atômica, painel de admin por agregado (sem ler dados pessoais), contas demo imutáveis, compra validada no banco (`store_items` + `comprar_item`) e limite de ritmo de escrita |
+| `0010_caderno_de_erros.sql` | O que o aluno respondeu em cada erro (`resposta`, `feedback`), para o Caderno de Erros — sem texto livre na conta de demonstração |
 
 Sem a 0007, o aplicativo carrega, mas editar o perfil, comprar na loja e
 enviar foto falham — e a própria tela diz qual migração rodar. Sem a 0009, tudo
 funciona pelo caminho antigo, mas a compra e a conclusão não são validadas no
-banco e a conta `admin` de demonstração ainda enxerga os dados de todos.
+banco e a conta `admin` de demonstração ainda enxerga os dados de todos. Sem a
+0010, o Caderno de Erros lista os erros, mas não o que foi respondido.
 
 Para se tornar administrador depois de entrar pela primeira vez:
 
