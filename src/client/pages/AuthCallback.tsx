@@ -7,21 +7,32 @@ import { useAuth } from '../contexts/AuthContext';
 /** Segurança contra ficar girando para sempre se a sessão nunca chegar. */
 const TIMEOUT_MS = 15000;
 
+/**
+ * O que dizer para cada erro que o provedor devolve na URL.
+ *
+ * Só frases nossas, por código. A versão anterior mostrava o
+ * `error_description` da própria URL — texto que qualquer um escreve num link
+ * ("Sua conta foi bloqueada, ligue para…") e que a página exibia como se fosse
+ * dela. O detalhe original vai para o console, para quem depura.
+ */
+const ERROS_DO_PROVEDOR: Record<string, string> = {
+  access_denied: 'Você cancelou a autorização no Google. Nenhum dado foi acessado.',
+  server_error: 'O servidor de login falhou agora. Tente entrar de novo em alguns instantes.',
+  temporarily_unavailable: 'O login está indisponível no momento. Tente de novo em alguns instantes.',
+};
+
 /** Erro devolvido pelo próprio provedor na URL (consentimento negado, etc.). */
-function readProviderError(): string | null {
-  const query = new URLSearchParams(window.location.search);
-  const hash = new URLSearchParams(window.location.hash.slice(1));
-  const code = query.get('error') ?? hash.get('error');
+export function erroDoProvedor(search: string, hash: string): string | null {
+  const query = new URLSearchParams(search);
+  const fragmento = new URLSearchParams(hash.replace(/^#/, ''));
+  const code = query.get('error') ?? fragmento.get('error');
 
   if (!code) return null;
 
-  const description = query.get('error_description') ?? hash.get('error_description');
+  const descricao = query.get('error_description') ?? fragmento.get('error_description');
+  if (descricao) console.error(`Login recusado pelo provedor (${code}):`, descricao);
 
-  if (code === 'access_denied') {
-    return 'Você cancelou a autorização no Google. Nenhum dado foi acessado.';
-  }
-
-  return description ? description.replace(/\+/g, ' ') : `O provedor recusou o login (${code}).`;
+  return ERROS_DO_PROVEDOR[code] ?? 'O Google não concluiu o login. Tente entrar de novo.';
 }
 
 /**
@@ -35,7 +46,7 @@ function readProviderError(): string | null {
 export function AuthCallback() {
   const { user, authError } = useAuth();
   const [timedOut, setTimedOut] = useState(false);
-  const providerError = readProviderError();
+  const providerError = erroDoProvedor(window.location.search, window.location.hash);
 
   useEffect(() => {
     if (providerError) return;

@@ -36,18 +36,18 @@ Feito nesta rodada (na 0009 e no cliente):
 - [x] P2-8 `service_role` legada recusada
 
 A fazer, nesta ordem:
-1. **P2-5** trancar a rede do motor de Python depois da carga do Pyodide;
-   `sys.modules['js'] = None`. Prova: `e2e/python.spec.ts` inteiro + um teste
-   que tenta `from js import fetch`.
-2. **P2-7** cabeçalhos em `vercel.json` (nosniff, referrer, permissions); CSP em
-   `Report-Only` por uma semana antes de valer.
+1. [x] **P2-5** rede do motor de Python trancada depois da carga do Pyodide;
+   `e2e/python.spec.ts` inteiro verde e um teste que roda `js.fetch`.
+2. [x] **P2-7** cabeçalhos em `vercel.json` (nosniff, referrer, permissions).
+   Falta a CSP da aplicação (em `Report-Only` primeiro) e decidir
+   `frame-ancestors` — depende de saber se algum portfólio embute o site.
 3. **P1-10** catálogo de exercícios no banco, gerado do conteúdo pelo CI
    (`supabase/seed/catalogo.sql`, conferido por teste como o `store_items`), e
    `registrar_tentativa`/`concluir` validando id e pertinência à aula; `concluir`
    de aula exige todos os exercícios dela acertados no histórico.
 4. **P2-9** Vite 6+ e Vitest 3+ numa etapa própria; revalidar
    `semSourcemapNosGigantes`, `worker.format` e o E2E dos oito motores.
-5. **P3-9** mensagens do OAuth por código, sem texto da URL.
+5. [x] **P3-9** mensagens do OAuth por código, sem texto da URL.
 
 ## Fase 3 — Código e arquitetura
 

@@ -188,9 +188,9 @@ Legenda de estado: **Corrigido** (com teste, nesta rodada), **Parcial**,
 | P2-2 | Derivações O(dias × tentativas) recalculadas a cada mudança de estado | Pendente |
 | P2-3 | O histórico inteiro é baixado a cada entrada no aplicativo | Pendente |
 | P2-4 | Bloqueio de rede dos workers contornável pelo protótipo; código duplicado | Corrigido |
-| P2-5 | Motor de Python sem bloqueio de rede (`from js import fetch`) | Pendente |
+| P2-5 | Motor de Python sem bloqueio de rede (`from js import fetch`) | Corrigido |
 | P2-6 | Laço infinito numa página do aluno pode congelar a aba no celular | Pendente |
-| P2-7 | Sem cabeçalhos de segurança HTTP | Pendente |
+| P2-7 | Sem cabeçalhos de segurança HTTP | Parcial |
 | P2-8 | `service_role` legada não era reconhecida como chave secreta | Corrigido |
 | P2-9 | Ferramentas de dev com vulnerabilidades (Vite 5, Vitest 2); DOMPurify via Monaco | Pendente |
 | P2-10 | Fontes servidas pelo Google (terceiro, privacidade, falha offline) | Pendente |
@@ -210,7 +210,7 @@ Legenda de estado: **Corrigido** (com teste, nesta rodada), **Parcial**,
 | P3-6 | Nome e avatar sem limite no banco | Corrigido (0009) |
 | P3-7 | Login ignorava a rota de origem | Corrigido |
 | P3-8 | Validação Zod de todo o catálogo roda em produção | Pendente |
-| P3-9 | Texto de erro do provedor OAuth refletido da URL | Pendente |
+| P3-9 | Texto de erro do provedor OAuth refletido da URL | Corrigido |
 | P3-10 | "Novidades" vistas guardadas por aparelho | Pendente |
 | P3-11 | Rótulo ambíguo no cartão de XP do perfil | Pendente |
 
@@ -418,14 +418,14 @@ Legenda de estado: **Corrigido** (com teste, nesta rodada), **Parcial**,
   de protótipos e acrescenta `EventSource`, `Worker`, `SharedWorker` e
   `BroadcastChannel`. Testado no Node com um escopo de mesmo formato.
 
-#### P2-5 · Python sem bloqueio de rede — Pendente
+#### P2-5 · Python sem bloqueio de rede — Corrigido
 - **Arquivo:** `python.worker.ts`, `python-core.ts`
 - **Por quê:** o Pyodide expõe o escopo do worker ao Python (`import js`,
   `pyodide.http.pyfetch`).
 - **Solução:** depois de o Pyodide carregar (ele precisa de `fetch` para os
-  próprios arquivos), chamar `trancarGlobais(self)`; e, no prelúdio Python,
-  `sys.modules['js'] = None` e `sys.modules['pyodide.http'] = None`. Provar no
-  E2E de Python antes de dar por pronto.
+  próprios arquivos), `trancarGlobais(self)`. Provado no navegador: um teste
+  novo em `e2e/python.spec.ts` roda `js.fetch(...)` numa aula — antes a saída
+  dizia "REDE: aberta", agora "fechada" —, e as 10 aulas continuam fechando.
 
 #### P2-6 · Laço infinito no motor de página — Pendente
 - **Arquivo:** `pagina.ts`
@@ -437,10 +437,12 @@ Legenda de estado: **Corrigido** (com teste, nesta rodada), **Parcial**,
   volta e lançar ao passar do prazo) usando o compilador que o motor 2 já
   carrega, como fazem CodePen e JS Bin.
 
-#### P2-7 · Sem cabeçalhos de segurança — Pendente
+#### P2-7 · Sem cabeçalhos de segurança — Parcial
 - **Arquivo:** `vercel.json`
-- **Solução:** `X-Content-Type-Options: nosniff`, `Referrer-Policy:
-  strict-origin-when-cross-origin`, `Permissions-Policy` mínima e, depois de
+- **Feito:** `X-Content-Type-Options: nosniff`, `Referrer-Policy:
+  strict-origin-when-cross-origin` e `Permissions-Policy` (câmera, microfone,
+  localização, pagamento e periféricos desligados) em `vercel.json`.
+- **Falta:** depois de
   confirmar que ninguém embute o site (portfólio?), `frame-ancestors 'none'`.
   Uma CSP da aplicação precisa listar o Supabase, `wasm-unsafe-eval` (sql.js,
   Pyodide), `blob:`/`worker-src` e as fontes; testar em produção em modo
@@ -542,9 +544,11 @@ Só `console.error`. Proposta na seção "Observabilidade".
 - **P3-8 · Zod em produção — Pendente.** Toda a validação do catálogo roda a
   cada carga (medido: ~13 ms para as aulas no desktop; 3–4× no celular). O CI
   já prova o conteúdo; rodar só em `DEV`/teste tiraria também o Zod do pacote.
-- **P3-9 · Texto do provedor refletido — Pendente.** `AuthCallback` mostra o
-  `error_description` da URL (escapado pelo React, então não é XSS, mas permite
-  texto enganoso num link). Mostrar só mensagens conhecidas por código.
+- **P3-9 · Texto do provedor refletido — Corrigido.** `AuthCallback` mostrava o
+  `error_description` da URL (escapado pelo React, então não era XSS, mas
+  permitia texto enganoso num link). Agora só frases nossas, por código; o
+  detalhe vai ao console. As mensagens do Supabase em inglês também deixaram
+  de ser concatenadas na tela do login.
 - **P3-10 · Novidades por aparelho — Pendente.** O "já visto" mora no
   `localStorage`; o mesmo aviso reaparece em outro aparelho.
 - **P3-11 · Rótulo do XP no perfil — Pendente.** "Praticante no nível 5" embaixo

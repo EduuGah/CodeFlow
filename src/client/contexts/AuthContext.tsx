@@ -49,7 +49,9 @@ function describeAuthError(error: unknown): string {
       return `Supabase recusou a URL de redirecionamento (${window.location.origin}). Adicione-a em Authentication › URL Configuration › Redirect URLs.`;
     }
 
-    return `Não foi possível entrar com o Google: ${error.message}`;
+    // A mensagem do Supabase vem em inglês e em jargão; ela vai para o
+    // console (quem chama já registra o erro inteiro), e a pessoa lê a frase.
+    return 'Não foi possível entrar com o Google. Tente de novo em alguns instantes.';
   }
 
   if (error instanceof TypeError) {
@@ -69,7 +71,11 @@ function describePasswordError(error: unknown): string {
       return 'A entrada por e-mail e senha está desligada no seu projeto Supabase. Ative em Authentication › Providers › Email.';
     }
 
-    return `Não foi possível entrar: ${error.message}`;
+    if (/rate limit|too many/i.test(error.message)) {
+      return 'Muitas tentativas de entrar em pouco tempo. Espere um minuto e tente de novo.';
+    }
+
+    return 'Não foi possível entrar. Confira usuário e senha e tente de novo.';
   }
 
   return describeAuthError(error);

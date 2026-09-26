@@ -3,6 +3,7 @@
 import { loadPyodide } from 'pyodide';
 
 import { executarPython, type ExecucaoPython, type Interprete, type ResultadoPython } from './python-core';
+import { trancarGlobais } from './trancar-globais';
 
 /**
  * Worker do motor de Python (motor 6).
@@ -55,8 +56,16 @@ self.onmessage = async (evento: MessageEvent<ExecucaoPython>) => {
 // Só avisa que está pronto com o Pyodide carregado: é a partir daí que o
 // relógio da execução pode contar. A falha também é avisada, com a causa —
 // uma rejeição solta aqui dentro não chega ao `onerror` de quem criou o worker.
+//
+// A rede é trancada aqui, e não antes: o Pyodide busca os próprios arquivos
+// com `fetch` enquanto carrega. Depois disso o código do aluno — que alcança
+// o escopo do worker por `import js` — não tem mais `fetch`, `XMLHttpRequest`
+// nem o resto (o `e2e/python.spec.ts` prova, rodando `js.fetch` numa aula).
 void pyodide.then(
-  () => self.postMessage('pronto' satisfies MensagemDoWorker),
+  () => {
+    trancarGlobais(self);
+    self.postMessage('pronto' satisfies MensagemDoWorker);
+  },
   (erro: unknown) => {
     self.postMessage({ falha: erro instanceof Error ? erro.message : String(erro) } satisfies MensagemDoWorker);
   }
