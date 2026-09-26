@@ -105,9 +105,12 @@ no SQL Editor do Supabase. Todas são idempotentes.
 | `0006_promote_admin.sql` | Conserta o gatilho que impedia promover alguém a administrador |
 | `0007_perfil_e_loja.sql` | Perfil editável (nome, avatar, tema), a tabela `purchases` da loja e o bucket `avatars` do Storage para a foto |
 | `0008_contas_demo.sql` | Contas de demonstração `aluno`/`aluno` e `admin`/`admin`, para testar sem conta Google |
+| `0009_integridade.sql` | Conclusão de aula atômica, painel de admin por agregado (sem ler dados pessoais), contas demo imutáveis, compra validada no banco (`store_items` + `comprar_item`) e limite de ritmo de escrita |
 
 Sem a 0007, o aplicativo carrega, mas editar o perfil, comprar na loja e
-enviar foto falham — e a própria tela diz qual migração rodar.
+enviar foto falham — e a própria tela diz qual migração rodar. Sem a 0009, tudo
+funciona pelo caminho antigo, mas a compra e a conclusão não são validadas no
+banco e a conta `admin` de demonstração ainda enxerga os dados de todos.
 
 Para se tornar administrador depois de entrar pela primeira vez:
 
@@ -125,7 +128,7 @@ Redirect URLs.
 
 ```bash
 npm run typecheck   # tipos, incluindo os testes de navegador
-npm test            # 3.317 testes de unidade, propriedade e componente (Vitest)
+npm test            # 3.353 testes de unidade, propriedade e componente (Vitest)
 npm run test:e2e    # 408 testes de navegador (Playwright, Chromium, celular e desktop)
 ```
 
@@ -202,6 +205,10 @@ docs/               CONTEXTO.md (o mapa do projeto), curriculo.md (o roadmap),
 ```
 
 ## Para onde vai
+
+A auditoria técnica de 2026-09-26 — bugs, segurança, performance, UX,
+pedagogia, gamificação e loja — está em [`AUDIT_REPORT.md`](AUDIT_REPORT.md), e
+o plano que saiu dela em [`ROADMAP_AUDITORIA.md`](ROADMAP_AUDITORIA.md).
 
 O roadmap completo, com o estado de cada aula e o custo de cada motor, está em
 [`docs/curriculo.md`](docs/curriculo.md). As oito fases previstas estão

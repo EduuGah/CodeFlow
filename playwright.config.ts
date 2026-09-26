@@ -25,6 +25,9 @@ export default defineConfig({
   use: {
     baseURL: `http://localhost:${PORTA}`,
     trace: 'retain-on-failure',
+    // Um Chromium já instalado na máquina (um contêiner que não baixa
+    // navegador, por exemplo). Sem a variável, o Playwright usa o dele.
+    ...(process.env.PW_CHROMIUM ? { launchOptions: { executablePath: process.env.PW_CHROMIUM } } : {}),
   },
 
   projects: [

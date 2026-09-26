@@ -3,7 +3,8 @@
 Documento de retomada. Escrito para alguém — ou alguma sessão — que não viu nada
 do que veio antes e precisa continuar sem redescobrir tudo.
 
-Atualizado em 2026-09-16. **Mantenha-o atualizado no mesmo commit que muda o que
+Atualizado em 2026-09-26 (auditoria completa: `AUDIT_REPORT.md` e
+`ROADMAP_AUDITORIA.md` na raiz). **Mantenha-o atualizado no mesmo commit que muda o que
 ele descreve.** Um documento de contexto desatualizado é pior que nenhum: induz a
 decisões erradas com aparência de informação.
 
@@ -33,15 +34,15 @@ Números lidos do catálogo, não de memória.
 
 | | |
 | --- | --- |
-| Trilhas | 14 — Fundamentos de JavaScript (20 aulas), Lógica (3), Como a Web Funciona (8), A Página (26), TypeScript (10), React (14), SQL e Bancos de Dados (10), Node e APIs (10), Engenharia: Organizar um Projeto (8), Projeto Final (5), Testes e Qualidade (8), Git e Equipe (6), Terminal e Ferramentas (5), Python (10) |
-| Aulas | 143, em blocos por assunto (`Track.sections`) |
-| Exercícios | 823, em 10 tipos — 226 de múltipla escolha, 161 de código, 98 de prever saída, 86 de lacuna, 70 de encontrar o bug, 66 de ordenar passos, 46 de SQL, 41 de servidor, 15 de escrever o teste, 14 de refatorar. 78 exercícios de página (`runtime: 'iframe'`), 42 de componente React (a aula é `language: 'react'`), 16 com trechos de tipo (`typeTests`). **Toda aula tem ao menos um dos quatro tipos de prática de dev** |
+| Trilhas | 17 — Fundamentos de JavaScript (20 aulas), Lógica (3), Estruturas de Dados e Big O (4), Git e Equipe (6), Como a Web Funciona (8), A Página (26), TypeScript (10), React (14), SQL e Bancos de Dados (10), Node e APIs (10), ORM (3), Engenharia: Organizar um Projeto (8), Testes e Qualidade (8), Projeto Final (5), Deploy (4), Terminal e Ferramentas (5), Python (10) |
+| Aulas | 154, em blocos por assunto (`Track.sections`) |
+| Exercícios | 888, em 10 tipos — 260 de múltipla escolha, 169 de código, 108 de prever saída, 86 de lacuna, 74 de encontrar o bug, 74 de ordenar passos, 46 de SQL, 41 de servidor, 15 de escrever o teste, 15 de refatorar. Dicas: 328 com uma, 429 com duas, 98 com três, 33 com quatro. 78 exercícios de página (`runtime: 'iframe'`), 42 de componente React (a aula é `language: 'react'`), 16 com trechos de tipo (`typeTests`). **Toda aula tem ao menos um dos quatro tipos de prática de dev** |
 | Verificação | 1.053 casos fixos + 59 propriedades + 71 verificações de SQL (por linhas devolvidas) |
 | Projetos | 10, com 34 critérios de aceitação — os 3 capstones são página + API + banco (motor 7), os outros 7 são JavaScript puro |
-| Conceitos | 139, com grafo de pré-requisitos |
-| Flashcards | 22 |
-| Testes | 3.175 de unidade + 408 de navegador |
-| Pacote | 2.385 kB (667 kB comprimido) no chunk principal — o conteúdo vai junto; o Monaco são mais 3.362 kB (869 kB) num chunk à parte, baixado só quando o primeiro editor monta, e o worker de TypeScript (7 MB) só quando um modelo JS/TS abre. O motor de TypeScript não acrescentou arquivo; o de React acrescentou um chunk de 143 kB (47 kB) com o React e o ReactDOM como texto, baixado só por um exercício de React; o de SQL acrescentou o worker (49 kB) e o SQLite em WebAssembly (658 kB), baixados só por um exercício de SQL; o de Python acrescentou o worker (~22 kB) e o Pyodide inteiro (~13,5 MB: o WebAssembly do CPython, a biblioteca padrão zipada, o manifesto de pacotes), copiados para `/pyodide/` na build e baixados só por um exercício de Python |
+| Conceitos | 151, com grafo de pré-requisitos |
+| Flashcards | 67 (93 conceitos ainda sem cartão) |
+| Testes | 3.353 de unidade + ~410 de navegador |
+| Pacote | 3.512 kB (972 kB comprimido) no chunk principal — o conteúdo vai junto, e é o maior problema de performance aberto (P2-1 do roadmap); o Monaco são mais 3.362 kB (869 kB) num chunk à parte, baixado só quando o primeiro editor monta, e o worker de TypeScript (7 MB) só quando um modelo JS/TS abre. O motor de TypeScript não acrescentou arquivo; o de React acrescentou um chunk de 143 kB (47 kB) com o React e o ReactDOM como texto, baixado só por um exercício de React; o de SQL acrescentou o worker (49 kB) e o SQLite em WebAssembly (658 kB), baixados só por um exercício de SQL; o de Python acrescentou o worker (~22 kB) e o Pyodide inteiro (~13,5 MB: o WebAssembly do CPython, a biblioteca padrão zipada, o manifesto de pacotes), copiados para `/pyodide/` na build e baixados só por um exercício de Python |
 
 ## 4. Decisões que não devem ser desfeitas sem motivo forte
 
@@ -64,7 +65,15 @@ quebra nada.
 **A economia é derivada, e a loja não vende aprendizado.** As moedas ganhas
 (`lib/economia.ts`) saem de aulas, projetos, desafios cumpridos e marcos de
 sequência; as gastas são a tabela `purchases`, append-only; o saldo é a
-diferença. O que se compra: **congelar a sequência** (um dia sem estudar não
+diferença. **A compra passa pelo banco** (0009, `comprar_item`): o preço vem de
+`store_items` (espelho de `ITENS`, conferido por teste), uma compra por vez por
+pessoa, cosmético uma vez só, e o gasto total não passa de `teto_de_moedas` —
+um teto que nenhum histórico real ultrapassa em nenhum fuso, porque o saldo
+exato depende do dia local, que o banco não conhece. O `INSERT` direto em
+`purchases` não existe mais. **A aula fecha num instante fixo**
+(`fechamentoDasAulas` em `study.ts`: o primeiro acerto do último exercício
+dela); é ele que o dobro de XP e o desafio "conclua uma aula" leem — datar
+pela última tentativa certa deixava refazer um exercício "reconcluir" a aula. O que se compra: **congelar a sequência** (um dia sem estudar não
 zera; consumido sozinho no primeiro dia perdido depois da compra —
 `lib/sequencia.ts` reconta a corrente com os congelamentos), **dobro de XP por
 24 h** (a compra é um fato com hora, e `computeXp` dobra o que aconteceu na
@@ -216,6 +225,8 @@ src/content/            Aulas, exercícios, projetos, conceitos, flashcards
 src/client/lib/         Lógica pura e testada
   sandbox-core.ts       Monta e roda o programa do aluno. ASSÍNCRONO.
   sandbox.worker.ts     Worker: bloqueia rede e chama o core
+  trancar-globais.ts    O bloqueio de rede dos workers, na cadeia inteira de
+                        protótipos (`fetch` mora em WorkerGlobalScope.prototype)
   sandbox.ts            executeCode(). Dois relógios: 20s para o worker
                         existir, e só então os 3s do código do aluno
   pagina-core.ts        Motor de página, parte pura: monta o documento
@@ -278,7 +289,11 @@ src/client/lib/         Lógica pura e testada
                         da história, para os marcos valerem uma vez
   desafios.ts           Desafios diários e semanais: rodízio, progresso,
                         os cumpridos desde o primeiro estudo
-  perfil.ts             Perfil editável (nome, avatar, tema), compras, foto
+  progress.ts           Leitura e escrita do progresso. `lerTodasAsPaginas`
+                        (o Supabase corta em 1.000 linhas), `concluir` pela
+                        função do banco, `Leitura<T>` = { dados, erro }
+  perfil.ts             Perfil editável (nome, avatar, tema), compras pela
+                        função `comprar_item`, foto
   novidades.ts          O que mudou desde a última vez que a pessoa olhou
                         (nível, conquista, desafio), comparando o estado
                         derivado com o visto, guardado no aparelho
@@ -340,7 +355,9 @@ src/client/pages/app/   Início é a aula da vez + o percurso; Trilhas é o
                         `/aparencia`, `/progresso` (XP com a partição, barra
                         por trilha, domínio por conceito)
 e2e/                    Playwright; `fixtures.ts` tem o dublê do Supabase
-supabase/migrations/    0001 a 0008, aplicadas em ordem (0007: perfil, loja, fotos;
+supabase/migrations/    0001 a 0009, aplicadas em ordem (0009: conclusão atômica,
+                        admin sem PII, demo imutável, compra no servidor,
+                        ritmo de escrita; 0007: perfil, loja, fotos;
                         0008: contas de demonstração)
 docs/curriculo.md       Roadmap de conteúdo — fonte canônica
 ```
@@ -349,8 +366,9 @@ docs/curriculo.md       Roadmap de conteúdo — fonte canônica
 
 ```bash
 npm run typecheck   # inclui e2e/ e playwright.config.ts
-npm test            # 2.321 testes
-npm run test:e2e    # 300 no navegador (antes: npx playwright install chromium)
+npm test            # 3.353 testes
+npm run test:e2e    # ~410 no navegador (antes: npx playwright install chromium;
+                    # com um Chromium já instalado: PW_CHROMIUM=/caminho/do/chrome)
 npm run build
 ```
 
@@ -618,6 +636,30 @@ Cada uma custou tempo. Não repita.
   exercícios nunca conseguiam avisar que tinham sido resolvidos, e nenhum dos 521
   testes viu. Quando quatro componentes respondem à mesma pergunta, o tipo
   compartilhado (`ExerciseState`) vale mais que a prop.
+- **O Supabase corta toda resposta em 1.000 linhas, sem erro** (`max-rows`).
+  As leituras do histórico não paginavam, e um aluno ativo passa de mil
+  tentativas em semanas: dali em diante sequência, XP, desafios e moedas
+  paravam no passado. Toda leitura que cresce com o tempo passa por
+  `lerTodasAsPaginas` (ordem `created_at, id`, para a página não embaralhar).
+- **Ler, acrescentar e regravar a lista inteira apaga dados.** A conclusão de
+  aula fazia isso — e uma leitura que falhava voltava vazia, e a regravação
+  levava todas as aulas concluídas junto. Acrescentar é no banco, num comando
+  (`concluir`, 0009). E uma leitura que "nunca lança" precisa ter o `error`
+  conferido por quem escreve a partir dela.
+- **A armadilha do `useAuth()` voltou em cinco lugares.** O supabase-js entrega
+  um `User` novo a cada renovação do token e ao voltar para a aba; efeitos com
+  `[user]` recarregavam tudo e reembaralhavam a revisão. O `AuthContext`
+  passou a manter a referência (`mesmoUsuario`), e os efeitos dependem do id.
+  Um ESLint com `react-hooks` pegaria na origem (roadmap, Fase 3).
+- **Estado reportado pelo componente não pode morar junto com estado vindo do
+  servidor.** Os resolvidos de visitas anteriores eram escritos no mesmo mapa
+  que os exercícios atualizam; o `'inicial'` do componente recém-montado
+  apagava o `'acertou'` antigo. Cada fonte no seu estado (`resolvidosAntes`).
+- **Teste de desafio precisa escolher dias em que o desafio está no rodízio.**
+  Sem isso ele passa vazio — o primeiro teste do "conclua uma aula" dessa
+  auditoria passou antes da correção porque o dia não tinha o desafio.
+- **Editar arquivos com o E2E rodando recarrega a página no meio do teste**
+  (HMR do Vite). A falha parece do produto e não é. Edite, espere, rode.
 
 ## 8. O que falta
 
@@ -843,6 +885,13 @@ JavaScript, Página, Git, Terminal, TypeScript, Web e o resto de Python.
 
 ## 9. Pendências do lado do usuário
 
+- **Rodar `supabase/migrations/0009_integridade.sql` no SQL Editor.** Conclusão
+  atômica (`concluir`), painel de admin por agregado (as policies que deixavam a
+  conta `admin`/`admin` ler e-mail e nome de todo mundo saem), contas de
+  demonstração com senha e e-mail imutáveis, a compra pela função
+  `comprar_item` com o catálogo `store_items`, e o limite de 120 escritas por
+  minuto. Sem ela o aplicativo funciona pelo caminho antigo — já sem a perda de
+  progresso —, mas a exposição de dados da conta demo continua até ela rodar.
 - **Rodar `supabase/migrations/0008_contas_demo.sql` no SQL Editor.** Cria as
   contas de demonstração `aluno`/`aluno` e `admin`/`admin` (o endereço interno é
   `usuario@demo.codeflow.app`, montado em `src/client/lib/demo.ts`). A tela de
