@@ -1,12 +1,11 @@
+import { lazy, Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 
 import { Landing } from './pages/Landing';
 import { Login } from './pages/Login';
 import { AuthCallback } from './pages/AuthCallback';
-import { Lesson } from './pages/Lesson';
-import { Review } from './pages/Review';
-import { ProjectWorkspace } from './pages/ProjectWorkspace';
 import { NotFound } from './pages/NotFound';
+import { IconSpinner } from './components/ui/Icon';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { AdminRoute } from './components/AdminRoute';
 import { AppShell } from './components/layout/AppShell';
@@ -20,8 +19,34 @@ import { PerfilConquistas } from './pages/app/perfil/PerfilConquistas';
 import { PerfilDesafios } from './pages/app/perfil/PerfilDesafios';
 import { PerfilLoja } from './pages/app/perfil/PerfilLoja';
 import { PerfilProgresso } from './pages/app/perfil/PerfilProgresso';
-import { AdminContent } from './pages/admin/AdminContent';
-import { AdminNewExercise } from './pages/admin/AdminNewExercise';
+
+/**
+ * As telas de foco e as de administração chegam sob demanda.
+ *
+ * Elas trazem o que o resto não usa: os dez componentes de exercício, o
+ * Markdown (react-markdown, remark, micromark), o motor de cada linguagem, e
+ * — no admin — o Zod do gerador de exercício. Carregadas junto, iam no pacote
+ * que até a página pública baixa. O `vite:preloadError` do `main.tsx` cobre
+ * a aba aberta de antes de um deploy.
+ */
+const Lesson = lazy(() => import('./pages/Lesson').then((m) => ({ default: m.Lesson })));
+const Review = lazy(() => import('./pages/Review').then((m) => ({ default: m.Review })));
+const ProjectWorkspace = lazy(() =>
+  import('./pages/ProjectWorkspace').then((m) => ({ default: m.ProjectWorkspace }))
+);
+const AdminContent = lazy(() => import('./pages/admin/AdminContent').then((m) => ({ default: m.AdminContent })));
+const AdminNewExercise = lazy(() =>
+  import('./pages/admin/AdminNewExercise').then((m) => ({ default: m.AdminNewExercise }))
+);
+
+/** Enquanto o pedaço da tela chega: o mesmo giro das rotas protegidas. */
+function CarregandoTela() {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-canvas" role="status" aria-label="Carregando">
+      <IconSpinner size={32} className="animate-spin text-ink-faint" />
+    </div>
+  );
+}
 
 /**
  * Rotas.
@@ -38,6 +63,7 @@ import { AdminNewExercise } from './pages/admin/AdminNewExercise';
  */
 function App() {
   return (
+    <Suspense fallback={<CarregandoTela />}>
     <Routes>
       <Route path="/" element={<Landing />} />
       <Route path="/login" element={<Login />} />
@@ -117,6 +143,7 @@ function App() {
           deslogado — e o `replace` ainda apagava a URL errada do histórico. */}
       <Route path="*" element={<NotFound />} />
     </Routes>
+    </Suspense>
   );
 }
 

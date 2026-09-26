@@ -61,6 +61,19 @@ export default defineConfig({
     // pacote de dependências logo na partida.
     include: ['sql.js', 'pyodide'],
   },
+  build: {
+    rollupOptions: {
+      treeshake: {
+        // `content/schema.ts` só declara os espelhos Zod do conteúdo — montar
+        // um schema não tem efeito nenhum. Sem isto o Rollup não pode supor
+        // isso das chamadas `z.object(...)` no topo, e o Zod inteiro ia no
+        // pacote principal mesmo com a validação desligada em produção
+        // (`content/index.ts`). O gerador de exercício do admin, que usa os
+        // schemas de verdade, continua levando o Zod no chunk dele.
+        moduleSideEffects: (id) => !id.endsWith('/src/content/schema.ts'),
+      },
+    },
+  },
   worker: {
     // O `pyodide.mjs` importa dinamicamente as próprias peças (o núcleo de
     // FFI, por exemplo) — código dividido em pedaços, que o formato padrão

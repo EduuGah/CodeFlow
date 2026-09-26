@@ -1,5 +1,5 @@
 import { NavLink, Outlet } from 'react-router-dom';
-import type { ComponentType } from 'react';
+import { useEffect, type ComponentType } from 'react';
 
 import {
   IconHome,
@@ -100,7 +100,29 @@ function ItemInferior({ to, label, Icone }: Destino) {
   );
 }
 
+/**
+ * Adianta o pedaço da aula quando a tela de orientação fica ociosa. A aula é
+ * carregada sob demanda (`App.tsx`), e o próximo toque aqui quase sempre é
+ * "Continuar a aula" — sem isto, esse toque esperaria o download.
+ */
+function useAdiantarAula() {
+  useEffect(() => {
+    // Só um adiantamento: se falhar, a navegação de verdade tenta de novo e,
+    // se for um deploy novo, o `vite:preloadError` recarrega a página.
+    const adiantar = () =>
+      void import('../../pages/Lesson').catch((erro) => console.warn('Adiantar a aula falhou:', erro));
+    if (typeof window.requestIdleCallback === 'function') {
+      const id = window.requestIdleCallback(adiantar, { timeout: 4000 });
+      return () => window.cancelIdleCallback(id);
+    }
+    const id = window.setTimeout(adiantar, 2000);
+    return () => window.clearTimeout(id);
+  }, []);
+}
+
 export function AppShell() {
+  useAdiantarAula();
+
   return (
     <StudentDataProvider>
       <div className="min-h-screen bg-canvas">

@@ -467,13 +467,19 @@ function validateAll(): string[] {
   return [...problems, ...checkReferences()];
 }
 
-// Falha ruidosamente em desenvolvimento; em produção apenas registra, para um
-// erro de conteúdo não derrubar a aplicação inteira do aluno.
-const contentProblems = validateAll();
-if (contentProblems.length > 0) {
-  const message = `[CodeFlow] Conteúdo inválido:\n- ${contentProblems.join('\n- ')}`;
-  if (import.meta.env.DEV) throw new Error(message);
-  console.error(message);
+// Só em desenvolvimento e nos testes, e falhando alto. Em produção o catálogo
+// já foi provado pelo CI (`content.test.ts` roda estes mesmos schemas, e
+// mais); validar de novo a cada carga custava CPU no celular e levava o Zod
+// inteiro — 239 kB antes de minificar — no pacote que a página pública baixa.
+//
+// `typeof` primeiro: o E2E importa este módulo direto no Node do Playwright,
+// onde `import.meta.env` não existe. No build, o Vite troca
+// `import.meta.env.DEV` por `false` e o bloco inteiro some.
+if (typeof import.meta.env === 'object' && import.meta.env.DEV) {
+  const contentProblems = validateAll();
+  if (contentProblems.length > 0) {
+    throw new Error(`[CodeFlow] Conteúdo inválido:\n- ${contentProblems.join('\n- ')}`);
+  }
 }
 
 const isPublished = <T extends { status: string }>(item: T) => item.status === 'published';
