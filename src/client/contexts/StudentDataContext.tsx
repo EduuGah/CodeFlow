@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 
 import { getExercises, getLessonsOfTrack, listConcepts, listFlashcards, listTracks } from '../../content';
 import { useAuth } from './AuthContext';
@@ -37,6 +37,12 @@ interface StudentData {
   loading: boolean;
   /** Falha de leitura, para a interface poder dizer em vez de mostrar zero. */
   error: string | null;
+  /**
+   * Alguma parte do histórico não chegou (tentativas, revisões ou compras).
+   * Os números derivados — saldo, sequência, XP — podem estar menores ou
+   * maiores do que são, então a loja não vende enquanto isto for verdade.
+   */
+  incompleto: boolean;
   reload: () => void;
 
   completedLessons: string[];
@@ -103,38 +109,50 @@ export function StudentDataProvider({ children }: { children: React.ReactNode })
   const [reviews, setReviews] = useState<FlashcardReview[]>([]);
   const [purchases, setPurchases] = useState<Purchase[]>([]);
   const [perfil, setPerfil] = useState<Perfil>(PERFIL_VAZIO);
+  const [incompleto, setIncompleto] = useState(false);
   const [versao, setVersao] = useState(0);
 
   const reload = useCallback(() => setVersao((v) => v + 1), []);
+
+  // O id, não o objeto: o supabase-js entrega um `user` novo a cada renovação
+  // do token (e ao voltar para a aba). Depender do objeto recarregava tudo —
+  // com esqueleto de carregamento por cima da tela — sem nada ter mudado.
+  const userId = user?.id;
 
   useEffect(() => {
     let ativo = true;
 
     async function carregar() {
-      if (!user) {
+      if (!userId) {
         setLoading(false);
         return;
       }
 
       setLoading(true);
       const [progresso, historico, revisoes, compras, dados] = await Promise.all([
-        fetchProgress(user.id),
-        fetchAttempts(user.id),
-        fetchFlashcardReviews(user.id),
-        fetchPurchases(user.id),
-        fetchPerfil(user.id),
+        fetchProgress(userId),
+        fetchAttempts(userId),
+        fetchFlashcardReviews(userId),
+        fetchPurchases(userId),
+        fetchPerfil(userId),
       ]);
       if (!ativo) return;
 
       setCompletedLessons(progresso.completedLessons);
       setCompletedProjects(progresso.completedProjects);
-      setAttempts(historico);
-      setReviews(revisoes);
-      setPurchases(compras);
+      setAttempts(historico.dados);
+      setReviews(revisoes.dados);
+      setPurchases(compras.dados);
       setPerfil(dados);
       // O tema da conta vence o que estava guardado neste aparelho.
       adotar?.({ theme: dados.theme, accent: dados.accent });
-      setError(progresso.error ?? null);
+
+      const falhas = [progresso.error, historico.erro, revisoes.erro, compras.erro].filter(Boolean);
+      setIncompleto(falhas.length > 0);
+      setError(
+        progresso.error ??
+          (falhas.length > 0 ? 'Parte do seu histórico não carregou. Os números podem estar incompletos.' : null)
+      );
       setLoading(false);
     }
 
@@ -142,24 +160,38 @@ export function StudentDataProvider({ children }: { children: React.ReactNode })
     return () => {
       ativo = false;
     };
-  }, [user, versao, adotar]);
+  }, [userId, versao, adotar]);
+
+  // Uma compra por vez. O botão já fica em "carregando", mas dois toques
+  // rápidos chegam antes de o React pintar o botão desabilitado.
+  const comprando = useRef(false);
 
   const comprar = useCallback(
     async (itemId: string): Promise<{ error?: string }> => {
       const item = itemDaLoja(itemId);
-      if (!user || !item) return { error: 'Item desconhecido.' };
-      const resultado = await recordPurchase(user.id, item.id, item.price);
-      if (resultado.error || !resultado.purchase) return { error: resultado.error };
-      setPurchases((atual) => [...atual, resultado.purchase!]);
-      return {};
+      if (!userId || !item) return { error: 'Item desconhecido.' };
+      if (incompleto) {
+        return { error: 'Seu histórico não carregou inteiro, então o saldo pode estar errado. Recarregue antes de comprar.' };
+      }
+      if (comprando.current) return { error: 'Uma compra já está em andamento.' };
+
+      comprando.current = true;
+      try {
+        const resultado = await recordPurchase(userId, item.id, item.price);
+        if (resultado.error || !resultado.purchase) return { error: resultado.error };
+        setPurchases((atual) => [...atual, resultado.purchase!]);
+        return {};
+      } finally {
+        comprando.current = false;
+      }
     },
-    [user]
+    [userId, incompleto]
   );
 
   const salvarPerfil = useCallback(
     async (mudancas: Partial<{ displayName: string | null; avatar: string | null; theme: Tema; accent: Acento }>) => {
-      if (!user) return { error: 'Sem sessão.' };
-      const resultado = await updatePerfil(user.id, mudancas);
+      if (!userId) return { error: 'Sem sessão.' };
+      const resultado = await updatePerfil(userId, mudancas);
       if (resultado.error) return resultado;
       setPerfil((atual) => ({
         ...atual,
@@ -170,7 +202,7 @@ export function StudentDataProvider({ children }: { children: React.ReactNode })
       }));
       return {};
     },
-    [user]
+    [userId]
   );
 
   const valor = useMemo<StudentData>(() => {
@@ -199,6 +231,7 @@ export function StudentDataProvider({ children }: { children: React.ReactNode })
     return {
       loading,
       error,
+      incompleto,
       reload,
       completedLessons,
       completedProjects,
@@ -231,7 +264,7 @@ export function StudentDataProvider({ children }: { children: React.ReactNode })
       comprar,
       salvarPerfil,
     };
-  }, [loading, error, reload, completedLessons, completedProjects, attempts, reviews, purchases, perfil, comprar, salvarPerfil]);
+  }, [loading, error, incompleto, reload, completedLessons, completedProjects, attempts, reviews, purchases, perfil, comprar, salvarPerfil]);
 
   return <StudentDataContext.Provider value={valor}>{children}</StudentDataContext.Provider>;
 }

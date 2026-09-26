@@ -32,3 +32,12 @@ export function emailDoUsuario(entrada: string): string {
   const valor = entrada.trim().toLowerCase();
   return valor.includes('@') ? valor : `${valor}@${DEMO_EMAIL_DOMAIN}`;
 }
+
+/**
+ * A conta é uma das de demonstração? Elas são de todo mundo: a foto não sobe
+ * (o bucket é público, e seria hospedagem anônima de imagem — a 0009 recusa
+ * no banco), e a tela diz isso antes de a pessoa tentar.
+ */
+export function ehContaDemo(email: string | null | undefined): boolean {
+  return (email ?? '').trim().toLowerCase().endsWith(`@${DEMO_EMAIL_DOMAIN}`);
+}

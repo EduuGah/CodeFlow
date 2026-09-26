@@ -91,6 +91,26 @@ test('comprar sai do saldo na hora, e o congelamento fica guardado', async ({ lo
   }
 });
 
+test('sem as compras carregadas, a loja não vende: o saldo pode estar errado', async ({ logado: page, banco }) => {
+  // O defeito: a leitura de compras falhava, virava lista vazia, e o saldo
+  // aparecia inflado — com o botão de comprar liberado sobre ele.
+  semear(banco);
+  banco.falhas = ['/rest/v1/purchases'];
+  await page.goto('/app/perfil/loja');
+  await esperarConteudo(page);
+
+  await expect(page.getByText(/Parte do seu histórico não carregou/)).toBeVisible();
+  const congelar = page.getByRole('listitem').filter({ hasText: 'Congelar a sequência' });
+  await expect(congelar.getByRole('button', { name: '60' })).toBeDisabled();
+  await expect(congelar.getByText('saldo indisponível')).toBeVisible();
+
+  // Voltando a rede, "Carregar de novo" devolve a loja.
+  banco.falhas = [];
+  await page.getByRole('button', { name: 'Carregar de novo' }).click();
+  await expect(page.getByText(/Parte do seu histórico não carregou/)).toHaveCount(0);
+  await expect(congelar.getByRole('button', { name: '60' })).toBeEnabled();
+});
+
 test('o tema escolhido chega ao html e sobrevive à recarga', async ({ logado: page, banco }) => {
   await page.goto('/app/perfil/aparencia');
   await esperarConteudo(page);

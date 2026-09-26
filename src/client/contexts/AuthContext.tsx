@@ -20,6 +20,24 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+/**
+ * O mesmo usuário, só com outro token? O supabase-js entrega um objeto `User`
+ * novo a cada renovação do token (de hora em hora, e ao voltar para a aba),
+ * e todo efeito que dependia de `user` rodava de novo: a revisão se
+ * reembaralhava no meio da sessão, o papel era buscado outra vez. Manter a
+ * referência quando nada que a tela mostra mudou corta isso na raiz.
+ */
+export function mesmoUsuario(a: User | null, b: User | null): boolean {
+  if (a === b) return true;
+  if (!a || !b) return false;
+  return (
+    a.id === b.id &&
+    a.email === b.email &&
+    a.updated_at === b.updated_at &&
+    JSON.stringify(a.user_metadata ?? {}) === JSON.stringify(b.user_metadata ?? {})
+  );
+}
+
 function describeAuthError(error: unknown): string {
   if (error instanceof AuthError) {
     // Provider desativado no painel é o erro mais comum na primeira configuração.
@@ -71,7 +89,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       .getSession()
       .then(({ data: { session } }) => {
         setSession(session);
-        setUser(session?.user ?? null);
+        setUser((atual) => (mesmoUsuario(atual, session?.user ?? null) ? atual : (session?.user ?? null)));
       })
       .catch((error) => {
         console.error('Erro ao recuperar a sessão:', error);
@@ -83,7 +101,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
-      setUser(session?.user ?? null);
+      setUser((atual) => (mesmoUsuario(atual, session?.user ?? null) ? atual : (session?.user ?? null)));
       setLoading(false);
     });
 

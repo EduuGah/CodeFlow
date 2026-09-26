@@ -16,6 +16,11 @@ as $$
 declare
   v_id uuid;
 begin
+  -- A 0009 impede que a senha de uma conta de demonstração mude pela API; esta
+  -- marca, local à transação, é o que deixa esta função recolocar a senha
+  -- padrão. Mesmo desenho do `app.allow_role_change` da 0006.
+  perform set_config('app.allow_demo_reset', 'on', true);
+
   select id into v_id from auth.users where lower(email) = lower(p_email);
 
   if v_id is null then
@@ -58,6 +63,7 @@ begin
   values (v_id, p_email, p_nome)
   on conflict (id) do nothing;
 
+  perform set_config('app.allow_demo_reset', 'off', true);
   return v_id;
 end;
 $$;

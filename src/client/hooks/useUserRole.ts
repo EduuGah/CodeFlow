@@ -17,23 +17,24 @@ import { fetchUserRole, type UserRole } from '../lib/progress';
 export function useUserRole(): { papel: UserRole | null; carregando: boolean } {
   const { user, loading } = useAuth();
   const [papel, setPapel] = useState<UserRole | null>(null);
+  const userId = user?.id;
 
   useEffect(() => {
     let ativo = true;
 
-    if (!user) {
+    if (!userId) {
       setPapel(null);
       return;
     }
 
-    fetchUserRole(user.id).then((p) => {
+    fetchUserRole(userId).then((p) => {
       if (ativo) setPapel(p);
     });
 
     return () => {
       ativo = false;
     };
-  }, [user]);
+  }, [userId]);
 
-  return { papel, carregando: loading || (!!user && papel === null) };
+  return { papel, carregando: loading || (!!userId && papel === null) };
 }

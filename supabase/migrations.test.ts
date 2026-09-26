@@ -2,6 +2,9 @@ import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
+import { ITENS, MOEDAS } from '../src/client/lib/economia';
+import { POR_PERIODO, RECOMPENSA } from '../src/client/lib/desafios';
+
 /**
  * Conferência estática das migrações.
  *
@@ -83,11 +86,12 @@ function colunasCriadas(texto: string): Map<string, Set<string>> {
 const TABELAS = colunasCriadas(tudo);
 
 describe('as tabelas esperadas existem', () => {
-  it('encontra users, exercise_attempts, flashcard_reviews e purchases', () => {
+  it('encontra users, exercise_attempts, flashcard_reviews, purchases e store_items', () => {
     expect([...TABELAS.keys()].sort()).toEqual([
       'exercise_attempts',
       'flashcard_reviews',
       'purchases',
+      'store_items',
       'users',
     ]);
   });
@@ -186,7 +190,7 @@ describe('segurança', () => {
     }
   });
 
-  it('função security definer que escreve não é chamável pelo cliente', () => {
+  it('função security definer que escreve só é chamável pelo cliente quando age sobre quem chama', () => {
     // Cabeçalho e corpo separados: a checagem de escrita tem que olhar o corpo.
     // A primeira versão deste teste capturava só o cabeçalho, nunca encontrava um
     // `update`, e passava sem conferir nada.
@@ -213,6 +217,16 @@ describe('segurança', () => {
       expect(semComentarios(tudo), `${nome} escreve como definer sem revoke`).toMatch(
         new RegExp(`revoke\\b[^;\\n]*\\bon function public\\.${nome}\\b`, 'i')
       );
+
+      // A exceção deliberada é a porta que o aluno usa (a compra): liberada
+      // para `authenticated`, e então o corpo só pode agir sobre quem chama.
+      const liberadaAoCliente = new RegExp(
+        `grant execute on function public\\.${nome}\\b[^;]*\\bto\\b[^;]*\\bauthenticated\\b`,
+        'i'
+      ).test(semComentarios(tudo));
+      if (liberadaAoCliente) {
+        expect(corpo, `${nome} é porta do cliente e não se prende a auth.uid()`).toMatch(/auth\.uid\(\)/);
+      }
     }
 
     // Sem isto, apagar as funções do projeto deixaria o teste verde e vazio.
@@ -229,5 +243,53 @@ describe('segurança', () => {
       // fazer o corpo executar as tabelas dele com privilégios de dono.
       expect(f[2], `${f[1]} é security definer sem search_path`).toMatch(/set search_path\s*=/i);
     }
+  });
+});
+
+describe('a loja no banco', () => {
+  const zero9 = semComentarios(sql.find((f) => f.nome.startsWith('0009'))!.texto);
+
+  it('o catálogo do banco tem os mesmos itens, preços e tipos do código', () => {
+    // A compra lê o preço de `store_items`. Um item novo em `ITENS` que não
+    // entrasse aqui seria recusado como indisponível; um preço diferente faria
+    // a loja mostrar um número e cobrar outro.
+    const semente = zero9.match(/insert into public\.store_items \(id, price, tipo\) values([\s\S]*?)on conflict/i)![1];
+    const noBanco = [...semente.matchAll(/\('([\w-]+)',\s*(\d+),\s*'(\w+)'\)/g)]
+      .map(([, id, preco, tipo]) => ({ id, price: Number(preco), tipo }))
+      .sort((a, b) => a.id.localeCompare(b.id));
+    const noCodigo = ITENS.map((i) => ({ id: i.id, price: i.price, tipo: i.tipo })).sort((a, b) =>
+      a.id.localeCompare(b.id)
+    );
+
+    expect(noBanco).toEqual(noCodigo);
+  });
+
+  it('o teto de moedas usa os números da economia', () => {
+    // Um teto abaixo do que o histórico rende recusaria compras legítimas.
+    const teto = zero9.match(/function public\.teto_de_moedas[\s\S]*?\$\$([\s\S]*?)\$\$/i)![1];
+
+    expect(teto).toMatch(new RegExp(`aulas from progresso\\), 0\\) \\* ${MOEDAS.porAulaConcluida}\\b`));
+    expect(teto).toMatch(new RegExp(`projetos from progresso\\), 0\\) \\* ${MOEDAS.porProjetoEntregue}\\b`));
+    expect(teto).toContain(`dias.d * 2 * ${POR_PERIODO.dia} * ${RECOMPENSA.dia.moedas}`);
+    expect(teto).toContain(`dias.w * 2 * ${POR_PERIODO.semana} * ${RECOMPENSA.semana.moedas}`);
+    expect(teto).toContain(`* (${MOEDAS.porSemanaSeguida} + ${MOEDAS.porMesSeguido})`);
+    expect(teto).toContain(`item = 'congelar-sequencia'`);
+  });
+
+  it('comprar só pela função: o INSERT direto em purchases deixa de existir', () => {
+    // A ordem importa: a 0007 cria a policy, a 0009 a derruba.
+    const criada = tudo.lastIndexOf('create policy "purchases_insert_own"');
+    const derrubada = tudo.lastIndexOf('drop policy if exists "purchases_insert_own"');
+    expect(derrubada).toBeGreaterThan(criada);
+  });
+
+  it('o admin deixa de ler as linhas cruas de todos os alunos', () => {
+    for (const policy of ['users_select_admin', 'attempts_select_admin', 'reviews_select_admin']) {
+      const criada = tudo.lastIndexOf(`create policy "${policy}"`);
+      const derrubada = tudo.lastIndexOf(`drop policy if exists "${policy}"`);
+      expect(derrubada, policy).toBeGreaterThan(criada);
+    }
+    // O agregado responde só a admin.
+    expect(zero9).toMatch(/function public\.desempenho_por_exercicio[\s\S]*?where public\.is_admin\(\)/i);
   });
 });

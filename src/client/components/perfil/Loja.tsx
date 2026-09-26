@@ -56,7 +56,7 @@ const COMO_GANHAR = [
 ];
 
 export function Loja() {
-  const { moedas, purchases, level, sequencia, dobro, comprar } = useStudentData();
+  const { moedas, purchases, level, sequencia, dobro, comprar, incompleto, reload } = useStudentData();
   const [confirmando, setConfirmando] = useState<string | null>(null);
   const [comprando, setComprando] = useState<string | null>(null);
   const [erro, setErro] = useState<string | null>(null);
@@ -92,7 +92,8 @@ export function Loja() {
 
   const cartao = (item: ItemDaLoja) => {
     const seu = temItem(item, level.level, purchases);
-    const daPara = moedas.saldo >= item.price;
+    // Com o histórico incompleto o saldo não é confiável — nem para mais, nem para menos.
+    const daPara = !incompleto && moedas.saldo >= item.price;
     const estaConfirmando = confirmando === item.id;
     const liberadoPorNivel = item.nivelQueLibera !== undefined && level.level >= item.nivelQueLibera;
 
@@ -145,7 +146,7 @@ export function Loja() {
             ) : (
               <>
                 <span className="label-mono text-ink-faint">
-                  {daPara ? 'dá para comprar' : `faltam ${item.price - moedas.saldo}`}
+                  {incompleto ? 'saldo indisponível' : daPara ? 'dá para comprar' : `faltam ${item.price - moedas.saldo}`}
                 </span>
                 <Button
                   size="sm"
@@ -153,7 +154,7 @@ export function Loja() {
                   disabled={!daPara}
                   onClick={() => setConfirmando(item.id)}
                   icon={daPara ? <IconCoin size={15} /> : <IconLock size={15} />}
-                  title={daPara ? undefined : `Faltam ${item.price - moedas.saldo} moedas`}
+                  title={daPara || incompleto ? undefined : `Faltam ${item.price - moedas.saldo} moedas`}
                 >
                   {item.price}
                 </Button>
@@ -185,6 +186,18 @@ export function Loja() {
           </p>
         </div>
       </Card>
+
+      {incompleto && (
+        <Card tone="caution" className="flex flex-wrap items-center justify-between gap-3 text-sm text-energy-700">
+          <span className="min-w-0 flex-1">
+            Parte do seu histórico não carregou, então o saldo acima pode estar errado. As compras voltam quando
+            ele carregar inteiro.
+          </span>
+          <Button size="sm" variant="outline" onClick={reload}>
+            Carregar de novo
+          </Button>
+        </Card>
+      )}
 
       {erro && (
         <p role="alert" className="rounded-lg border border-danger-200 bg-danger-50 px-3 py-2 text-sm text-danger-700">

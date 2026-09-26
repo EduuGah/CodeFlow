@@ -4,6 +4,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useStudentData } from '../../contexts/StudentDataContext';
 import { itemDaLoja, temItem } from '../../lib/economia';
 import { reduzirFoto, uploadFoto } from '../../lib/perfil';
+import { ehContaDemo } from '../../lib/demo';
 import { AVATARES, AVATARES_LIVRES, Avatar, AvatarDesenhado } from '../ui/Avatar';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
@@ -32,6 +33,7 @@ export function EditarPerfil({ aoFechar }: { aoFechar: () => void }) {
   const idDoNome = useId();
 
   const fotoDoGoogle = user?.user_metadata?.avatar_url as string | undefined;
+  const contaDemo = ehContaDemo(user?.email);
   const nomeDoGoogle = (user?.user_metadata?.full_name as string | undefined) ?? '';
 
   const liberado = (id: string) => {
@@ -137,16 +139,22 @@ export function EditarPerfil({ aoFechar }: { aoFechar: () => void }) {
           aria-label="Escolher uma foto"
           onChange={(e) => escolherFoto(e.target.files?.[0])}
         />
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          loading={enviando}
-          onClick={() => arquivoRef.current?.click()}
-          icon={<IconCamera size={16} />}
-        >
-          {enviando ? 'Enviando…' : 'Enviar uma foto'}
-        </Button>
+        {contaDemo ? (
+          <p className="text-xs leading-relaxed text-ink-faint">
+            A conta de demonstração é de todo mundo, então não guarda foto — escolha um dos avatares.
+          </p>
+        ) : (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            loading={enviando}
+            onClick={() => arquivoRef.current?.click()}
+            icon={<IconCamera size={16} />}
+          >
+            {enviando ? 'Enviando…' : 'Enviar uma foto'}
+          </Button>
+        )}
         {(avatar || fotoDoGoogle) && (
           <Button type="button" variant="ghost" size="sm" onClick={() => setAvatar(fotoDoGoogle ? null : 'preset:folha')}>
             {fotoDoGoogle ? 'Usar a foto do Google' : 'Voltar ao avatar'}

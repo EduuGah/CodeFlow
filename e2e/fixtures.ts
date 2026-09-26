@@ -1,6 +1,7 @@
 import { expect, test as base, type Page } from '@playwright/test';
 
 import type { Exercise, LanguageId } from '../src/content/types';
+import { ITENS } from '../src/client/lib/economia';
 
 /**
  * Um aluno logado, sem Supabase de verdade.
@@ -44,6 +45,8 @@ export interface BancoFalso {
   perfil: { display_name: string | null; avatar: string | null; theme: string | null; accent: string | null };
   /** Escritas registradas, para o teste conferir que o progresso foi salvo. */
   escritas: Array<{ tabela: string; corpo: unknown }>;
+  /** Caminhos cuja leitura falha (500), para os testes de rede ruim. */
+  falhas: string[];
 }
 
 /**
@@ -129,6 +132,10 @@ async function dublarSupabase(page: Page, banco: BancoFalso) {
       });
     }
 
+    if (metodo === 'GET' && banco.falhas.includes(caminho)) {
+      return json({ message: 'falha simulada' }, 500);
+    }
+
     if (caminho.startsWith('/auth/v1/user')) {
       return json(sessaoFalsa().user);
     }
@@ -202,6 +209,35 @@ async function dublarSupabase(page: Page, banco: BancoFalso) {
       return json([]);
     }
 
+    // As funções da 0009, com a mesma regra do banco: concluir acrescenta sem
+    // duplicar; comprar lê o preço do catálogo e recusa cosmético repetido.
+    if (caminho === '/rest/v1/rpc/concluir') {
+      const { p_coluna, p_id } = requisicao.postDataJSON() as { p_coluna: string; p_id: string };
+      const lista = p_coluna === 'completed_projects' ? banco.completed_projects : banco.completed_lessons;
+      if (!lista.includes(p_id)) lista.push(p_id);
+      // Registrada como a linha de `users` fica depois dela: é isso que os
+      // testes conferem ("a aula chegou ao banco"), seja qual for o caminho.
+      banco.escritas.push({ tabela: 'users', corpo: { [p_coluna]: [...lista] } });
+      return json(lista);
+    }
+
+    if (caminho === '/rest/v1/rpc/comprar_item') {
+      const { p_item } = requisicao.postDataJSON() as { p_item: string };
+      const item = ITENS.find((i) => i.id === p_item);
+      if (!item) return json({ code: 'P0001', message: 'item_indisponivel' }, 400);
+      if (item.tipo !== 'consumivel' && banco.purchases.some((p) => p.item === p_item)) {
+        return json({ code: 'P0001', message: 'item_ja_possuido' }, 400);
+      }
+      const linha = { item: item.id, price: item.price, created_at: new Date().toISOString() };
+      banco.purchases.push(linha);
+      banco.escritas.push({ tabela: 'purchases', corpo: linha });
+      return json(linha);
+    }
+
+    if (caminho === '/rest/v1/rpc/desempenho_por_exercicio') {
+      return json([]);
+    }
+
     // Rota não prevista: falha alto em vez de fingir que deu certo.
     return json({ message: `rota não dublada: ${metodo} ${caminho}` }, 500);
   });
@@ -217,6 +253,7 @@ export const test = base.extend<{ banco: BancoFalso; logado: Page }>({
       purchases: [],
       perfil: { display_name: null, avatar: null, theme: null, accent: null },
       escritas: [],
+      falhas: [],
     });
   },
 

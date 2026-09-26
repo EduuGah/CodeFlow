@@ -44,6 +44,7 @@ export function Review() {
   useDocumentTitle('Revisão');
   const navigate = useNavigate();
   const { user } = useAuth();
+  const userId = user?.id;
 
   const [sessao, setSessao] = useState<DueCard[] | null>(null);
   const [indice, setIndice] = useState(0);
@@ -56,30 +57,33 @@ export function Review() {
       const cards = listFlashcards();
 
       // Sem sessão, a revisão continua utilizável — só não persiste nem prioriza.
-      if (!user) {
+      if (!userId) {
         if (ativo) setSessao(buildReviewSession(cards, [], []));
         return;
       }
 
       const [reviews, attempts] = await Promise.all([
-        fetchFlashcardReviews(user.id),
-        fetchAttempts(user.id),
+        fetchFlashcardReviews(userId),
+        fetchAttempts(userId),
       ]);
       if (!ativo) return;
 
       const fracos = conceptsNeedingReview(
         listConcepts().map((c) => c.id),
-        attempts
+        attempts.dados
       ).map((m) => m.conceptId);
 
-      setSessao(buildReviewSession(cards, reviews, fracos));
+      setSessao(buildReviewSession(cards, reviews.dados, fracos));
     }
 
     montar();
     return () => {
       ativo = false;
     };
-  }, [user]);
+    // O id, não o objeto: uma renovação de token no meio da sessão trocava o
+    // `user`, e a sessão era remontada e reembaralhada com o índice parado —
+    // cartões já avaliados voltavam, outros sumiam.
+  }, [userId]);
 
   if (sessao === null) {
     return (
@@ -109,7 +113,7 @@ export function Review() {
           >
             <IconClose size={20} />
           </Link>
-          <span className="text-sm font-bold text-ink">Sessão de revisão</span>
+          <h1 className="text-sm font-bold text-ink">Sessão de revisão</h1>
         </div>
 
         <span className="label-mono text-ink-faint">

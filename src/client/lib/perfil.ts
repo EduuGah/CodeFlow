@@ -1,5 +1,6 @@
 import { supabase } from './supabase';
 import type { Purchase } from './economia';
+import { funcaoAusente, lerTodasAsPaginas, type Leitura } from './progress';
 
 /**
  * Perfil editável, compras e foto.
@@ -101,26 +102,47 @@ export function nomeParaMostrar(
 
 // ------------------------------------------------------------ compras
 
-export async function fetchPurchases(userId: string): Promise<Purchase[]> {
-  if (!supabase) return [];
+export async function fetchPurchases(userId: string): Promise<Leitura<Purchase>> {
+  if (!supabase) return { dados: [] };
+  const cliente = supabase;
 
-  const { data, error } = await supabase
-    .from('purchases')
-    .select('item, price, created_at')
-    .eq('user_id', userId)
-    .order('created_at', { ascending: true });
+  const leitura = await lerTodasAsPaginas<{ item: string; price: number; created_at: string }>((de, ate) =>
+    cliente
+      .from('purchases')
+      .select('item, price, created_at', { count: de === 0 ? 'exact' : undefined })
+      .eq('user_id', userId)
+      .order('created_at', { ascending: true })
+      .order('id', { ascending: true })
+      .range(de, ate)
+  );
 
-  if (error) {
-    console.error('Falha ao buscar compras:', error.message);
-    return [];
-  }
+  if (leitura.erro) console.error('Falha ao buscar compras:', leitura.erro);
 
-  return (data ?? []).map((row) => ({ item: row.item, price: row.price, createdAt: row.created_at }));
+  return {
+    erro: leitura.erro ? 'Não foi possível carregar suas compras.' : undefined,
+    dados: leitura.dados.map((row) => ({ item: row.item, price: row.price, createdAt: row.created_at })),
+  };
 }
 
 /**
- * Registra uma compra. Quem chama já conferiu o saldo; o banco guarda o fato
- * e a hora — que é o que o dobro de XP e o congelamento usam.
+ * O que a função `comprar_item` (0009) responde quando recusa, dito para a
+ * pessoa. O banco fala em códigos curtos de propósito: a frase é da tela.
+ */
+const MOTIVOS_DE_RECUSA: Record<string, string> = {
+  saldo_insuficiente: 'Moedas insuficientes para este item.',
+  item_ja_possuido: 'Este item já é seu.',
+  item_indisponivel: 'Este item não está disponível agora.',
+  sem_sessao: 'Sua sessão expirou. Entre de novo para comprar.',
+};
+
+/**
+ * Registra uma compra.
+ *
+ * Pela função `comprar_item` (0009), que é a autoridade: ela lê o preço do
+ * catálogo do banco, compra uma de cada vez por pessoa, recusa cosmético
+ * repetido e gasto acima do que o histórico poderia render. O `price` daqui
+ * só serve ao caminho antigo, num banco que ainda não tem a 0009 — que
+ * continua conferindo o saldo na tela, como antes.
  */
 export async function recordPurchase(
   userId: string,
@@ -128,6 +150,17 @@ export async function recordPurchase(
   price: number
 ): Promise<{ purchase?: Purchase; error?: string }> {
   if (!supabase) return { error: 'Supabase não configurado.' };
+
+  const { data: comprada, error: erroDaFuncao } = await supabase.rpc('comprar_item', { p_item: item });
+  if (!erroDaFuncao && comprada) {
+    const linha = (Array.isArray(comprada) ? comprada[0] : comprada) as { item: string; price: number; created_at: string };
+    return { purchase: { item: linha.item, price: linha.price, createdAt: linha.created_at } };
+  }
+  if (erroDaFuncao && !funcaoAusente(erroDaFuncao)) {
+    console.error('Compra recusada:', erroDaFuncao.message);
+    const motivo = Object.keys(MOTIVOS_DE_RECUSA).find((codigo) => erroDaFuncao.message?.includes(codigo));
+    return { error: motivo ? MOTIVOS_DE_RECUSA[motivo] : 'A compra não foi registrada. Tente de novo.' };
+  }
 
   const { data, error } = await supabase
     .from('purchases')

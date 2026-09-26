@@ -44,7 +44,32 @@ export async function fetchProgress(userId: string): Promise<UserProgress> {
   };
 }
 
-/** Acrescenta um id a uma das listas de progresso, sem duplicar. */
+/**
+ * O PostgREST devolve este erro quando a função chamada por `rpc` não existe —
+ * o banco ainda não recebeu a migração que a cria. É o único erro que autoriza
+ * cair no caminho antigo; qualquer outro é falha de verdade.
+ */
+export function funcaoAusente(error: { code?: string; message?: string } | null): boolean {
+  if (!error) return false;
+  return (
+    error.code === 'PGRST202' || // função não encontrada no schema cache
+    error.code === '42883' || // undefined_function
+    /could not find the function/i.test(error.message ?? '')
+  );
+}
+
+/**
+ * Acrescenta um id a uma das listas de progresso, sem duplicar.
+ *
+ * O caminho de verdade é a função `concluir` (migração 0009): o banco
+ * acrescenta num comando só, sem ler antes, então duas conclusões ao mesmo
+ * tempo — duas abas, ou uma aula e um projeto — ficam as duas.
+ *
+ * O caminho antigo (ler, acrescentar, regravar a lista inteira) só roda num
+ * banco sem a 0009, e **nunca a partir de uma leitura que falhou**: antes,
+ * uma falha de rede na leitura virava lista vazia, e a regravação apagava
+ * todas as aulas concluídas da pessoa.
+ */
 async function appendToProgress(
   userId: string,
   column: 'completed_lessons' | 'completed_projects',
@@ -52,7 +77,14 @@ async function appendToProgress(
 ): Promise<void> {
   if (!supabase) return;
 
+  const { error: erroDaFuncao } = await supabase.rpc('concluir', { p_coluna: column, p_id: id });
+  if (!erroDaFuncao) return;
+  if (!funcaoAusente(erroDaFuncao)) throw new Error(erroDaFuncao.message);
+
   const current = await fetchProgress(userId);
+  if (current.error) {
+    throw new Error(`O progresso não foi lido, então não foi regravado: ${current.error}`);
+  }
   const list = column === 'completed_lessons' ? current.completedLessons : current.completedProjects;
 
   if (list.includes(id)) return;
@@ -70,6 +102,63 @@ export function markLessonCompleted(userId: string, lessonId: string): Promise<v
 
 export function markProjectCompleted(userId: string, projectId: string): Promise<void> {
   return appendToProgress(userId, 'completed_projects', projectId);
+}
+
+// ------------------------------------------------------- leitura paginada
+
+/**
+ * Uma leitura de histórico: as linhas, e o erro se alguma página falhou.
+ *
+ * O erro não esvazia `dados`, mas quem lê precisa saber que eles podem estar
+ * incompletos — um saldo calculado sem as compras, ou uma sequência sem as
+ * tentativas de ontem, parecem números certos e não são.
+ */
+export interface Leitura<T> {
+  dados: T[];
+  erro?: string;
+}
+
+/**
+ * Linhas por página. O Supabase corta toda resposta em `max-rows` (1.000 por
+ * padrão) **sem avisar**: sem paginar, quem passasse de mil tentativas via o
+ * histórico parar na milésima — a mais antiga, porque a ordem é crescente — e
+ * a sequência, o XP e os desafios congelavam no passado.
+ */
+export const LINHAS_POR_PAGINA = 1000;
+
+/** Trava de segurança: 200 mil linhas é muito mais que uma vida de estudo. */
+const PAGINAS_NO_MAXIMO = 200;
+
+type Pagina = PromiseLike<{
+  data: unknown[] | null;
+  error: { message: string } | null;
+  count?: number | null;
+}>;
+
+/**
+ * Lê todas as páginas de uma consulta ordenada. `consultar(de, ate)` monta a
+ * consulta com `.range(de, ate)`; a primeira pede também a contagem, e a
+ * leitura para quando juntou tudo — ou, sem contagem, na primeira página
+ * incompleta.
+ */
+export async function lerTodasAsPaginas<T>(consultar: (de: number, ate: number) => Pagina): Promise<Leitura<T>> {
+  const dados: T[] = [];
+  let total: number | null = null;
+
+  for (let pagina = 0; pagina < PAGINAS_NO_MAXIMO; pagina++) {
+    const de = pagina * LINHAS_POR_PAGINA;
+    const { data, error, count } = await consultar(de, de + LINHAS_POR_PAGINA - 1);
+    if (error) return { dados, erro: error.message };
+
+    const linhas = (data ?? []) as T[];
+    dados.push(...linhas);
+    if (typeof count === 'number') total = count;
+
+    const acabou = total !== null ? dados.length >= total : linhas.length < LINHAS_POR_PAGINA;
+    if (acabou || linhas.length === 0) break;
+  }
+
+  return { dados };
 }
 
 // ------------------------------------------------------- tentativas
@@ -139,28 +228,42 @@ export async function fetchSolvedExercises(
 }
 
 /** Histórico de tentativas do aluno, do mais antigo para o mais recente. */
-export async function fetchAttempts(userId: string): Promise<Attempt[]> {
-  if (!supabase) return [];
+export async function fetchAttempts(userId: string): Promise<Leitura<Attempt>> {
+  if (!supabase) return { dados: [] };
+  const cliente = supabase;
 
-  const { data, error } = await supabase
-    .from('exercise_attempts')
-    .select('exercise_id, lesson_id, concepts, correct, hints_used, created_at')
-    .eq('user_id', userId)
-    .order('created_at', { ascending: true });
+  const leitura = await lerTodasAsPaginas<{
+    exercise_id: string;
+    lesson_id: string;
+    concepts: string[] | null;
+    correct: boolean;
+    hints_used: number | null;
+    created_at: string;
+  }>((de, ate) =>
+    cliente
+      .from('exercise_attempts')
+      .select('exercise_id, lesson_id, concepts, correct, hints_used, created_at', {
+        count: de === 0 ? 'exact' : undefined,
+      })
+      .eq('user_id', userId)
+      .order('created_at', { ascending: true })
+      .order('id', { ascending: true })
+      .range(de, ate)
+  );
 
-  if (error) {
-    console.error('Falha ao buscar tentativas:', error.message);
-    return [];
-  }
+  if (leitura.erro) console.error('Falha ao buscar tentativas:', leitura.erro);
 
-  return (data ?? []).map((row) => ({
-    exerciseId: row.exercise_id,
-    lessonId: row.lesson_id,
-    concepts: row.concepts ?? [],
-    correct: row.correct,
-    hintsUsed: row.hints_used ?? 0,
-    createdAt: row.created_at,
-  }));
+  return {
+    erro: leitura.erro ? 'Não foi possível carregar suas tentativas.' : undefined,
+    dados: leitura.dados.map((row) => ({
+      exerciseId: row.exercise_id,
+      lessonId: row.lesson_id,
+      concepts: row.concepts ?? [],
+      correct: row.correct,
+      hintsUsed: row.hints_used ?? 0,
+      createdAt: row.created_at,
+    })),
+  };
 }
 
 // ------------------------------------------------- revisao de flashcards
@@ -181,25 +284,30 @@ export async function recordFlashcardReview(
 }
 
 /** Histórico de revisões do aluno. */
-export async function fetchFlashcardReviews(userId: string): Promise<FlashcardReview[]> {
-  if (!supabase) return [];
+export async function fetchFlashcardReviews(userId: string): Promise<Leitura<FlashcardReview>> {
+  if (!supabase) return { dados: [] };
+  const cliente = supabase;
 
-  const { data, error } = await supabase
-    .from('flashcard_reviews')
-    .select('flashcard_id, rating, created_at')
-    .eq('user_id', userId)
-    .order('created_at', { ascending: true });
+  const leitura = await lerTodasAsPaginas<{ flashcard_id: string; rating: string; created_at: string }>((de, ate) =>
+    cliente
+      .from('flashcard_reviews')
+      .select('flashcard_id, rating, created_at', { count: de === 0 ? 'exact' : undefined })
+      .eq('user_id', userId)
+      .order('created_at', { ascending: true })
+      .order('id', { ascending: true })
+      .range(de, ate)
+  );
 
-  if (error) {
-    console.error('Falha ao buscar revisões:', error.message);
-    return [];
-  }
+  if (leitura.erro) console.error('Falha ao buscar revisões:', leitura.erro);
 
-  return (data ?? []).map((row) => ({
-    flashcardId: row.flashcard_id,
-    rating: row.rating as ReviewRating,
-    createdAt: row.created_at,
-  }));
+  return {
+    erro: leitura.erro ? 'Não foi possível carregar suas revisões.' : undefined,
+    dados: leitura.dados.map((row) => ({
+      flashcardId: row.flashcard_id,
+      rating: row.rating as ReviewRating,
+      createdAt: row.created_at,
+    })),
+  };
 }
 
 // ------------------------------------------------------------ papel
@@ -234,25 +342,34 @@ export async function fetchUserRole(userId: string): Promise<UserRole> {
   return data?.role === 'admin' ? 'admin' : 'student';
 }
 
-/** Desempenho agregado por exercício. Só devolve dados para quem o RLS permite. */
+/**
+ * Desempenho agregado por exercício.
+ *
+ * Vem da função `desempenho_por_exercicio` (0009), que só responde a admin e
+ * só devolve números — a leitura ampla das linhas de cada aluno saiu do banco.
+ * Num banco sem a 0009, cai na view antiga.
+ */
 export async function fetchExercisePerformance(): Promise<ExercisePerformance[]> {
   if (!supabase) return [];
 
-  const { data, error } = await supabase.from('exercise_performance').select('*');
+  let { data, error } = await supabase.rpc('desempenho_por_exercicio');
+  if (funcaoAusente(error)) {
+    ({ data, error } = await supabase.from('exercise_performance').select('*'));
+  }
 
   if (error) {
     console.error('Falha ao buscar desempenho por exercício:', error.message);
     return [];
   }
 
-  return (data ?? []).map((row) => ({
-    exerciseId: row.exercise_id,
-    lessonId: row.lesson_id,
-    attempts: row.attempts ?? 0,
-    correctAttempts: row.correct_attempts ?? 0,
-    students: row.students ?? 0,
-    studentsSolved: row.students_solved ?? 0,
-    accuracyPercent: row.accuracy_percent === null ? null : Number(row.accuracy_percent),
+  return ((data ?? []) as Array<Record<string, unknown>>).map((row) => ({
+    exerciseId: String(row.exercise_id),
+    lessonId: String(row.lesson_id),
+    attempts: Number(row.attempts ?? 0),
+    correctAttempts: Number(row.correct_attempts ?? 0),
+    students: Number(row.students ?? 0),
+    studentsSolved: Number(row.students_solved ?? 0),
+    accuracyPercent: row.accuracy_percent === null || row.accuracy_percent === undefined ? null : Number(row.accuracy_percent),
     avgHintsUsed: Number(row.avg_hints_used ?? 0),
     attemptsPerStudent: Number(row.attempts_per_student ?? 0),
   }));
