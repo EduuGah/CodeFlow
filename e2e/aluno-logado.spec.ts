@@ -72,3 +72,32 @@ test('o editor do projeto se dimensiona no desktop', async ({ logado: page }) =>
   // Metade da tela é do enunciado; o editor fica com a outra metade.
   expect(caixa.width).toBeGreaterThan(page.viewportSize()!.width * 0.4);
 });
+
+/**
+ * As fontes vêm do próprio domínio.
+ *
+ * Vinham do Google Fonts: o único pedido a terceiro em tempo de execução. O
+ * teste confere as duas metades — nenhum pedido sai para o Google, e a fonte
+ * de texto e a de código de fato carregam (sem isso a página cairia na fonte
+ * do sistema em silêncio).
+ */
+test('as fontes carregam do próprio domínio, sem pedido ao Google', async ({ logado: page }) => {
+  const externos: string[] = [];
+  page.on('request', (r) => {
+    if (/fonts\.(googleapis|gstatic)\.com/.test(r.url())) externos.push(r.url());
+  });
+
+  await page.goto('/app');
+  await page.getByRole('navigation', { name: 'Navegação principal' }).first().waitFor();
+
+  const carregadas = await page.evaluate(async () => {
+    await Promise.all([document.fonts.load('700 16px "Plus Jakarta Sans"'), document.fonts.load('400 16px "JetBrains Mono"')]);
+    return {
+      texto: document.fonts.check('700 16px "Plus Jakarta Sans"'),
+      codigo: document.fonts.check('400 16px "JetBrains Mono"'),
+    };
+  });
+
+  expect(carregadas).toEqual({ texto: true, codigo: true });
+  expect(externos).toEqual([]);
+});

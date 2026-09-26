@@ -193,7 +193,7 @@ Legenda de estado: **Corrigido** (com teste, nesta rodada), **Parcial**,
 | P2-7 | Sem cabeçalhos de segurança HTTP | Parcial |
 | P2-8 | `service_role` legada não era reconhecida como chave secreta | Corrigido |
 | P2-9 | Ferramentas de dev com vulnerabilidades (Vite 5, Vitest 2); DOMPurify via Monaco | Pendente |
-| P2-10 | Fontes servidas pelo Google (terceiro, privacidade, falha offline) | Pendente |
+| P2-10 | Fontes servidas pelo Google (terceiro, privacidade, falha offline) | Corrigido |
 | P2-11 | Quatro telas sem `<h1>` (trilha, aula, revisão, projeto) | Corrigido |
 | P2-12 | Sem ESLint (as regras de hooks pegariam P1-8 na origem) | Pendente |
 | P2-13 | Camada de persistência e `StudentDataContext` sem testes | Corrigido |
@@ -473,14 +473,18 @@ Legenda de estado: **Corrigido** (com teste, nesta rodada), **Parcial**,
   `semSourcemapNosGigantes` e o `worker.format` precisam ser revalidados) e
   Monaco 0.57 quando a quebra for avaliada.
 
-#### P2-10 · Fontes do Google — Pendente
+#### P2-10 · Fontes do Google — Corrigido
 - **Arquivo:** `index.html`
 - **Por quê:** terceiro em tempo de execução (o IP do aluno vai ao Google, tema
   de LGPD), falha offline, e é o único pedido externo. Neste contêiner o proxy
   derruba o certificado e o E2E "o console não acumula erro" fica vermelho por
   isso.
-- **Solução:** `@font-face` com os `.woff2` da Plus Jakarta Sans e JetBrains Mono
-  (subconjunto latino) servidos do próprio domínio, `font-display: swap`.
+- **Feito:** as duas são fontes variáveis — um `.woff2` por família (27 kB e
+  31 kB, subconjunto latino) cobre todos os pesos — em `public/fontes/` com a
+  licença OFL, `@font-face` com `font-display: swap`, `preload` da fonte de
+  texto e cache de um ano na Vercel. Um E2E confere que nenhum pedido vai ao
+  Google e que as duas carregam; o teste do console, que falhava neste
+  contêiner só por isso, voltou a passar.
 
 #### P2-11 · Telas sem `<h1>` — Corrigido
 Trilha (`TrackBanner`), aula, revisão e projeto não tinham título de nível 1 —

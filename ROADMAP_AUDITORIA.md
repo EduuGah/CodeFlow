@@ -79,7 +79,7 @@ A fazer, nesta ordem:
    histórico) e calculados uma vez só por recálculo do painel.
 5. **P2-3** provider acima das rotas; atualização local após concluir/tentar;
    revalidação sem esqueleto.
-6. **P2-10** fontes do próprio domínio.
+6. [x] **P2-10** fontes do próprio domínio (dois `.woff2` variáveis, 58 kB).
 7. [x] **P3-8** validação Zod só em DEV/teste; Zod fora do pacote principal.
 
 ## Fase 5 — UX/UI

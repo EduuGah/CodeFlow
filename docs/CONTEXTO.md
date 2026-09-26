@@ -41,7 +41,7 @@ Números lidos do catálogo, não de memória.
 | Projetos | 10, com 34 critérios de aceitação — os 3 capstones são página + API + banco (motor 7), os outros 7 são JavaScript puro |
 | Conceitos | 151, com grafo de pré-requisitos |
 | Flashcards | 67 (93 conceitos ainda sem cartão) |
-| Testes | 3.353 de unidade + ~410 de navegador |
+| Testes | 3.370 de unidade + ~430 de navegador |
 | Pacote | 3.080 kB (847 kB comprimido) no chunk principal — o corpo das aulas vai junto (é quase metade), e separá-lo é o maior problema de performance aberto (P2-1b do roadmap). Aula, revisão, projeto e admin são rotas sob demanda (`App.tsx`), e o Zod só entra no chunk do admin; o Monaco são mais 3.362 kB (869 kB) num chunk à parte, baixado só quando o primeiro editor monta, e o worker de TypeScript (7 MB) só quando um modelo JS/TS abre. O motor de TypeScript não acrescentou arquivo; o de React acrescentou um chunk de 143 kB (47 kB) com o React e o ReactDOM como texto, baixado só por um exercício de React; o de SQL acrescentou o worker (49 kB) e o SQLite em WebAssembly (658 kB), baixados só por um exercício de SQL; o de Python acrescentou o worker (~22 kB) e o Pyodide inteiro (~13,5 MB: o WebAssembly do CPython, a biblioteca padrão zipada, o manifesto de pacotes), copiados para `/pyodide/` na build e baixados só por um exercício de Python |
 
 ## 4. Decisões que não devem ser desfeitas sem motivo forte
@@ -369,7 +369,7 @@ docs/curriculo.md       Roadmap de conteúdo — fonte canônica
 
 ```bash
 npm run typecheck   # inclui e2e/ e playwright.config.ts
-npm test            # 3.353 testes
+npm test            # 3.370 testes
 npm run test:e2e    # ~410 no navegador (antes: npx playwright install chromium;
                     # com um Chromium já instalado: PW_CHROMIUM=/caminho/do/chrome)
 npm run build
@@ -692,10 +692,10 @@ Cada uma custou tempo. Não repita.
 
 ### Bloqueios técnicos
 
-- **As fontes vêm do Google Fonts.** É o último recurso externo em tempo de
-  execução (o Monaco já é servido do próprio domínio). Sem rede, o texto cai
-  para a fonte do sistema — degrada, mas funciona. Servir do próprio domínio
-  é um `@font-face` e dois arquivos `.woff2`; ainda não foi feito.
+- ~~**As fontes vêm do Google Fonts.**~~ Resolvido em 2026-09-26: as duas
+  fontes variáveis moram em `public/fontes/` (com a licença OFL de cada uma),
+  declaradas por `@font-face` no `index.css`, com cache de um ano na Vercel.
+  Nada mais é pedido a terceiro em tempo de execução — o E2E confere.
 - **`import`/`export` é erro de sintaxe no sandbox** — `new Function` não aceita
   módulos. A aula de módulos terá que ser conceitual, ou esperar outro executor.
 - **Publicado na Vercel** (2026-09-14) pela integração com o GitHub: cada
