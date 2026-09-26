@@ -42,7 +42,7 @@ Números lidos do catálogo, não de memória.
 | Conceitos | 151, com grafo de pré-requisitos |
 | Flashcards | 67 (93 conceitos ainda sem cartão) |
 | Testes | 3.353 de unidade + ~410 de navegador |
-| Pacote | 3.512 kB (972 kB comprimido) no chunk principal — o conteúdo vai junto, e é o maior problema de performance aberto (P2-1 do roadmap); o Monaco são mais 3.362 kB (869 kB) num chunk à parte, baixado só quando o primeiro editor monta, e o worker de TypeScript (7 MB) só quando um modelo JS/TS abre. O motor de TypeScript não acrescentou arquivo; o de React acrescentou um chunk de 143 kB (47 kB) com o React e o ReactDOM como texto, baixado só por um exercício de React; o de SQL acrescentou o worker (49 kB) e o SQLite em WebAssembly (658 kB), baixados só por um exercício de SQL; o de Python acrescentou o worker (~22 kB) e o Pyodide inteiro (~13,5 MB: o WebAssembly do CPython, a biblioteca padrão zipada, o manifesto de pacotes), copiados para `/pyodide/` na build e baixados só por um exercício de Python |
+| Pacote | 3.080 kB (847 kB comprimido) no chunk principal — o corpo das aulas vai junto (é quase metade), e separá-lo é o maior problema de performance aberto (P2-1b do roadmap). Aula, revisão, projeto e admin são rotas sob demanda (`App.tsx`), e o Zod só entra no chunk do admin; o Monaco são mais 3.362 kB (869 kB) num chunk à parte, baixado só quando o primeiro editor monta, e o worker de TypeScript (7 MB) só quando um modelo JS/TS abre. O motor de TypeScript não acrescentou arquivo; o de React acrescentou um chunk de 143 kB (47 kB) com o React e o ReactDOM como texto, baixado só por um exercício de React; o de SQL acrescentou o worker (49 kB) e o SQLite em WebAssembly (658 kB), baixados só por um exercício de SQL; o de Python acrescentou o worker (~22 kB) e o Pyodide inteiro (~13,5 MB: o WebAssembly do CPython, a biblioteca padrão zipada, o manifesto de pacotes), copiados para `/pyodide/` na build e baixados só por um exercício de Python |
 
 ## 4. Decisões que não devem ser desfeitas sem motivo forte
 
@@ -666,6 +666,17 @@ Cada uma custou tempo. Não repita.
 - **Teste de desafio precisa escolher dias em que o desafio está no rodízio.**
   Sem isso ele passa vazio — o primeiro teste do "conclua uma aula" dessa
   auditoria passou antes da correção porque o dia não tinha o desafio.
+- **O E2E importa `src/content` direto no Node do Playwright, onde
+  `import.meta.env` não existe.** Ler `import.meta.env.DEV` no topo de um
+  módulo de conteúdo derruba a suíte inteira; o `typeof import.meta.env ===
+  'object'` antes resolve, e o Vite ainda troca o `.DEV` por `false` no build.
+- **Um módulo que só declara schemas Zod não é "sem efeito" para o Rollup**:
+  `z.object(...)` no topo é uma chamada. Sem o `moduleSideEffects` do
+  `vite.config.ts`, desligar a validação não tirava o Zod do pacote.
+- **Derivar do histórico precisa de índice.** Filtrar todas as tentativas para
+  cada dia da história era 1,5 s com um ano de estudo — invisível com o
+  histórico curto dos testes. Meça com um histórico grande antes de dar uma
+  derivação por pronta.
 - **Editar arquivos com o E2E rodando recarrega a página no meio do teste**
   (HMR do Vite). A falha parece do produto e não é. Edite, espere, rode.
 

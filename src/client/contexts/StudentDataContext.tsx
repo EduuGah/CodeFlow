@@ -213,8 +213,9 @@ export function StudentDataProvider({ children }: { children: React.ReactNode })
       .map((e) => e.id);
 
     const entradaDeJogo = { attempts, completedLessons, completedProjects, reviews, purchases };
-    const xp = computeXp(entradaDeJogo);
+    // A derivação mais cara do painel: uma vez, para XP, moedas e conquistas.
     const concluidos = desafiosConcluidos({ attempts, reviews, completedLessons });
+    const xp = computeXp(entradaDeJogo, concluidos);
     const ganhas = moedasGanhas({
       completedLessons,
       completedProjects,

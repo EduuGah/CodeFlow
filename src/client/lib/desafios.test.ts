@@ -13,6 +13,8 @@ import {
   POR_PERIODO,
   RECOMPENSA,
 } from './desafios';
+import { diaLocal, somarDias } from './sequencia';
+import { fechamentoDasAulas } from './study';
 
 const t = (dia: string, over: Partial<Attempt> = {}): Attempt => ({
   exerciseId: 'ex-1',
@@ -83,7 +85,7 @@ describe('progresso e conclusão', () => {
     const { dia } = desafiosAtuais({ attempts, reviews: [], completedLessons: [], hoje: HOJE });
     // Independe do sorteio: avalia a definição direto.
     const tentativasDeHoje = attempts.filter((a) => a.createdAt.startsWith('2026-03-10'));
-    expect(ctxDia.progresso({ tentativas: tentativasDeHoje, historico: attempts, revisoes: [], aulasConcluidas: 0 })).toBe(2);
+    expect(ctxDia.progresso({ tentativas: tentativasDeHoje, jaErrados: new Set(), revisoes: [], aulasConcluidas: 0 })).toBe(2);
     expect(dia.every((d) => d.progresso <= d.desafio.meta)).toBe(true);
   });
 
@@ -91,14 +93,14 @@ describe('progresso e conclusão', () => {
     const def = DESAFIOS_DO_DIA.find((d) => d.id === 'dia-insistir-1')!;
     const ontemErrou = t('2026-03-09', { exerciseId: 'a', correct: false });
     const hojeAcertou = t('2026-03-10', { exerciseId: 'a' });
-    expect(def.progresso({ tentativas: [hojeAcertou], historico: [ontemErrou, hojeAcertou], revisoes: [], aulasConcluidas: 0 })).toBe(1);
-    expect(def.progresso({ tentativas: [hojeAcertou], historico: [hojeAcertou], revisoes: [], aulasConcluidas: 0 })).toBe(0);
+    expect(def.progresso({ tentativas: [hojeAcertou], jaErrados: new Set([ontemErrou.exerciseId]), revisoes: [], aulasConcluidas: 0 })).toBe(1);
+    expect(def.progresso({ tentativas: [hojeAcertou], jaErrados: new Set(), revisoes: [], aulasConcluidas: 0 })).toBe(0);
   });
 
   it('o desafio semanal de dias conta dias distintos da semana', () => {
     const def = DESAFIOS_DA_SEMANA.find((d) => d.id === 'semana-dias-4')!;
     const tentativas = ['2026-03-09', '2026-03-09', '2026-03-10', '2026-03-11', '2026-03-12'].map((d) => t(d));
-    expect(def.progresso({ tentativas, historico: tentativas, revisoes: [], aulasConcluidas: 0 })).toBe(4);
+    expect(def.progresso({ tentativas, jaErrados: new Set(), revisoes: [], aulasConcluidas: 0 })).toBe(4);
   });
 
   it('refazer um exercício de uma aula antiga não a "conclui" de novo', () => {
@@ -160,5 +162,80 @@ describe('o histórico de desafios cumpridos', () => {
     const concluidos = desafiosConcluidos({ attempts: [], reviews, completedLessons: [], hoje: HOJE });
     const sorteado = desafiosDoDia('2026-03-10').some((d) => d.id === 'dia-revisar-5');
     expect(concluidos.some((c) => c.id === 'dia-revisar-5')).toBe(sorteado);
+  });
+});
+
+describe('o índice por dia dá o mesmo resultado da conta ingênua', () => {
+  /**
+   * A versão antiga, escrita do jeito mais direto possível: para cada dia e
+   * cada semana, filtra todas as tentativas. Era 70× mais lenta com um ano de
+   * histórico, e é justamente por ser óbvia que serve de referência.
+   */
+  function referencia(entrada: { attempts: Attempt[]; reviews: FlashcardReview[]; completedLessons: string[]; hoje: Date }) {
+    const hoje = diaLocal(entrada.hoje);
+    const diaDe = (iso: string) => diaLocal(new Date(iso));
+    const concluidas = new Set(entrada.completedLessons);
+    const fechamento = [...fechamentoDasAulas(entrada.attempts)]
+      .filter(([aula]) => concluidas.has(aula))
+      .map(([, instante]) => diaDe(instante));
+    const ctx = (de: string, ate: string) => ({
+      tentativas: entrada.attempts.filter((a) => diaDe(a.createdAt) >= de && diaDe(a.createdAt) <= ate),
+      jaErrados: new Set(entrada.attempts.filter((a) => !a.correct && diaDe(a.createdAt) <= ate).map((a) => a.exerciseId)),
+      revisoes: entrada.reviews.filter((r) => diaDe(r.createdAt) >= de && diaDe(r.createdAt) <= ate),
+      aulasConcluidas: fechamento.filter((d) => d >= de && d <= ate).length,
+    });
+    const dias = [...new Set([...entrada.attempts.map((a) => diaDe(a.createdAt)), ...entrada.reviews.map((r) => diaDe(r.createdAt))])]
+      .filter((d) => d <= hoje)
+      .sort();
+    const saida: string[] = [];
+    for (const dia of dias) {
+      const c = ctx(dia, dia);
+      for (const d of desafiosDoDia(dia)) if (Math.min(d.meta, d.progresso(c)) >= d.meta) saida.push(`dia ${dia} ${d.id}`);
+    }
+    if (dias.length === 0) return saida;
+    for (let segunda = inicioDaSemana(dias[0]); segunda <= hoje; segunda = somarDias(segunda, 7)) {
+      const fim = somarDias(segunda, 6);
+      const ultimo = dias.filter((d) => d >= segunda && d <= fim).pop();
+      if (!ultimo) continue;
+      const c = ctx(segunda, fim);
+      for (const d of desafiosDaSemana(segunda)) if (Math.min(d.meta, d.progresso(c)) >= d.meta) saida.push(`semana ${ultimo} ${d.id}`);
+    }
+    return saida;
+  }
+
+  /** Gerador pequeno e determinístico, para a falha ser reproduzível. */
+  function sorteador(semente: number) {
+    let x = semente;
+    return (n: number) => {
+      x = (x * 1103515245 + 12345) % 2147483648;
+      return x % n;
+    };
+  }
+
+  it.each([1, 2, 3, 4, 5, 6, 7, 8])('histórico sorteado %i', (semente) => {
+    const sortear = sorteador(semente);
+    const inicio = new Date(2026, 0, 5, 8).getTime();
+    const attempts: Attempt[] = Array.from({ length: 150 + sortear(150) }, () => ({
+      exerciseId: `ex-${sortear(40)}`,
+      lessonId: `aula-${sortear(8)}`,
+      concepts: [`c-${sortear(10)}`],
+      correct: sortear(3) !== 0,
+      hintsUsed: sortear(4) === 0 ? 1 : 0,
+      createdAt: new Date(inicio + sortear(70) * 864e5 + sortear(24 * 60) * 6e4).toISOString(),
+    }));
+    const reviews: FlashcardReview[] = Array.from({ length: sortear(80) }, () => ({
+      flashcardId: `card-${sortear(25)}`,
+      rating: 'medio',
+      createdAt: new Date(inicio + sortear(70) * 864e5 + sortear(24 * 60) * 6e4).toISOString(),
+    }));
+    const entrada = {
+      attempts,
+      reviews,
+      completedLessons: ['aula-0', 'aula-2', 'aula-5', 'aula-7'],
+      hoje: new Date(inicio + 60 * 864e5),
+    };
+
+    const rapido = desafiosConcluidos(entrada).map((c) => `${c.periodo} ${c.dia} ${c.id}`);
+    expect(rapido.sort()).toEqual(referencia(entrada).sort());
   });
 });

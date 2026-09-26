@@ -25,8 +25,8 @@ export type Periodo = 'dia' | 'semana';
 export interface ContextoDoPeriodo {
   /** Tentativas dentro do período. */
   tentativas: Attempt[];
-  /** Todas as tentativas até o fim do período — para saber o que já tinha sido errado antes. */
-  historico: Attempt[];
+  /** Exercícios com alguma tentativa errada até o fim do período — o "já tinha errado". */
+  jaErrados: ReadonlySet<string>;
   revisoes: FlashcardReview[];
   /** Aulas cuja última tentativa certa caiu no período. */
   aulasConcluidas: number;
@@ -75,10 +75,7 @@ export const DESAFIOS_DO_DIA: DefinicaoDeDesafio[] = [
     title: 'Voltar e resolver',
     description: 'Resolva um exercício em que você já tinha errado.',
     meta: 1,
-    progresso: (c) => {
-      const errados = new Set(c.historico.filter((a) => !a.correct).map((a) => a.exerciseId));
-      return [...exerciciosCertos(c.tentativas)].filter((id) => errados.has(id)).length;
-    },
+    progresso: (c) => [...exerciciosCertos(c.tentativas)].filter((id) => c.jaErrados.has(id)).length,
   },
   {
     id: 'dia-aula-1',
@@ -201,32 +198,76 @@ export interface EntradaDeDesafios {
   hoje?: Date;
 }
 
-/** O dia em que cada aula concluída fechou (`fechamentoDasAulas`), no fuso local. */
-function diaDeConclusaoPorAula(attempts: Attempt[], completedLessons: string[]): Map<string, string> {
-  const concluidas = new Set(completedLessons);
-  const dia = new Map<string, string>();
-  for (const [aula, instante] of fechamentoDasAulas(attempts)) {
-    if (concluidas.has(aula)) dia.set(aula, diaLocal(new Date(instante)));
-  }
-  return dia;
+/**
+ * O histórico arrumado por dia local, uma vez só.
+ *
+ * A versão anterior refazia, para **cada dia** da história, um filtro sobre
+ * **todas** as tentativas, convertendo cada data de novo. Com um ano de
+ * estudo (~5 mil tentativas) isso era 1,5 s no desktop — e rodava duas vezes
+ * por recálculo do painel, travando a tela a cada compra ou troca de perfil.
+ * Aqui cada data é convertida uma vez, e um período lê só os seus dias.
+ */
+interface IndiceDoHistorico {
+  tentativasPorDia: Map<string, Attempt[]>;
+  revisoesPorDia: Map<string, FlashcardReview[]>;
+  /** O primeiro dia em que cada exercício teve uma tentativa errada. */
+  primeiroErro: Map<string, string>;
+  /** O dia em que cada aula concluída fechou (`fechamentoDasAulas`). */
+  conclusoes: string[];
+  /** Todos os dias com alguma atividade, em ordem. */
+  diasComAtividade: string[];
 }
 
-function contexto(
-  entrada: EntradaDeDesafios,
-  de: string,
-  ate: string,
-  conclusoes: Map<string, string>
-): ContextoDoPeriodo {
-  const dentro = (iso: string) => {
-    const d = diaLocal(new Date(iso));
-    return d >= de && d <= ate;
-  };
-  const historico = entrada.attempts.filter((a) => diaLocal(new Date(a.createdAt)) <= ate);
+function indexar(entrada: EntradaDeDesafios): IndiceDoHistorico {
+  const tentativasPorDia = new Map<string, Attempt[]>();
+  const primeiroErro = new Map<string, string>();
+  for (const a of entrada.attempts) {
+    const dia = diaLocal(new Date(a.createdAt));
+    const doDia = tentativasPorDia.get(dia);
+    if (doDia) doDia.push(a);
+    else tentativasPorDia.set(dia, [a]);
+    if (!a.correct) {
+      const antes = primeiroErro.get(a.exerciseId);
+      if (antes === undefined || dia < antes) primeiroErro.set(a.exerciseId, dia);
+    }
+  }
+
+  const revisoesPorDia = new Map<string, FlashcardReview[]>();
+  for (const r of entrada.reviews) {
+    const dia = diaLocal(new Date(r.createdAt));
+    const doDia = revisoesPorDia.get(dia);
+    if (doDia) doDia.push(r);
+    else revisoesPorDia.set(dia, [r]);
+  }
+
+  const concluidas = new Set(entrada.completedLessons);
+  const conclusoes: string[] = [];
+  for (const [aula, instante] of fechamentoDasAulas(entrada.attempts)) {
+    if (concluidas.has(aula)) conclusoes.push(diaLocal(new Date(instante)));
+  }
+
+  const diasComAtividade = [...new Set([...tentativasPorDia.keys(), ...revisoesPorDia.keys()])].sort();
+  return { tentativasPorDia, revisoesPorDia, primeiroErro, conclusoes, diasComAtividade };
+}
+
+function contexto(indice: IndiceDoHistorico, de: string, ate: string): ContextoDoPeriodo {
+  const tentativas: Attempt[] = [];
+  const revisoes: FlashcardReview[] = [];
+  for (let dia = de; dia <= ate; dia = somarDias(dia, 1)) {
+    const t = indice.tentativasPorDia.get(dia);
+    if (t) tentativas.push(...t);
+    const r = indice.revisoesPorDia.get(dia);
+    if (r) revisoes.push(...r);
+  }
+
+  const jaErrados = new Set<string>();
+  for (const [exercicio, dia] of indice.primeiroErro) if (dia <= ate) jaErrados.add(exercicio);
+
   return {
-    tentativas: entrada.attempts.filter((a) => dentro(a.createdAt)),
-    historico,
-    revisoes: entrada.reviews.filter((r) => dentro(r.createdAt)),
-    aulasConcluidas: [...conclusoes.values()].filter((d) => d >= de && d <= ate).length,
+    tentativas,
+    jaErrados,
+    revisoes,
+    aulasConcluidas: indice.conclusoes.filter((d) => d >= de && d <= ate).length,
   };
 }
 
@@ -244,10 +285,10 @@ function avaliar(desafio: DefinicaoDeDesafio, ctx: ContextoDoPeriodo): EstadoDoD
 export function desafiosAtuais(entrada: EntradaDeDesafios): { dia: EstadoDoDesafio[]; semana: EstadoDoDesafio[] } {
   const hoje = diaLocal(entrada.hoje ?? new Date());
   const segunda = inicioDaSemana(hoje);
-  const conclusoes = diaDeConclusaoPorAula(entrada.attempts, entrada.completedLessons);
+  const indice = indexar(entrada);
 
-  const ctxDia = contexto(entrada, hoje, hoje, conclusoes);
-  const ctxSemana = contexto(entrada, segunda, somarDias(segunda, 6), conclusoes);
+  const ctxDia = contexto(indice, hoje, hoje);
+  const ctxSemana = contexto(indice, segunda, somarDias(segunda, 6));
 
   return {
     dia: desafiosDoDia(hoje).map((d) => avaliar(d, ctxDia)),
@@ -271,30 +312,24 @@ export interface DesafioConcluido {
 export function desafiosConcluidos(entrada: EntradaDeDesafios): DesafioConcluido[] {
   if (entrada.attempts.length === 0 && entrada.reviews.length === 0) return [];
   const hoje = diaLocal(entrada.hoje ?? new Date());
-  const conclusoes = diaDeConclusaoPorAula(entrada.attempts, entrada.completedLessons);
-
-  const datas = [
-    ...entrada.attempts.map((a) => diaLocal(new Date(a.createdAt))),
-    ...entrada.reviews.map((r) => diaLocal(new Date(r.createdAt))),
-  ].sort();
-  const primeiro = datas[0];
-  const diasComAtividade = new Set(datas);
+  const indice = indexar(entrada);
+  const dias = indice.diasComAtividade.filter((d) => d <= hoje);
+  if (dias.length === 0) return [];
 
   const concluidos: DesafioConcluido[] = [];
 
-  for (let dia = primeiro; dia <= hoje; dia = somarDias(dia, 1)) {
-    if (!diasComAtividade.has(dia)) continue;
-    const ctx = contexto(entrada, dia, dia, conclusoes);
+  for (const dia of dias) {
+    const ctx = contexto(indice, dia, dia);
     for (const d of desafiosDoDia(dia)) {
       if (avaliar(d, ctx).concluido) concluidos.push({ id: d.id, periodo: 'dia', dia, recompensa: RECOMPENSA.dia });
     }
   }
 
-  for (let segunda = inicioDaSemana(primeiro); segunda <= hoje; segunda = somarDias(segunda, 7)) {
+  for (let segunda = inicioDaSemana(dias[0]); segunda <= hoje; segunda = somarDias(segunda, 7)) {
     const fim = somarDias(segunda, 6);
-    const ctx = contexto(entrada, segunda, fim, conclusoes);
-    const ultimoDia = [...diasComAtividade].filter((d) => d >= segunda && d <= fim).sort().pop();
+    const ultimoDia = dias.filter((d) => d >= segunda && d <= fim).pop();
     if (!ultimoDia) continue;
+    const ctx = contexto(indice, segunda, fim);
     for (const d of desafiosDaSemana(segunda)) {
       if (avaliar(d, ctx).concluido) {
         concluidos.push({ id: d.id, periodo: 'semana', dia: ultimoDia, recompensa: RECOMPENSA.semana });

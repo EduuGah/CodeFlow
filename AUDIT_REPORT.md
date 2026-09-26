@@ -184,8 +184,8 @@ Legenda de estado: **Corrigido** (com teste, nesta rodada), **Parcial**,
 | P1-8 | Renovação de token recarregava todos os dados e reembaralhava a revisão | Corrigido |
 | P1-9 | Sem limite de ritmo de escrita; sem validação de formato das tentativas | Corrigido (0009) |
 | P1-10 | O progresso é autoridade do navegador (tentativas e conclusões forjáveis) | Pendente — arquitetural |
-| P2-1 | Pacote principal de 3,5 MB com o catálogo inteiro, até na página pública | Pendente |
-| P2-2 | Derivações O(dias × tentativas) recalculadas a cada mudança de estado | Pendente |
+| P2-1 | Pacote principal de 3,5 MB com o catálogo inteiro, até na página pública | Parcial |
+| P2-2 | Derivações O(dias × tentativas) recalculadas a cada mudança de estado | Corrigido |
 | P2-3 | O histórico inteiro é baixado a cada entrada no aplicativo | Pendente |
 | P2-4 | Bloqueio de rede dos workers contornável pelo protótipo; código duplicado | Corrigido |
 | P2-5 | Motor de Python sem bloqueio de rede (`from js import fetch`) | Corrigido |
@@ -209,7 +209,7 @@ Legenda de estado: **Corrigido** (com teste, nesta rodada), **Parcial**,
 | P3-5 | Links soltos com 20 px de altura (WCAG 2.5.8) | Pendente |
 | P3-6 | Nome e avatar sem limite no banco | Corrigido (0009) |
 | P3-7 | Login ignorava a rota de origem | Corrigido |
-| P3-8 | Validação Zod de todo o catálogo roda em produção | Pendente |
+| P3-8 | Validação Zod de todo o catálogo roda em produção | Corrigido |
 | P3-9 | Texto de erro do provedor OAuth refletido da URL | Corrigido |
 | P3-10 | "Novidades" vistas guardadas por aparelho | Pendente |
 | P3-11 | Rótulo ambíguo no cartão de XP do perfil | Pendente |
@@ -374,31 +374,42 @@ Legenda de estado: **Corrigido** (com teste, nesta rodada), **Parcial**,
 
 ### P2 — médio
 
-#### P2-1 · Pacote principal de 3,5 MB — Pendente
+#### P2-1 · Pacote principal de 3,5 MB — Parcial
 - **Arquivo:** `src/content/index.ts` (importa as 154 aulas), `App.tsx` (sem
   divisão por rota)
 - **Por quê:** o conteúdo inteiro (3,2 MB de fonte) entra no chunk principal, que
   a página pública também baixa. Medido: `index-*.js` 3.512 kB, 972 kB gzip.
 - **Impacto:** em 3G/4G fraco e Android de entrada, vários segundos de download
   e parse antes da primeira tela (LCP e INP).
-- **Solução:** (1) `React.lazy` por rota — `Landing`/`Login` separados do
-  aplicativo, e `Lesson`, `ProjectWorkspace`, `Review`, admin em chunks
-  próprios; (2) separar o catálogo em **índice** (ids, títulos, ordem, ids de
+- **Feito:** medido módulo a módulo, o chunk tinha 47% de corpo de aula,
+  ~750 kB de Supabase, 239 kB de Zod (só para validar o catálogo) e ~250 kB de
+  Markdown (só usado em aula e projeto). `Lesson`, `Review`,
+  `ProjectWorkspace` e o admin viraram rotas sob demanda (o Markdown, os
+  componentes de exercício e o Zod do gerador saem do pacote inicial), a
+  validação do catálogo roda só em desenvolvimento (P3-8), e o `AppShell`
+  adianta o chunk da aula quando a tela fica ociosa. **3.512 → 3.080 kB
+  (972 → 847 kB gzip, −13%).**
+- **Falta:** separar o catálogo em **índice** (ids, títulos, ordem, ids de
   exercícios e conceitos — o que as telas de orientação usam) e **corpo** de
   aula por trilha, carregado por `import()` quando a aula abre. `content/index`
   continua sendo a única fronteira; ganha uma variante assíncrona para o corpo.
 
-#### P2-2 · Derivações caras recalculadas a cada mudança — Pendente
+#### P2-2 · Derivações caras recalculadas a cada mudança — Corrigido
 - **Arquivos:** `desafios.ts` (`desafiosConcluidos` filtra todas as tentativas
   para cada dia da história — e roda duas vezes por recálculo, uma dentro de
   `computeXp`), `mastery.ts` (filtra todas as tentativas para cada um dos 151
   conceitos, duas vezes: domínio e "para retomar"), `gamification.ts`
   (`aulaSemErro` filtra por aula).
-- **Impacto:** com um ano de uso (~300 dias, ~5 mil tentativas), milhões de
-  conversões de data por recálculo; qualquer compra ou mudança de perfil refaz
-  tudo. Sente-se em celular.
-- **Solução:** agrupar uma vez por dia/conceito/aula (`Map`) e passar os grupos;
-  calcular `desafiosConcluidos` uma vez e injetar em `computeXp`.
+- **Impacto, medido depois do relatório:** com um ano de estudo sintético
+  (~5.100 tentativas em 300 dias), `desafiosConcluidos` levava **1,5 s no
+  desktop** e rodava duas vezes por recálculo — ~3 s de thread principal
+  travada a cada compra ou troca de perfil; no celular, várias vezes isso.
+  Pior que a estimativa inicial, por isso subiu na fila.
+- **Feito:** índice por dia local, calculado uma vez (cada data convertida uma
+  vez só); o período lê só os seus dias; `computeXp` recebe os desafios já
+  calculados. **1.525 → 22 ms; o recálculo inteiro do painel, 3.150 → 71 ms.**
+  Um teste compara a versão rápida com a conta ingênua antiga em oito
+  históricos sorteados — sabotado duas vezes, fica vermelho.
 
 #### P2-3 · O histórico inteiro a cada entrada no aplicativo — Pendente
 - **Por quê:** o `StudentDataProvider` vive no `AppShell`; sair de uma aula e
@@ -542,9 +553,10 @@ Só `console.error`. Proposta na seção "Observabilidade".
 - **P3-7 · Login ignorava a rota de origem — Corrigido.** Um link direto para
   uma aula voltava sempre para `/app`; agora volta à rota guardada (só caminhos
   internos).
-- **P3-8 · Zod em produção — Pendente.** Toda a validação do catálogo roda a
-  cada carga (medido: ~13 ms para as aulas no desktop; 3–4× no celular). O CI
-  já prova o conteúdo; rodar só em `DEV`/teste tiraria também o Zod do pacote.
+- **P3-8 · Zod em produção — Corrigido.** A validação do catálogo roda só em
+  desenvolvimento e nos testes (o CI já prova o conteúdo), e `schema.ts` é
+  marcado sem efeitos colaterais no `vite.config.ts` para o Rollup poder
+  deixá-lo — e o Zod — fora do pacote principal.
 - **P3-9 · Texto do provedor refletido — Corrigido.** `AuthCallback` mostrava o
   `error_description` da URL (escapado pelo React, então não era XSS, mas
   permitia texto enganoso num link). Agora só frases nossas, por código; o

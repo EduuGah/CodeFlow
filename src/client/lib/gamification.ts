@@ -67,7 +67,15 @@ function meioDia(dia: string): number {
   return new Date(ano, mes - 1, d, 12).getTime();
 }
 
-export function computeXp(entrada: GamificationInput): XpBreakdown {
+/**
+ * `desafiosCumpridos` pode vir pronto: é a derivação mais cara do painel, e
+ * quem já a calculou (o `StudentDataContext`, para as moedas) não deve pagar
+ * de novo.
+ */
+export function computeXp(
+  entrada: GamificationInput,
+  desafiosCumpridos: DesafioConcluido[] = desafiosConcluidos(entrada)
+): XpBreakdown {
   const { attempts, completedLessons, completedProjects, reviews, purchases = [] } = entrada;
   const janelas = janelasDeDobro(purchases);
   let dobrado = 0;
@@ -121,17 +129,17 @@ export function computeXp(entrada: GamificationInput): XpBreakdown {
   let revisao = 0;
   for (const quando of primeiraRevisao.values()) revisao += somar(XP.porCartaoRevisado, quando);
 
-  let desafios = 0;
-  for (const d of desafiosConcluidos(entrada)) desafios += somar(d.recompensa.xp, meioDia(d.dia));
+  let xpDeDesafios = 0;
+  for (const d of desafiosCumpridos) xpDeDesafios += somar(d.recompensa.xp, meioDia(d.dia));
 
   return {
     exercicios,
     aulas,
     projetos,
     revisao,
-    desafios,
+    desafios: xpDeDesafios,
     dobrado,
-    total: exercicios + aulas + projetos + revisao + desafios,
+    total: exercicios + aulas + projetos + revisao + xpDeDesafios,
   };
 }
 

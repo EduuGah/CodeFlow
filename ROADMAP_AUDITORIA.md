@@ -69,18 +69,18 @@ A fazer, nesta ordem:
 
 ## Fase 4 — Performance
 
-1. **P2-1a** `React.lazy` por rota: `Landing`/`Login` num chunk,
-   `Lesson`/`ProjectWorkspace`/`Review`/admin em outros. Medir antes/depois.
+1. [x] **P2-1a** `React.lazy` para `Lesson`/`ProjectWorkspace`/`Review`/admin,
+   o chunk da aula adiantado no ócio: 972 → 847 kB gzip, com o item 7.
 2. **P2-1b** índice × corpo do catálogo: `content/indice.ts` (ids, títulos,
    ordem, exercícios, conceitos — gerado ou derivado) no chunk principal;
    corpo de cada trilha por `import()`. Meta: chunk principal < 400 kB gz.
 3. **Orçamento de pacote no CI** para a meta não escorregar.
-4. **P2-2** agrupar tentativas por dia/conceito/aula uma vez; `desafiosConcluidos`
-   calculado uma vez e passado ao XP.
+4. [x] **P2-2** índice por dia nos desafios (1,5 s → 22 ms com um ano de
+   histórico) e calculados uma vez só por recálculo do painel.
 5. **P2-3** provider acima das rotas; atualização local após concluir/tentar;
    revalidação sem esqueleto.
 6. **P2-10** fontes do próprio domínio.
-7. **P3-8** validação Zod só em DEV/teste.
+7. [x] **P3-8** validação Zod só em DEV/teste; Zod fora do pacote principal.
 
 ## Fase 5 — UX/UI
 
