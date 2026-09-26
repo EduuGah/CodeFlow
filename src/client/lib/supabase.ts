@@ -4,6 +4,23 @@ const rawUrl = (import.meta.env.VITE_SUPABASE_URL ?? '').trim();
 const rawAnonKey = (import.meta.env.VITE_SUPABASE_ANON_KEY ?? '').trim();
 
 /**
+ * O papel escrito dentro de uma chave legada (um JWT). A `anon` diz `anon`; a
+ * `service_role` também começa com `eyJ` e tem três blocos, e só o conteúdo
+ * a denuncia.
+ */
+export function papelDaChaveLegada(chave: string): string | null {
+  const partes = chave.split('.');
+  if (partes.length !== 3) return null;
+  try {
+    const base64 = partes[1].replace(/-/g, '+').replace(/_/g, '/');
+    const conteudo = JSON.parse(atob(base64.padEnd(Math.ceil(base64.length / 4) * 4, '=')));
+    return typeof conteudo?.role === 'string' ? conteudo.role : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Valida a configuração ANTES de instanciar o client.
  *
  * `createClient('', '')` lança "supabaseUrl is required" durante o import do módulo,
@@ -34,7 +51,11 @@ function validateConfig(): string | null {
 
   // NUNCA deixar uma chave de servidor chegar ao bundle do cliente: qualquer
   // visitante consegue lê-la no JavaScript servido e ela ignora as políticas de RLS.
-  if (rawAnonKey.startsWith('sb_secret_') || rawAnonKey.startsWith('service_role')) {
+  if (
+    rawAnonKey.startsWith('sb_secret_') ||
+    rawAnonKey.startsWith('service_role') ||
+    papelDaChaveLegada(rawAnonKey) === 'service_role'
+  ) {
     return 'VITE_SUPABASE_ANON_KEY contém uma chave secreta (de servidor). Ela seria exposta a qualquer visitante e ignora o RLS. Use a chave publishable/anon.';
   }
 

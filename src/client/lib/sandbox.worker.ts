@@ -8,6 +8,7 @@ import {
 } from './sandbox-core';
 import type { ServidorVivo } from './servidor-core';
 import { atenderServico, ehMensagemDeServico, type MensagemDeServico, type RespostaDeServico } from './worker-servico';
+import { trancarGlobais } from './trancar-globais';
 
 /**
  * Worker de execução de código do aluno.
@@ -47,44 +48,13 @@ export interface WorkerRequest {
  */
 export type WorkerResponse = 'pronto' | SandboxRunResult | RespostaDeServico;
 
-/**
- * Remove as APIs de rede e persistência do escopo do worker.
- *
- * Não é uma barreira de segurança contra código hostil — para isso o navegador já
- * isola o worker. É uma barreira pedagógica e de privacidade: exercícios não devem
- * conseguir fazer requisições externas nem gravar dados a partir do editor.
- */
-function lockDownGlobals(): void {
-  const blocked = [
-    'fetch',
-    'XMLHttpRequest',
-    'WebSocket',
-    'importScripts',
-    'indexedDB',
-    'caches',
-    'Notification',
-  ];
-
-  for (const name of blocked) {
-    try {
-      Object.defineProperty(self, name, {
-        value: undefined,
-        configurable: false,
-        writable: false,
-      });
-    } catch {
-      // Alguns ambientes não permitem redefinir; seguir mesmo assim.
-    }
-  }
-}
-
 // O servidor vivo do motor 7, quando este worker está servindo uma página.
 let servidor: ServidorVivo | null = null;
 let trancado = false;
 
 self.onmessage = async (event: MessageEvent<WorkerRequest | MensagemDeServico>) => {
   if (!trancado) {
-    lockDownGlobals();
+    trancarGlobais(self);
     trancado = true;
   }
   if (ehMensagemDeServico(event.data)) {

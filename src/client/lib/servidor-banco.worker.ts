@@ -8,6 +8,7 @@ import type { WorkerRequest, WorkerResponse } from './sandbox.worker';
 import type { ServidorVivo } from './servidor-core';
 import { adaptarSqlJs, retratoDasTabelas, type Banco } from './sql-core';
 import { atenderServico, ehMensagemDeServico, type MensagemDeServico } from './worker-servico';
+import { trancarGlobais } from './trancar-globais';
 
 /**
  * O worker do servidor **com banco** — o motor 7 pela metade que já existe.
@@ -31,16 +32,6 @@ import { atenderServico, ehMensagemDeServico, type MensagemDeServico } from './w
  */
 
 const sqlite = initSqlJs({ locateFile: () => wasmUrl });
-
-function lockDownGlobals(): void {
-  for (const name of ['fetch', 'XMLHttpRequest', 'WebSocket', 'importScripts', 'indexedDB', 'caches', 'Notification']) {
-    try {
-      Object.defineProperty(self, name, { value: undefined, configurable: false, writable: false });
-    } catch {
-      // Alguns ambientes não permitem redefinir; seguir mesmo assim.
-    }
-  }
-}
 
 /** Abre um banco novo com o SQL do exercício, ou devolve a frase do que falhou. */
 async function abrirBanco(setup: string): Promise<{ banco: Banco } | { error: string }> {
@@ -73,7 +64,7 @@ self.onmessage = async (event: MessageEvent<(WorkerRequest & { banco: string }) 
         return;
       }
       globais = { __cfBancoNativo: aberto.banco };
-      lockDownGlobals();
+      trancarGlobais(self);
     }
     servidor = await atenderServico(
       mensagem,
@@ -93,7 +84,7 @@ self.onmessage = async (event: MessageEvent<(WorkerRequest & { banco: string }) 
   const banco = aberto.banco;
 
   self.postMessage('pronto' satisfies WorkerResponse);
-  lockDownGlobals();
+  trancarGlobais(self);
   const resultado = await runProgram(code, tests, properties, { sequencial, globais: { __cfBancoNativo: banco } });
   let tabelas: unknown[] | undefined;
   try {
