@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Outlet, Routes, Route, Navigate } from 'react-router-dom';
 
 import { Landing } from './pages/Landing';
 import { Login } from './pages/Login';
@@ -9,6 +9,7 @@ import { IconSpinner } from './components/ui/Icon';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { AdminRoute } from './components/AdminRoute';
 import { AppShell } from './components/layout/AppShell';
+import { StudentDataProvider } from './contexts/StudentDataContext';
 import { Home } from './pages/app/Home';
 import { Tracks } from './pages/app/Tracks';
 import { TrackDetail } from './pages/app/TrackDetail';
@@ -39,6 +40,19 @@ const AdminNewExercise = lazy(() =>
   import('./pages/admin/AdminNewExercise').then((m) => ({ default: m.AdminNewExercise }))
 );
 
+/**
+ * Os dados do aluno acima das telas que os usam — o aplicativo e as telas de
+ * foco. Assim o histórico carrega uma vez por sessão, e voltar de uma aula
+ * revalida por baixo em vez de recomeçar do zero (`AppShell`).
+ */
+function ComDadosDoAluno() {
+  return (
+    <StudentDataProvider>
+      <Outlet />
+    </StudentDataProvider>
+  );
+}
+
 /** Enquanto o pedaço da tela chega: o mesmo giro das rotas protegidas. */
 function CarregandoTela() {
   return (
@@ -64,85 +78,86 @@ function CarregandoTela() {
 function App() {
   return (
     <Suspense fallback={<CarregandoTela />}>
-    <Routes>
-      <Route path="/" element={<Landing />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/auth/callback" element={<AuthCallback />} />
+      <Routes>
+        <Route path="/" element={<Landing />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/auth/callback" element={<AuthCallback />} />
 
-      <Route
-        path="/app"
-        element={
-          <ProtectedRoute>
-            <AppShell />
-          </ProtectedRoute>
-        }
-      >
-        <Route index element={<Home />} />
-        <Route path="trilhas" element={<Tracks />} />
-        <Route path="trilhas/:trackId" element={<TrackDetail />} />
-        <Route path="praticar" element={<Practice />} />
-        {/* O perfil é uma família: cada assunto numa página, para o celular
-            não virar uma rolagem de 3 000 px. */}
-        <Route path="perfil" element={<Perfil />} />
-        <Route path="perfil/desafios" element={<PerfilDesafios />} />
-        <Route path="perfil/loja" element={<PerfilLoja />} />
-        <Route path="perfil/conquistas" element={<PerfilConquistas />} />
-        <Route path="perfil/aparencia" element={<PerfilAparencia />} />
-        <Route path="perfil/progresso" element={<PerfilProgresso />} />
-      </Route>
+        <Route element={<ComDadosDoAluno />}>
+          <Route
+            path="/app"
+            element={
+              <ProtectedRoute>
+                <AppShell />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<Home />} />
+            <Route path="trilhas" element={<Tracks />} />
+            <Route path="trilhas/:trackId" element={<TrackDetail />} />
+            <Route path="praticar" element={<Practice />} />
+            {/* O perfil é uma família: cada assunto numa página, para o celular
+                não virar uma rolagem de 3 000 px. */}
+            <Route path="perfil" element={<Perfil />} />
+            <Route path="perfil/desafios" element={<PerfilDesafios />} />
+            <Route path="perfil/loja" element={<PerfilLoja />} />
+            <Route path="perfil/conquistas" element={<PerfilConquistas />} />
+            <Route path="perfil/aparencia" element={<PerfilAparencia />} />
+            <Route path="perfil/progresso" element={<PerfilProgresso />} />
+          </Route>
 
-      {/* Administração fora do AppShell: não é uma aba do aluno, e a barra de
-          navegação dele não faz sentido aqui. */}
-      <Route
-        path="/admin"
-        element={
-          <AdminRoute>
-            <AdminContent />
-          </AdminRoute>
-        }
-      />
-      <Route
-        path="/admin/novo-exercicio"
-        element={
-          <AdminRoute>
-            <AdminNewExercise />
-          </AdminRoute>
-        }
-      />
+          <Route
+            path="/lesson/:id"
+            element={
+              <ProtectedRoute>
+                <Lesson />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/review"
+            element={
+              <ProtectedRoute>
+                <Review />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/project/:id"
+            element={
+              <ProtectedRoute>
+                <ProjectWorkspace />
+              </ProtectedRoute>
+            }
+          />
+        </Route>
 
-      <Route path="/dashboard/*" element={<Navigate to="/app" replace />} />
+        {/* Administração fora do AppShell: não é uma aba do aluno, e a barra de
+            navegação dele não faz sentido aqui. */}
+        <Route
+          path="/admin"
+          element={
+            <AdminRoute>
+              <AdminContent />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/novo-exercicio"
+          element={
+            <AdminRoute>
+              <AdminNewExercise />
+            </AdminRoute>
+          }
+        />
 
-      <Route
-        path="/lesson/:id"
-        element={
-          <ProtectedRoute>
-            <Lesson />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/review"
-        element={
-          <ProtectedRoute>
-            <Review />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/project/:id"
-        element={
-          <ProtectedRoute>
-            <ProjectWorkspace />
-          </ProtectedRoute>
-        }
-      />
+        <Route path="/dashboard/*" element={<Navigate to="/app" replace />} />
 
-      {/* Qualquer outra rota volta para o início em vez de tela em branco. */}
-      {/* Endereço desconhecido explica o que houve. Redirecionar em silêncio
-          para a página de marketing fazia um aluno logado achar que tinha sido
-          deslogado — e o `replace` ainda apagava a URL errada do histórico. */}
-      <Route path="*" element={<NotFound />} />
-    </Routes>
+        {/* Endereço desconhecido explica o que houve. Redirecionar em silêncio
+            para a página de marketing fazia um aluno logado achar que tinha sido
+            deslogado — e o `replace` ainda apagava a URL errada do histórico. */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
     </Suspense>
   );
 }

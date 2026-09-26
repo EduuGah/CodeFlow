@@ -292,6 +292,9 @@ src/client/lib/         Lógica pura e testada
   progress.ts           Leitura e escrita do progresso. `lerTodasAsPaginas`
                         (o Supabase corta em 1.000 linhas), `concluir` pela
                         função do banco, `Leitura<T>` = { dados, erro }
+  (StudentDataContext)  Acima das rotas protegidas (`App.tsx`): o histórico
+                        carrega uma vez por pessoa; voltar ao app revalida
+                        por baixo (`revalidar`), sem esqueleto
   perfil.ts             Perfil editável (nome, avatar, tema), compras pela
                         função `comprar_item`, foto
   novidades.ts          O que mudou desde a última vez que a pessoa olhou

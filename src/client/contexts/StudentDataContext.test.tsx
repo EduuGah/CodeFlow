@@ -1,5 +1,5 @@
 import { act, render, screen, waitFor } from '@testing-library/react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { StudentDataProvider, useStudentData } from './StudentDataContext';
@@ -65,6 +65,7 @@ function Painel({ aoComprar }: { aoComprar?: (r: { error?: string }) => void }) 
         comprar
       </button>
       <button onClick={dados.reload}>recarregar</button>
+      <button onClick={dados.revalidar}>revalidar</button>
     </div>
   );
 }
@@ -196,3 +197,82 @@ describe('a sessão renovada', () => {
     await waitFor(() => expect(banco.leituras).toBe(2));
   });
 });
+
+describe('voltar para o aplicativo', () => {
+  it('revalidar relê por baixo: a tela não volta ao esqueleto, e os números chegam', async () => {
+    // O provider mora acima das rotas; voltar de uma aula chama `revalidar`.
+    // Antes, o shell remontava o provider e a tela inteira virava esqueleto.
+    const { container } = render(
+      <StudentDataProvider>
+        <Painel />
+      </StudentDataProvider>
+    );
+    await waitFor(() => expect(screen.getByTestId('saldo')).toHaveTextContent('100'));
+
+    // A aula que a pessoa acabou de fechar.
+    banco.completedLessons = [...banco.completedLessons, 'aula-nova'];
+    const viuEsqueleto = { valor: false };
+    const observador = new MutationObserver(() => {
+      if (container.textContent?.includes('carregando')) viuEsqueleto.valor = true;
+    });
+    observador.observe(container, { childList: true, subtree: true, characterData: true });
+
+    act(() => screen.getByText('revalidar').click());
+
+    await waitFor(() => expect(screen.getByTestId('saldo')).toHaveTextContent('110'));
+    observador.disconnect();
+    expect(viuEsqueleto.valor).toBe(false);
+    expect(banco.leituras).toBe(2);
+  });
+
+  it('antes da primeira carga, revalidar não dispara uma leitura a mais', async () => {
+    function RevalidaAoMontar() {
+      const { revalidar } = useStudentData();
+      useEffect(() => revalidar(), [revalidar]);
+      return null;
+    }
+    render(
+      <StudentDataProvider>
+        <RevalidaAoMontar />
+        <Painel />
+      </StudentDataProvider>
+    );
+    await screen.findByTestId('saldo');
+    await new Promise((r) => setTimeout(r, 20));
+
+    expect(banco.leituras).toBe(1);
+  });
+});
+
+describe('a sessão que resolve depois de o provider montar', () => {
+  it('não há um instante "carregado e vazio" para a pessoa que acabou de entrar', async () => {
+    // O provider vive acima das rotas e monta antes de a sessão resolver. Com
+    // `loading` como flag, esse intervalo valia "carregado, e vazio": as
+    // novidades gravavam o vazio como já visto e depois anunciavam como novo
+    // tudo o que a pessoa já tinha (o E2E de novidades pegou).
+    const vistos: string[] = [];
+    function Registro() {
+      const dados = useStudentData();
+      if (!dados.loading && sessao.user) vistos.push(String(dados.moedas.saldo));
+      return null;
+    }
+
+    sessao.user = null;
+    const { rerender } = render(
+      <StudentDataProvider>
+        <Registro />
+      </StudentDataProvider>
+    );
+
+    sessao.user = { id: 'aluno-1' };
+    rerender(
+      <StudentDataProvider>
+        <Registro />
+      </StudentDataProvider>
+    );
+
+    await waitFor(() => expect(vistos).toContain('100'));
+    expect(vistos.filter((v) => v !== '100')).toEqual([]);
+  });
+});
+

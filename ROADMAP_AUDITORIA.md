@@ -78,8 +78,8 @@ A fazer, nesta ordem:
 3. **Orçamento de pacote no CI** para a meta não escorregar.
 4. [x] **P2-2** índice por dia nos desafios (1,5 s → 22 ms com um ano de
    histórico) e calculados uma vez só por recálculo do painel.
-5. **P2-3** provider acima das rotas; atualização local após concluir/tentar;
-   revalidação sem esqueleto.
+5. [x] **P2-3** provider acima das rotas; voltar ao app revalida sem esqueleto.
+   Falta a leitura agregada no banco, para a carga não crescer com o tempo.
 6. [x] **P2-10** fontes do próprio domínio (dois `.woff2` variáveis, 58 kB).
 7. [x] **P3-8** validação Zod só em DEV/teste; Zod fora do pacote principal.
 

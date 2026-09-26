@@ -9,7 +9,7 @@ import {
   IconTrack,
   type IconProps,
 } from '../ui/Icon';
-import { StudentDataProvider } from '../../contexts/StudentDataContext';
+import { useStudentData } from '../../contexts/StudentDataContext';
 import { Novidades } from './Novidades';
 
 /**
@@ -120,62 +120,73 @@ function useAdiantarAula() {
   }, []);
 }
 
+/**
+ * Ao voltar para o aplicativo (de uma aula, de um projeto, da revisão), relê
+ * o histórico por baixo: o que aconteceu lá — tentativas, conclusão — entra
+ * nos números sem esqueleto, e as novidades aparecem quando ele chega.
+ */
+function useRevalidarAoVoltar() {
+  const { revalidar } = useStudentData();
+  useEffect(() => {
+    revalidar();
+  }, [revalidar]);
+}
+
 export function AppShell() {
   useAdiantarAula();
+  useRevalidarAoVoltar();
 
   return (
-    <StudentDataProvider>
-      <div className="min-h-screen bg-canvas">
-        {/* Invisível até receber foco: só quem navega por teclado precisa dele, e
-            para essa pessoa ele precisa aparecer de verdade. */}
-        <a
-          href="#conteudo"
-          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-ink focus:px-4 focus:py-2.5 focus:text-sm focus:font-bold focus:text-canvas"
-        >
-          Pular para o conteúdo
-        </a>
+    <div className="min-h-screen bg-canvas">
+      {/* Invisível até receber foco: só quem navega por teclado precisa dele, e
+          para essa pessoa ele precisa aparecer de verdade. */}
+      <a
+        href="#conteudo"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-ink focus:px-4 focus:py-2.5 focus:text-sm focus:font-bold focus:text-canvas"
+      >
+        Pular para o conteúdo
+      </a>
 
-        {/* Lateral: só a partir de md, onde há espaço horizontal sobrando. */}
-        <aside className="fixed inset-y-0 left-0 hidden w-60 flex-col border-r border-line bg-surface p-4 md:flex">
-          <div className="mb-6 flex items-center gap-2.5 px-2 pt-2">
-            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-600 text-white">
-              <IconLogo size={20} />
-            </span>
-            <span className="text-lg font-extrabold tracking-tight text-ink">CodeFlow</span>
-          </div>
-
-          <nav className="flex flex-col gap-1" aria-label="Navegação principal">
-            {DESTINOS.map((d) => (
-              <ItemLateral key={d.to} {...d} />
-            ))}
-          </nav>
-        </aside>
-
-        {/* pb-24 no mobile reserva a altura da barra inferior, para o conteúdo
-            final não ficar escondido atrás dela. */}
-        <div className="md:pl-60">
-          <main
-            id="conteudo"
-            tabIndex={-1}
-            className="mx-auto w-full max-w-3xl px-4 pb-24 pt-4 focus-visible:outline-none sm:px-6 md:pb-10 md:pt-8"
-          >
-            <Outlet />
-          </main>
+      {/* Lateral: só a partir de md, onde há espaço horizontal sobrando. */}
+      <aside className="fixed inset-y-0 left-0 hidden w-60 flex-col border-r border-line bg-surface p-4 md:flex">
+        <div className="mb-6 flex items-center gap-2.5 px-2 pt-2">
+          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-600 text-white">
+            <IconLogo size={20} />
+          </span>
+          <span className="text-lg font-extrabold tracking-tight text-ink">CodeFlow</span>
         </div>
 
-        <nav
-          aria-label="Navegação principal"
-          className="fixed inset-x-0 bottom-0 z-30 flex border-t border-line bg-surface pb-[env(safe-area-inset-bottom)] md:hidden"
-        >
+        <nav className="flex flex-col gap-1" aria-label="Navegação principal">
           {DESTINOS.map((d) => (
-            <ItemInferior key={d.to} {...d} />
+            <ItemLateral key={d.to} {...d} />
           ))}
         </nav>
+      </aside>
 
-        {/* Os avisos de nível, conquista e desafio: só aqui, nas telas de
-            orientação — a aula é tela de foco e não recebe nada por cima. */}
-        <Novidades />
+      {/* pb-24 no mobile reserva a altura da barra inferior, para o conteúdo
+          final não ficar escondido atrás dela. */}
+      <div className="md:pl-60">
+        <main
+          id="conteudo"
+          tabIndex={-1}
+          className="mx-auto w-full max-w-3xl px-4 pb-24 pt-4 focus-visible:outline-none sm:px-6 md:pb-10 md:pt-8"
+        >
+          <Outlet />
+        </main>
       </div>
-    </StudentDataProvider>
+
+      <nav
+        aria-label="Navegação principal"
+        className="fixed inset-x-0 bottom-0 z-30 flex border-t border-line bg-surface pb-[env(safe-area-inset-bottom)] md:hidden"
+      >
+        {DESTINOS.map((d) => (
+          <ItemInferior key={d.to} {...d} />
+        ))}
+      </nav>
+
+      {/* Os avisos de nível, conquista e desafio: só aqui, nas telas de
+          orientação — a aula é tela de foco e não recebe nada por cima. */}
+      <Novidades />
+    </div>
   );
 }

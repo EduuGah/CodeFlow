@@ -34,6 +34,7 @@ import { dobroAtivo, itemDaLoja, moedasGanhas, moedasGastas, type FontesDeMoedas
  */
 
 interface StudentData {
+  /** Só a primeira carga de cada pessoa: as seguintes revalidam por baixo. */
   loading: boolean;
   /** Falha de leitura, para a interface poder dizer em vez de mostrar zero. */
   error: string | null;
@@ -44,6 +45,11 @@ interface StudentData {
    */
   incompleto: boolean;
   reload: () => void;
+  /**
+   * Relê o histórico sem esqueleto — a tela continua com o que tinha até o
+   * novo chegar. Não faz nada antes da primeira carga (ela já está a caminho).
+   */
+  revalidar: () => void;
 
   completedLessons: string[];
   completedProjects: string[];
@@ -101,7 +107,14 @@ export function StudentDataProvider({ children }: { children: React.ReactNode })
   const { user } = useAuth();
   const adotar = useTemaOpcional()?.adotar;
 
-  const [loading, setLoading] = useState(true);
+  /**
+   * De quem são os dados na tela. "Carregando" é derivado daqui, e não uma
+   * flag: o provider vive acima das rotas e monta antes de a sessão resolver.
+   * Com uma flag, esse intervalo (sem usuário) valia "carregado, e vazio" — e
+   * as novidades gravavam o vazio como já visto, para depois anunciar como
+   * novo tudo o que a pessoa já tinha.
+   */
+  const [dadosDe, setDadosDe] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [completedLessons, setCompletedLessons] = useState<string[]>([]);
   const [completedProjects, setCompletedProjects] = useState<string[]>([]);
@@ -114,6 +127,15 @@ export function StudentDataProvider({ children }: { children: React.ReactNode })
 
   const reload = useCallback(() => setVersao((v) => v + 1), []);
 
+  // De quem é o histórico já carregado. Com ele na mão, reler não apaga a
+  // tela: o provider vive acima das rotas, e voltar de uma aula para o
+  // início só atualiza os números — antes, o `AppShell` remontava o provider
+  // e o histórico inteiro era rebaixado com esqueleto por cima de tudo.
+  const carregadoPara = useRef<string | null>(null);
+  const revalidar = useCallback(() => {
+    if (carregadoPara.current !== null) setVersao((v) => v + 1);
+  }, []);
+
   // O id, não o objeto: o supabase-js entrega um `user` novo a cada renovação
   // do token (e ao voltar para a aba). Depender do objeto recarregava tudo —
   // com esqueleto de carregamento por cima da tela — sem nada ter mudado.
@@ -124,11 +146,11 @@ export function StudentDataProvider({ children }: { children: React.ReactNode })
 
     async function carregar() {
       if (!userId) {
-        setLoading(false);
+        carregadoPara.current = null;
+        setDadosDe(null);
         return;
       }
 
-      setLoading(true);
       const [progresso, historico, revisoes, compras, dados] = await Promise.all([
         fetchProgress(userId),
         fetchAttempts(userId),
@@ -153,7 +175,8 @@ export function StudentDataProvider({ children }: { children: React.ReactNode })
         progresso.error ??
           (falhas.length > 0 ? 'Parte do seu histórico não carregou. Os números podem estar incompletos.' : null)
       );
-      setLoading(false);
+      carregadoPara.current = userId;
+      setDadosDe(userId);
     }
 
     carregar();
@@ -205,6 +228,9 @@ export function StudentDataProvider({ children }: { children: React.ReactNode })
     [userId]
   );
 
+  // Só a primeira carga de cada pessoa: reler a mesma pessoa não apaga a tela.
+  const loading = userId !== undefined && dadosDe !== userId;
+
   const valor = useMemo<StudentData>(() => {
     const conceptIds = listConcepts().map((c) => c.id);
     const todosExercicios = listTracks()
@@ -234,6 +260,7 @@ export function StudentDataProvider({ children }: { children: React.ReactNode })
       error,
       incompleto,
       reload,
+      revalidar,
       completedLessons,
       completedProjects,
       attempts,
@@ -265,7 +292,7 @@ export function StudentDataProvider({ children }: { children: React.ReactNode })
       comprar,
       salvarPerfil,
     };
-  }, [loading, error, incompleto, reload, completedLessons, completedProjects, attempts, reviews, purchases, perfil, comprar, salvarPerfil]);
+  }, [loading, error, incompleto, reload, revalidar, completedLessons, completedProjects, attempts, reviews, purchases, perfil, comprar, salvarPerfil]);
 
   return <StudentDataContext.Provider value={valor}>{children}</StudentDataContext.Provider>;
 }

@@ -4,6 +4,7 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 
 import { AppShell } from './AppShell';
+import { StudentDataProvider } from '../../contexts/StudentDataContext';
 
 /**
  * Testes da navegação.
@@ -21,17 +22,20 @@ vi.mock('../../contexts/AuthContext', () => ({
 const ROTAS_REAIS = ['/app', '/app/trilhas', '/app/praticar', '/app/perfil'];
 
 function abrir(rota: string) {
+  // O provider mora acima das rotas no `App`; aqui, em volta do shell.
   return render(
-    <MemoryRouter initialEntries={[rota]}>
-      <Routes>
-        <Route path="/app" element={<AppShell />}>
-          <Route index element={<p>conteúdo do início</p>} />
-          <Route path="trilhas" element={<p>conteúdo de trilhas</p>} />
-          <Route path="praticar" element={<p>conteúdo de praticar</p>} />
-          <Route path="perfil" element={<p>conteúdo de perfil</p>} />
-        </Route>
-      </Routes>
-    </MemoryRouter>
+    <StudentDataProvider>
+      <MemoryRouter initialEntries={[rota]}>
+        <Routes>
+          <Route path="/app" element={<AppShell />}>
+            <Route index element={<p>conteúdo do início</p>} />
+            <Route path="trilhas" element={<p>conteúdo de trilhas</p>} />
+            <Route path="praticar" element={<p>conteúdo de praticar</p>} />
+            <Route path="perfil" element={<p>conteúdo de perfil</p>} />
+          </Route>
+        </Routes>
+      </MemoryRouter>
+    </StudentDataProvider>
   );
 }
 

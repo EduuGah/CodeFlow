@@ -186,7 +186,7 @@ Legenda de estado: **Corrigido** (com teste, nesta rodada), **Parcial**,
 | P1-10 | O progresso é autoridade do navegador (tentativas e conclusões forjáveis) | Pendente — arquitetural |
 | P2-1 | Pacote principal de 3,5 MB com o catálogo inteiro, até na página pública | Parcial |
 | P2-2 | Derivações O(dias × tentativas) recalculadas a cada mudança de estado | Corrigido |
-| P2-3 | O histórico inteiro é baixado a cada entrada no aplicativo | Pendente |
+| P2-3 | O histórico inteiro é baixado a cada entrada no aplicativo | Parcial |
 | P2-4 | Bloqueio de rede dos workers contornável pelo protótipo; código duplicado | Corrigido |
 | P2-5 | Motor de Python sem bloqueio de rede (`from js import fetch`) | Corrigido |
 | P2-6 | Laço infinito numa página do aluno pode congelar a aba no celular | Pendente |
@@ -411,13 +411,18 @@ Legenda de estado: **Corrigido** (com teste, nesta rodada), **Parcial**,
   Um teste compara a versão rápida com a conta ingênua antiga em oito
   históricos sorteados — sabotado duas vezes, fica vermelho.
 
-#### P2-3 · O histórico inteiro a cada entrada no aplicativo — Pendente
+#### P2-3 · O histórico inteiro a cada entrada no aplicativo — Parcial
 - **Por quê:** o `StudentDataProvider` vive no `AppShell`; sair de uma aula e
   voltar remonta tudo e rebaixa o histórico inteiro.
-- **Solução:** curto prazo — manter o provider acima das rotas e atualizar o
-  estado local depois de uma conclusão/tentativa, com revalidação em segundo
-  plano (sem esqueleto). Longo prazo — views agregadas no banco (tentativas por
-  dia, primeiros acertos por exercício) para a carga não crescer com o tempo.
+- **Feito:** o provider sobe para acima das rotas protegidas (`App.tsx`); a
+  primeira carga de cada pessoa mostra esqueleto, e voltar de uma aula, projeto
+  ou revisão **revalida por baixo** — a tela fica com os números que tinha até
+  os novos chegarem. "Carregando" passou a ser derivado de *de quem são os
+  dados*: como flag, o intervalo antes de a sessão resolver valia "carregado e
+  vazio", e as novidades anunciavam como novo tudo o que a pessoa já tinha (o
+  E2E de novidades pegou; há teste de unidade para isso).
+- **Falta:** views agregadas no banco (tentativas por dia, primeiros acertos por
+  exercício) para a leitura não crescer com o tempo.
 
 #### P2-4 · Bloqueio de rede dos workers contornável — Corrigido
 - **Arquivos:** `sandbox.worker.ts`, `servidor-banco.worker.ts`
