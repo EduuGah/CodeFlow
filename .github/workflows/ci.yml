@@ -68,6 +68,37 @@ jobs:
       - name: Build de produção
         run: npm run build
 
+  banco:
+    name: Migrações num Postgres de verdade
+    runs-on: ubuntu-latest
+    # O teste de migrações do Vitest lê o SQL como texto; aqui ele roda. Uma
+    # função com erro de sintaxe, uma policy que não recusa o que devia, um
+    # gatilho que não dispara — tudo isso só aparecia quando alguém colava o
+    # arquivo no SQL Editor do Supabase.
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Aplicar as migrações duas vezes e verificar o comportamento
+        env:
+          PGHOST: localhost
+          PGPORT: 5432
+          PGUSER: postgres
+          PGPASSWORD: postgres
+        run: bash supabase/verificacao/rodar.sh
+
   e2e:
     name: Navegador de verdade
     runs-on: ubuntu-latest

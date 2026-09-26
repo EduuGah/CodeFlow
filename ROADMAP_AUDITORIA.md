@@ -55,10 +55,12 @@ A fazer, nesta ordem:
    dos testes; corrigir o que ele apontar, sem desligar regra.
 2. **P2-13** testes do `StudentDataContext` (derivação, `incompleto`, compra
    dupla, recarga) com os `fetch*` dublados.
-3. **Migrações num Postgres de verdade no CI** (job com `postgres` de serviço e
-   schemas `auth`/`storage` mínimos): aplica 0001→0009 duas vezes (idempotência)
-   e chama `concluir`, `comprar_item` (preço, duplicado, teto, trava) e
-   `desempenho_por_exercicio` (admin × aluno).
+3. [x] **Migrações num Postgres de verdade no CI** — `supabase/verificacao/`:
+   o mínimo do Supabase (papéis, `auth.uid()`, `auth.users`, `storage`),
+   0001→0009 aplicadas duas vezes, e 34 verificações de comportamento com os
+   papéis da API (conclusão, compra, painel de admin, anônimo, ritmo, formato,
+   foto, contas demo). Sabotado: a policy ampla de admin, o gatilho das contas
+   demo e o INSERT direto em compras, de volta, são pegos.
 4. **P3-4** mapa tipo → componente em `Lesson.tsx`.
 5. **P3-1** remover `IconShop`, `LINHAS_DO_PRELUDIO`,
    `VERSAO_DO_TYPESCRIPT_NO_NAVEGADOR`, `getDefaultTrack`; decidir `bun.lock`

@@ -370,9 +370,14 @@ npm test            # 3.353 testes
 npm run test:e2e    # ~410 no navegador (antes: npx playwright install chromium;
                     # com um Chromium já instalado: PW_CHROMIUM=/caminho/do/chrome)
 npm run build
+
+# As migrações num Postgres de verdade: um banco novo, o mínimo do Supabase,
+# 0001→última aplicadas duas vezes, e a verificação de comportamento.
+PGHOST=localhost PGUSER=postgres PGPASSWORD=postgres bash supabase/verificacao/rodar.sh
 ```
 
-CI: tipos → testes → build, e o E2E num job separado depois.
+CI: tipos → testes → build, as migrações num Postgres de serviço
+(`supabase/verificacao/`), e o E2E num job separado depois.
 
 **Método que tem funcionado, e vale manter:**
 

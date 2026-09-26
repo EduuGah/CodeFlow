@@ -736,10 +736,9 @@ daqui — no CI, com o Chromium do Playwright, passa.
 
 Falta:
 - **lint** (P2-12);
-- **migrações num Postgres de verdade**: o teste atual é estático. Um job com
-  `supabase start` (ou um `postgres` de serviço com os schemas `auth`/`storage`
-  simulados) aplicando 0001→0009 e chamando `concluir`/`comprar_item` pegaria
-  erro de sintaxe e de permissão que hoje só aparecem no SQL Editor;
+- ~~**migrações num Postgres de verdade**~~ — feito depois do relatório: job
+  `banco` com `postgres:16` de serviço (`supabase/verificacao/`), migrações
+  aplicadas duas vezes e verificação de comportamento com os papéis da API;
 - **orçamento de pacote**: falhar o build se o chunk principal crescer mais que
   X% (evita P2-1 voltar).
 
