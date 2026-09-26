@@ -1,4 +1,4 @@
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { IconAlert, IconLock, IconLogo, IconSpinner } from '../components/ui/Icon';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
@@ -9,8 +9,21 @@ import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { AVATARES, AVATARES_LIVRES, AvatarDesenhado } from '../components/ui/Avatar';
 import { CenaEditor } from '../components/ui/Cena';
 
+/**
+ * Para onde voltar depois de entrar: a rota que a `ProtectedRoute` guardou
+ * (um link direto para uma aula, por exemplo). Só caminhos internos — `//x`
+ * seria outro domínio.
+ */
+export function destinoDepoisDoLogin(estado: unknown): string {
+  const de = (estado as { from?: { pathname?: unknown; search?: unknown } } | null)?.from;
+  const caminho = typeof de?.pathname === 'string' ? de.pathname : '';
+  if (!caminho.startsWith('/') || caminho.startsWith('//') || caminho === '/login') return '/app';
+  return caminho + (typeof de?.search === 'string' ? de.search : '');
+}
+
 export function Login() {
   useDocumentTitle('Entrar');
+  const location = useLocation();
   const { user, signInWithGoogle, signInWithPassword, loading, authError, isConfigured } = useAuth();
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   // Qual entrada com senha está em andamento: o usuário de um botão de
@@ -28,7 +41,7 @@ export function Login() {
   }
 
   if (user) {
-    return <Navigate to="/app" replace />;
+    return <Navigate to={destinoDepoisDoLogin(location.state)} replace />;
   }
 
   // Não navegamos manualmente após o login: signInWithOAuth redireciona a aba para

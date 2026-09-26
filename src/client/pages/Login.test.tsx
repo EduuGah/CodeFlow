@@ -1,7 +1,7 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { Login } from './Login';
+import { destinoDepoisDoLogin, Login } from './Login';
 
 const signInWithPassword = vi.fn();
 
@@ -52,5 +52,21 @@ describe('Login — testar sem criar conta', () => {
     fireEvent.change(screen.getByLabelText('Senha'), { target: { value: 'admin' } });
     fireEvent.click(screen.getByRole('button', { name: 'Entrar com usuário e senha' }));
     expect(signInWithPassword).toHaveBeenCalledWith('admin', 'admin');
+  });
+});
+
+describe('para onde voltar depois de entrar', () => {
+  it('volta para a rota que a pessoa tentou abrir', () => {
+    expect(destinoDepoisDoLogin({ from: { pathname: '/lesson/lesson-js-3', search: '' } })).toBe('/lesson/lesson-js-3');
+    expect(destinoDepoisDoLogin({ from: { pathname: '/app/trilhas', search: '?aba=projetos' } })).toBe(
+      '/app/trilhas?aba=projetos'
+    );
+  });
+
+  it('sem rota guardada, ou com uma de fora, vai para o início', () => {
+    expect(destinoDepoisDoLogin(null)).toBe('/app');
+    expect(destinoDepoisDoLogin({ from: { pathname: '//outro.site/x' } })).toBe('/app');
+    expect(destinoDepoisDoLogin({ from: { pathname: 'https://outro.site' } })).toBe('/app');
+    expect(destinoDepoisDoLogin({ from: { pathname: '/login' } })).toBe('/app');
   });
 });

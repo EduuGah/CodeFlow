@@ -36,7 +36,7 @@ export function TrackBanner({ track, summary, cena }: { track: Track; summary: P
         <div className="min-w-0 flex-1">
           <p className="label-mono text-white/70">{posicao}</p>
 
-          <h2 className="mt-1 text-xl font-bold tracking-tight">{track.title}</h2>
+          <h1 className="mt-1 text-xl font-bold tracking-tight">{track.title}</h1>
 
           <p className="mt-1.5 text-sm leading-relaxed text-white/85">
             {summary.current

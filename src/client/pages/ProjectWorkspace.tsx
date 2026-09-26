@@ -69,6 +69,9 @@ export function ProjectWorkspace() {
   const [isRunning, setIsRunning] = useState(false);
   const [result, setResult] = useState<ExecutionResult | null>(null);
   const [isCompleted, setIsCompleted] = useState(false);
+  const userId = user?.id;
+  const [entregando, setEntregando] = useState(false);
+  const [erroDeEntrega, setErroDeEntrega] = useState<string | null>(null);
 
   const [checkResults, setCheckResults] = useState<Map<string, CheckpointResult>>(new Map());
   const [isVerifying, setIsVerifying] = useState(false);
@@ -85,9 +88,9 @@ export function ProjectWorkspace() {
     let ativo = true;
 
     async function conferirStatus() {
-      if (!user) return;
+      if (!userId) return;
 
-      const progresso = await fetchProgress(user.id);
+      const progresso = await fetchProgress(userId);
       if (ativo && progresso.completedProjects.includes(project.id)) setIsCompleted(true);
     }
 
@@ -95,7 +98,8 @@ export function ProjectWorkspace() {
     return () => {
       ativo = false;
     };
-  }, [user, project.id]);
+    // O id, não o objeto: `user` muda de objeto a cada renovação do token.
+  }, [userId, project.id]);
 
   /**
    * Motor 7: o servidor do projeto sobe num worker antes da página e fica de
@@ -176,20 +180,30 @@ export function ProjectWorkspace() {
     setIsVerifying(false);
   };
 
+  /**
+   * Entregar grava primeiro e comemora depois. Antes era o contrário, e a
+   * falha de gravação ia só para o console: a tela dizia "Entregue", com
+   * confete, para um projeto que o banco nunca soube que foi entregue.
+   */
   const submeter = async () => {
-    if (isCompleted) return;
-
-    celebrar('projeto');
-
-    setIsCompleted(true);
+    if (isCompleted || entregando) return;
+    setErroDeEntrega(null);
 
     if (user) {
+      setEntregando(true);
       try {
         await markProjectCompleted(user.id, project.id);
       } catch (erro) {
         console.error('Falha ao salvar conclusão do projeto:', erro);
+        setErroDeEntrega('A entrega não foi salva — a conexão falhou. Tente entregar de novo.');
+        return;
+      } finally {
+        setEntregando(false);
       }
     }
+
+    setIsCompleted(true);
+    celebrar('projeto');
   };
 
   const abas: Array<{ id: Aba; label: string; Icone: typeof IconLesson }> = [
@@ -235,7 +249,7 @@ export function ProjectWorkspace() {
           </Link>
 
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-bold text-ink">{project.title}</p>
+            <h1 className="truncate text-sm font-bold text-ink">{project.title}</h1>
             <p className="label-mono text-ink-faint">
               Projeto · {LANGUAGE_LABELS[project.language]}
             </p>
@@ -436,6 +450,11 @@ export function ProjectWorkspace() {
       {/* Ações fixas embaixo: no celular precisam estar no polegar, e no desktop
           ficam ancoradas em vez de perdidas no fim de uma coluna que rola. */}
       <footer className="sticky bottom-0 border-t border-line bg-surface pb-[env(safe-area-inset-bottom)]">
+        {erroDeEntrega && (
+          <p role="alert" className="border-b border-danger-200 bg-danger-50 px-4 py-2 text-sm text-danger-700">
+            {erroDeEntrega}
+          </p>
+        )}
         <div className="flex items-center gap-2 px-4 py-3">
           <Button
             variant="outline"
@@ -463,6 +482,7 @@ export function ProjectWorkspace() {
           <Button
             size="lg"
             onClick={submeter}
+            loading={entregando}
             // Entregar sem os critérios fechados tornaria o selo "Entregue" uma
             // afirmação sem lastro — era exatamente o que acontecia antes.
             disabled={isCompleted || !todosFechados}

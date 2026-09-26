@@ -86,7 +86,28 @@ export function Lesson() {
   // página é pior do que deixá-lo no começo do documento.
   const montado = useRef(false);
   const [estados, setEstados] = useState<Map<string, ExerciseState>>(new Map());
+  /**
+   * Os exercícios desta aula resolvidos em visitas anteriores. Moram à parte
+   * de `estados` de propósito: o componente de exercício avisa "inicial" ao
+   * montar, e quando os dois dividiam o mesmo mapa esse aviso apagava o
+   * resolvido de antes — o contador caía e o botão voltava a pedir resposta.
+   */
+  const [resolvidosAntes, setResolvidosAntes] = useState<ReadonlySet<string>>(new Set());
   const [completedLessons, setCompletedLessons] = useState<string[]>([]);
+  /**
+   * A lista de aulas concluídas já chegou do servidor? Até lá não se sabe se
+   * "tudo resolvido" é uma conclusão nova ou uma aula já concluída sendo
+   * revisitada — e a resposta errada era confete e gravação a cada visita.
+   */
+  const [progressoCarregado, setProgressoCarregado] = useState(false);
+  /**
+   * A gravação da conclusão: a tela só diz "salvo" quando foi. Guarda de qual
+   * aula é — trocar de aula com a gravação no ar não pode pôr o resultado dela
+   * (nem o "tentar de novo") na aula seguinte.
+   */
+  const [salvamento, setSalvamento] = useState<{ aula: string; estado: 'salvando' | 'salvo' | 'falhou' } | null>(
+    null
+  );
 
   /**
    * Trocar de aula reaproveita o componente, então o passo atual precisa voltar
@@ -106,6 +127,8 @@ export function Lesson() {
     setAulaRenderizada(id);
     setIndice(0);
     setEstados(new Map());
+    setResolvidosAntes(new Set());
+    setSalvamento(null);
   }
 
   useEffect(() => {
@@ -145,20 +168,17 @@ export function Lesson() {
         const novos = p.completedLessons.filter((id) => !atuais.includes(id));
         return novos.length === 0 ? atuais : [...atuais, ...novos];
       });
+      setProgressoCarregado(true);
     });
 
     // O que o aluno já resolveu nesta aula em visitas anteriores. Sem isto ele
     // teria que refazer tudo numa sessão só para a aula fechar.
     fetchSolvedExercises(userId, lessonId).then((resolvidos) => {
-      if (!ativo) return;
+      if (!ativo || resolvidos.length === 0) return;
 
-      setEstados((atual) => {
+      setResolvidosAntes((atual) => {
         const novos = resolvidos.filter((id) => !atual.has(id));
-        if (novos.length === 0) return atual;
-
-        const proximo = new Map(atual);
-        for (const exerciseId of novos) proximo.set(exerciseId, 'acertou');
-        return proximo;
+        return novos.length === 0 ? atual : new Set([...atual, ...novos]);
       });
     });
 
@@ -182,8 +202,18 @@ export function Lesson() {
   }, []);
 
   const jaConcluida = lesson ? completedLessons.includes(lesson.id) : false;
-  const faltando = pendentes(exerciseIds, estados);
+  const faltando = pendentes(exerciseIds, estados).filter((id) => !resolvidosAntes.has(id));
   const tudoResolvido = exerciseIds.length > 0 && faltando.length === 0;
+
+  const salvar = useCallback((aluno: string, aula: string) => {
+    setSalvamento({ aula, estado: 'salvando' });
+    markLessonCompleted(aluno, aula)
+      .then(() => setSalvamento((atual) => (atual?.aula === aula ? { aula, estado: 'salvo' } : atual)))
+      .catch((erro) => {
+        console.error('Falha ao salvar progresso da aula:', erro);
+        setSalvamento((atual) => (atual?.aula === aula ? { aula, estado: 'falhou' } : atual));
+      });
+  }, []);
 
   /**
    * Conclusão da aula: todos os exercícios resolvidos.
@@ -194,6 +224,8 @@ export function Lesson() {
    */
   useEffect(() => {
     if (!lessonId || !tudoResolvido || jaConcluida) return;
+    // Com sessão, espera saber se a aula já estava concluída.
+    if (userId && !progressoCarregado) return;
 
     celebrar('aula');
     setCompletedLessons((ids) => (ids.includes(lessonId) ? ids : [...ids, lessonId]));
@@ -201,10 +233,8 @@ export function Lesson() {
     // Visitante sem sessão conclui a aula na tela; só não gera histórico.
     if (!userId) return;
 
-    markLessonCompleted(userId, lessonId).catch((erro) => {
-      console.error('Falha ao salvar progresso da aula:', erro);
-    });
-  }, [lessonId, tudoResolvido, jaConcluida, userId]);
+    salvar(userId, lessonId);
+  }, [lessonId, tudoResolvido, jaConcluida, userId, progressoCarregado, salvar]);
 
   if (!lesson || steps.length === 0) {
     return <Navigate to="/app" replace />;
@@ -217,14 +247,20 @@ export function Lesson() {
   const passo = steps[posicao];
   const ultimo = posicao === steps.length - 1;
   const proximaAula = getLessonAfter(lesson.id);
+  const estadoDaGravacao = salvamento?.aula === lesson.id ? salvamento.estado : null;
 
   const estadoDoPasso = passo.kind === 'exercise' ? estados.get(passo.exercise.id) : undefined;
-  const resolvido = estaResolvido(estadoDoPasso);
+  // Resolvido numa visita anterior e ainda não respondido nesta: vale como
+  // acerto para avançar — refazer é opcional, e errar agora não desfaz.
+  const resolvidoAntes =
+    passo.kind === 'exercise' && resolvidosAntes.has(passo.exercise.id) && !avancoLiberado(estadoDoPasso);
+  const estadoEfetivo: ExerciseState | undefined = resolvidoAntes ? 'acertou' : estadoDoPasso;
+  const resolvido = estaResolvido(estadoEfetivo);
 
   // Num exercício sem resposta verificada o avanço não existe — nem pelo
   // botão (desabilitado), nem por qualquer outro caminho que chame isto.
   const avancar = () => {
-    if (passo.kind === 'exercise' && !avancoLiberado(estadoDoPasso)) return;
+    if (passo.kind === 'exercise' && !avancoLiberado(estadoEfetivo)) return;
     setIndice((i) => Math.min(i + 1, steps.length - 1));
   };
   const voltar = () => setIndice((i) => Math.max(i - 1, 0));
@@ -253,7 +289,7 @@ export function Lesson() {
           <EmblemaDaTrilha trackId={lesson.trackId} size={32} className="hidden shrink-0 sm:block" />
 
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-bold text-ink">{lesson.title}</p>
+            <h1 className="truncate text-sm font-bold text-ink">{lesson.title}</h1>
             {/* O próprio contador é a região viva: duplicá-lo num span oculto
                 faria o leitor de tela anunciar a mesma informação duas vezes. */}
             <p className="label-mono flex items-center gap-1.5 text-ink-faint" aria-live="polite">
@@ -334,11 +370,20 @@ export function Lesson() {
                   <VinhetaMedalha size={56} />
                 </span>
                 <p className="font-bold text-success-700">Aula concluída</p>
-                <p className="mt-1 text-sm leading-relaxed text-ink-soft">
-                  {proximaAula
-                    ? 'Seu progresso foi salvo. A próxima aula continua daqui.'
-                    : 'Você chegou ao fim desta trilha.'}
+                <p className="mt-1 text-sm leading-relaxed text-ink-soft" aria-live="polite">
+                  {estadoDaGravacao === 'salvando'
+                    ? 'Salvando seu progresso…'
+                    : estadoDaGravacao === 'falhou'
+                      ? 'A conclusão não foi salva — a conexão falhou.'
+                      : proximaAula
+                        ? 'Seu progresso foi salvo. A próxima aula continua daqui.'
+                        : 'Você chegou ao fim desta trilha.'}
                 </p>
+                {estadoDaGravacao === 'falhou' && userId && (
+                  <Button size="sm" variant="outline" className="mt-3" onClick={() => salvar(userId, lesson.id)}>
+                    Tentar salvar de novo
+                  </Button>
+                )}
                 {/* O que a aula rendeu — os números de verdade de `XP` e
                     `MOEDAS`, os mesmos que o perfil recalcula do histórico.
                     Só para quem tem sessão: visitante não gera histórico. */}
@@ -389,6 +434,13 @@ export function Lesson() {
               </Card>
             )}
           </div>
+        )}
+
+        {resolvidoAntes && (
+          <p className="mb-3 flex items-center gap-2 text-sm text-success-700">
+            <IconCheck size={15} className="shrink-0" />
+            Você já resolveu este exercício numa visita anterior. Pode refazer, ou seguir.
+          </p>
         )}
 
         {/* A `key` remonta o componente quando o exercício muda. Dois exercícios
@@ -518,7 +570,7 @@ export function Lesson() {
             <Button
               size="lg"
               onClick={avancar}
-              disabled={passo.kind === 'exercise' && !avancoLiberado(estadoDoPasso)}
+              disabled={passo.kind === 'exercise' && !avancoLiberado(estadoEfetivo)}
               className="flex-1"
               // Um check antes do rótulo, e não um botão verde: verde já quer
               // dizer "você acertou" no retorno do exercício, e repetir a cor
@@ -526,7 +578,7 @@ export function Lesson() {
               icon={resolvido ? <IconCheck size={17} /> : undefined}
               iconRight={<IconArrowRight size={18} />}
             >
-              {passo.kind === 'exercise' ? rotuloDeAvanco(estadoDoPasso) : 'Continuar'}
+              {passo.kind === 'exercise' ? rotuloDeAvanco(estadoEfetivo) : 'Continuar'}
             </Button>
           )}
         </div>
