@@ -53,8 +53,8 @@ A fazer, nesta ordem:
 
 1. **P2-12** ESLint mínimo (`typescript-eslint` + `react-hooks`), no CI antes
    dos testes; corrigir o que ele apontar, sem desligar regra.
-2. **P2-13** testes do `StudentDataContext` (derivação, `incompleto`, compra
-   dupla, recarga) com os `fetch*` dublados.
+2. [x] **P2-13** testes do `StudentDataContext` (`incompleto`, recarga, compra
+   dupla, recusa do banco, sessão renovada).
 3. [x] **Migrações num Postgres de verdade no CI** — `supabase/verificacao/`:
    o mínimo do Supabase (papéis, `auth.uid()`, `auth.users`, `storage`),
    0001→0009 aplicadas duas vezes, e 34 verificações de comportamento com os

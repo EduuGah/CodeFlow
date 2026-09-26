@@ -196,7 +196,7 @@ Legenda de estado: **Corrigido** (com teste, nesta rodada), **Parcial**,
 | P2-10 | Fontes servidas pelo Google (terceiro, privacidade, falha offline) | Pendente |
 | P2-11 | Quatro telas sem `<h1>` (trilha, aula, revisão, projeto) | Corrigido |
 | P2-12 | Sem ESLint (as regras de hooks pegariam P1-8 na origem) | Pendente |
-| P2-13 | Camada de persistência e `StudentDataContext` sem testes | Parcial |
+| P2-13 | Camada de persistência e `StudentDataContext` sem testes | Corrigido |
 | P2-14 | 85% dos exercícios com ≤ 2 dicas; a diretriz pede 4 níveis | Pendente |
 | P2-15 | Nenhum caminho para refazer um exercício errado; 62% dos conceitos sem flashcard | Pendente |
 | P2-16 | Economia: cosméticos esgotam em ~8 semanas e competem com a liberação por nível | Pendente (Loja 2.0) |
@@ -492,10 +492,12 @@ apontado P1-8 nos cinco lugares. É um caso em que a dependência se justifica:
 `eslint` + `typescript-eslint` + `eslint-plugin-react-hooks`, configuração
 mínima, rodando no CI antes dos testes.
 
-#### P2-13 · Persistência sem testes — Parcial
-`progress.ts` e `perfil.ts` ganharam 16 testes com um cliente dublado.
-Continuam sem teste direto: `StudentDataContext` (derivação + estados de erro),
-`Novidades`, `Aparencia`, `EditarPerfil`, `Review` (cobertos em parte pelo E2E).
+#### P2-13 · Persistência sem testes — Corrigido
+`progress.ts` e `perfil.ts` ganharam 16 testes com um cliente dublado, e o
+`StudentDataContext` 6 (histórico incompleto, recarga, compra dupla, recusa do
+banco, sessão renovada com o mesmo id, troca de pessoa), todos sabotados.
+Seguem sem teste de componente próprio, cobertos pelo E2E: `Novidades`,
+`Aparencia`, `EditarPerfil`, `Review`.
 
 #### P2-14 · Dicas rasas — Pendente (conteúdo)
 Medido no catálogo: 328 exercícios com 1 dica, 429 com 2, 98 com 3, **33 com

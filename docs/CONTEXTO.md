@@ -677,6 +677,14 @@ Cada uma custou tempo. Não repita.
   cada dia da história era 1,5 s com um ano de estudo — invisível com o
   histórico curto dos testes. Meça com um histórico grande antes de dar uma
   derivação por pronta.
+- **Tela sob demanda muda o "logo depois do `goto`".** Aula, projeto, revisão
+  e admin chegam por `React.lazy`; no primeiro instante a tela é o giro de
+  carregamento. Um teste que sonda nesse instante (`count()`, `isVisible()`)
+  recebe "não" e segue errado — o `concluirAula` pulava o passo 1 e esperava
+  para sempre. Espere algo da tela ("Passo 1 de", "Verificar critérios")
+  antes de sondar.
+- **Mudar qualquer coisa em `public/` também recarrega a página** no servidor
+  de desenvolvimento — inclusive baixar um arquivo para lá com o E2E rodando.
 - **Editar arquivos com o E2E rodando recarrega a página no meio do teste**
   (HMR do Vite). A falha parece do produto e não é. Edite, espere, rode.
 
