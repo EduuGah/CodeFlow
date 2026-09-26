@@ -206,13 +206,13 @@ Legenda de estado: **Corrigido** (com teste, nesta rodada), **Parcial**,
 | P3-2 | Dependências sem uso e sobras do AI Studio | Corrigido |
 | P3-3 | Dois lockfiles (`bun.lock` e `package-lock.json`) | Pendente — investigar |
 | P3-4 | `Lesson.tsx` repete dez blocos quase iguais | Corrigido |
-| P3-5 | Links soltos com 20 px de altura (WCAG 2.5.8) | Pendente |
+| P3-5 | Links soltos com 20 px de altura (WCAG 2.5.8) | Corrigido |
 | P3-6 | Nome e avatar sem limite no banco | Corrigido (0009) |
 | P3-7 | Login ignorava a rota de origem | Corrigido |
 | P3-8 | Validação Zod de todo o catálogo roda em produção | Corrigido |
 | P3-9 | Texto de erro do provedor OAuth refletido da URL | Corrigido |
 | P3-10 | "Novidades" vistas guardadas por aparelho | Pendente |
-| P3-11 | Rótulo ambíguo no cartão de XP do perfil | Pendente |
+| P3-11 | Rótulo ambíguo no cartão de XP do perfil | Corrigido |
 
 ### P0 — crítico
 
@@ -550,10 +550,12 @@ Só `console.error`. Proposta na seção "Observabilidade".
   `passo.exercise.type === 'x' && <X key … />` viraram `ExercicioDoPasso`, um
   `switch` exaustivo (o compilador recusa um 11º tipo sem componente) com a
   `key` num lugar só; `Lesson.tsx` caiu de 569 para 494 linhas.
-- **P3-5 · Alvos de toque de 20 px — Pendente.** Links "← Perfil", "Ver as
-  trilhas", "Todas as trilhas", "Desafios da semana" e os títulos de trilha em
-  Progresso medem 20–22 px de altura no celular. WCAG 2.2 (2.5.8) pede 24 px
-  para controles isolados.
+- **P3-5 · Alvos de toque de 20 px — Corrigido.** Links "← Perfil", "Ver as
+  trilhas", "Todas as trilhas", "Desafios da semana", "Ver as cores na loja" e
+  os títulos de trilha em Progresso mediam 20–22 px de altura no celular.
+  WCAG 2.2 (2.5.8) pede 24 px para controles isolados. Agora têm, e um E2E
+  percorre as dez telas de orientação cobrando isso de todo link e botão fora
+  de texto corrido (sabotado, pega).
 - **P3-6 · Tamanho de nome e avatar — Corrigido (0009).** `check` de 60
   caracteres e formato do avatar (`preset:` ou `https://`).
 - **P3-7 · Login ignorava a rota de origem — Corrigido.** Um link direto para
@@ -570,9 +572,9 @@ Só `console.error`. Proposta na seção "Observabilidade".
   de ser concatenadas na tela do login.
 - **P3-10 · Novidades por aparelho — Pendente.** O "já visto" mora no
   `localStorage`; o mesmo aviso reaparece em outro aparelho.
-- **P3-11 · Rótulo do XP no perfil — Pendente.** "Praticante no nível 5" embaixo
-  do XP de quem é Iniciante no nível 3 lê como estado atual; "próximo título:
-  Praticante, no nível 5" é inequívoco.
+- **P3-11 · Rótulo do XP no perfil — Corrigido.** "Praticante no nível 5"
+  embaixo do XP de quem é Iniciante no nível 3 lia como estado atual; agora
+  diz "próximo título: Praticante, no nível 5".
 
 ---
 

@@ -208,7 +208,9 @@ export function Perfil() {
             {dobro
               ? `em dobro até ${dobro.ate.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`
               : faixa
-                ? `${faixa.title} no nível ${faixa.aPartirDe}`
+                ? // "Praticante no nível 5" embaixo do XP de quem é Iniciante
+                  // no nível 3 lia como estado atual; é o próximo título.
+                  `próximo título: ${faixa.title}, no nível ${faixa.aPartirDe}`
                 : 'última faixa de título'}
           </dd>
         </div>

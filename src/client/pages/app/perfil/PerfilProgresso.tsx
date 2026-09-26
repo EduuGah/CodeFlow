@@ -123,7 +123,7 @@ export function PerfilProgresso() {
               {trilhas.map(({ track, completed, total, percentage }) => (
                 <li key={track.id}>
                   <div className="mb-1 flex items-center justify-between gap-3 text-sm">
-                    <Link to={`/app/trilhas/${track.id}`} className="flex items-center gap-2 font-semibold text-ink hover:underline">
+                    <Link to={`/app/trilhas/${track.id}`} className="flex min-h-6 items-center gap-2 font-semibold text-ink hover:underline">
                       <EmblemaDaTrilha trackId={track.id} size={22} />
                       {track.title}
                     </Link>

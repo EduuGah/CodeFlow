@@ -168,6 +168,31 @@ test.describe('celular', () => {
     expect(pequenos).toEqual([]);
   });
 
+  test('nenhum link ou botão solto fica abaixo de 24 px', async ({ logado: page }) => {
+    // WCAG 2.2, critério 2.5.8. A auditoria de 2026-09-26 mediu "← Perfil",
+    // "Ver as trilhas" e os nomes de trilha do progresso com 20 a 22 px. Link
+    // dentro de texto corrido fica de fora, como a própria regra permite.
+    test.setTimeout(90_000);
+    const telas = ['/app', '/app/trilhas', '/app/trilhas/track-js-fundamentos', '/app/praticar', '/app/perfil',
+      '/app/perfil/loja', '/app/perfil/desafios', '/app/perfil/conquistas', '/app/perfil/aparencia', '/app/perfil/progresso'];
+    const pequenos: string[] = [];
+
+    for (const tela of telas) {
+      await page.goto(tela);
+      await esperarConteudo(page);
+      const daTela = await page.evaluate(() =>
+        [...document.querySelectorAll<HTMLElement>('a, button')]
+          .filter((el) => !el.closest('p, .prose, .sr-only') && !el.classList.contains('sr-only'))
+          .map((el) => ({ el, r: el.getBoundingClientRect() }))
+          .filter(({ r }) => r.width > 0 && r.height > 0 && (r.height < 24 || r.width < 24))
+          .map(({ el, r }) => `"${(el.textContent ?? '').trim().slice(0, 30)}" ${Math.round(r.width)}x${Math.round(r.height)}`)
+      );
+      pequenos.push(...daTela.map((d) => `${tela}: ${d}`));
+    }
+
+    expect(pequenos).toEqual([]);
+  });
+
   test('a aula não corta texto nem estoura a largura em nenhum passo', async ({
     logado: page,
   }) => {

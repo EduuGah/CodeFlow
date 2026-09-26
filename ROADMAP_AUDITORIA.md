@@ -86,8 +86,8 @@ A fazer, nesta ordem:
 
 1. Erros técnicos crus → frases por código (login, callback, motores); o detalhe
    vai para o registro (Fase 3 da observabilidade, abaixo).
-2. **P3-5** alvos de 24 px nos links soltos.
-3. **P3-11** rótulo do XP no perfil.
+2. [x] **P3-5** alvos de 24 px nos links soltos, com E2E de guarda.
+3. [x] **P3-11** rótulo do XP no perfil.
 4. **P2-6** laço infinito no motor de página: guarda de laço no código do aluno.
 5. Microinterações curtas, todas atrás de `prefers-reduced-motion`: moeda indo
    ao saldo na compra; pulso no contador de sequência no primeiro estudo do dia;

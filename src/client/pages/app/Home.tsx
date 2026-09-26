@@ -270,7 +270,7 @@ export function Home() {
             <h2 id="titulo-percurso" className="label-mono text-ink-faint">
               Seu percurso
             </h2>
-            <Link to="/app/trilhas" className="text-sm font-semibold text-brand-700 hover:text-brand-900">
+            <Link to="/app/trilhas" className="inline-flex min-h-6 items-center text-sm font-semibold text-brand-700 hover:text-brand-900">
               Ver as trilhas
             </Link>
           </div>
@@ -300,7 +300,7 @@ export function Home() {
             <h2 id="titulo-hoje" className="label-mono text-ink-faint">
               Para hoje
             </h2>
-            <Link to="/app/perfil/desafios" className="text-sm font-semibold text-brand-700 hover:text-brand-900">
+            <Link to="/app/perfil/desafios" className="inline-flex min-h-6 items-center text-sm font-semibold text-brand-700 hover:text-brand-900">
               Desafios da semana
             </Link>
           </div>

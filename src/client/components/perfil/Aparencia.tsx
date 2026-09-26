@@ -146,7 +146,7 @@ export function Aparencia() {
         {trancadas.length > 0 && (
           <Link
             to="/app/perfil/loja"
-            className="inline-flex items-center gap-1 text-sm font-semibold text-brand-700 hover:text-brand-900"
+            className="inline-flex min-h-6 items-center gap-1 text-sm font-semibold text-brand-700 hover:text-brand-900"
           >
             Ver as cores na loja
             <IconArrowRight size={15} />

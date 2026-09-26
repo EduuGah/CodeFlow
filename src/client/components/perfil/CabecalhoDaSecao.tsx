@@ -36,7 +36,7 @@ export function CabecalhoDaSecao({
     <header className="space-y-3">
       <Link
         to="/app/perfil"
-        className="inline-flex items-center gap-1 text-sm font-semibold text-ink-soft hover:text-ink"
+        className="inline-flex min-h-6 items-center gap-1 text-sm font-semibold text-ink-soft hover:text-ink"
       >
         <IconArrowLeft size={16} />
         Perfil
