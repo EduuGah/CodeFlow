@@ -96,6 +96,14 @@ export function lerResposta(valor: unknown): RespostaEnviada | null {
   }
 }
 
+/** Uma lista sem nada dentro não é evidência: não há o que mostrar. */
+export function respostaVazia(resposta: RespostaEnviada): boolean {
+  return (
+    (resposta.tipo === 'ordem' && resposta.ids.length === 0) ||
+    (resposta.tipo === 'lacunas' && resposta.valores.length === 0)
+  );
+}
+
 /** O primeiro problema de uma execução, como a tela mostra: o erro, ou a primeira verificação que falhou. */
 export function primeiraFalha(execucao: Pick<ExecutionResult, 'error' | 'testResults'>): string | undefined {
   return execucao.error || execucao.testResults.find((t) => !t.passed)?.message;

@@ -7,6 +7,7 @@ import {
   lerResposta,
   primeiraFalha,
   resumirFeedback,
+  respostaVazia,
   resumirResposta,
   type RespostaEnviada,
 } from './resposta';
@@ -80,5 +81,15 @@ describe('a resposta que volta do banco', () => {
     ]) {
       expect(lerResposta(valor), JSON.stringify(valor)).toBeNull();
     }
+  });
+});
+
+describe('resposta vazia', () => {
+  it('lista sem nada não é evidência; zero e texto em branco são', () => {
+    expect(respostaVazia({ tipo: 'ordem', ids: [] })).toBe(true);
+    expect(respostaVazia({ tipo: 'lacunas', valores: [] })).toBe(true);
+    // Marcar a primeira alternativa, prever uma saída vazia: respostas de verdade.
+    expect(respostaVazia({ tipo: 'alternativa', indice: 0 })).toBe(false);
+    expect(respostaVazia({ tipo: 'previsao', texto: '' })).toBe(false);
   });
 });

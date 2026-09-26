@@ -3,9 +3,10 @@ import { Link } from 'react-router-dom';
 import { getConcept } from '../../../content';
 import { useStudentData } from '../../contexts/StudentDataContext';
 import { MASTERY_LABELS } from '../../lib/mastery';
+import { resumoDoCaderno, type EntradaDoCaderno } from '../../lib/caderno';
 import { IconArrowRight, IconPractice } from '../../components/ui/Icon';
 import { CenaCartoes } from '../../components/ui/Cena';
-import { VinhetaCartoes, VinhetaEditor } from '../../components/ui/Ilustracao';
+import { VinhetaAlvo, VinhetaCartoes, VinhetaEditor } from '../../components/ui/Ilustracao';
 import { Badge } from '../../components/ui/Badge';
 import { Card, cardClasses } from '../../components/ui/Card';
 import { ProgressBar } from '../../components/ui/ProgressBar';
@@ -16,17 +17,19 @@ import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 /**
  * Praticar.
  *
- * Junta as três formas de reforçar o que já foi visto: revisão espaçada,
- * conceitos com desempenho fraco e exercícios ainda não resolvidos.
+ * Junta as formas de reforçar o que já foi visto: revisão espaçada, o
+ * caderno de erros, conceitos com desempenho fraco e exercícios ainda não
+ * resolvidos.
  *
- * A ordem não é arbitrária. Revisão vem primeiro porque é a única com prazo —
- * um cartão vencido perde valor a cada dia. Depois os conceitos fracos, que
- * apontam onde o aluno está de fato travado. Por último a contagem de
- * pendentes, que é informação, não urgência.
+ * A ordem não é arbitrária. Revisão e caderno vêm primeiro porque são os que
+ * têm prazo — um cartão vencido perde valor a cada dia, e um erro sem
+ * conserto é o que mais pesa adiante. Depois os conceitos fracos, que apontam
+ * onde o aluno está de fato travado. Por último a contagem de pendentes, que
+ * é informação, não urgência.
  */
 export function Practice() {
   useDocumentTitle('Praticar');
-  const { loading, dueCards, cards, conceptsToReview, pendingExercises, totalExercises, stats } =
+  const { loading, dueCards, cards, conceptsToReview, pendingExercises, totalExercises, stats, caderno } =
     useStudentData();
 
   if (loading) {
@@ -100,6 +103,8 @@ export function Practice() {
         )}
       </section>
 
+      {caderno.length > 0 && <ResumoDoCaderno caderno={caderno} />}
+
       {conceptsToReview.length > 0 && (
         <section>
           <h2 className="label-mono mb-1 text-ink-faint">Conceitos para retomar</h2>
@@ -156,5 +161,40 @@ export function Practice() {
         </Card>
       </section>
     </div>
+  );
+}
+
+/** O caderno de erros em uma linha: quanto há para refazer, e a porta para ele. */
+function ResumoDoCaderno({ caderno }: { caderno: EntradaDoCaderno[] }) {
+  const resumo = resumoDoCaderno(caderno);
+  const aRefazer = resumo.pendente + resumo.revisar;
+
+  return (
+    <section>
+      <h2 className="label-mono mb-3 text-ink-faint">Caderno de erros</h2>
+      <Link
+        to="/app/praticar/erros"
+        className={cardClasses({ className: 'flex items-center gap-4 transition-colors hover:border-line-strong' })}
+      >
+        <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-energy-50" aria-hidden>
+          <VinhetaAlvo size={40} />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block font-bold text-ink">
+            {aRefazer === 0
+              ? 'Nada para refazer hoje'
+              : `${aRefazer} ${aRefazer === 1 ? 'exercício para refazer' : 'exercícios para refazer'}`}
+          </span>
+          <span className="block text-sm leading-relaxed text-ink-soft">
+            {resumo.pendente > 0
+              ? 'Veja o que você respondeu e tente de novo, com o erro à vista.'
+              : resumo.revisar > 0
+                ? 'Revisões do dia: acertar de novo, com intervalo, é o que mostra que ficou.'
+                : `${resumo['em-dia']} em dia, ${resumo.dominado} ${resumo.dominado === 1 ? 'dominado' : 'dominados'}. Cada um volta na data marcada.`}
+          </span>
+        </span>
+        <IconArrowRight size={18} className="shrink-0 text-ink-faint" />
+      </Link>
+    </section>
   );
 }

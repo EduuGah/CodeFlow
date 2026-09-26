@@ -41,8 +41,8 @@ Números lidos do catálogo, não de memória.
 | Projetos | 10, com 34 critérios de aceitação — os 3 capstones são página + API + banco (motor 7), os outros 7 são JavaScript puro |
 | Conceitos | 151, com grafo de pré-requisitos |
 | Flashcards | 67 (93 conceitos ainda sem cartão) |
-| Testes | 3.370 de unidade + ~430 de navegador |
-| Pacote | 3.080 kB (847 kB comprimido) no chunk principal — o corpo das aulas vai junto (é quase metade), e separá-lo é o maior problema de performance aberto (P2-1b do roadmap). Aula, revisão, projeto e admin são rotas sob demanda (`App.tsx`), e o Zod só entra no chunk do admin; o Monaco são mais 3.362 kB (869 kB) num chunk à parte, baixado só quando o primeiro editor monta, e o worker de TypeScript (7 MB) só quando um modelo JS/TS abre. O motor de TypeScript não acrescentou arquivo; o de React acrescentou um chunk de 143 kB (47 kB) com o React e o ReactDOM como texto, baixado só por um exercício de React; o de SQL acrescentou o worker (49 kB) e o SQLite em WebAssembly (658 kB), baixados só por um exercício de SQL; o de Python acrescentou o worker (~22 kB) e o Pyodide inteiro (~13,5 MB: o WebAssembly do CPython, a biblioteca padrão zipada, o manifesto de pacotes), copiados para `/pyodide/` na build e baixados só por um exercício de Python |
+| Testes | 3.418 de unidade + ~440 de navegador |
+| Pacote | 3.095 kB (851 kB comprimido) no chunk principal — o corpo das aulas vai junto (é quase metade), e separá-lo é o maior problema de performance aberto (P2-1b do roadmap). Aula, revisão, refazer erros, projeto e admin são rotas sob demanda (`App.tsx`), e o Zod só entra no chunk do admin; o Monaco são mais 3.362 kB (869 kB) num chunk à parte, baixado só quando o primeiro editor monta, e o worker de TypeScript (7 MB) só quando um modelo JS/TS abre. O motor de TypeScript não acrescentou arquivo; o de React acrescentou um chunk de 143 kB (47 kB) com o React e o ReactDOM como texto, baixado só por um exercício de React; o de SQL acrescentou o worker (49 kB) e o SQLite em WebAssembly (658 kB), baixados só por um exercício de SQL; o de Python acrescentou o worker (~22 kB) e o Pyodide inteiro (~13,5 MB: o WebAssembly do CPython, a biblioteca padrão zipada, o manifesto de pacotes), copiados para `/pyodide/` na build e baixados só por um exercício de Python |
 
 ## 4. Decisões que não devem ser desfeitas sem motivo forte
 
@@ -105,6 +105,22 @@ pedido do dono do projeto (2026-09-17): convidava a passar reto pelo
 exercício, que é onde a aula acontece. Nos testes, "passar por um
 exercício" é responder errado: `pages/aula.test-utils.tsx` e
 `responderErrado`/`passarPelaAula`/`irAteOExercicio` em `e2e/fixtures.ts`.
+
+**O Caderno de Erros é derivado; a evidência é à parte.** Não há tabela de
+caderno: `lib/caderno.ts` monta tudo das tentativas — um item por exercício
+já errado, pendente até um acerto depois do erro, e depois revisado em 3, 7 e
+21 dias (só conta o acerto que chega na data: repetir no mesmo dia não prova
+nada; um erro novo recomeça). O que a pessoa respondeu mora em
+`exercise_attempts.resposta`/`feedback` (0010), gravado **só quando errou**
+e lido **só na tela do caderno** (`fetchEvidencias`) — o histórico que
+alimenta o app inteiro não carrega código enviado. Se o banco não tem a
+coluna ou recusa o tamanho, a tentativa é gravada sem a resposta: o fato
+conta para XP e sequência, a evidência não pode levá-lo junto. A conta
+`aluno` de demonstração não guarda texto livre (gatilho da 0010): o próximo
+visitante leria. A explicação da resposta certa não aparece no caderno — vem
+ao acertar, como na aula. Refazer (`/refazer`) usa os mesmos componentes da
+aula e a mesma regra: sem "pular"; a fila é tirada na entrada e não
+reembaralha no meio.
 
 **A correção julga comportamento, nunca texto.** Qualquer implementação que
 funcione passa. Comparar com gabarito ensinaria a adivinhar o que o professor
@@ -279,6 +295,10 @@ src/client/lib/         Lógica pura e testada
   fill-blank.ts         Molde com lacunas: dividir, preencher, validar
   mastery.ts            Domínio por conceito, em 4 níveis
   review.ts             Repetição espaçada, Leitner [1,3,7,14,30,60] dias
+  caderno.ts            O Caderno de Erros: estado de cada erro (pendente,
+                        revisar, em dia, dominado), a fila de refazer, a sessão
+  resposta.ts           O que foi enviado numa tentativa, por tipo, cortado nos
+                        tetos da 0010; `lerResposta` recusa o que não tem forma
   gamification.ts       XP, níveis, conquistas
   path.ts               Caminho da trilha; nunca bloqueia, só avisa
   percurso.ts           O percurso do aluno: trilhas por etapa, estado de
@@ -291,7 +311,8 @@ src/client/lib/         Lógica pura e testada
                         os cumpridos desde o primeiro estudo
   progress.ts           Leitura e escrita do progresso. `lerTodasAsPaginas`
                         (o Supabase corta em 1.000 linhas), `concluir` pela
-                        função do banco, `Leitura<T>` = { dados, erro }
+                        função do banco, `Leitura<T>` = { dados, erro };
+                        `fetchEvidencias`, só para o caderno
   (StudentDataContext)  Acima das rotas protegidas (`App.tsx`): o histórico
                         carrega uma vez por pessoa; voltar ao app revalida
                         por baixo (`revalidar`), sem esqueleto
@@ -360,6 +381,14 @@ src/client/pages/app/   Início é a aula da vez + o percurso; Trilhas é o
                         seção), `/desafios`, `/loja`, `/conquistas`,
                         `/aparencia`, `/progresso` (XP com a partição, barra
                         por trilha, domínio por conceito)
+  CadernoDeErros.tsx    `/app/praticar/erros`: cada erro com o que foi
+                        respondido e o retorno lido; a porta para refazer
+src/client/pages/       Telas de foco (sem a navegação): `Lesson`, `Review`,
+  Refazer.tsx           `ProjectWorkspace` e `Refazer` (`/refazer`, os
+                        exercícios do caderno um de cada vez)
+src/client/components/  `caderno/`: a resposta no formato do exercício
+                        (`RespostaDoAluno`) e o enunciado numa linha
+                        (`TextoEmLinha`, sem o leitor de Markdown inteiro)
 e2e/                    Playwright; `fixtures.ts` tem o dublê do Supabase
 supabase/migrations/    0001 a 0010, aplicadas em ordem (0010: o que foi
                         respondido em cada erro, para o Caderno de Erros;
@@ -374,7 +403,7 @@ docs/curriculo.md       Roadmap de conteúdo — fonte canônica
 ```bash
 npm run typecheck   # inclui e2e/ e playwright.config.ts
 npm run lint        # ESLint mínimo: typescript-eslint + react-hooks
-npm test            # 3.370 testes
+npm test            # 3.418 testes
 npm run test:e2e    # ~410 no navegador (antes: npx playwright install chromium;
                     # com um Chromium já instalado: PW_CHROMIUM=/caminho/do/chrome)
 npm run build
@@ -692,6 +721,18 @@ Cada uma custou tempo. Não repita.
   de desenvolvimento — inclusive baixar um arquivo para lá com o E2E rodando.
 - **Editar arquivos com o E2E rodando recarrega a página no meio do teste**
   (HMR do Vite). A falha parece do produto e não é. Edite, espere, rode.
+- **Sem policy de UPDATE, o UPDATE não dá erro: não muda nada.** O RLS esconde
+  a linha, e o comando passa com zero linhas. Para provar que o histórico não
+  se reescreve, confira o valor depois — esperar "permission denied" dá um
+  teste que nunca passa (a verificação da 0010 errou isso no rascunho).
+- **O dublê do E2E responde o que o teste semeou, sem olhar filtros.** Uma
+  leitura nova com `.eq`/`.not` recebe o histórico inteiro, e a tela parece
+  certa pelo motivo errado. A leitura do caderno ganhou os dois filtros dela
+  em `fixtures.ts`; uma leitura filtrada nova precisa do mesmo.
+- **O teto em bytes do banco tem de caber o pior caso do navegador**, não o
+  caso médio: 20 lacunas de 500 caracteres com acento passavam de 30 KiB num
+  teto de 16. `migrations.test.ts` mede o pior caso de cada tipo contra o
+  número da migração.
 
 ## 8. O que falta
 

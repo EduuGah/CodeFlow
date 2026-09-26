@@ -567,3 +567,19 @@ export const getExercises = (lesson: Lesson): Exercise[] =>
     .filter((b): b is Extract<LessonBlock, { kind: 'exercise' }> => b.kind === 'exercise')
     .map((b) => b.exercise);
 
+let exerciciosPorId: Map<string, { exercise: Exercise; lesson: Lesson }> | undefined;
+
+/**
+ * Um exercício publicado e a aula onde ele mora, pelo id — o que o Caderno de
+ * Erros precisa para mostrar e refazer o que a pessoa errou. `undefined` para
+ * exercício que saiu do catálogo (a tentativa antiga continua no histórico).
+ */
+export function localizarExercicio(id: string): { exercise: Exercise; lesson: Lesson } | undefined {
+  exerciciosPorId ??= new Map(
+    listTracks()
+      .flatMap((t) => getLessonsOfTrack(t.id))
+      .flatMap((lesson) => getExercises(lesson).map((exercise) => [exercise.id, { exercise, lesson }] as const))
+  );
+  return exerciciosPorId.get(id);
+}
+

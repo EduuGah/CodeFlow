@@ -24,6 +24,7 @@ import {
   listFlashcards,
   listProjects,
   listTracks,
+  localizarExercicio,
 } from './index';
 import { preencher } from '../client/lib/fill-blank';
 import { embaralhar, estaOrdenado } from '../client/lib/ordenar';
@@ -241,6 +242,22 @@ ${exercise.solution}`,
       ).toBeLessThan(TETO);
     }
   );
+});
+
+describe('localizar um exercício pelo id (Caderno de Erros)', () => {
+  it('todo exercício publicado é achado, na aula onde mora', () => {
+    for (const track of listTracks()) {
+      for (const lesson of getLessonsOfTrack(track.id)) {
+        for (const exercicio of getExercises(lesson)) {
+          expect(localizarExercicio(exercicio.id)?.lesson.id, exercicio.id).toBe(lesson.id);
+        }
+      }
+    }
+  });
+
+  it('exercício que saiu do catálogo não é achado', () => {
+    expect(localizarExercicio('exercicio-que-nao-existe')).toBeUndefined();
+  });
 });
 
 describe('markdown chega limpo ao aluno', () => {

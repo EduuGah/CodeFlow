@@ -7,6 +7,8 @@ import {
   INTERVALOS_DO_CADERNO,
   montarCaderno,
   resumoDoCaderno,
+  sessaoDeRefazer,
+  TAMANHO_DA_SESSAO,
 } from './caderno';
 import type { Attempt } from './mastery';
 import type { EvidenciaDoErro } from './resposta';
@@ -143,5 +145,32 @@ describe('a fila de revisão', () => {
   it('o resumo conta cada estado', () => {
     const attempts = [t('a', '2026-03-15', false), t('b', '2026-03-19', false), t('b', '2026-03-19', true, '11:00')];
     expect(resumoDoCaderno(montarCaderno(attempts, new Map(), HOJE))).toEqual({ pendente: 1, revisar: 0, 'em-dia': 1, dominado: 0 });
+  });
+});
+
+describe('a sessão de refazer', () => {
+  const existe = () => true;
+
+  it('sem pedido: o começo da fila, no máximo uma sessão curta', () => {
+    const attempts = Array.from({ length: TAMANHO_DA_SESSAO + 5 }, (_, i) => t(`ex-${i}`, '2026-03-10', false));
+    const sessao = sessaoDeRefazer(montarCaderno(attempts, new Map(), HOJE), null, existe);
+    expect(sessao).toHaveLength(TAMANHO_DA_SESSAO);
+  });
+
+  it('com pedido: só o escolhido — mesmo em dia, que a pessoa pode querer conferir', () => {
+    const caderno = montarCaderno(
+      [t('a', '2026-03-10', false), t('b', '2026-03-19', false), t('b', '2026-03-19', true, '11:00')],
+      new Map(),
+      HOJE
+    );
+    expect(sessaoDeRefazer(caderno, 'b', existe).map((e) => e.exerciseId)).toEqual(['b']);
+    expect(sessaoDeRefazer(caderno, 'nunca-errado', existe)).toEqual([]);
+  });
+
+  it('o que saiu do catálogo fica de fora', () => {
+    const caderno = montarCaderno([t('a', '2026-03-10', false), t('fora', '2026-03-11', false)], new Map(), HOJE);
+    const noCatalogo = (id: string) => id !== 'fora';
+    expect(sessaoDeRefazer(caderno, null, noCatalogo).map((e) => e.exerciseId)).toEqual(['a']);
+    expect(sessaoDeRefazer(caderno, 'fora', noCatalogo)).toEqual([]);
   });
 });

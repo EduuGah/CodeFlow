@@ -14,6 +14,7 @@ import { Home } from './pages/app/Home';
 import { Tracks } from './pages/app/Tracks';
 import { TrackDetail } from './pages/app/TrackDetail';
 import { Practice } from './pages/app/Practice';
+import { CadernoDeErros } from './pages/app/CadernoDeErros';
 import { Perfil } from './pages/app/perfil/Perfil';
 import { PerfilAparencia } from './pages/app/perfil/PerfilAparencia';
 import { PerfilConquistas } from './pages/app/perfil/PerfilConquistas';
@@ -32,6 +33,7 @@ import { PerfilProgresso } from './pages/app/perfil/PerfilProgresso';
  */
 const Lesson = lazy(() => import('./pages/Lesson').then((m) => ({ default: m.Lesson })));
 const Review = lazy(() => import('./pages/Review').then((m) => ({ default: m.Review })));
+const Refazer = lazy(() => import('./pages/Refazer').then((m) => ({ default: m.Refazer })));
 const ProjectWorkspace = lazy(() =>
   import('./pages/ProjectWorkspace').then((m) => ({ default: m.ProjectWorkspace }))
 );
@@ -69,8 +71,9 @@ function CarregandoTela() {
  *
  * - `/app/*` vive dentro do AppShell, com navegação sempre visível. São as telas
  *   de orientação: onde estou, o que existe, o que praticar.
- * - `/lesson`, `/project` e `/review` ocupam a tela inteira, sem navegação. São
- *   telas de foco — durante um exercício, uma barra de abas só oferece saída.
+ * - `/lesson`, `/project`, `/review` e `/refazer` ocupam a tela inteira, sem
+ *   navegação. São telas de foco — durante um exercício, uma barra de abas só
+ *   oferece saída.
  *
  * `/dashboard` continua respondendo, redirecionando para `/app`: era a rota
  * anterior, e links salvos não devem quebrar.
@@ -96,6 +99,7 @@ function App() {
             <Route path="trilhas" element={<Tracks />} />
             <Route path="trilhas/:trackId" element={<TrackDetail />} />
             <Route path="praticar" element={<Practice />} />
+            <Route path="praticar/erros" element={<CadernoDeErros />} />
             {/* O perfil é uma família: cada assunto numa página, para o celular
                 não virar uma rolagem de 3 000 px. */}
             <Route path="perfil" element={<Perfil />} />
@@ -119,6 +123,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Review />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/refazer"
+            element={
+              <ProtectedRoute>
+                <Refazer />
               </ProtectedRoute>
             }
           />

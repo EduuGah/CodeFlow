@@ -1,6 +1,6 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 
-import { getExercises, getLessonsOfTrack, listConcepts, listFlashcards, listTracks } from '../../content';
+import { getExercises, getLessonsOfTrack, listConcepts, listFlashcards, listTracks, localizarExercicio } from '../../content';
 import { useAuth } from './AuthContext';
 import { useTemaOpcional } from './TemaContext';
 import { fetchAttempts, fetchFlashcardReviews, fetchProgress } from '../lib/progress';
@@ -18,6 +18,7 @@ import {
 import { calcularSequencia, type Sequencia } from '../lib/sequencia';
 import { desafiosAtuais, desafiosConcluidos, type EstadoDoDesafio } from '../lib/desafios';
 import { dobroAtivo, itemDaLoja, moedasGanhas, moedasGastas, type FontesDeMoedas, type Purchase } from '../lib/economia';
+import { dependentesPorConceito, montarCaderno, type EntradaDoCaderno } from '../lib/caderno';
 
 /**
  * Dados do aluno, buscados uma vez e compartilhados pelas abas.
@@ -72,6 +73,8 @@ interface StudentData {
   pendingExercises: string[];
   /** Tentados e nunca resolvidos. É o que "em aberto" quer dizer para o aluno. */
   abandonedExercises: string[];
+  /** Todo exercício do catálogo já errado, com o estado da revisão espaçada (`caderno.ts`). */
+  caderno: EntradaDoCaderno[];
   totalExercises: number;
   /** Cartões vencidos hoje. */
   dueCards: number;
@@ -100,6 +103,10 @@ interface StudentData {
 }
 
 const StudentDataContext = createContext<StudentData | undefined>(undefined);
+
+/** O grafo de pré-requisitos não muda com o aluno: conta-se uma vez. */
+let dependentes: Map<string, number> | undefined;
+const DEPENDENTES = () => (dependentes ??= dependentesPorConceito(listConcepts()));
 
 const PERFIL_VAZIO: Perfil = { displayName: null, avatar: null, theme: null, accent: null };
 
@@ -276,6 +283,8 @@ export function StudentDataProvider({ children }: { children: React.ReactNode })
       resume: lastActivity(attempts),
       pendingExercises: unsolvedExerciseIds(todosExercicios, attempts),
       abandonedExercises: abandonedExerciseIds(attempts),
+      // Exercício que saiu do catálogo não tem como ser mostrado nem refeito.
+      caderno: montarCaderno(attempts, DEPENDENTES()).filter((e) => localizarExercicio(e.exerciseId)),
       totalExercises: todosExercicios.length,
       dueCards: dueCount(listFlashcards(), reviews),
       cards: countCards(listFlashcards(), reviews),

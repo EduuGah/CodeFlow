@@ -38,6 +38,9 @@ export interface BancoFalso {
     correct: boolean;
     hints_used: number;
     created_at: string;
+    /** O que foi enviado e o retorno lido (0010), para o Caderno de Erros. */
+    resposta?: unknown;
+    feedback?: string | null;
   }>;
   /** Compras já feitas na loja. */
   purchases: Array<{ item: string; price: number; created_at: string }>;
@@ -178,7 +181,13 @@ async function dublarSupabase(page: Page, banco: BancoFalso) {
     }
 
     if (caminho === '/rest/v1/exercise_attempts') {
-      if (metodo === 'GET') return json(banco.attempts);
+      if (metodo === 'GET') {
+        // Os dois filtros da leitura do caderno (`fetchEvidencias`); as outras
+        // leituras pedem o histórico inteiro.
+        const soErradas = url.searchParams.get('correct') === 'eq.false';
+        const comResposta = url.searchParams.get('resposta') === 'not.is.null';
+        return json(banco.attempts.filter((a) => (!soErradas || !a.correct) && (!comResposta || a.resposta != null)));
+      }
       banco.escritas.push({ tabela: 'exercise_attempts', corpo: requisicao.postDataJSON() });
       return json([], 201);
     }

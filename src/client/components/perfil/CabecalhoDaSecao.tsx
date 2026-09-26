@@ -17,6 +17,7 @@ export function CabecalhoDaSecao({
   vinheta,
   tom = 'brand',
   lado,
+  voltar = { para: '/app/perfil', rotulo: 'Perfil' },
 }: {
   titulo: string;
   descricao: string;
@@ -25,6 +26,8 @@ export function CabecalhoDaSecao({
   tom?: 'brand' | 'energy' | 'success';
   /** O que fica à direita: um número, uma ação. */
   lado?: ReactNode;
+  /** De onde se veio. O perfil, a não ser que a seção more em outro lugar. */
+  voltar?: { para: string; rotulo: string };
 }) {
   const pastilha = {
     brand: 'bg-brand-50 text-brand-700',
@@ -35,11 +38,11 @@ export function CabecalhoDaSecao({
   return (
     <header className="space-y-3">
       <Link
-        to="/app/perfil"
+        to={voltar.para}
         className="inline-flex min-h-6 items-center gap-1 text-sm font-semibold text-ink-soft hover:text-ink"
       >
         <IconArrowLeft size={16} />
-        Perfil
+        {voltar.rotulo}
       </Link>
       <div className="flex items-center gap-4">
         <span className={`animar-pop flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl ${pastilha}`} aria-hidden>

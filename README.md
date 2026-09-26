@@ -58,7 +58,9 @@ bug, ordenar, teste, refatorar — que pedem o conceito de outro ângulo.
 | Python | a primeira linguagem além do JavaScript | Pyodide (CPython em WebAssembly, ~13 MB) num worker que fica vivo — recarregar custaria segundos; cada execução isola com um dicionário de globais novo, sem recriar o intérprete; testes são `assert` em Python de verdade |
 
 **O que acompanha o aluno**: percurso em etapas com o ponto atual, revisão
-espaçada (Leitner) com a sessão embaralhada a cada vez, XP e níveis sem teto,
+espaçada (Leitner) com a sessão embaralhada a cada vez, **caderno de erros**
+(cada exercício errado com o que foi respondido e o retorno lido, e uma fila
+para refazer em 3, 7 e 21 dias), XP e níveis sem teto,
 sequência de dias com congelamento, moedas e loja (dobro de XP, temas,
 avatares), desafios do dia e da semana, 67 conquistas (com um destaque para
 as mais perto de fechar, e trilhas/etapas numa parede compacta de emblemas),
@@ -130,7 +132,7 @@ Redirect URLs.
 
 ```bash
 npm run typecheck   # tipos, incluindo os testes de navegador
-npm test            # 3.370 testes de unidade, propriedade e componente (Vitest)
+npm test            # 3.418 testes de unidade, propriedade e componente (Vitest)
 npm run test:e2e    # 408 testes de navegador (Playwright, Chromium, celular e desktop)
 ```
 

@@ -198,7 +198,7 @@ Legenda de estado: **Corrigido** (com teste, nesta rodada), **Parcial**,
 | P2-12 | Sem ESLint | Corrigido |
 | P2-13 | Camada de persistência e `StudentDataContext` sem testes | Corrigido |
 | P2-14 | 85% dos exercícios com ≤ 2 dicas; a diretriz pede 4 níveis | Pendente |
-| P2-15 | Nenhum caminho para refazer um exercício errado; 62% dos conceitos sem flashcard | Pendente |
+| P2-15 | Nenhum caminho para refazer um exercício errado; 62% dos conceitos sem flashcard | Parcial — caderno e refazer feitos (0010); faltam os flashcards |
 | P2-16 | Economia: cosméticos esgotam em ~8 semanas e competem com a liberação por nível | Pendente (Loja 2.0) |
 | P2-17 | Documentação de arquitetura desatualizada | Parcial |
 | P2-18 | Observabilidade: só `console.error` | Pendente |
@@ -520,7 +520,7 @@ orientação conceitual → específica → parte da solução → solução exp
 O CI pode cobrar ao menos três para exercícios de produção (código, SQL,
 servidor, teste, refatorar).
 
-#### P2-15 · Não há como refazer o que se errou — Pendente
+#### P2-15 · Não há como refazer o que se errou — Parcial
 - "Praticar" diz "N exercícios tentados e não resolvidos… siga pela trilha" e
   não leva a eles. A revisão espaçada só conhece flashcards: 67 cartões para
   151 conceitos — **93 conceitos sem cartão**.
@@ -529,6 +529,15 @@ servidor, teste, refatorar).
 - **Solução:** Fase 6 do roadmap — coluna `resposta` (resumo limitado) e
   `feedback` em `exercise_attempts`, fila de revisão por exercício errado com
   prioridade por frequência de erro, tempo e pré-requisitos.
+- **Feito (2026-09-26):** 0010 com `resposta` e `feedback`, gravados só no
+  erro e lidos só no caderno; `/app/praticar/erros` mostra cada erro com o que
+  foi enviado e o retorno lido; `/refazer` refaz a fila (3, 7 e 21 dias) com
+  os componentes da aula; Praticar aponta para lá. Testes: caderno e fila
+  (sabotado o espaçamento), gravação com a volta sem a coluna (sabotada),
+  teto do banco × pior caso do navegador (sabotado), a evidência na tela no
+  formato de cada tipo, E2E do fluxo inteiro (sabotado o registro da
+  alternativa) e 8 verificações novas no Postgres (sabotado o gatilho da
+  demo). **Falta:** flashcards para os 93 conceitos sem cartão.
 
 #### P2-16 · Economia se esgota e compete com o nível — Pendente (Loja 2.0)
 Ver a seção "Economia". Em resumo: ~175 moedas/semana, todos os cosméticos em

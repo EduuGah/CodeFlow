@@ -150,6 +150,26 @@ export function filaDeRevisao(caderno: EntradaDoCaderno[]): EntradaDoCaderno[] {
   return [...pendentes, ...vencidos];
 }
 
+/** Quantos exercícios uma sessão de refazer leva, no máximo. Sessão curta rende mais que maratona. */
+export const TAMANHO_DA_SESSAO = 10;
+
+/**
+ * Os exercícios de uma sessão de refazer: o que a pessoa escolheu no caderno,
+ * ou o começo da fila. `existe` diz se o exercício ainda está no catálogo —
+ * o que saiu dele não tem como ser refeito.
+ */
+export function sessaoDeRefazer(
+  caderno: EntradaDoCaderno[],
+  pedido: string | null,
+  existe: (exerciseId: string) => boolean
+): EntradaDoCaderno[] {
+  if (pedido !== null) {
+    const escolhido = caderno.find((e) => e.exerciseId === pedido);
+    return escolhido && existe(pedido) ? [escolhido] : [];
+  }
+  return filaDeRevisao(caderno.filter((e) => existe(e.exerciseId))).slice(0, TAMANHO_DA_SESSAO);
+}
+
 /** Os números do caderno, para o resumo em Praticar. */
 export function resumoDoCaderno(caderno: EntradaDoCaderno[]): Record<EstadoNoCaderno, number> {
   const resumo: Record<EstadoNoCaderno, number> = { pendente: 0, revisar: 0, 'em-dia': 0, dominado: 0 };

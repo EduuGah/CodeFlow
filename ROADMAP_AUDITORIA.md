@@ -58,9 +58,9 @@ A fazer, nesta ordem:
    dupla, recusa do banco, sessão renovada).
 3. [x] **Migrações num Postgres de verdade no CI** — `supabase/verificacao/`:
    o mínimo do Supabase (papéis, `auth.uid()`, `auth.users`, `storage`),
-   0001→0009 aplicadas duas vezes, e 34 verificações de comportamento com os
-   papéis da API (conclusão, compra, painel de admin, anônimo, ritmo, formato,
-   foto, contas demo). Sabotado: a policy ampla de admin, o gatilho das contas
+   todas as migrações aplicadas duas vezes, e as verificações de comportamento
+   com os papéis da API (conclusão, compra, painel de admin, anônimo, ritmo,
+   formato, caderno, foto, contas demo). Sabotado: a policy ampla de admin, o gatilho das contas
    demo e o INSERT direto em compras, de volta, são pegos.
 4. [x] **P3-4** `ExercicioDoPasso`: `switch` exaustivo no lugar dos dez blocos.
 5. [x] **P3-1** removidos `LINHAS_DO_PRELUDIO` e
@@ -94,22 +94,30 @@ A fazer, nesta ordem:
    ao saldo na compra; pulso no contador de sequência no primeiro estudo do dia;
    anel de nível enchendo no aviso de nível.
 6. **Observabilidade leve** (P2-18): `lib/registro.ts` com lista branca, tabela
-   `eventos` (0010) só com `insert` e ritmo, ganchos no `ErrorBoundary`,
+   `eventos` (0011) só com `insert` e ritmo, ganchos no `ErrorBoundary`,
    `unhandledrejection` e motores; "saúde" no painel de admin.
 
 ## Fase 6 — Aprendizado
 
-1. **Caderno de erros** (P2-15). Migração: `exercise_attempts.resposta jsonb`
-   (resumo limitado a ~2 kB: alternativa escolhida, lacunas, linha apontada, ou
-   as primeiras linhas do código) e `feedback text` (a primeira falha, como o
-   aluno a leu). Tela `/app/praticar/erros`: questão, conceito, o que foi
-   enviado, a explicação, quando, quantas vezes errou, se já dominou (acertou
-   depois). Sem texto livre de terceiros, sem nada além do próprio aluno.
-2. **Revisar** (fila de exercícios). Um exercício errado entra na fila;
-   prioridade = frequência de erro × tempo desde a última tentativa × peso do
-   conceito no grafo de pré-requisitos (conceito que destrava muitos pesa
-   mais). Intervalos de Leitner como nos cartões; acertar de novo depois do
-   intervalo o tira da fila. Reusa os componentes de exercício existentes.
+1. [x] **Caderno de erros** (P2-15). 0010: `exercise_attempts.resposta jsonb`
+   (a alternativa, a previsão, as lacunas, a linha, a ordem, ou o código —
+   cortados no navegador, teto de 16 KiB no banco, o pior caso medido contra o
+   teto em teste) e `feedback text` (a primeira falha, como o aluno a leu),
+   gravados só quando errou. Tela `/app/praticar/erros`: o enunciado, a aula,
+   o que foi enviado no formato do exercício, o retorno, quando e quantas
+   vezes errou, o estado na revisão. Sem texto livre na conta de demonstração
+   (gatilho), nada além do próprio aluno (RLS). Desvio do plano: a explicação
+   da resposta certa **não** aparece no caderno — vem ao acertar, como na
+   aula; lida antes, vira resposta decorada.
+2. [x] **Revisar** (fila de exercícios, `lib/caderno.ts` + `/refazer`). Um
+   exercício errado entra pendente; acertar depois o põe na revisão em 3, 7 e
+   21 dias (só conta o acerto que chega na data; erro novo recomeça); passar
+   pelas três o deixa dominado. Ordem da fila: pendentes antes de vencidos;
+   entre pendentes, mais erros, depois o conceito que sustenta mais conceitos,
+   depois o erro mais antigo. Desvio do plano: ordem lexicográfica, não um
+   produto — um produto de grandezas sem unidade comum dá uma ordem que
+   ninguém consegue explicar ao aluno. Sessões de até 10, com os componentes
+   da aula e a regra dela (sem "pular").
 3. **Domínio com tempo**: a evidência envelhece; "dominando" pede um acerto
    depois de N dias. Mantém os quatro níveis e a evidência à vista — nada de
    porcentagem com casas decimais.
