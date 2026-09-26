@@ -13,18 +13,15 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
-    "@hookform/resolvers": "^5.9.1",
     "@monaco-editor/react": "^4.7.0",
     "@supabase/supabase-js": "^2.115.0",
     "canvas-confetti": "^1.9.4",
     "clsx": "^2.1.1",
     "express": "^5.2.1",
-    "firebase": "^12.18.0",
     "monaco-editor": "^0.56.0",
     "pyodide": "^314.0.7",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-hook-form": "^7.87.0",
     "react-markdown": "^10.1.0",
     "react-router-dom": "^7.18.3",
     "remark-gfm": "^4.0.1",
