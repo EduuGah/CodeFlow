@@ -219,3 +219,21 @@ export function temItem(item: ItemDaLoja, nivel: number, purchases: Purchase[]):
   if (item.nivelQueLibera !== undefined && nivel >= item.nivelQueLibera) return true;
   return purchases.some((p) => p.item === item.id);
 }
+
+/**
+ * De onde vem um cosmético que a pessoa tem — ou o que falta para ter.
+ *
+ * `item` ausente é o que nunca esteve à venda (os avatares e a cor de
+ * graça): é de todo mundo. A compra vence o nível na origem, porque foi uma
+ * escolha da pessoa; um item que abriu pelos dois diz "comprado".
+ */
+export type Posse =
+  | { tem: true; origem: 'livre' | 'nivel' | 'compra' }
+  | { tem: false; nivel?: number; preco: number };
+
+export function posseDe(item: ItemDaLoja | undefined, nivel: number, purchases: Purchase[]): Posse {
+  if (!item) return { tem: true, origem: 'livre' };
+  if (purchases.some((p) => p.item === item.id)) return { tem: true, origem: 'compra' };
+  if (item.nivelQueLibera !== undefined && nivel >= item.nivelQueLibera) return { tem: true, origem: 'nivel' };
+  return { tem: false, nivel: item.nivelQueLibera, preco: item.price };
+}

@@ -9,12 +9,14 @@ import { nomeParaMostrar } from '../../../lib/perfil';
 import { ACENTOS, TEMAS } from '../../../lib/tema';
 import { AnelDeNivel } from '../../../components/perfil/AnelDeNivel';
 import { EditarPerfil } from '../../../components/perfil/EditarPerfil';
+import { contarCosmeticos } from '../../../components/perfil/Inventario';
 import { Avatar } from '../../../components/ui/Avatar';
 import { Button } from '../../../components/ui/Button';
 import { Card, cardClasses } from '../../../components/ui/Card';
 import { IconArrowRight, IconBolt, IconCoin, IconEdit, IconExit, IconFreeze, IconStreak } from '../../../components/ui/Icon';
 import {
   VinhetaAlvo,
+  VinhetaCaixa,
   VinhetaGrafico,
   VinhetaMedalha,
   VinhetaMoedas,
@@ -95,6 +97,7 @@ export function Perfil() {
     moedas,
     desafios,
     dobro,
+    purchases,
   } = useStudentData();
   const [editando, setEditando] = useState(false);
 
@@ -115,6 +118,7 @@ export function Perfil() {
   const feitosHoje = desafios.dia.filter((d) => d.concluido).length;
   const feitosNaSemana = desafios.semana.filter((d) => d.concluido).length;
   const conquistasAbertas = achievements.filter((c) => c.unlocked).length;
+  const cosmeticos = contarCosmeticos(level.level, purchases);
   const praticados = mastery.filter((m) => m.attempts > 0).length;
   const faixa = proximaFaixa(level.level);
   const nomeDoTema = TEMAS.find((t) => t.id === tema)?.title ?? tema;
@@ -234,6 +238,13 @@ export function Perfil() {
               ? 'Congelar a sequência, dobrar o XP, cores e avatares.'
               : `${moedas.saldo} ${moedas.saldo === 1 ? 'moeda' : 'moedas'} para gastar`
           }
+        />
+        <Porta
+          para="/app/perfil/inventario"
+          titulo="Inventário"
+          tom="brand"
+          vinheta={<VinhetaCaixa size={40} />}
+          resumo={`${cosmeticos.seus} de ${cosmeticos.total} cosméticos são seus`}
         />
         <Porta
           para="/app/perfil/conquistas"

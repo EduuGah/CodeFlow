@@ -20,6 +20,7 @@ const TELAS = [
   // O perfil é uma família de páginas: cada uma precisa do próprio título.
   { rota: '/app/perfil/desafios', titulo: 'Desafios' },
   { rota: '/app/perfil/loja', titulo: 'Loja' },
+  { rota: '/app/perfil/inventario', titulo: 'Inventário' },
   { rota: '/app/perfil/conquistas', titulo: 'Conquistas' },
   { rota: '/app/perfil/aparencia', titulo: 'Aparência' },
   { rota: '/app/perfil/progresso', titulo: 'Progresso' },

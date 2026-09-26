@@ -12,8 +12,7 @@ import {
   type Raridade,
   type TipoDeItem,
 } from '../../lib/economia';
-import { ACENTOS } from '../../lib/tema';
-import { AvatarDesenhado, avatarPreset } from '../ui/Avatar';
+import { FiguraDoItem } from './FiguraDoItem';
 import { Button } from '../ui/Button';
 import { Card, SectionLabel, cardClasses } from '../ui/Card';
 import {
@@ -26,7 +25,7 @@ import {
   IconStreak,
   IconTarget,
 } from '../ui/Icon';
-import { VinhetaFloco, VinhetaJanela, VinhetaMoedas, VinhetaRaioDuplo } from '../ui/Ilustracao';
+import { VinhetaMoedas } from '../ui/Ilustracao';
 
 /**
  * A loja.
@@ -64,18 +63,6 @@ const FILTROS: Array<{ id: Filtro; rotulo: string }> = [
   { id: 'tema', rotulo: 'Temas' },
   { id: 'consumivel', rotulo: 'Consumíveis' },
 ];
-
-/** A figura do item, na cor que ele tem. */
-function FiguraDoItem({ item }: { item: ItemDaLoja }) {
-  if (item.id === 'congelar-sequencia') return <VinhetaFloco size={56} />;
-  if (item.id === 'dobro-de-xp') return <VinhetaRaioDuplo size={56} />;
-  if (item.tipo === 'tema') {
-    const acento = ACENTOS.find((a) => a.item === item.id);
-    return <VinhetaJanela size={64} acento={acento?.amostra ?? '#1f6660'} escuro={false} />;
-  }
-  const preset = avatarPreset(item.id.replace('avatar-', ''));
-  return preset ? <AvatarDesenhado preset={preset} size={56} /> : null;
-}
 
 const COMO_GANHAR = [
   { Icone: IconLesson, texto: 'aula concluída', valor: MOEDAS.porAulaConcluida },
@@ -281,10 +268,18 @@ export function Loja() {
             </button>
           ))}
         </div>
-        <span className="flex shrink-0 items-center gap-1.5 text-sm font-bold tabular-nums text-ink">
-          <IconCoin size={15} className="text-energy-700" aria-hidden />
-          {incompleto ? '—' : moedas.saldo}
-          <span className="sr-only">moedas de saldo</span>
+        <span className="flex shrink-0 items-center gap-3">
+          <span className="flex items-center gap-1.5 text-sm font-bold tabular-nums text-ink">
+            <IconCoin size={15} className="text-energy-700" aria-hidden />
+            {incompleto ? '—' : moedas.saldo}
+            <span className="sr-only">moedas de saldo</span>
+          </span>
+          <Link
+            to="/app/perfil/inventario"
+            className="inline-flex min-h-8 items-center text-sm font-semibold text-brand-700 hover:underline"
+          >
+            Inventário
+          </Link>
         </span>
       </div>
 

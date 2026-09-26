@@ -201,8 +201,15 @@ validadas por uma função `equipar(p_categoria, p_item)` que confere posse
    conquistas) e **não vai ao banco** — nenhuma regra do servidor a lê, e uma
    migração a mais sem regra seria SQL para rodar sem ganho. O atalho para o
    inventário entra com o inventário (etapa 2).
-2. **Inventário** (`/app/perfil/inventario`): o que é seu, por categoria, com
+2. [x] **Inventário** (`/app/perfil/inventario`): o que é seu, por categoria, com
    `Possuído · Equipado · Bloqueado` e o que abre cada bloqueado.
+   Feito assim: avatares (os de graça incluídos) e cores, cada um com a
+   origem — de graça, pelo nível, comprado (`posseDe`; a compra vence na
+   origem, porque foi escolha) — e **Equipar** num toque; o trancado diz o
+   nível e o preço e leva à loja (nada no inventário vende); os consumíveis
+   dizem quantos estão guardados e se o dobro está ativo. Porta no perfil e
+   atalho na barra da loja. Equipar ainda não é conferido no banco (a
+   `equipar()` do modelo): hoje só muda a aparência da própria pessoa.
 3. **Histórico de compras** na loja: item, preço, data, saldo depois. O "saldo
    antes/depois" é derivado recontando as moedas até o instante da compra
    (aulas pelo fechamento, desafios pelo dia; projetos não têm hora — entram

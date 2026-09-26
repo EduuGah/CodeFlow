@@ -1,7 +1,17 @@
 import { describe, expect, it } from 'vitest';
 
 import type { Attempt } from './mastery';
-import { dobroAtivo, ITENS, itemDaLoja, moedasGanhas, moedasGastas, MOEDAS, RARIDADES, temItem } from './economia';
+import {
+  dobroAtivo,
+  ITENS,
+  itemDaLoja,
+  moedasGanhas,
+  moedasGastas,
+  MOEDAS,
+  posseDe,
+  RARIDADES,
+  temItem,
+} from './economia';
 
 const em = (dia: string): Attempt => ({
   exerciseId: 'ex',
@@ -95,5 +105,32 @@ describe('a raridade', () => {
 
   it('nada à venda é épico nem lendário: esses são de conquista', () => {
     for (const item of ITENS) expect(RARIDADES[item.raridade].ordem, item.id).toBeLessThan(RARIDADES.epico.ordem);
+  });
+});
+
+describe('a posse, para o inventário', () => {
+  const tema = itemDaLoja('tema-oceano')!;
+  const compra = { item: 'tema-oceano', price: 120, createdAt: '' };
+
+  it('o que nunca esteve à venda é de todo mundo', () => {
+    expect(posseDe(undefined, 1, [])).toEqual({ tem: true, origem: 'livre' });
+  });
+
+  it('pelo nível, pela compra — e a compra vence na origem, porque foi escolha', () => {
+    expect(posseDe(tema, tema.nivelQueLibera!, [])).toEqual({ tem: true, origem: 'nivel' });
+    expect(posseDe(tema, 1, [compra])).toEqual({ tem: true, origem: 'compra' });
+    expect(posseDe(tema, 99, [compra])).toEqual({ tem: true, origem: 'compra' });
+  });
+
+  it('bloqueado diz o que falta: o nível que abre e o preço', () => {
+    expect(posseDe(tema, 1, [])).toEqual({ tem: false, nivel: tema.nivelQueLibera, preco: tema.price });
+  });
+
+  it('concorda com `temItem` em todo cosmético, em todo nível', () => {
+    for (const item of ITENS.filter((i) => i.tipo !== 'consumivel')) {
+      for (const nivel of [1, 5, 10, 20]) {
+        expect(posseDe(item, nivel, []).tem, `${item.id} no nível ${nivel}`).toBe(temItem(item, nivel, []));
+      }
+    }
   });
 });

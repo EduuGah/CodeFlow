@@ -20,6 +20,7 @@ import { PerfilAparencia } from './pages/app/perfil/PerfilAparencia';
 import { PerfilConquistas } from './pages/app/perfil/PerfilConquistas';
 import { PerfilDesafios } from './pages/app/perfil/PerfilDesafios';
 import { PerfilLoja } from './pages/app/perfil/PerfilLoja';
+import { PerfilInventario } from './pages/app/perfil/PerfilInventario';
 import { PerfilProgresso } from './pages/app/perfil/PerfilProgresso';
 
 /**
@@ -105,6 +106,7 @@ function App() {
             <Route path="perfil" element={<Perfil />} />
             <Route path="perfil/desafios" element={<PerfilDesafios />} />
             <Route path="perfil/loja" element={<PerfilLoja />} />
+            <Route path="perfil/inventario" element={<PerfilInventario />} />
             <Route path="perfil/conquistas" element={<PerfilConquistas />} />
             <Route path="perfil/aparencia" element={<PerfilAparencia />} />
             <Route path="perfil/progresso" element={<PerfilProgresso />} />

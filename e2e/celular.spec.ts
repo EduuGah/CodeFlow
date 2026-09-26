@@ -174,7 +174,7 @@ test.describe('celular', () => {
     // dentro de texto corrido fica de fora, como a própria regra permite.
     test.setTimeout(90_000);
     const telas = ['/app', '/app/trilhas', '/app/trilhas/track-js-fundamentos', '/app/praticar', '/app/praticar/erros', '/app/perfil',
-      '/app/perfil/loja', '/app/perfil/desafios', '/app/perfil/conquistas', '/app/perfil/aparencia', '/app/perfil/progresso'];
+      '/app/perfil/loja', '/app/perfil/inventario', '/app/perfil/desafios', '/app/perfil/conquistas', '/app/perfil/aparencia', '/app/perfil/progresso'];
     const pequenos: string[] = [];
 
     for (const tela of telas) {

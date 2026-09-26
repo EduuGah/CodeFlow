@@ -174,7 +174,7 @@ test('o perfil abre com o anel do nível e uma porta por assunto', async ({ loga
   await esperarConteudo(page);
 
   const portas = page.getByRole('list', { name: 'Seções do perfil' });
-  for (const nome of ['Desafios', 'Loja', 'Conquistas', 'Aparência', 'Progresso']) {
+  for (const nome of ['Desafios', 'Loja', 'Inventário', 'Conquistas', 'Aparência', 'Progresso']) {
     await expect(portas.getByRole('link', { name: new RegExp(nome) })).toBeVisible();
   }
   // A porta dos desafios já diz quantos foram feitos hoje.
@@ -235,4 +235,37 @@ test('a loja filtra por categoria, mostra a raridade, e o saldo acompanha a rola
 
   await filtros.getByRole('button', { name: 'Todos' }).click();
   await expect(page.getByRole('region', { name: 'Para usar' })).toBeVisible();
+});
+
+test('o inventário mostra o que é seu, de onde veio, e equipa com um toque', async ({ logado: page, banco }) => {
+  semear(banco);
+  await page.goto('/app/perfil');
+  await esperarConteudo(page);
+
+  const porta = page.getByRole('list', { name: 'Seções do perfil' }).getByRole('link', { name: /Inventário/ });
+  await expect(porta).toContainText(/\d+ de \d+ cosméticos são seus/);
+  await porta.click();
+  await expect(page).toHaveURL(/\/app\/perfil\/inventario$/);
+  await expect(page.getByRole('heading', { level: 1, name: 'Inventário' })).toBeVisible();
+
+  const avatares = page.getByRole('region', { name: 'Avatares' });
+  // O trancado diz o que abre e leva à loja; nada aqui vende.
+  const alien = avatares.getByRole('listitem').filter({ hasText: 'Avatar Alien' });
+  await expect(alien).toContainText('Abre no nível 15, ou 150 moedas na loja');
+  await expect(alien.getByRole('button')).toHaveCount(0);
+
+  // Um dos de graça: equipar grava na conta e a tela diz na hora.
+  const folha = avatares.getByRole('listitem').filter({ hasText: 'Avatar Folha' });
+  await expect(folha).toContainText('de graça');
+  await folha.getByRole('button', { name: 'Equipar Avatar Folha' }).click();
+  await expect(page.getByRole('status').filter({ hasText: 'Avatar Folha equipado.' })).toBeVisible();
+  await expect(folha.getByText('Equipado')).toBeVisible();
+  expect(banco.escritas.some((e) => e.tabela === 'users' && (e.corpo as { avatar?: string }).avatar === 'preset:folha')).toBe(
+    true
+  );
+
+  // A cor em uso é a de graça, e ela aparece como equipada.
+  await expect(page.getByRole('region', { name: 'Cores de destaque' }).getByRole('listitem').first()).toContainText(
+    'Equipado'
+  );
 });
