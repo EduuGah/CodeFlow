@@ -15,6 +15,10 @@ test('capstone: loja com carrinho fecha todos os critérios com a solução de r
   if (!project) throw new Error('projeto proj-capstone-loja não encontrado no catálogo');
 
   await page.goto('/project/proj-capstone-loja');
+  // O projeto chega sob demanda: sem esperar a tela, o `isVisible()` da aba
+  // abaixo respondia "não" durante o carregamento, e no celular o editor
+  // ficava escondido na aba que ninguém abriu.
+  await page.getByRole('button', { name: /Verificar critérios/ }).waitFor();
 
   const abaCodigo = page.getByRole('tab', { name: 'Código' });
   if (await abaCodigo.isVisible()) await abaCodigo.click();

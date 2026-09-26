@@ -461,6 +461,10 @@ export async function concluirAula(page: Page, aulaId: string): Promise<void> {
   const aula = getLesson(aulaId)!;
   const passos = buildLessonSteps(aula);
   await page.goto(`/lesson/${aulaId}`);
+  // A aula chega sob demanda (`App.tsx`): logo depois do `goto` ainda é o giro
+  // de carregamento, e o `count()` do botão abaixo daria zero — o laço pulava o
+  // primeiro passo e esperava para sempre por um exercício que não vinha.
+  await page.getByText(/Passo 1 de/).waitFor();
 
   for (const passo of passos) {
     if (passo.kind === 'exercise') {

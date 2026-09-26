@@ -19,6 +19,10 @@ test('capstone: lista de tarefas com conta fecha todos os critérios com a solu�
   if (!project) throw new Error('projeto proj-capstone-tarefas não encontrado no catálogo');
 
   await page.goto('/project/proj-capstone-tarefas');
+  // O projeto chega sob demanda: sem esperar a tela, o `isVisible()` da aba
+  // abaixo respondia "não" durante o carregamento, e no celular o editor
+  // ficava escondido na aba que ninguém abriu.
+  await page.getByRole('button', { name: /Verificar critérios/ }).waitFor();
 
   // No celular o editor mora numa aba separada, escondida por CSS até a
   // pessoa trocar de aba — sem isso o Monaco fica oculto (display: none).
