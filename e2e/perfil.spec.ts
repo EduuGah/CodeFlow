@@ -205,3 +205,34 @@ test('o domínio diz o que falta: três acertos na mesma manhã ainda não são 
   await expect(linha.getByText('Praticando', { exact: true })).toBeVisible();
   await expect(linha).toContainText('falta acertar de novo daqui a alguns dias');
 });
+
+test('a loja filtra por categoria, mostra a raridade, e o saldo acompanha a rolagem', async ({
+  logado: page,
+  banco,
+}) => {
+  semear(banco);
+  await page.goto('/app/perfil/loja');
+  await esperarConteudo(page);
+
+  const filtros = page.getByRole('group', { name: 'Mostrar' });
+  await expect(filtros.getByRole('button', { name: 'Todos' })).toHaveAttribute('aria-pressed', 'true');
+
+  // Avatares: só a seção deles, cada um com a raridade escrita.
+  await filtros.getByRole('button', { name: 'Avatares' }).click();
+  await expect(filtros.getByRole('button', { name: 'Avatares' })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByRole('region', { name: 'Avatares' })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Para usar' })).toHaveCount(0);
+  const alien = page.getByRole('listitem').filter({ hasText: 'Avatar Alien' });
+  await expect(alien.getByText('Raro', { exact: true })).toBeVisible();
+
+  // O saldo fica à vista no topo depois de rolar até o fim da lista.
+  await page.getByRole('region', { name: 'Avatares' }).getByRole('listitem').last().scrollIntoViewIfNeeded();
+  const saldoPreso = page.getByText('moedas de saldo');
+  await expect(saldoPreso).toBeAttached();
+  const caixa = await saldoPreso.locator('..').boundingBox();
+  expect(caixa!.y, 'o saldo saiu da tela ao rolar').toBeGreaterThanOrEqual(-1);
+  expect(caixa!.y).toBeLessThan(80);
+
+  await filtros.getByRole('button', { name: 'Todos' }).click();
+  await expect(page.getByRole('region', { name: 'Para usar' })).toBeVisible();
+});

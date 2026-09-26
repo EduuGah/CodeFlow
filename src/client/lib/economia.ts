@@ -22,7 +22,28 @@ export interface Purchase {
   createdAt: string;
 }
 
+/**
+ * A categoria do item — o que ele é e onde aparece. Consumível se gasta;
+ * o resto é aparência, comprada uma vez. Novas categorias (moldura, fundo,
+ * título) entram aqui e na checagem de `store_items` (0009) juntas.
+ */
 export type TipoDeItem = 'consumivel' | 'tema' | 'avatar';
+
+/**
+ * Quão longe na jornada o item mora. Por ora acompanha o nível que o libera
+ * (`economia.test.ts` confere): até o 5 é comum, do 6 ao 9 incomum, do 10 em
+ * diante raro. Épico e lendário existem para os itens de conquista, que ainda
+ * não chegaram. A raridade não mora no banco: nenhuma regra do servidor a lê.
+ */
+export type Raridade = 'comum' | 'incomum' | 'raro' | 'epico' | 'lendario';
+
+export const RARIDADES: Record<Raridade, { rotulo: string; ordem: number }> = {
+  comum: { rotulo: 'Comum', ordem: 0 },
+  incomum: { rotulo: 'Incomum', ordem: 1 },
+  raro: { rotulo: 'Raro', ordem: 2 },
+  epico: { rotulo: 'Épico', ordem: 3 },
+  lendario: { rotulo: 'Lendário', ordem: 4 },
+};
 
 export interface ItemDaLoja {
   id: string;
@@ -30,6 +51,7 @@ export interface ItemDaLoja {
   description: string;
   price: number;
   tipo: TipoDeItem;
+  raridade: Raridade;
   /** Nível a partir do qual o item é liberado de graça. Só cosméticos. */
   nivelQueLibera?: number;
 }
@@ -56,6 +78,7 @@ export const ITENS: ItemDaLoja[] = [
       'Um dia sem estudar não zera a sua sequência. É usado sozinho no primeiro dia perdido depois da compra — um por dia.',
     price: 60,
     tipo: 'consumivel',
+    raridade: 'comum',
   },
   {
     id: 'dobro-de-xp',
@@ -64,6 +87,7 @@ export const ITENS: ItemDaLoja[] = [
       'Exercícios, aulas, revisões e desafios rendem o dobro de XP nas 24 horas depois da compra. Começa na hora.',
     price: 80,
     tipo: 'consumivel',
+    raridade: 'comum',
   },
   {
     id: 'tema-oceano',
@@ -71,6 +95,7 @@ export const ITENS: ItemDaLoja[] = [
     description: 'A cor de destaque em azul-profundo.',
     price: 120,
     tipo: 'tema',
+    raridade: 'comum',
     nivelQueLibera: 3,
   },
   {
@@ -79,6 +104,7 @@ export const ITENS: ItemDaLoja[] = [
     description: 'A cor de destaque em laranja-queimado.',
     price: 150,
     tipo: 'tema',
+    raridade: 'comum',
     nivelQueLibera: 5,
   },
   {
@@ -87,6 +113,7 @@ export const ITENS: ItemDaLoja[] = [
     description: 'A cor de destaque em roxo-ameixa.',
     price: 200,
     tipo: 'tema',
+    raridade: 'incomum',
     nivelQueLibera: 8,
   },
   // Os avatares que não vêm de graça, do mais barato ao mais raro. O nível
@@ -94,22 +121,23 @@ export const ITENS: ItemDaLoja[] = [
   // qualquer jeito; as moedas só encurtam a espera.
   ...(
     [
-      ['cometa', 'Cometa', 'Uma bola de luz com o rastro.', 90, 4],
-      ['raposa', 'Raposa', 'Laranja, orelhas em pé, focinho branco.', 90, 5],
-      ['coelho', 'Coelho', 'Orelhas compridas e dois dentinhos.', 90, 5],
-      ['urso', 'Urso', 'Marrom, redondo, focinho claro.', 100, 6],
-      ['dino', 'Dino', 'Verde-água com a crista amarela.', 100, 7],
-      ['panda', 'Panda', 'Branco e preto, manchas nos olhos.', 110, 8],
-      ['robo', 'Robô', 'Cabeça de aço, olhos de led e antena.', 120, 10],
-      ['polvo', 'Polvo', 'Roxo, com os tentáculos embaixo.', 130, 12],
-      ['alien', 'Alien', 'Verde, olhos grandes e uma antena.', 150, 15],
+      ['cometa', 'Cometa', 'Uma bola de luz com o rastro.', 90, 4, 'comum'],
+      ['raposa', 'Raposa', 'Laranja, orelhas em pé, focinho branco.', 90, 5, 'comum'],
+      ['coelho', 'Coelho', 'Orelhas compridas e dois dentinhos.', 90, 5, 'comum'],
+      ['urso', 'Urso', 'Marrom, redondo, focinho claro.', 100, 6, 'incomum'],
+      ['dino', 'Dino', 'Verde-água com a crista amarela.', 100, 7, 'incomum'],
+      ['panda', 'Panda', 'Branco e preto, manchas nos olhos.', 110, 8, 'incomum'],
+      ['robo', 'Robô', 'Cabeça de aço, olhos de led e antena.', 120, 10, 'raro'],
+      ['polvo', 'Polvo', 'Roxo, com os tentáculos embaixo.', 130, 12, 'raro'],
+      ['alien', 'Alien', 'Verde, olhos grandes e uma antena.', 150, 15, 'raro'],
     ] as const
-  ).map(([id, title, description, price, nivelQueLibera]) => ({
+  ).map(([id, title, description, price, nivelQueLibera, raridade]) => ({
     id: `avatar-${id}`,
     title: `Avatar ${title}`,
     description,
     price,
     tipo: 'avatar' as const,
+    raridade,
     nivelQueLibera,
   })),
 ];

@@ -41,7 +41,7 @@ Números lidos do catálogo, não de memória.
 | Projetos | 10, com 34 critérios de aceitação — os 3 capstones são página + API + banco (motor 7), os outros 7 são JavaScript puro |
 | Conceitos | 151, com grafo de pré-requisitos |
 | Flashcards | 67 (93 conceitos ainda sem cartão) |
-| Testes | 3.459 de unidade + ~440 de navegador |
+| Testes | 3.462 de unidade + ~445 de navegador |
 | Pacote | 3.095 kB (851 kB comprimido) no chunk principal — o corpo das aulas vai junto (é quase metade), e separá-lo é o maior problema de performance aberto (P2-1b do roadmap). Aula, revisão, refazer erros, projeto e admin são rotas sob demanda (`App.tsx`), e o Zod só entra no chunk do admin; o Monaco são mais 3.362 kB (869 kB) num chunk à parte, baixado só quando o primeiro editor monta, e o worker de TypeScript (7 MB) só quando um modelo JS/TS abre. O motor de TypeScript não acrescentou arquivo; o de React acrescentou um chunk de 143 kB (47 kB) com o React e o ReactDOM como texto, baixado só por um exercício de React; o de SQL acrescentou o worker (49 kB) e o SQLite em WebAssembly (658 kB), baixados só por um exercício de SQL; o de Python acrescentou o worker (~22 kB) e o Pyodide inteiro (~13,5 MB: o WebAssembly do CPython, a biblioteca padrão zipada, o manifesto de pacotes), copiados para `/pyodide/` na build e baixados só por um exercício de Python |
 
 ## 4. Decisões que não devem ser desfeitas sem motivo forte
@@ -73,7 +73,10 @@ exato depende do dia local, que o banco não conhece. O `INSERT` direto em
 `purchases` não existe mais. **A aula fecha num instante fixo**
 (`fechamentoDasAulas` em `study.ts`: o primeiro acerto do último exercício
 dela); é ele que o dobro de XP e o desafio "conclua uma aula" leem — datar
-pela última tentativa certa deixava refazer um exercício "reconcluir" a aula. O que se compra: **congelar a sequência** (um dia sem estudar não
+pela última tentativa certa deixava refazer um exercício "reconcluir" a aula. A Loja 2.0 anda em etapas (`ROADMAP_AUDITORIA.md`, Fase 8); na primeira,
+cada item ganhou raridade — que acompanha o nível que o libera e só existe
+no código, porque nenhuma regra do servidor a lê — e a loja, filtros por
+categoria e o saldo preso no topo. O que se compra: **congelar a sequência** (um dia sem estudar não
 zera; consumido sozinho no primeiro dia perdido depois da compra —
 `lib/sequencia.ts` reconta a corrente com os congelamentos), **dobro de XP por
 24 h** (a compra é um fato com hora, e `computeXp` dobra o que aconteceu na
@@ -317,8 +320,9 @@ src/client/lib/         Lógica pura e testada
   path.ts               Caminho da trilha; nunca bloqueia, só avisa
   percurso.ts           O percurso do aluno: trilhas por etapa, estado de
                         cada uma, e qual é a trilha da vez
-  economia.ts           Moedas ganhas por fonte, a loja (itens, preços, o que
-                        o nível libera), janelas de dobro de XP
+  economia.ts           Moedas ganhas por fonte, a loja (itens, preços,
+                        categoria em `tipo`, raridade, o que o nível libera),
+                        janelas de dobro de XP
   sequencia.ts          A sequência de dias com congelamentos; as correntes
                         da história, para os marcos valerem uma vez
   desafios.ts           Desafios diários e semanais: rodízio, progresso,
@@ -417,7 +421,7 @@ docs/curriculo.md       Roadmap de conteúdo — fonte canônica
 ```bash
 npm run typecheck   # inclui e2e/ e playwright.config.ts
 npm run lint        # ESLint mínimo: typescript-eslint + react-hooks
-npm test            # 3.459 testes
+npm test            # 3.462 testes
 npm run test:e2e    # ~410 no navegador (antes: npx playwright install chromium;
                     # com um Chromium já instalado: PW_CHROMIUM=/caminho/do/chrome)
 npm run build

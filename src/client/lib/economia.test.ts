@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import type { Attempt } from './mastery';
-import { dobroAtivo, ITENS, itemDaLoja, moedasGanhas, moedasGastas, MOEDAS, temItem } from './economia';
+import { dobroAtivo, ITENS, itemDaLoja, moedasGanhas, moedasGastas, MOEDAS, RARIDADES, temItem } from './economia';
 
 const em = (dia: string): Attempt => ({
   exerciseId: 'ex',
@@ -75,5 +75,25 @@ describe('a loja', () => {
     expect(dobroAtivo(compras, new Date('2026-03-10T12:00:00.000Z'))?.ate.toISOString()).toBe('2026-03-11T10:00:00.000Z');
     expect(dobroAtivo(compras, new Date('2026-03-11T10:00:00.000Z'))).toBeNull();
     expect(dobroAtivo(compras, new Date('2026-03-10T09:59:00.000Z'))).toBeNull();
+  });
+});
+
+describe('a raridade', () => {
+  it('acompanha o nível que libera: até o 5 comum, do 6 ao 9 incomum, do 10 em diante raro', () => {
+    // Enquanto os preços não forem recalibrados pela raridade (etapa 10 da
+    // Loja 2.0), é o nível que diz quão longe na jornada o item mora.
+    for (const item of ITENS.filter((i) => i.nivelQueLibera !== undefined)) {
+      const nivel = item.nivelQueLibera!;
+      const esperada = nivel <= 5 ? 'comum' : nivel <= 9 ? 'incomum' : 'raro';
+      expect(item.raridade, item.id).toBe(esperada);
+    }
+  });
+
+  it('consumível é comum: gastar não pode ser coisa rara', () => {
+    for (const item of ITENS.filter((i) => i.tipo === 'consumivel')) expect(item.raridade, item.id).toBe('comum');
+  });
+
+  it('nada à venda é épico nem lendário: esses são de conquista', () => {
+    for (const item of ITENS) expect(RARIDADES[item.raridade].ordem, item.id).toBeLessThan(RARIDADES.epico.ordem);
   });
 });

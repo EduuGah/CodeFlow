@@ -191,9 +191,16 @@ validadas por uma função `equipar(p_categoria, p_item)` que confere posse
 
 ### Etapas (cada uma com teste, E2E e o seu commit)
 
-1. **Catálogo com categoria e raridade**, sem item novo: os 14 itens atuais
+1. [x] **Catálogo com categoria e raridade**, sem item novo: os 14 itens atuais
    reclassificados; filtros `Todos · Avatares · Temas · Consumíveis`; saldo fixo
    no topo com atalho para o inventário. Nenhuma mudança de preço ainda.
+   Feito assim: a categoria é o `tipo` que já existia (os valores são os do
+   modelo; a união cresce com as categorias novas, junto da checagem de
+   `store_items`); a raridade acompanha o nível que libera (até 5 comum, 6–9
+   incomum, 10+ raro; consumível sempre comum; épico e lendário reservados às
+   conquistas) e **não vai ao banco** — nenhuma regra do servidor a lê, e uma
+   migração a mais sem regra seria SQL para rodar sem ganho. O atalho para o
+   inventário entra com o inventário (etapa 2).
 2. **Inventário** (`/app/perfil/inventario`): o que é seu, por categoria, com
    `Possuído · Equipado · Bloqueado` e o que abre cada bloqueado.
 3. **Histórico de compras** na loja: item, preço, data, saldo depois. O "saldo

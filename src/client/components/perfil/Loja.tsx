@@ -2,7 +2,16 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import { useStudentData } from '../../contexts/StudentDataContext';
-import { HORAS_DE_DOBRO, ITENS, MOEDAS, temItem, type ItemDaLoja } from '../../lib/economia';
+import {
+  HORAS_DE_DOBRO,
+  ITENS,
+  MOEDAS,
+  RARIDADES,
+  temItem,
+  type ItemDaLoja,
+  type Raridade,
+  type TipoDeItem,
+} from '../../lib/economia';
 import { ACENTOS } from '../../lib/tema';
 import { AvatarDesenhado, avatarPreset } from '../ui/Avatar';
 import { Button } from '../ui/Button';
@@ -32,7 +41,29 @@ import { VinhetaFloco, VinhetaJanela, VinhetaMoedas, VinhetaRaioDuplo } from '..
  * botão vira "Confirmar por 60"), não um modal: a decisão é pequena, e o
  * arrependimento é de um toque. Um consumível pode ser comprado de novo; um
  * cosmético que a pessoa já tem — por nível ou por compra — aparece como seu.
+ *
+ * Os filtros e o saldo ficam presos no topo enquanto a lista rola: é o que se
+ * consulta a cada item ("isso cabe?"), e rolar de volta para ver o saldo era
+ * o gesto mais repetido da página.
  */
+
+/** O selo da raridade: texto sempre, a cor só reforça. */
+const TOM_DA_RARIDADE: Record<Raridade, string> = {
+  comum: 'bg-sunken text-ink-soft',
+  incomum: 'bg-success-50 text-success-700',
+  raro: 'bg-brand-50 text-brand-700',
+  epico: 'bg-energy-50 text-energy-700',
+  lendario: 'bg-energy-50 text-energy-700',
+};
+
+type Filtro = 'todos' | TipoDeItem;
+
+const FILTROS: Array<{ id: Filtro; rotulo: string }> = [
+  { id: 'todos', rotulo: 'Todos' },
+  { id: 'avatar', rotulo: 'Avatares' },
+  { id: 'tema', rotulo: 'Temas' },
+  { id: 'consumivel', rotulo: 'Consumíveis' },
+];
 
 /** A figura do item, na cor que ele tem. */
 function FiguraDoItem({ item }: { item: ItemDaLoja }) {
@@ -61,6 +92,7 @@ export function Loja() {
   const [comprando, setComprando] = useState<string | null>(null);
   const [erro, setErro] = useState<string | null>(null);
   const [comprado, setComprado] = useState<string | null>(null);
+  const [filtro, setFiltro] = useState<Filtro>('todos');
 
   const confirmar = async (item: ItemDaLoja) => {
     setComprando(item.id);
@@ -72,18 +104,21 @@ export function Loja() {
     else setComprado(item.id);
   };
 
-  const grupos: Array<{ titulo: string; nota: string; itens: ItemDaLoja[] }> = [
+  const grupos: Array<{ tipo: TipoDeItem; titulo: string; nota: string; itens: ItemDaLoja[] }> = [
     {
+      tipo: 'consumivel',
       titulo: 'Para usar',
       nota: 'Consumíveis: cada compra é um uso.',
       itens: ITENS.filter((i) => i.tipo === 'consumivel'),
     },
     {
+      tipo: 'tema',
       titulo: 'Cores de destaque',
       nota: 'Abrem por nível ou por moedas — o que vier primeiro. Aplicam-se na aparência.',
       itens: ITENS.filter((i) => i.tipo === 'tema'),
     },
     {
+      tipo: 'avatar',
       titulo: 'Avatares',
       nota: 'Os que não vêm de graça — cada um abre no nível dele, ou antes, com moedas. Escolha em editar perfil.',
       itens: ITENS.filter((i) => i.tipo === 'avatar'),
@@ -115,7 +150,12 @@ export function Loja() {
         </div>
 
         <div className="flex min-w-0 flex-1 flex-col gap-1 p-3 sm:p-4">
-          <span className="font-semibold text-ink">{item.title}</span>
+          <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
+            <span className="font-semibold text-ink">{item.title}</span>
+            <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${TOM_DA_RARIDADE[item.raridade]}`}>
+              {RARIDADES[item.raridade].rotulo}
+            </span>
+          </span>
           <span className="text-sm leading-relaxed text-ink-soft">{item.description}</span>
           {item.nivelQueLibera !== undefined && !seu && (
             <span className="label-mono text-ink-faint">ou de graça no nível {item.nivelQueLibera}</span>
@@ -221,15 +261,44 @@ export function Loja() {
         </p>
       )}
 
-      {grupos.map((g) => (
-        <section key={g.titulo} aria-label={g.titulo}>
-          <SectionLabel as="h2" className="mb-0.5">
-            {g.titulo}
-          </SectionLabel>
-          <p className="mb-3 text-xs leading-relaxed text-ink-faint">{g.nota}</p>
-          <ul className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">{g.itens.map(cartao)}</ul>
-        </section>
-      ))}
+      {/* Preso no topo: o filtro e o saldo, que se consultam a cada item. */}
+      <div className="sticky top-0 z-20 -mx-4 flex items-center gap-2 border-b border-line bg-canvas/95 px-4 py-2 backdrop-blur sm:-mx-6 sm:px-6">
+        {/* Numa tela estreita, só os filtros quebram linha: o saldo fica à direita. */}
+        <div role="group" aria-label="Mostrar" className="flex min-w-0 flex-1 flex-wrap gap-1.5">
+          {FILTROS.map(({ id, rotulo }) => (
+            <button
+              key={id}
+              type="button"
+              aria-pressed={filtro === id}
+              onClick={() => setFiltro(id)}
+              className={`min-h-8 rounded-full border px-2.5 text-xs font-semibold transition-colors sm:min-h-9 sm:px-3 sm:text-sm ${
+                filtro === id
+                  ? 'border-brand-600 bg-brand-600 text-white'
+                  : 'border-line bg-surface text-ink-soft hover:border-line-strong hover:text-ink'
+              }`}
+            >
+              {rotulo}
+            </button>
+          ))}
+        </div>
+        <span className="flex shrink-0 items-center gap-1.5 text-sm font-bold tabular-nums text-ink">
+          <IconCoin size={15} className="text-energy-700" aria-hidden />
+          {incompleto ? '—' : moedas.saldo}
+          <span className="sr-only">moedas de saldo</span>
+        </span>
+      </div>
+
+      {grupos
+        .filter((g) => filtro === 'todos' || g.tipo === filtro)
+        .map((g) => (
+          <section key={g.titulo} aria-label={g.titulo}>
+            <SectionLabel as="h2" className="mb-0.5">
+              {g.titulo}
+            </SectionLabel>
+            <p className="mb-3 text-xs leading-relaxed text-ink-faint">{g.nota}</p>
+            <ul className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">{g.itens.map(cartao)}</ul>
+          </section>
+        ))}
 
       <Card as="section" aria-labelledby="titulo-ganhar" tone="sunken">
         <h2 id="titulo-ganhar" className="font-bold text-ink">
