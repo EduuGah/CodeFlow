@@ -24,7 +24,12 @@ test('a visão geral é o percurso em etapas, com um botão só', async ({ logad
   // Toda trilha aparece, numerada e com o tamanho dela.
   const trilhas = listTracks();
   for (const trilha of trilhas) {
-    const linha = page.getByRole('listitem').filter({ hasText: trilha.title });
+    // Pelo nome exato: `hasText` casa por pedaço, sem distinguir maiúsculas, e
+    // "ORM" achava também "plataforma" e "informação" nas descrições — o CI
+    // ficou vermelho assim desde que a trilha de ORM entrou.
+    const linha = page
+      .getByRole('listitem')
+      .filter({ has: page.getByText(trilha.title, { exact: true }) });
     await expect(linha).toHaveCount(1);
     await expect(linha).toContainText(`${trilha.lessonIds.length} aulas`);
   }
