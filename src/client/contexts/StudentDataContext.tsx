@@ -17,7 +17,16 @@ import {
 } from '../lib/study';
 import { calcularSequencia, type Sequencia } from '../lib/sequencia';
 import { desafiosAtuais, desafiosConcluidos, type EstadoDoDesafio } from '../lib/desafios';
-import { dobroAtivo, itemDaLoja, moedasGanhas, moedasGastas, type FontesDeMoedas, type Purchase } from '../lib/economia';
+import {
+  dobroAtivo,
+  historicoDeCompras,
+  itemDaLoja,
+  moedasGanhas,
+  moedasGastas,
+  type FontesDeMoedas,
+  type LinhaDoHistorico,
+  type Purchase,
+} from '../lib/economia';
 import { dependentesPorConceito, montarCaderno, type EntradaDoCaderno } from '../lib/caderno';
 
 /**
@@ -94,6 +103,8 @@ interface StudentData {
   /** Quantos já foram cumpridos desde o começo, por período. */
   desafiosCumpridos: { dia: number; semana: number };
   moedas: { ganhas: FontesDeMoedas; gastas: number; saldo: number };
+  /** As compras, da mais recente, com o saldo depois de cada uma (`historicoDeCompras`). */
+  historico: { linhas: LinhaDoHistorico[]; semData: number };
   /** O dobro de XP que está valendo agora, se houver. */
   dobro: { ate: Date } | null;
 
@@ -297,6 +308,13 @@ export function StudentDataProvider({ children }: { children: React.ReactNode })
         semana: concluidos.filter((d) => d.periodo === 'semana').length,
       },
       moedas: { ganhas, gastas, saldo: ganhas.total - gastas },
+      historico: historicoDeCompras({
+        completedLessons,
+        completedProjects,
+        attempts,
+        purchases,
+        desafiosCumpridos: concluidos,
+      }),
       dobro: dobroAtivo(purchases),
       comprar,
       salvarPerfil,

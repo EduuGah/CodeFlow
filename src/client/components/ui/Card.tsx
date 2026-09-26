@@ -59,7 +59,7 @@ export interface CardProps extends React.HTMLAttributes<HTMLElement> {
   tone?: CardTone;
   padding?: CardPadding;
   /** `section`, `article`, `li`, `ul`… A tag certa é semântica, não estilo. */
-  as?: 'div' | 'section' | 'article' | 'li' | 'ul' | 'aside';
+  as?: 'div' | 'section' | 'article' | 'li' | 'ul' | 'ol' | 'aside';
 }
 
 // Sem `forwardRef` de propósito: nada precisa de um ref para um card, e a

@@ -122,18 +122,30 @@ export function correntesDaHistoria(
   congelamentos: Array<{ createdAt: string }> = [],
   hoje: Date = new Date()
 ): number[] {
+  return correntesComInicio(attempts, congelamentos, hoje).map((c) => c.dias);
+}
+
+/**
+ * As mesmas correntes, com o dia em que cada uma começou — é o que data os
+ * marcos (o de 7 dias caiu no sétimo dia da corrente), para o histórico da
+ * loja saber quando as moedas deles entraram.
+ */
+export function correntesComInicio(
+  attempts: Attempt[],
+  congelamentos: Array<{ createdAt: string }> = [],
+  hoje: Date = new Date()
+): Array<{ inicio: string; dias: number }> {
   const { diasCongelados } = calcularSequencia(attempts, congelamentos, hoje);
   const dias = new Set([...attempts.map((a) => diaLocal(new Date(a.createdAt))), ...diasCongelados]);
   const ordenados = [...dias].sort();
-  const correntes: number[] = [];
-  let corrente = 0;
+  const correntes: Array<{ inicio: string; dias: number }> = [];
   let anterior: string | null = null;
 
   for (const dia of ordenados) {
-    corrente = anterior !== null && somarDias(anterior, 1) === dia ? corrente + 1 : 1;
+    const atual = correntes[correntes.length - 1];
+    if (atual && anterior !== null && somarDias(anterior, 1) === dia) atual.dias += 1;
+    else correntes.push({ inicio: dia, dias: 1 });
     anterior = dia;
-    if (correntes.length && corrente > 1) correntes[correntes.length - 1] = corrente;
-    else correntes.push(corrente);
   }
   return correntes;
 }

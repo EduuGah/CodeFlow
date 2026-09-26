@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import type { Attempt } from './mastery';
 import {
   dobroAtivo,
+  historicoDeCompras,
   ITENS,
   itemDaLoja,
   moedasGanhas,
@@ -132,5 +133,94 @@ describe('a posse, para o inventário', () => {
         expect(posseDe(item, nivel, []).tem, `${item.id} no nível ${nivel}`).toBe(temItem(item, nivel, []));
       }
     }
+  });
+});
+
+describe('o histórico de compras', () => {
+  /** Uma aula fechada num dia: o acerto do exercício dela. */
+  const aula = (id: string, dia: string): Attempt => ({ ...em(dia), exerciseId: `ex-${id}`, lessonId: id });
+  const compra = (item: string, price: number, dia: string, hora = '12:00') => ({
+    item,
+    price,
+    createdAt: new Date(`${dia}T${hora}:00`).toISOString(),
+  });
+  const aulas = (de: number, ate: number, dia: string) =>
+    Array.from({ length: ate - de + 1 }, (_, i) => aula(`l${de + i}`, dia));
+
+  it('cada compra com o saldo que sobrou depois dela, recontado até aquele instante', () => {
+    // Nove aulas no dia 1 (90), congelar no dia 2 (sobra 30); cinco aulas no
+    // dia 3 (+50), dobro no dia 4 (sobra 0). Dias não seguidos: sem marco.
+    const attempts = [...aulas(1, 9, '2026-03-01'), ...aulas(10, 14, '2026-03-03')];
+    const purchases = [compra('congelar-sequencia', 60, '2026-03-02'), compra('dobro-de-xp', 80, '2026-03-04')];
+    const { linhas, semData } = historicoDeCompras({
+      completedLessons: attempts.map((a) => a.lessonId),
+      completedProjects: [],
+      attempts,
+      purchases,
+      desafiosCumpridos: [],
+      hoje,
+    });
+
+    expect(semData).toBe(0);
+    // A mais recente primeiro.
+    expect(linhas.map((l) => [l.compra.item, l.saldoDepois])).toEqual([
+      ['dobro-de-xp', 0],
+      ['congelar-sequencia', 30],
+    ]);
+    expect(linhas[0].item?.title).toMatch(/Dobro de XP/);
+  });
+
+  it('aula fechada depois da compra não conta para ela, nem no mesmo dia', () => {
+    const attempts = [aula('l1', '2026-03-01'), { ...aula('l2', '2026-03-02'), createdAt: new Date('2026-03-02T15:00:00').toISOString() }];
+    const { linhas } = historicoDeCompras({
+      completedLessons: ['l1', 'l2'],
+      completedProjects: [],
+      attempts,
+      purchases: [compra('x', 10, '2026-03-02', '12:00')],
+      desafiosCumpridos: [],
+      hoje,
+    });
+    expect(linhas[0].saldoDepois).toBe(MOEDAS.porAulaConcluida - 10);
+  });
+
+  it('projeto não tem hora: entra em toda linha, e `semData` avisa quanto', () => {
+    const { linhas, semData } = historicoDeCompras({
+      completedLessons: [],
+      completedProjects: ['p1'],
+      attempts: [],
+      purchases: [compra('x', 10, '2026-03-02')],
+      desafiosCumpridos: [],
+      hoje,
+    });
+    expect(semData).toBe(MOEDAS.porProjetoEntregue);
+    expect(linhas[0].saldoDepois).toBe(MOEDAS.porProjetoEntregue - 10);
+  });
+
+  it('desafios pelo dia em que foram cumpridos; marcos de sequência pelo dia em que a corrente chegou lá', () => {
+    // Sete dias seguidos a partir do dia 1: o marco cai no dia 7.
+    const attempts = Array.from({ length: 7 }, (_, i) => em(`2026-03-0${i + 1}`));
+    const desafiosCumpridos = [{ dia: '2026-03-03', recompensa: { moedas: 15 } }];
+    const { linhas } = historicoDeCompras({
+      completedLessons: [],
+      completedProjects: [],
+      attempts,
+      purchases: [compra('a', 5, '2026-03-02'), compra('b', 5, '2026-03-05'), compra('c', 5, '2026-03-08')],
+      desafiosCumpridos,
+      hoje,
+    });
+    expect(linhas.map((l) => l.saldoDepois)).toEqual([
+      15 + MOEDAS.porSemanaSeguida - 15, // dia 8: desafio e marco, três compras
+      15 - 10, // dia 5: o desafio, duas compras
+      -5, // dia 2: nada ainda — o banco recusaria; aqui a conta só descreve
+    ]);
+  });
+
+  it('a linha mais recente, depois de tudo, é o saldo de hoje', () => {
+    const attempts = [...aulas(1, 12, '2026-03-01')];
+    const purchases = [compra('congelar-sequencia', 60, '2026-03-02')];
+    const entrada = { completedLessons: attempts.map((a) => a.lessonId), completedProjects: ['p1'], attempts, purchases, hoje };
+    const { linhas } = historicoDeCompras({ ...entrada, desafiosCumpridos: [] });
+    const ganhas = moedasGanhas({ ...entrada, moedasDeDesafios: 0 });
+    expect(linhas[0].saldoDepois).toBe(ganhas.total - moedasGastas(purchases));
   });
 });

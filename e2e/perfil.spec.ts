@@ -269,3 +269,22 @@ test('o inventário mostra o que é seu, de onde veio, e equipa com um toque', a
     'Equipado'
   );
 });
+
+test('o histórico de compras mostra cada compra e o que sobrou depois dela', async ({ logado: page, banco }) => {
+  semear(banco);
+  await page.goto('/app/perfil/loja');
+  await esperarConteudo(page);
+  await expect(page.getByRole('heading', { name: 'Histórico de compras' })).toHaveCount(0);
+
+  // Comprar põe a linha no histórico, com o saldo que sobrou — o mesmo do topo.
+  const saldo = page.getByRole('heading', { name: /\d+ moedas/ });
+  const antes = Number((await saldo.textContent())!.match(/\d+/)![0]);
+  const congelar = page.getByRole('listitem').filter({ hasText: 'Congelar a sequência' });
+  await congelar.getByRole('button', { name: '60' }).click();
+  await congelar.getByRole('button', { name: /Confirmar por 60/ }).click();
+
+  const historico = page.getByRole('region', { name: 'Histórico de compras' });
+  await expect(historico.getByRole('listitem')).toHaveCount(1);
+  await expect(historico.getByRole('listitem').first()).toContainText('Congelar a sequência');
+  await expect(historico.getByRole('listitem').first()).toContainText(`sobraram ${antes - 60}`);
+});

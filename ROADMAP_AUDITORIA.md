@@ -210,10 +210,16 @@ validadas por uma função `equipar(p_categoria, p_item)` que confere posse
    dizem quantos estão guardados e se o dobro está ativo. Porta no perfil e
    atalho na barra da loja. Equipar ainda não é conferido no banco (a
    `equipar()` do modelo): hoje só muda a aparência da própria pessoa.
-3. **Histórico de compras** na loja: item, preço, data, saldo depois. O "saldo
+3. [x] **Histórico de compras** na loja: item, preço, data, saldo depois. O "saldo
    antes/depois" é derivado recontando as moedas até o instante da compra
    (aulas pelo fechamento, desafios pelo dia; projetos não têm hora — entram
    como "até a data"), e o texto diz isso.
+   Feito assim: `historicoDeCompras` (economia.ts) reconta até o instante de
+   cada compra — aulas pelo fechamento, desafios pelo dia, marcos de
+   sequência pelo dia em que a corrente os alcançou (`correntesComInicio`);
+   projetos, sem hora, entram como já ganhos em todas as linhas, e a tela
+   diz quantas moedas são assim. A linha mais recente é, por teste, o saldo
+   de hoje.
 4. **Prévia**: `Visualizar` aplica o item no próprio cabeçalho do perfil (ou na
    janela pintada, para tema) sem gravar; `Comprar`; `Equipar agora` no retorno
    da compra, com a moeda indo ao saldo (movimento curto, reduzível).

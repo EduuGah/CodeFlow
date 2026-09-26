@@ -1,5 +1,6 @@
 import type { Attempt } from './mastery';
-import { correntesDaHistoria } from './sequencia';
+import { correntesComInicio, correntesDaHistoria, diaLocal, somarDias } from './sequencia';
+import { fechamentoDasAulas } from './study';
 
 /**
  * Moedas e a loja.
@@ -182,6 +183,67 @@ export function moedasGanhas(entrada: {
 
   const desafios = entrada.moedasDeDesafios;
   return { aulas, projetos, desafios, sequencia, total: aulas + projetos + desafios + sequencia };
+}
+
+/** Uma compra, com o saldo que sobrou depois dela. */
+export interface LinhaDoHistorico {
+  compra: Purchase;
+  item: ItemDaLoja | undefined;
+  saldoDepois: number;
+}
+
+/**
+ * O histórico de compras, da mais recente para a mais antiga, com o saldo
+ * depois de cada uma.
+ *
+ * Não há saldo guardado: ele é recontado até o instante da compra. As aulas
+ * entram pelo fechamento (`fechamentoDasAulas`), os desafios pelo dia em que
+ * foram cumpridos, os marcos de sequência pelo dia em que a corrente os
+ * alcançou. Projetos — e aulas concluídas sem tentativa registrada — não têm
+ * hora: entram como já ganhos em toda linha, e `semData` diz quantas moedas
+ * são assim, para a tela avisar.
+ */
+export function historicoDeCompras(entrada: {
+  completedLessons: string[];
+  completedProjects: string[];
+  attempts: Attempt[];
+  purchases: Purchase[];
+  desafiosCumpridos: Array<{ dia: string; recompensa: { moedas: number } }>;
+  hoje?: Date;
+}): { linhas: LinhaDoHistorico[]; semData: number } {
+  const fechamentos = fechamentoDasAulas(entrada.attempts);
+  // Em milissegundos: a hora que vem do banco e a do navegador podem ter
+  // formatos diferentes (`+00:00`, `Z`), e texto não compara instantes.
+  const aulasDatadas: number[] = [];
+  let semData = entrada.completedProjects.length * MOEDAS.porProjetoEntregue;
+  for (const aula of entrada.completedLessons) {
+    const quando = fechamentos.get(aula);
+    if (quando) aulasDatadas.push(Date.parse(quando));
+    else semData += MOEDAS.porAulaConcluida;
+  }
+
+  const congelamentos = entrada.purchases.filter((p) => p.item === 'congelar-sequencia');
+  const marcos: Array<{ dia: string; moedas: number }> = [];
+  for (const { inicio, dias } of correntesComInicio(entrada.attempts, congelamentos, entrada.hoje)) {
+    if (dias >= 7) marcos.push({ dia: somarDias(inicio, 6), moedas: MOEDAS.porSemanaSeguida });
+    if (dias >= 30) marcos.push({ dia: somarDias(inicio, 29), moedas: MOEDAS.porMesSeguido });
+  }
+
+  const ordenadas = [...entrada.purchases].sort((a, b) => Date.parse(a.createdAt) - Date.parse(b.createdAt));
+  let gastas = 0;
+  const linhas = ordenadas.map((compra) => {
+    gastas += compra.price;
+    const instante = Date.parse(compra.createdAt);
+    const dia = diaLocal(new Date(instante));
+    const ganhas =
+      semData +
+      aulasDatadas.filter((quando) => quando <= instante).length * MOEDAS.porAulaConcluida +
+      entrada.desafiosCumpridos.filter((d) => d.dia <= dia).reduce((s, d) => s + d.recompensa.moedas, 0) +
+      marcos.filter((m) => m.dia <= dia).reduce((s, m) => s + m.moedas, 0);
+    return { compra, item: itemDaLoja(compra.item), saldoDepois: ganhas - gastas };
+  });
+
+  return { linhas: linhas.reverse(), semData };
 }
 
 export function moedasGastas(purchases: Purchase[]): number {

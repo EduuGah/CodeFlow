@@ -74,7 +74,7 @@ const COMO_GANHAR = [
 ];
 
 export function Loja() {
-  const { moedas, purchases, level, sequencia, dobro, comprar, incompleto, reload } = useStudentData();
+  const { moedas, purchases, level, sequencia, dobro, comprar, incompleto, reload, historico } = useStudentData();
   const [confirmando, setConfirmando] = useState<string | null>(null);
   const [comprando, setComprando] = useState<string | null>(null);
   const [erro, setErro] = useState<string | null>(null);
@@ -294,6 +294,42 @@ export function Loja() {
             <ul className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">{g.itens.map(cartao)}</ul>
           </section>
         ))}
+
+      {historico.linhas.length > 0 && (
+        <section aria-labelledby="titulo-historico">
+          <SectionLabel as="h2" id="titulo-historico" className="mb-0.5">
+            Histórico de compras
+          </SectionLabel>
+          <p className="mb-3 text-xs leading-relaxed text-ink-faint">
+            O que sobrou depois de cada compra é recontado até aquele instante — não há saldo guardado.
+            {historico.semData > 0 &&
+              ` As ${historico.semData} moedas de projetos não têm hora, e entram como já ganhas em todas as linhas.`}
+          </p>
+          <Card as="ol" padding="none" className="divide-y divide-line overflow-hidden">
+            {historico.linhas.map(({ compra, item, saldoDepois }) => (
+              <li key={`${compra.createdAt}-${compra.item}`} className="flex flex-wrap items-center gap-x-4 gap-y-0.5 px-4 py-3">
+                <span className="min-w-0 flex-1">
+                  <span className="block text-sm font-semibold text-ink">{item?.title ?? compra.item}</span>
+                  <time dateTime={compra.createdAt} className="block text-xs text-ink-faint">
+                    {new Date(compra.createdAt).toLocaleString('pt-BR', {
+                      day: 'numeric',
+                      month: 'short',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </time>
+                </span>
+                <span className="text-right text-sm tabular-nums">
+                  <span className="block font-semibold text-ink">{compra.price} moedas</span>
+                  <span className="block text-xs text-ink-soft">
+                    {incompleto ? 'saldo indisponível' : `sobraram ${saldoDepois}`}
+                  </span>
+                </span>
+              </li>
+            ))}
+          </Card>
+        </section>
+      )}
 
       <Card as="section" aria-labelledby="titulo-ganhar" tone="sunken">
         <h2 id="titulo-ganhar" className="font-bold text-ink">

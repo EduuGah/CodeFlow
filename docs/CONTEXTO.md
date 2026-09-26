@@ -41,7 +41,7 @@ Números lidos do catálogo, não de memória.
 | Projetos | 10, com 34 critérios de aceitação — os 3 capstones são página + API + banco (motor 7), os outros 7 são JavaScript puro |
 | Conceitos | 151, com grafo de pré-requisitos |
 | Flashcards | 67 (93 conceitos ainda sem cartão) |
-| Testes | 3.466 de unidade + ~450 de navegador |
+| Testes | 3.471 de unidade + ~452 de navegador |
 | Pacote | 3.095 kB (851 kB comprimido) no chunk principal — o corpo das aulas vai junto (é quase metade), e separá-lo é o maior problema de performance aberto (P2-1b do roadmap). Aula, revisão, refazer erros, projeto e admin são rotas sob demanda (`App.tsx`), e o Zod só entra no chunk do admin; o Monaco são mais 3.362 kB (869 kB) num chunk à parte, baixado só quando o primeiro editor monta, e o worker de TypeScript (7 MB) só quando um modelo JS/TS abre. O motor de TypeScript não acrescentou arquivo; o de React acrescentou um chunk de 143 kB (47 kB) com o React e o ReactDOM como texto, baixado só por um exercício de React; o de SQL acrescentou o worker (49 kB) e o SQLite em WebAssembly (658 kB), baixados só por um exercício de SQL; o de Python acrescentou o worker (~22 kB) e o Pyodide inteiro (~13,5 MB: o WebAssembly do CPython, a biblioteca padrão zipada, o manifesto de pacotes), copiados para `/pyodide/` na build e baixados só por um exercício de Python |
 
 ## 4. Decisões que não devem ser desfeitas sem motivo forte
@@ -78,7 +78,10 @@ cada item ganhou raridade — que acompanha o nível que o libera e só existe
 no código, porque nenhuma regra do servidor a lê — e a loja, filtros por
 categoria e o saldo preso no topo; na segunda, o **inventário**
 (`/app/perfil/inventario`): o que é seu, de onde veio (`posseDe`), o que
-está equipado, e o que falta para o resto. O que se compra: **congelar a sequência** (um dia sem estudar não
+está equipado, e o que falta para o resto; na terceira, o **histórico de
+compras**, com o que sobrou depois de cada uma — recontado até aquele
+instante, porque não há saldo guardado (`historicoDeCompras`). O que se
+compra: **congelar a sequência** (um dia sem estudar não
 zera; consumido sozinho no primeiro dia perdido depois da compra —
 `lib/sequencia.ts` reconta a corrente com os congelamentos), **dobro de XP por
 24 h** (a compra é um fato com hora, e `computeXp` dobra o que aconteceu na
@@ -326,7 +329,8 @@ src/client/lib/         Lógica pura e testada
                         categoria em `tipo`, raridade, o que o nível libera),
                         janelas de dobro de XP
   sequencia.ts          A sequência de dias com congelamentos; as correntes
-                        da história, para os marcos valerem uma vez
+                        da história (com o dia em que cada uma começou), para
+                        os marcos valerem uma vez e terem data
   desafios.ts           Desafios diários e semanais: rodízio, progresso,
                         os cumpridos desde o primeiro estudo
   progress.ts           Leitura e escrita do progresso. `lerTodasAsPaginas`
@@ -423,7 +427,7 @@ docs/curriculo.md       Roadmap de conteúdo — fonte canônica
 ```bash
 npm run typecheck   # inclui e2e/ e playwright.config.ts
 npm run lint        # ESLint mínimo: typescript-eslint + react-hooks
-npm test            # 3.466 testes
+npm test            # 3.471 testes
 npm run test:e2e    # ~410 no navegador (antes: npx playwright install chromium;
                     # com um Chromium já instalado: PW_CHROMIUM=/caminho/do/chrome)
 npm run build
