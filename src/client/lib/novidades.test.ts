@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest';
 
 import type { EstadoDoDesafio } from './desafios';
 import type { Achievement } from './gamification';
-import { estadoAtual, novidades } from './novidades';
+import { ITENS, itemDaLoja, type ItemDaLoja } from './economia';
+import { CATALOGO_ANTES_DA_LOJA_2, estadoAtual, novidades, resumoDosItens } from './novidades';
 
 const conquista = (id: string, unlocked: boolean): Achievement => ({
   id,
@@ -62,5 +63,53 @@ describe('novidades', () => {
     const visto = { nivel: 4, conquistas: ['a', 'b', 'c'], desafios: [] };
     const atual = { nivel: 3, conquistas: ['a'], desafios: [] };
     expect(novidades(visto, atual, contexto)).toEqual([]);
+  });
+});
+
+describe('o que chegou à loja', () => {
+  const contexto = { achievements: [], desafios: [], tituloDoNivel: 'Iniciante' };
+  const base = { nivel: 3, conquistas: [], desafios: [] };
+  const todos = ITENS.map((i) => i.id);
+
+  it('pela primeira vez, nada é novo — nem a loja inteira', () => {
+    expect(novidades(null, { ...base, loja: todos }, contexto)).toEqual([]);
+  });
+
+  it('quem usava antes deste aviso fica sabendo de tudo o que chegou depois da Loja 2.0, num aviso só', () => {
+    const lista = novidades(base, { ...base, loja: todos }, contexto);
+    expect(lista).toHaveLength(1);
+    const [aviso] = lista;
+    expect(aviso.tipo).toBe('loja');
+    const ids = aviso.tipo === 'loja' ? aviso.itens.map((i) => i.id) : [];
+    expect(ids).toContain('avatar-capivara');
+    expect(ids).toContain('moldura-neon');
+    // O que já existia não é notícia.
+    for (const antigo of CATALOGO_ANTES_DA_LOJA_2) expect(ids).not.toContain(antigo);
+  });
+
+  it('com o catálogo já visto, só o item que entrou depois é novo', () => {
+    const visto = { ...base, loja: todos.filter((id) => id !== 'fundo-mar') };
+    const lista = novidades(visto, { ...base, loja: todos }, contexto);
+    expect(lista).toEqual([{ tipo: 'loja', itens: [itemDaLoja('fundo-mar')] }]);
+    expect(novidades({ ...base, loja: todos }, { ...base, loja: todos }, contexto)).toEqual([]);
+  });
+
+  it('um item que sai do catálogo não é notícia', () => {
+    const visto = { ...base, loja: [...todos, 'avatar-que-saiu'] };
+    expect(novidades(visto, { ...base, loja: todos }, contexto)).toEqual([]);
+  });
+
+  it('o catálogo de antes ainda existe inteiro no de agora', () => {
+    // Senão a base apontaria para um id que sumiu, e a conta mudaria em silêncio.
+    for (const id of CATALOGO_ANTES_DA_LOJA_2) expect(todos, id).toContain(id);
+  });
+
+  it('resume por tipo, no singular e no plural', () => {
+    const item = (id: string) => itemDaLoja(id) as ItemDaLoja;
+    expect(resumoDosItens([item('avatar-capivara')])).toBe('1 avatar');
+    expect(
+      resumoDosItens([item('avatar-capivara'), item('avatar-tucano'), item('moldura-prisma'), item('fundo-mar')])
+    ).toBe('2 avatares, 1 moldura e 1 fundo');
+    expect(resumoDosItens([item('tema-grafite'), item('recuperar-sequencia')])).toBe('1 cor e 1 item para usar');
   });
 });

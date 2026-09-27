@@ -4,15 +4,16 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useStudentData } from '../../contexts/StudentDataContext';
 import { inicioDaSemana } from '../../lib/desafios';
-import { estadoAtual, guardarVisto, lerVisto, novidades, type Novidade } from '../../lib/novidades';
+import { ITENS } from '../../lib/economia';
+import { estadoAtual, guardarVisto, lerVisto, novidades, resumoDosItens, type Novidade } from '../../lib/novidades';
 import { diaLocal } from '../../lib/sequencia';
 import { Medalha } from '../perfil/Conquistas';
 import { IconClose, IconCoin } from '../ui/Icon';
-import { VinhetaAlvo, VinhetaMedalha } from '../ui/Ilustracao';
+import { VinhetaAlvo, VinhetaCaixa, VinhetaMedalha } from '../ui/Ilustracao';
 
 /**
  * Os avisos de novidade: subiu de nível, abriu uma conquista, cumpriu um
- * desafio.
+ * desafio, chegou coisa nova à loja.
  *
  * Aparecem quando a pessoa volta ao aplicativo — a aula é uma tela de foco,
  * sem avisos por cima — e um de cada vez, com a figura do que aconteceu.
@@ -22,6 +23,23 @@ import { VinhetaAlvo, VinhetaMedalha } from '../ui/Ilustracao';
  */
 const DURACAO_MS = 6000;
 
+/** Os ids do catálogo, para o aviso de itens novos na loja. */
+const IDS_DA_LOJA = ITENS.map((i) => i.id);
+
+/** Para onde o "ver" de cada aviso leva. */
+function destino(novidade: Novidade): { para: string; rotulo: string } {
+  switch (novidade.tipo) {
+    case 'desafio':
+      return { para: '/app/perfil/desafios', rotulo: 'Ver no perfil' };
+    case 'conquista':
+      return { para: '/app/perfil/conquistas', rotulo: 'Ver no perfil' };
+    case 'loja':
+      return { para: '/app/perfil/loja', rotulo: 'Ver na loja' };
+    case 'nivel':
+      return { para: '/app/perfil', rotulo: 'Ver no perfil' };
+  }
+}
+
 export function Novidades() {
   const { user } = useAuth();
   const { loading, level, achievements, desafios } = useStudentData();
@@ -30,7 +48,14 @@ export function Novidades() {
   const atual = useMemo(() => {
     if (loading) return null;
     const hoje = diaLocal(new Date());
-    return estadoAtual({ nivel: level.level, achievements, desafios, hoje, segunda: inicioDaSemana(hoje) });
+    return estadoAtual({
+      nivel: level.level,
+      achievements,
+      desafios,
+      hoje,
+      segunda: inicioDaSemana(hoje),
+      itensDaLoja: IDS_DA_LOJA,
+    });
   }, [loading, level.level, achievements, desafios]);
 
   useEffect(() => {
@@ -80,6 +105,11 @@ export function Novidades() {
               <VinhetaAlvo size={34} />
             </span>
           )}
+          {novidade.tipo === 'loja' && (
+            <span className="flex h-12 w-12 items-center justify-center rounded-full bg-energy-50">
+              <VinhetaCaixa size={34} />
+            </span>
+          )}
         </span>
 
         <span className="min-w-0 flex-1">
@@ -110,12 +140,18 @@ export function Novidades() {
               </span>
             </>
           )}
+          {novidade.tipo === 'loja' && (
+            <>
+              <span className="label-mono block text-energy-700">Chegou à loja</span>
+              <span className="block text-sm font-bold text-ink">{resumoDosItens(novidade.itens)}</span>
+            </>
+          )}
           <Link
-            to={novidade.tipo === 'desafio' ? '/app/perfil/desafios' : novidade.tipo === 'conquista' ? '/app/perfil/conquistas' : '/app/perfil'}
+            to={destino(novidade).para}
             onClick={fechar}
             className="mt-0.5 block text-xs font-semibold text-brand-700 hover:text-brand-900"
           >
-            Ver no perfil
+            {destino(novidade).rotulo}
           </Link>
         </span>
 

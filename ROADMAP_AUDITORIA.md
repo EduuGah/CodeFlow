@@ -308,9 +308,18 @@ validadas por uma função `equipar(p_categoria, p_item)` que confere posse
     níveis 3 a 5 chegam nos primeiros dias, e o que abre no dia 2 não pode
     custar uma semana — custa 10 a 90. **Nenhum nível subiu**: ninguém perde o
     que já abriu; só o preço muda, e uma compra feita guarda o que foi pago.
-11. **Destaques desta semana** (rodízio determinístico como os desafios, 3
+11. [x] **Destaques desta semana** (rodízio determinístico como os desafios, 3
     itens, sem contagem regressiva nem "últimas unidades") e integração com
     Novidades ("5 avatares novos chegaram à loja").
+    Feito assim: `lib/destaques.ts` — os cosméticos numa ordem fixa
+    (embaralhada pelo id, para as categorias se alternarem) e, a cada semana,
+    a janela seguinte de três, pulando o que a pessoa já tem; comprar um
+    destaque troca só aquele. Todo cosmético passa pela vitrine em ~11
+    semanas (teste). Na loja, a vitrine são links para o cartão do item, não
+    cópias dele — cada item mora numa seção só —, e o texto diz que nada fica
+    mais barato nem some. Nas Novidades, "Chegou à loja: 4 avatares, 2
+    molduras e 1 fundo", um aviso só; quem já usava o aplicativo antes do
+    aviso existir compara com o catálogo de antes da Loja 2.0.
 12. **Sazonais**: `disponivelDe`/`disponivelAte` já valem no servidor; a tela
     mostra "até <data>" sem pressão. Nada de sistema de eventos.
 13. **Admin da loja**: mesma decisão do conteúdo — a tela **gera** a linha do

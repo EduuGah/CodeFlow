@@ -528,3 +528,30 @@ test('recuperar a sequência: a loja só vende quando salva, e a sequência volt
   await esperarConteudo(page);
   await expect(page.getByText('Sequência', { exact: true }).locator('..')).toContainText(/6\s*dias/);
 });
+
+test('os destaques da semana são três que a pessoa não tem, e levam ao cartão do item', async ({
+  logado: page,
+  banco,
+}) => {
+  semear(banco);
+  await page.goto('/app/perfil/loja');
+  await esperarConteudo(page);
+
+  const vitrine = page.getByRole('region', { name: 'Destaques da semana' });
+  const destaques = vitrine.locator('[data-destaque]');
+  await expect(destaques).toHaveCount(3);
+  // Nenhum preço riscado, nenhum relógio: a vitrine só aponta.
+  await expect(vitrine).not.toContainText(/termina em|acaba em|restam|últimas unidades|desconto|%/i);
+
+  const id = await destaques.first().getAttribute('data-destaque');
+  await destaques.first().click();
+  const cartao = page.locator(`#item-${id}`);
+  await expect(cartao).toBeFocused();
+  await expect(cartao).toBeInViewport();
+  // O item mora numa seção só: a vitrine não é uma segunda cópia do cartão.
+  await expect(page.locator(`#item-${id}`)).toHaveCount(1);
+
+  // Filtrar uma categoria esconde a vitrine.
+  await page.getByRole('group', { name: 'Mostrar' }).getByRole('button', { name: 'Fundos' }).click();
+  await expect(vitrine).toHaveCount(0);
+});

@@ -6,6 +6,8 @@ import { useStudentData } from '../../contexts/StudentDataContext';
 import { useTema } from '../../contexts/TemaContext';
 import { mudancaDeEquipar } from '../../lib/equipar';
 import { nomeParaMostrar } from '../../lib/perfil';
+import { inicioDaSemana } from '../../lib/desafios';
+import { destaquesDaSemana } from '../../lib/destaques';
 import { diaLocal, RECUPERAR_SEQUENCIA, somarDias } from '../../lib/sequencia';
 import { ACENTOS } from '../../lib/tema';
 import { PreviaDoPerfil } from './PreviaDoPerfil';
@@ -103,6 +105,7 @@ export function Loja() {
   const nome = nomeParaMostrar(perfil, user);
   const fotoDoGoogle = user?.user_metadata?.avatar_url as string | undefined;
   const [previa, setPrevia] = useState<string | null>(null);
+  const [realce, setRealce] = useState<string | null>(null);
   const [equipandoAgora, setEquipandoAgora] = useState(false);
   const [equipadoAgora, setEquipadoAgora] = useState<string | null>(null);
   const [confirmando, setConfirmando] = useState<string | null>(null);
@@ -137,6 +140,20 @@ export function Loja() {
   };
 
   const itemComprado = comprado ? itemDaLoja(comprado) : undefined;
+
+  // Com o histórico incompleto, a posse também não é confiável: sem vitrine.
+  const destaques = incompleto ? [] : destaquesDaSemana(inicioDaSemana(diaLocal(new Date())), level.level, purchases);
+
+  /** Da vitrine ao cartão do item, na seção dele, com um realce breve. */
+  const irAoItem = (id: string) => {
+    const cartao = document.getElementById(`item-${id}`);
+    if (!cartao) return;
+    const reduzir = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    cartao.scrollIntoView({ behavior: reduzir ? 'auto' : 'smooth', block: 'center' });
+    cartao.focus({ preventScroll: true });
+    setRealce(id);
+    window.setTimeout(() => setRealce((atual) => (atual === id ? null : atual)), 2000);
+  };
 
   /** O perfil como ficaria com o item equipado — nada é gravado. */
   const perfilCom = (item: ItemDaLoja) => {
@@ -196,7 +213,17 @@ export function Loja() {
       // No celular a figura fica à esquerda e o card é uma linha; de `sm` para
       // cima vira um cartão em pé. Empilhar cartões em pé numa tela estreita
       // dava uma rolagem de 8 000 px para nove itens.
-      <li key={item.id} className={cardClasses({ padding: 'none', className: 'flex overflow-hidden sm:flex-col' })}>
+      <li
+        key={item.id}
+        id={`item-${item.id}`}
+        tabIndex={-1}
+        className={cardClasses({
+          padding: 'none',
+          className: `flex overflow-hidden outline-none transition-shadow sm:flex-col ${
+            realce === item.id ? 'ring-2 ring-brand-600 ring-offset-2 ring-offset-canvas' : ''
+          }`,
+        })}
+      >
         <div className="relative flex w-24 shrink-0 items-center justify-center bg-sunken sm:h-28 sm:w-auto">
           <FiguraDoItem item={item} />
           {seu && (
@@ -399,6 +426,48 @@ export function Loja() {
           </Link>
         </span>
       </div>
+
+      {/* A vitrine: links para os cartões, não cópias deles — cada item mora
+          numa seção só. */}
+      {filtro === 'todos' && destaques.length > 0 && (
+        <section aria-labelledby="titulo-destaques">
+          <SectionLabel as="h2" id="titulo-destaques" className="mb-0.5">
+            Destaques da semana
+          </SectionLabel>
+          <p className="mb-3 text-xs leading-relaxed text-ink-faint">
+            Três dos que você ainda não tem, trocados toda segunda. Nenhum fica mais barato nem some: é só uma
+            vitrine.
+          </p>
+          <div className="grid grid-cols-3 gap-2 sm:gap-3">
+            {destaques.map((item) => (
+              <a
+                key={item.id}
+                href={`#item-${item.id}`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  irAoItem(item.id);
+                }}
+                className={cardClasses({
+                  padding: 'none',
+                  className:
+                    'flex flex-col items-center gap-1.5 overflow-hidden p-2 text-center transition-colors hover:border-line-strong hover:bg-sunken sm:p-3',
+                })}
+                data-destaque={item.id}
+              >
+                <span className="flex h-16 items-center justify-center" aria-hidden>
+                  <FiguraDoItem item={item} />
+                </span>
+                <span className="line-clamp-2 text-xs font-semibold leading-tight text-ink sm:text-sm">{item.title}</span>
+                <span className="label-mono flex items-center gap-1 tabular-nums text-ink-faint">
+                  <IconCoin size={12} aria-hidden />
+                  {item.price}
+                  <span className="sr-only"> moedas</span>
+                </span>
+              </a>
+            ))}
+          </div>
+        </section>
+      )}
 
       {grupos
         .filter((g) => filtro === 'todos' || g.tipo === filtro)

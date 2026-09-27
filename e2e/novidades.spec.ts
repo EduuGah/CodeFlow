@@ -1,3 +1,4 @@
+import { ITENS } from '../src/client/lib/economia';
 import { ALUNO, esperarConteudo, expect, test, type BancoFalso } from './fixtures';
 
 /**
@@ -84,4 +85,38 @@ test('com um estado antigo guardado, a conquista nova é avisada e o aviso fecha
   // reescreveria o estado antigo.)
   const guardado = await page.evaluate((id) => localStorage.getItem(`codeflow:visto:${id}`), ALUNO.id);
   expect(JSON.parse(guardado!).conquistas).toContain('persistente');
+});
+
+test('o que chegou à loja vira um aviso só, que leva à loja', async ({ logado: page, banco }) => {
+  semear(banco);
+  // Já tinha visto o catálogo inteiro, menos o Fundo Mar e o Avatar Baleia.
+  const vistos = ITENS.map((i) => i.id).filter((id) => id !== 'fundo-mar' && id !== 'avatar-baleia');
+  await page.addInitScript(
+    ([id, loja]) => {
+      localStorage.setItem(
+        `codeflow:visto:${id}`,
+        JSON.stringify({ nivel: 99, conquistas: [], desafios: [], loja })
+      );
+    },
+    [ALUNO.id, vistos] as const
+  );
+
+  await page.goto('/app');
+  await esperarConteudo(page);
+  // A loja é a última notícia da fila: as conquistas e os desafios da
+  // semeadura vêm antes, e fecham-se um a um.
+  const aviso = page.getByRole('status').filter({ hasText: 'Chegou à loja' });
+  await expect(page.getByRole('status').first()).toBeVisible({ timeout: 10_000 });
+  for (let fechados = 0; (await aviso.count()) === 0; fechados++) {
+    expect(fechados, 'o aviso da loja nunca apareceu').toBeLessThan(12);
+    await page.getByRole('button', { name: 'Fechar aviso' }).first().click();
+  }
+  await expect(aviso).toBeVisible();
+  await expect(aviso).toContainText('1 avatar e 1 fundo');
+  await aviso.getByRole('link', { name: 'Ver na loja' }).click();
+  await expect(page).toHaveURL(/\/app\/perfil\/loja$/);
+
+  // E o catálogo novo fica guardado como visto: não avisa de novo.
+  const guardado = await page.evaluate((id) => localStorage.getItem(`codeflow:visto:${id}`), ALUNO.id);
+  expect(JSON.parse(guardado!).loja).toContain('fundo-mar');
 });

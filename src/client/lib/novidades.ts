@@ -1,4 +1,5 @@
 import type { EstadoDoDesafio } from './desafios';
+import { ITENS, type ItemDaLoja, type TipoDeItem } from './economia';
 import type { Achievement } from './gamification';
 
 /**
@@ -19,12 +20,31 @@ export interface EstadoVisto {
   conquistas: string[];
   /** `${dia}:${id}` dos desafios cumpridos nos períodos atuais. */
   desafios: string[];
+  /**
+   * Ids do catálogo da loja. Ausente num estado guardado antes deste aviso
+   * existir: aí a comparação é com o catálogo de antes da Loja 2.0.
+   */
+  loja?: string[];
 }
+
+/**
+ * O catálogo antes da Loja 2.0 — a base para quem já usava o aplicativo
+ * quando o aviso da loja chegou: tudo o que entrou depois é novo para ela.
+ */
+export const CATALOGO_ANTES_DA_LOJA_2: readonly string[] = [
+  'congelar-sequencia',
+  'dobro-de-xp',
+  'tema-oceano',
+  'tema-brasa',
+  'tema-ameixa',
+  ...['cometa', 'raposa', 'coelho', 'urso', 'dino', 'panda', 'robo', 'polvo', 'alien'].map((a) => `avatar-${a}`),
+];
 
 export type Novidade =
   | { tipo: 'nivel'; nivel: number; titulo: string }
   | { tipo: 'conquista'; conquista: Achievement }
-  | { tipo: 'desafio'; estado: EstadoDoDesafio };
+  | { tipo: 'desafio'; estado: EstadoDoDesafio }
+  | { tipo: 'loja'; itens: ItemDaLoja[] };
 
 export function estadoAtual(entrada: {
   nivel: number;
@@ -32,8 +52,11 @@ export function estadoAtual(entrada: {
   desafios: { dia: EstadoDoDesafio[]; semana: EstadoDoDesafio[] };
   hoje: string;
   segunda: string;
+  /** Os ids do catálogo; sem eles, a loja fica fora da comparação. */
+  itensDaLoja?: string[];
 }): EstadoVisto {
   return {
+    ...(entrada.itensDaLoja ? { loja: entrada.itensDaLoja } : {}),
     nivel: entrada.nivel,
     conquistas: entrada.achievements.filter((c) => c.unlocked).map((c) => c.id),
     desafios: [
@@ -45,7 +68,8 @@ export function estadoAtual(entrada: {
 
 /**
  * O que apareceu entre `visto` e `atual`, na ordem em que vale contar: o
- * nível (a maior notícia), depois as conquistas, depois os desafios.
+ * nível (a maior notícia), depois as conquistas, depois os desafios, e por
+ * fim o que chegou à loja — um aviso só, com todos os itens.
  */
 export function novidades(
   visto: EstadoVisto | null,
@@ -74,7 +98,34 @@ export function novidades(
     if (estado) lista.push({ tipo: 'desafio', estado });
   }
 
+  if (atual.loja) {
+    const vistos = new Set(visto.loja ?? CATALOGO_ANTES_DA_LOJA_2);
+    const itens = atual.loja
+      .filter((id) => !vistos.has(id))
+      .map((id) => ITENS.find((i) => i.id === id))
+      .filter((i): i is ItemDaLoja => i !== undefined);
+    if (itens.length > 0) lista.push({ tipo: 'loja', itens });
+  }
+
   return lista;
+}
+
+const NOMES: Record<TipoDeItem, [string, string]> = {
+  avatar: ['avatar', 'avatares'],
+  moldura: ['moldura', 'molduras'],
+  fundo: ['fundo', 'fundos'],
+  tema: ['cor', 'cores'],
+  consumivel: ['item para usar', 'itens para usar'],
+};
+
+/** "4 avatares, 2 molduras e 1 fundo" — os itens novos por tipo, na ordem da loja. */
+export function resumoDosItens(itens: ItemDaLoja[]): string {
+  const ordem: TipoDeItem[] = ['avatar', 'moldura', 'fundo', 'tema', 'consumivel'];
+  const partes = ordem
+    .map((tipo) => [tipo, itens.filter((i) => i.tipo === tipo).length] as const)
+    .filter(([, n]) => n > 0)
+    .map(([tipo, n]) => `${n} ${NOMES[tipo][n === 1 ? 0 : 1]}`);
+  return partes.length <= 1 ? (partes[0] ?? '') : `${partes.slice(0, -1).join(', ')} e ${partes[partes.length - 1]}`;
 }
 
 const PREFIXO = 'codeflow:visto:';
@@ -88,6 +139,7 @@ export function lerVisto(userId: string): EstadoVisto | null {
       nivel: typeof dado.nivel === 'number' ? dado.nivel : 1,
       conquistas: Array.isArray(dado.conquistas) ? dado.conquistas : [],
       desafios: Array.isArray(dado.desafios) ? dado.desafios : [],
+      ...(Array.isArray(dado.loja) ? { loja: dado.loja } : {}),
     };
   } catch {
     return null;

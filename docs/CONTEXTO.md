@@ -41,7 +41,7 @@ Números lidos do catálogo, não de memória.
 | Projetos | 10, com 34 critérios de aceitação — os 3 capstones são página + API + banco (motor 7), os outros 7 são JavaScript puro |
 | Conceitos | 151, com grafo de pré-requisitos |
 | Flashcards | 67 (93 conceitos ainda sem cartão) |
-| Testes | 3.715 de unidade + ~466 de navegador |
+| Testes | 3.729 de unidade + ~470 de navegador |
 | Pacote | 3.095 kB (851 kB comprimido) no chunk principal — o corpo das aulas vai junto (é quase metade), e separá-lo é o maior problema de performance aberto (P2-1b do roadmap). Aula, revisão, refazer erros, projeto e admin são rotas sob demanda (`App.tsx`), e o Zod só entra no chunk do admin; o Monaco são mais 3.362 kB (869 kB) num chunk à parte, baixado só quando o primeiro editor monta, e o worker de TypeScript (7 MB) só quando um modelo JS/TS abre. O motor de TypeScript não acrescentou arquivo; o de React acrescentou um chunk de 143 kB (47 kB) com o React e o ReactDOM como texto, baixado só por um exercício de React; o de SQL acrescentou o worker (49 kB) e o SQLite em WebAssembly (658 kB), baixados só por um exercício de SQL; o de Python acrescentou o worker (~22 kB) e o Pyodide inteiro (~13,5 MB: o WebAssembly do CPython, a biblioteca padrão zipada, o manifesto de pacotes), copiados para `/pyodide/` na build e baixados só por um exercício de Python |
 
 ## 4. Decisões que não devem ser desfeitas sem motivo forte
@@ -108,7 +108,10 @@ catálogo de verdade, em cinco datas de início: nada abre pelo nível antes de
 caber no saldo, e do nível 6 em diante comprar encurta a espera sem ser de
 graça. Mexeu em recompensa, desafio ou no começo do catálogo, esse teste diz
 se os preços ainda fazem sentido. **Nível de item nunca sobe** (tiraria o que
-alguém já abriu); preço pode mudar. **Uma capa deixa o que
+alguém já abriu); preço pode mudar. **Os destaques da semana** (`lib/destaques.ts`)
+são um rodízio fixo, não sorteio: nenhum fica mais barato nem some, e a
+vitrine aponta para o cartão do item em vez de repeti-lo (cada item mora numa
+seção só — e os testes que filtram por nome não viram loteria da semana). **Uma capa deixa o que
 importa no miolo** (x de ~100 a ~220, y de ~24 a ~56): a miniatura da loja
 corta os lados e a capa larga do perfil corta em cima e embaixo. O que se
 compra: **congelar a sequência** (um dia sem estudar não
@@ -463,8 +466,8 @@ docs/curriculo.md       Roadmap de conteúdo — fonte canônica
 ```bash
 npm run typecheck   # inclui e2e/ e playwright.config.ts
 npm run lint        # ESLint mínimo: typescript-eslint + react-hooks
-npm test            # 3.715 testes
-npm run test:e2e    # ~466 no navegador (antes: npx playwright install chromium;
+npm test            # 3.729 testes
+npm run test:e2e    # ~470 no navegador (antes: npx playwright install chromium;
                     # com um Chromium já instalado: PW_CHROMIUM=/caminho/do/chrome)
 npm run build
 
