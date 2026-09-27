@@ -127,7 +127,19 @@ const StudentDataContext = createContext<StudentData | undefined>(undefined);
 let dependentes: Map<string, number> | undefined;
 const DEPENDENTES = () => (dependentes ??= dependentesPorConceito(listConcepts()));
 
-const PERFIL_VAZIO: Perfil = { displayName: null, avatar: null, theme: null, accent: null, moldura: null, fundo: null, titulo: null };
+const PERFIL_VAZIO: Perfil = {
+  displayName: null,
+  avatar: null,
+  theme: null,
+  accent: null,
+  moldura: null,
+  fundo: null,
+  titulo: null,
+  temaEditor: null,
+  celebracao: null,
+  iconeSequencia: null,
+  adesivos: null,
+};
 
 export function StudentDataProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
@@ -330,6 +342,15 @@ export function StudentDataProvider({ children }: { children: React.ReactNode })
   }, [loading, error, incompleto, reload, revalidar, completedLessons, completedProjects, attempts, reviews, purchases, perfil, comprar, salvarPerfil]);
 
   return <StudentDataContext.Provider value={valor}>{children}</StudentDataContext.Provider>;
+}
+
+/**
+ * O mesmo contexto, sem exigir o provider: para componentes de interface que
+ * leem uma preferência (o tema do editor) e também aparecem fora do app — num
+ * teste, no admin. Fora do provider, `undefined`, e quem chama usa o padrão.
+ */
+export function useStudentDataOpcional(): StudentData | undefined {
+  return useContext(StudentDataContext);
 }
 
 export function useStudentData() {

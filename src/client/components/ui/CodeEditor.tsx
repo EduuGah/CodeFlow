@@ -2,7 +2,9 @@ import { useEffect, useId, useRef, useState } from 'react';
 import Editor from '@monaco-editor/react';
 
 import type { LanguageId } from '../../../content/types';
+import { useStudentDataOpcional } from '../../contexts/StudentDataContext';
 import { registrar } from '../../lib/registro';
+import { nomeNoMonaco, temaDoEditor, type TemaDoEditor } from '../../lib/temas-do-editor';
 
 /**
  * O editor de código — o único.
@@ -20,6 +22,10 @@ import { registrar } from '../../lib/registro';
  *    primeira visita, navegador antigo demais, extensão que bloqueia workers:
  *    em vez de um retângulo vazio, entra um `<textarea>` monoespaçado. Sem
  *    cores nem autocompletar, mas o exercício segue resolvível.
+ *
+ * As cores vêm do tema do editor que a pessoa equipou (`temas-do-editor.ts`)
+ * — no Monaco, no esqueleto e no textarea, para a troca entre eles continuar
+ * invisível. Fora do app (um teste, o admin), o padrão.
  */
 export interface CodeEditorProps {
   value: string;
@@ -125,6 +131,7 @@ function linguagemDoMonaco(language: LanguageId): { language: string; path?: str
 }
 
 export function CodeEditor({ value, onChange, language, height }: CodeEditorProps) {
+  const tema = temaDoEditor(useStudentDataOpcional()?.perfil.temaEditor);
   const [estado, setEstado] = useState<Carregamento>(estadoGlobal);
   const areaRef = useRef<HTMLTextAreaElement>(null);
   const idDaAjuda = useId();
@@ -190,7 +197,8 @@ export function CodeEditor({ value, onChange, language, height }: CodeEditorProp
           spellCheck={false}
           autoCapitalize="off"
           autoCorrect="off"
-          className="block min-h-0 w-full flex-1 resize-none bg-editor p-3.5 font-mono text-sm leading-[22px] text-white/90 outline-none"
+          style={{ background: tema.fundo, color: tema.texto }}
+          className="block min-h-0 w-full flex-1 resize-none p-3.5 font-mono text-sm leading-[22px] outline-none"
         />
         <p id={idDaAjuda} className="mt-1.5 shrink-0 text-xs text-ink-faint">
           Tab insere dois espaços · Esc solta o foco para navegar com Tab
@@ -200,7 +208,7 @@ export function CodeEditor({ value, onChange, language, height }: CodeEditorProp
   }
 
   if (estado === 'pendente') {
-    return <Esqueleto value={value} height={height} />;
+    return <Esqueleto value={value} height={height} tema={tema} />;
   }
 
   const monaco = linguagemDoMonaco(language);
@@ -210,10 +218,10 @@ export function CodeEditor({ value, onChange, language, height }: CodeEditorProp
       height={height}
       language={monaco.language}
       path={monaco.path}
-      theme="codeflow"
+      theme={nomeNoMonaco(tema.id)}
       value={value}
       onChange={(valor) => onChange(valor ?? '')}
-      loading={<Esqueleto value={value} height={height} />}
+      loading={<Esqueleto value={value} height={height} tema={tema} />}
       options={OPCOES}
     />
   );
@@ -224,25 +232,27 @@ export function CodeEditor({ value, onChange, language, height }: CodeEditorProp
  * fonte, no mesmo fundo, com números de linha na mesma coluna. Quando o
  * editor monta, a troca é quase invisível — e até lá o aluno já está lendo.
  */
-function Esqueleto({ value, height }: { value: string; height: string }) {
+function Esqueleto({ value, height, tema }: { value: string; height: string; tema: TemaDoEditor }) {
   const linhas = value.split('\n');
 
   return (
     <div
       aria-busy="true"
       aria-label="Carregando o editor de código"
-      style={{ height }}
+      style={{ height, background: tema.fundo }}
       // Rola de lado como o Monaco vai rolar: uma linha longa no celular fica
       // alcançável, em vez de cortada.
-      className="overflow-x-auto overflow-y-hidden bg-editor py-3.5 font-mono text-sm leading-[22px]"
+      className="overflow-x-auto overflow-y-hidden py-3.5 font-mono text-sm leading-[22px]"
     >
       {linhas.map((linha, i) => (
         <div key={i} className="flex">
           {/* 3 caracteres de largura mínima, como `lineNumbersMinChars`. */}
-          <span className="w-[42px] shrink-0 select-none pr-2 text-right text-white/35">
+          <span style={{ color: tema.numeros }} className="w-[42px] shrink-0 select-none pr-2 text-right">
             {i + 1}
           </span>
-          <span className="whitespace-pre pl-2 text-white/70">{linha}</span>
+          <span style={{ color: tema.texto }} className="whitespace-pre pl-2">
+            {linha}
+          </span>
         </div>
       ))}
     </div>

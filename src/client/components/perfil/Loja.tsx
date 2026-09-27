@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 
 import { useAuth } from '../../contexts/AuthContext';
@@ -11,6 +11,8 @@ import { destaquesDaSemana } from '../../lib/destaques';
 import { fetchInativos } from '../../lib/loja-admin';
 import { diaLocal, RECUPERAR_SEQUENCIA, somarDias } from '../../lib/sequencia';
 import { ACENTOS } from '../../lib/tema';
+import { temaDoEditor } from '../../lib/temas-do-editor';
+import { PreviaDoEditor } from './PreviaDoEditor';
 import { PreviaDoPerfil } from './PreviaDoPerfil';
 import {
   aVenda,
@@ -75,7 +77,8 @@ const FILTROS: Array<{ id: Filtro; rotulo: string }> = [
   { id: 'avatar', rotulo: 'Avatares' },
   { id: 'moldura', rotulo: 'Molduras' },
   { id: 'fundo', rotulo: 'Fundos' },
-  { id: 'tema', rotulo: 'Temas' },
+  { id: 'tema', rotulo: 'Cores' },
+  { id: 'editor', rotulo: 'Editor' },
   { id: 'consumivel', rotulo: 'Consumíveis' },
 ];
 
@@ -198,6 +201,24 @@ export function Loja() {
     };
   };
 
+  /**
+   * A prévia de cada categoria, onde o item aparece de verdade: o que muda o
+   * perfil, no cabeçalho; o tema do editor, num trecho de código. Nada é
+   * gravado.
+   */
+  const previaDe = (item: ItemDaLoja): { rotulo: string; conteudo: ReactNode } | null => {
+    if (item.tipo === 'editor') {
+      return { rotulo: 'Ver no editor', conteudo: <PreviaDoEditor tema={temaDoEditor(mudancaDeEquipar(item)?.temaEditor)} /> };
+    }
+    if (item.tipo === 'avatar' || item.tipo === 'moldura' || item.tipo === 'fundo' || item.tipo === 'tema') {
+      return {
+        rotulo: 'Ver no meu perfil',
+        conteudo: <PreviaDoPerfil nome={nome} nivel={level.level} fotoDoGoogle={fotoDoGoogle} {...perfilCom(item)} />,
+      };
+    }
+    return null;
+  };
+
   const grupos: Array<{ tipo: TipoDeItem; titulo: string; nota: string; itens: ItemDaLoja[] }> = [
     {
       tipo: 'consumivel',
@@ -229,6 +250,12 @@ export function Loja() {
       nota: 'A capa do perfil, acima do seu nome. Abrem por nível ou por moedas; equipe no inventário.',
       itens: ITENS.filter((i) => i.tipo === 'fundo' && naLoja(i)),
     },
+    {
+      tipo: 'editor',
+      titulo: 'Temas do editor',
+      nota: 'As cores do código nos exercícios e projetos. O padrão e o alto contraste são de todo mundo; estes abrem por nível ou por moedas.',
+      itens: ITENS.filter((i) => i.tipo === 'editor' && naLoja(i)),
+    },
   ];
 
   const cartao = (item: ItemDaLoja) => {
@@ -240,6 +267,7 @@ export function Loja() {
     const daPara = !incompleto && !semEfeito && moedas.saldo >= item.price;
     const estaConfirmando = confirmando === item.id;
     const liberadoPorNivel = item.nivelQueLibera !== undefined && level.level >= item.nivelQueLibera;
+    const previaDoItem = previaDe(item);
 
     return (
       // No celular a figura fica à esquerda e o card é uma linha; de `sm` para
@@ -276,8 +304,8 @@ export function Loja() {
             </span>
           </span>
           <span className="text-sm leading-relaxed text-ink-soft">{item.description}</span>
-          {/* A prévia: o item no próprio cabeçalho da pessoa, antes de comprar. */}
-          {mudancaDeEquipar(item) && (
+          {/* A prévia: o item onde ele aparece, antes de comprar. */}
+          {previaDoItem && (
             <>
               <button
                 type="button"
@@ -286,11 +314,11 @@ export function Loja() {
                 aria-controls={`previa-${item.id}`}
                 onClick={() => setPrevia((atual) => (atual === item.id ? null : item.id))}
               >
-                {previa === item.id ? 'Fechar a prévia' : 'Ver no meu perfil'}
+                {previa === item.id ? 'Fechar a prévia' : previaDoItem.rotulo}
               </button>
               {previa === item.id && (
                 <div id={`previa-${item.id}`} className="animar-pousar">
-                  <PreviaDoPerfil nome={nome} nivel={level.level} fotoDoGoogle={fotoDoGoogle} {...perfilCom(item)} />
+                  {previaDoItem.conteudo}
                 </div>
               )}
             </>

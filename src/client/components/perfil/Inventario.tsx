@@ -7,6 +7,7 @@ import { itemDaLoja, posseDe, RARIDADES, visivel, type ItemDaLoja, type Posse, t
 import { ITENS_DE_CONQUISTA, posseDeConquista, type ItemDeConquista, type PosseDeConquista } from '../../lib/exclusivos';
 import type { Achievement } from '../../lib/gamification';
 import { ACENTOS } from '../../lib/tema';
+import { TEMA_DO_EDITOR_PADRAO, TEMAS_DO_EDITOR, temaDoEditor } from '../../lib/temas-do-editor';
 import { AVATARES, AvatarDesenhado, avatarPreset } from '../ui/Avatar';
 import { FUNDOS, FundoDesenhado, ehFundo, type IdDeFundo } from '../ui/Fundo';
 import { ComMoldura, MOLDURAS, ehMoldura, type IdDeMoldura } from '../ui/Moldura';
@@ -15,6 +16,7 @@ import { SectionLabel, cardClasses } from '../ui/Card';
 import { IconCheck, IconLock } from '../ui/Icon';
 import { VinhetaFloco, VinhetaJanela, VinhetaRaioDuplo } from '../ui/Ilustracao';
 import { EscolherTitulo } from './EscolherTitulo';
+import { MiniaturaDoEditor } from './PreviaDoEditor';
 
 /**
  * O inventário: tudo o que é da pessoa, por categoria, e o que falta para o
@@ -66,6 +68,7 @@ export function contarCosmeticos(
     ...ACENTOS.map((a) => (a.item ? itemDaLoja(a.item) : undefined)),
     ...MOLDURAS.map((id) => itemDaLoja(`moldura-${id}`)),
     ...FUNDOS.map((id) => itemDaLoja(`fundo-${id}`)),
+    ...TEMAS_DO_EDITOR.map((t) => (t.item ? itemDaLoja(t.item) : undefined)),
   ];
   // Um sazonal fora da janela só conta para quem o tem.
   const contaveis = itens.filter((i) => !i || visivel(i, nivel, purchases));
@@ -212,6 +215,22 @@ export function Inventario() {
     }),
   ];
 
+  // O padrão e o alto contraste não têm item: são de todo mundo. Voltar ao
+  // padrão grava `null`, como tirar a moldura.
+  const temaEditorAtual = temaDoEditor(perfil.temaEditor).id;
+  const temasDoEditor: Peca[] = TEMAS_DO_EDITOR.map((tema) => {
+    const item = tema.item ? itemDaLoja(tema.item) : undefined;
+    return {
+      chave: `editor-${tema.id}`,
+      titulo: tema.item ? (item?.title ?? tema.title) : `Editor ${tema.title}`,
+      figura: <MiniaturaDoEditor tema={tema} largura={64} />,
+      item,
+      posse: posseDe(item, level.level, purchases),
+      equipado: temaEditorAtual === tema.id,
+      equipar: () => salvarPerfil({ temaEditor: tema.id === TEMA_DO_EDITOR_PADRAO.id ? null : tema.id }),
+    };
+  });
+
   const equipar = async (peca: Peca) => {
     setEquipando(peca.chave);
     const { error } = await peca.equipar();
@@ -233,6 +252,11 @@ export function Inventario() {
     { titulo: 'Molduras', nota: 'Um anel na borda do seu avatar.', pecas: emOrdem(molduras) },
     { titulo: 'Fundos', nota: 'A capa do seu perfil, acima do seu nome.', pecas: emOrdem(fundos) },
     { titulo: 'Cores de destaque', nota: 'A cor dos botões, das barras e dos destaques.', pecas: emOrdem(cores) },
+    {
+      titulo: 'Temas do editor',
+      nota: 'As cores do código nos exercícios e projetos. O padrão e o alto contraste são de todo mundo.',
+      pecas: emOrdem(temasDoEditor),
+    },
   ];
 
   const { seus, total } = contarCosmeticos(level.level, purchases, achievements);

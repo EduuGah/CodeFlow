@@ -56,7 +56,8 @@ export function compararCatalogo(itens: readonly ItemDaLoja[], banco: readonly L
 // ------------------------------------------------------------ gerador
 
 export interface RascunhoDeItem {
-  tipo: Exclude<TipoDeItem, 'consumivel' | 'tema'>;
+  /** As categorias com lista de itens por nível em `economia.ts`. */
+  tipo: Extract<TipoDeItem, 'avatar' | 'moldura' | 'fundo'>;
   /** O id curto (`capivara`); o completo é `${tipo}-${curto}`. */
   curto: string;
   titulo: string;

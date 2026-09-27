@@ -386,6 +386,48 @@ test('a prévia mostra o item no próprio perfil sem gravar, e "Equipar agora" g
   expect(banco.perfil.moldura).toBe('pixel');
 });
 
+test('um tema do editor se vê num trecho de código, se compra, e se troca no inventário', async ({
+  logado: page,
+  banco,
+}) => {
+  semear(banco);
+  // Dezesseis aulas: saldo para o Papel (130), que só abre de graça no nível 6.
+  banco.completed_lessons = Array.from({ length: 16 }, (_, i) => `lesson-js-${i + 1}`);
+  await page.goto('/app/perfil/loja');
+  await esperarConteudo(page);
+  await page.getByRole('group', { name: 'Mostrar' }).getByRole('button', { name: 'Editor' }).click();
+  await expect(page.getByRole('region', { name: 'Temas do editor' })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Avatares' })).toHaveCount(0);
+
+  const papel = page.getByRole('listitem').filter({ hasText: 'Editor Papel' });
+  await papel.getByRole('button', { name: 'Ver no editor' }).click();
+  // A prévia é código de verdade, nas cores do tema — sem carregar o Monaco.
+  const previa = papel.locator('#previa-editor-papel pre');
+  await expect(previa).toContainText('alert("boa semana!");');
+  expect(await previa.evaluate((el) => getComputedStyle(el).backgroundColor)).toBe('rgb(246, 241, 231)');
+  expect(banco.escritas.filter((e) => e.tabela === 'users')).toEqual([]);
+
+  await papel.getByRole('button', { name: '130' }).click();
+  await papel.getByRole('button', { name: /Confirmar por 130/ }).click();
+  const status = page.getByRole('status').filter({ hasText: 'Comprado: Editor Papel' });
+  await status.getByRole('button', { name: 'Equipar agora' }).click();
+  await expect(status).toContainText('Equipado.');
+  expect(banco.perfil.tema_editor).toBe('papel');
+
+  // No inventário: o padrão e o alto contraste são de todo mundo.
+  await page.goto('/app/perfil/inventario');
+  const secao = page.getByRole('region', { name: 'Temas do editor' });
+  await expect(secao.getByRole('listitem').filter({ hasText: 'Editor Papel' })).toContainText('Equipado');
+  await expect(secao.getByRole('listitem').filter({ hasText: 'Editor Alto contraste' })).toContainText('de graça');
+  await secao.getByRole('button', { name: 'Equipar Editor Alto contraste' }).click();
+  await expect.poll(() => banco.perfil.tema_editor).toBe('alto-contraste');
+  // Voltar ao padrão é tirar: nulo, como a moldura.
+  await secao.getByRole('button', { name: 'Equipar Editor Padrão' }).click();
+  await expect.poll(() => banco.perfil.tema_editor).toBeNull();
+  // Os outros vendidos continuam trancados, com o nível e o preço.
+  await expect(secao.getByRole('listitem').filter({ hasText: 'Editor Neon' })).toContainText('Abre no nível 13');
+});
+
 test('um título ganho por conquista se escolhe no inventário e aparece ao lado do nome', async ({
   logado: page,
   banco,

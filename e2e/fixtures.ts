@@ -53,6 +53,10 @@ export interface BancoFalso {
     moldura?: string | null;
     fundo?: string | null;
     titulo?: string | null;
+    tema_editor?: string | null;
+    celebracao?: string | null;
+    icone_sequencia?: string | null;
+    adesivos?: string[] | null;
   };
   /**
    * O catálogo do banco (`store_items`). Ausente, espelha `ITENS` com tudo à
@@ -192,7 +196,19 @@ async function dublarSupabase(page: Page, banco: BancoFalso) {
       const linha = Array.isArray(corpo) ? corpo[0] : corpo;
       if (linha?.completed_lessons) banco.completed_lessons = linha.completed_lessons;
       if (linha?.completed_projects) banco.completed_projects = linha.completed_projects;
-      for (const campo of ['display_name', 'avatar', 'theme', 'accent', 'moldura', 'fundo', 'titulo'] as const) {
+      for (const campo of [
+        'display_name',
+        'avatar',
+        'theme',
+        'accent',
+        'moldura',
+        'fundo',
+        'titulo',
+        'tema_editor',
+        'celebracao',
+        'icone_sequencia',
+        'adesivos',
+      ] as const) {
         if (campo in (linha ?? {})) banco.perfil[campo] = linha[campo];
       }
 

@@ -41,7 +41,7 @@ Números lidos do catálogo, não de memória.
 | Projetos | 10, com 34 critérios de aceitação — os 3 capstones são página + API + banco (motor 7), os outros 7 são JavaScript puro |
 | Conceitos | 151, com grafo de pré-requisitos |
 | Flashcards | 67 (93 conceitos ainda sem cartão) |
-| Testes | 3.767 de unidade + ~484 de navegador |
+| Testes | 3.840 de unidade + ~488 de navegador |
 | Pacote | 3.095 kB (851 kB comprimido) no chunk principal — o corpo das aulas vai junto (é quase metade), e separá-lo é o maior problema de performance aberto (P2-1b do roadmap). Aula, revisão, refazer erros, projeto e admin são rotas sob demanda (`App.tsx`), e o Zod só entra no chunk do admin; o Monaco são mais 3.362 kB (869 kB) num chunk à parte, baixado só quando o primeiro editor monta, e o worker de TypeScript (7 MB) só quando um modelo JS/TS abre. O motor de TypeScript não acrescentou arquivo; o de React acrescentou um chunk de 143 kB (47 kB) com o React e o ReactDOM como texto, baixado só por um exercício de React; o de SQL acrescentou o worker (49 kB) e o SQLite em WebAssembly (658 kB), baixados só por um exercício de SQL; o de Python acrescentou o worker (~22 kB) e o Pyodide inteiro (~13,5 MB: o WebAssembly do CPython, a biblioteca padrão zipada, o manifesto de pacotes), copiados para `/pyodide/` na build e baixados só por um exercício de Python |
 
 ## 4. Decisões que não devem ser desfeitas sem motivo forte
@@ -110,7 +110,17 @@ graça. Mexeu em recompensa, desafio ou no começo do catálogo, esse teste diz
 se os preços ainda fazem sentido. **Nível de item nunca sobe** (tiraria o que
 alguém já abriu); preço pode mudar. **Há itens sem nível**: os épicos só por
 moedas (0018) são o destino das moedas depois da semana ~13, quando o nível
-já abriu todo o resto — o teste de calibragem cobra que somem meses. **Os destaques da semana** (`lib/destaques.ts`)
+já abriu todo o resto — o teste de calibragem cobra que somem meses. **Os
+temas do editor** (0020, `lib/temas-do-editor.ts`) são a primeira das
+categorias além da aparência do perfil: cada paleta tem cada cor de token
+conferida contra o fundo (AA; o alto contraste, AAA), e **o padrão e o alto
+contraste são de todo mundo — acessibilidade não se vende**. O Monaco ganha
+um tema por paleta (`codeflow-<id>`), e o esqueleto e o textarea de
+contingência usam as mesmas cores, para a troca continuar invisível. **Só o
+editor muda**: os blocos de código da aula e as saídas ficam no verde do
+padrão — são material da aula, não o espaço de quem escreve. A prévia da loja
+não carrega o Monaco: é um trecho já separado em tokens, com os mesmos papéis
+que `monaco.ts` pinta. **Os destaques da semana** (`lib/destaques.ts`)
 são um rodízio fixo, não sorteio: nenhum fica mais barato nem some, e a
 vitrine aponta para o cartão do item em vez de repeti-lo (cada item mora numa
 seção só — e os testes que filtram por nome não viram loteria da semana).
@@ -380,6 +390,9 @@ src/client/lib/         Lógica pura e testada
   economia.ts           Moedas ganhas por fonte, a loja (itens, preços,
                         categoria em `tipo`, raridade, o que o nível libera),
                         janelas de dobro de XP
+  temas-do-editor.ts    As paletas do editor de código (o Monaco, o
+                        esqueleto, a miniatura da loja), com teste de
+                        contraste por cor de token
   sequencia.ts          A sequência de dias com congelamentos; as correntes
                         da história (com o dia em que cada uma começou), para
                         os marcos valerem uma vez e terem data
@@ -436,7 +449,8 @@ src/client/components/  Componentes
                         foto), a loja, o inventário, os desafios, as conquistas por
                         categoria, a aparência (modo e cor); `icones.tsx`
                         diz qual ícone cada conquista e desafio leva;
-                        `AnelDeNivel` e `CabecalhoDaSecao`
+                        `AnelDeNivel` e `CabecalhoDaSecao`; `PreviaDoEditor`
+                        (o tema do editor sem o Monaco)
   lesson/               Um componente por tipo de exercício; `ExerciseAction`
                         e `ExerciseFeedback` são o botão e o retorno de todos;
                         `ExercicioDoPasso` escolhe o componente pelo tipo
@@ -466,7 +480,9 @@ src/client/components/  `caderno/`: a resposta no formato do exercício
                         (`RespostaDoAluno`) e o enunciado numa linha
                         (`TextoEmLinha`, sem o leitor de Markdown inteiro)
 e2e/                    Playwright; `fixtures.ts` tem o dublê do Supabase
-supabase/migrations/    0001 a 0019, aplicadas em ordem (0019: registro
+supabase/migrations/    0001 a 0020, aplicadas em ordem (0020: as
+                        categorias além do perfil — tema do editor,
+                        celebração, ícone da sequência, adesivos; 0019: registro
                         de eventos; 0018: épicos só
                         por moedas; 0017: tirar item
                         da venda pela administração; 0016: o primeiro
@@ -488,7 +504,7 @@ docs/curriculo.md       Roadmap de conteúdo — fonte canônica
 ```bash
 npm run typecheck   # inclui e2e/ e playwright.config.ts
 npm run lint        # ESLint mínimo: typescript-eslint + react-hooks
-npm test            # 3.767 testes
+npm test            # 3.840 testes
 npm run test:e2e    # ~484 no navegador (antes: npx playwright install chromium;
                     # com um Chromium já instalado: PW_CHROMIUM=/caminho/do/chrome)
 npm run build
@@ -843,6 +859,19 @@ Cada uma custou tempo. Não repita.
   aceita as duas formas — só o editor não —, então a verificação local passa
   com qualquer uma; quem segura é o teste "o editor do Supabase consegue rodar
   cada migração" em `migrations.test.ts`. Nem em comentário escreva a forma.
+- **Uma checagem de lista redefinida depois precisa ser `not valid` na
+  migração antiga.** A 0011 criava `store_items_tipo_check` com cinco tipos;
+  a 0020 a alarga para nove e grava itens de editor. Rodando tudo de novo, a
+  0011 recriava a lista estreita sobre linhas que só a 0020 aceita, e parava
+  ali. Com `not valid`, a antiga só vale para linhas novas — e a última
+  definição, a de verdade, continua conferindo tudo. `migrations.test.ts`
+  cobra: toda definição de uma checagem que outra migração redefine depois
+  termina em `not valid`.
+- **Checagem de array sem subconsulta confere a lista unida — e isso esconde
+  dois casos.** `array_to_string(adesivos, ',')` pula nulos e não distingue
+  `['a,b']` de `['a', 'b']`. A 0020 separa de novo e compara a contagem
+  (`string_to_array`): um elemento com vírgula dá mais, um nulo dá menos. A
+  verificação no banco tenta os dois.
 - **Um laço sem fim de verdade num teste de jsdom trava o próprio `vitest`**:
   o jsdom roda os scripts na mesma thread, e o prazo do teste precisa dela
   para disparar. Para provar a guarda de laço, os testes usam um laço que
@@ -1081,6 +1110,13 @@ Faltam ~19 aulas da lista original — outras trilhas do Fundamentos de
 JavaScript, Página, Git, Terminal, TypeScript, Web e o resto de Python.
 
 ## 9. Pendências do lado do usuário
+
+- **Rodar `supabase/migrations/0020_itens_gerais.sql` no SQL Editor.** As
+  categorias novas da loja e as colunas do perfil onde elas moram. Ela cresce
+  a cada categoria que chega (hoje: os temas do editor) e pode rodar de novo.
+  Sem ela, a loja mostra os temas e o banco recusa a compra; equipar diz qual
+  migração rodar. A 0011 mudou (a checagem de tipo ficou `not valid`): quem
+  já a rodou não precisa rodar de novo.
 
 - **Rodar `supabase/migrations/0019_eventos.sql` no SQL Editor.** O registro
   de eventos. Sem ela, os eventos são recusados em silêncio (o registro não

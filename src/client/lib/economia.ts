@@ -28,7 +28,20 @@ export interface Purchase {
  * o resto é aparência, comprada uma vez. Categoria nova entra aqui e na
  * checagem de `store_items` juntas (a 0011 trouxe moldura e fundo).
  */
-export type TipoDeItem = 'consumivel' | 'tema' | 'avatar' | 'moldura' | 'fundo';
+export type TipoDeItem =
+  | 'consumivel'
+  | 'tema'
+  | 'avatar'
+  | 'moldura'
+  | 'fundo'
+  /** Tema do editor de código (`temas-do-editor.ts`). */
+  | 'editor'
+  /** O efeito ao concluir uma aula ou projeto (`celebrar.ts`). */
+  | 'celebracao'
+  /** O ícone da sequência de dias. */
+  | 'sequencia'
+  /** Adesivo no cabeçalho do perfil (até três). */
+  | 'adesivo';
 
 /**
  * Quão longe na jornada o item mora — sai do nível que o abre
@@ -230,6 +243,18 @@ export const ITENS: ItemDaLoja[] = [
       ['mar', 'Mar', 'Três ondas, das escuras às claras, e o sol em cima.', 13],
     ] as const
   ).map(([id, title, description, nivel]) => cosmetico(`fundo-${id}`, 'fundo', `Fundo ${title}`, description, nivel)),
+  // Temas do editor (0020): as cores do código. O padrão e o alto contraste
+  // são de todo mundo e não estão aqui — acessibilidade não se vende. As
+  // paletas moram em `temas-do-editor.ts`, com o contraste testado.
+  ...(
+    [
+      ['noturno', 'Noturno', 'Azul de madrugada, com as palavras-chave em lilás.', 4],
+      ['papel', 'Papel', 'Fundo claro de caderno, tinta escura — para estudar de dia.', 6],
+      ['floresta', 'Floresta à noite', 'Verde fundo de mata, com o texto em tons de musgo e mel.', 8],
+      ['giz', 'Giz', 'O quadro-negro da sala de aula, escrito a giz colorido.', 10],
+      ['neon', 'Neon', 'Roxo de fliperama, com as cores acesas.', 13],
+    ] as const
+  ).map(([id, title, description, nivel]) => cosmetico(`editor-${id}`, 'editor', `Editor ${title}`, description, nivel)),
   // Só por moedas (0018): épicos sem nível que os abra. O nível abre o último
   // cosmético lá pela semana 13 do aluno-modelo; estes são para onde as
   // moedas vão depois disso (P2-16). O teste de calibragem cobra que somem

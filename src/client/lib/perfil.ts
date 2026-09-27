@@ -39,6 +39,10 @@ const AVISO_DA_0011 =
 const AVISO_DA_0012 =
   'O banco ainda não guarda títulos. Rode supabase/migrations/0012_titulos.sql no SQL Editor do Supabase.';
 
+/** Tema do editor, celebração, ícone da sequência e adesivos moram na 0020. */
+const AVISO_DA_0020 =
+  'O banco ainda não guarda estes itens. Rode supabase/migrations/0020_itens_gerais.sql no SQL Editor do Supabase.';
+
 export type Tema = 'sistema' | 'claro' | 'escuro';
 
 /** O que se grava do perfil; `undefined` deixa a coluna como está. */
@@ -50,6 +54,10 @@ export interface MudancasDoPerfil {
   moldura: string | null;
   fundo: string | null;
   titulo: string | null;
+  temaEditor: string | null;
+  celebracao: string | null;
+  iconeSequencia: string | null;
+  adesivos: string[] | null;
 }
 export type Acento = 'floresta' | 'oceano' | 'brasa' | 'ameixa' | 'grafite' | 'meia-noite' | 'crepusculo';
 
@@ -66,6 +74,14 @@ export interface Perfil {
   fundo: string | null;
   /** O id do título escolhido (`coruja`), ou `null`; se a pessoa o tem, é derivado. */
   titulo: string | null;
+  /** O id curto do tema do editor (`noturno`), ou `null` para o padrão. */
+  temaEditor: string | null;
+  /** O id curto da celebração (`estrelas`), ou `null` para o confete. */
+  celebracao: string | null;
+  /** O id curto do ícone da sequência (`foguete`), ou `null` para a chama. */
+  iconeSequencia: string | null;
+  /** Até três adesivos no cabeçalho do perfil, na ordem escolhida. */
+  adesivos: string[] | null;
   error?: string;
 }
 
@@ -77,6 +93,10 @@ const VAZIO: Perfil = {
   moldura: null,
   fundo: null,
   titulo: null,
+  temaEditor: null,
+  celebracao: null,
+  iconeSequencia: null,
+  adesivos: null,
 };
 
 /**
@@ -85,6 +105,7 @@ const VAZIO: Perfil = {
  * que já existia continua valendo; só o que é novo fica vazio.
  */
 const COLUNAS_POR_MIGRACAO = [
+  'display_name, avatar, theme, accent, moldura, fundo, titulo, tema_editor, celebracao, icone_sequencia, adesivos',
   'display_name, avatar, theme, accent, moldura, fundo, titulo',
   'display_name, avatar, theme, accent, moldura, fundo',
   'display_name, avatar, theme, accent',
@@ -108,6 +129,7 @@ export async function fetchPerfil(userId: string): Promise<Perfil> {
   }
 
   const linha = (data ?? null) as Record<string, string | null> | null;
+  const adesivos = (linha as Record<string, unknown> | null)?.adesivos;
   return {
     displayName: linha?.display_name ?? null,
     avatar: linha?.avatar ?? null,
@@ -116,11 +138,23 @@ export async function fetchPerfil(userId: string): Promise<Perfil> {
     moldura: linha?.moldura ?? null,
     fundo: linha?.fundo ?? null,
     titulo: linha?.titulo ?? null,
+    temaEditor: linha?.tema_editor ?? null,
+    celebracao: linha?.celebracao ?? null,
+    iconeSequencia: linha?.icone_sequencia ?? null,
+    adesivos: Array.isArray(adesivos) ? adesivos.filter((a): a is string => typeof a === 'string') : null,
   };
 }
 
 /** Qual migração falta, pela coluna mais nova que a gravação tocou. */
 function avisoDeMigracao(mudancas: Partial<MudancasDoPerfil>): string {
+  if (
+    mudancas.temaEditor !== undefined ||
+    mudancas.celebracao !== undefined ||
+    mudancas.iconeSequencia !== undefined ||
+    mudancas.adesivos !== undefined
+  ) {
+    return AVISO_DA_0020;
+  }
   if (mudancas.titulo !== undefined) return AVISO_DA_0012;
   if (mudancas.moldura !== undefined || mudancas.fundo !== undefined) return AVISO_DA_0011;
   return AVISO_DA_MIGRACAO;
@@ -141,6 +175,10 @@ export async function updatePerfil(
   if (mudancas.moldura !== undefined) linha.moldura = mudancas.moldura;
   if (mudancas.fundo !== undefined) linha.fundo = mudancas.fundo;
   if (mudancas.titulo !== undefined) linha.titulo = mudancas.titulo;
+  if (mudancas.temaEditor !== undefined) linha.tema_editor = mudancas.temaEditor;
+  if (mudancas.celebracao !== undefined) linha.celebracao = mudancas.celebracao;
+  if (mudancas.iconeSequencia !== undefined) linha.icone_sequencia = mudancas.iconeSequencia;
+  if (mudancas.adesivos !== undefined) linha.adesivos = mudancas.adesivos;
 
   const { error } = await supabase.from('users').upsert(linha, { onConflict: 'id' });
   if (error) {

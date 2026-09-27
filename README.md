@@ -119,6 +119,7 @@ no SQL Editor do Supabase. Todas são idempotentes.
 | `0017_admin_da_loja.sql` | `definir_item_ativo`: o administrador tira um item da venda e devolve pela tela `/admin/loja` (a conta de demonstração não) |
 | `0018_so_por_moedas.sql` | Quatro épicos só por moedas (Dragão, Fênix, Engrenagens, Cidade): o destino das moedas depois que o nível abriu o resto |
 | `0019_eventos.sql` | O registro de eventos sem PII (só `insert`, com ritmo) e o agregado `saude_da_plataforma` para o painel de admin |
+| `0020_itens_gerais.sql` | As categorias da loja além do perfil (tema do editor, celebração, ícone da sequência, adesivos) e as colunas de `users` onde moram; cresce a cada categoria e pode rodar de novo |
 
 Sem a 0007, o aplicativo carrega, mas editar o perfil, comprar na loja e
 enviar foto falham — e a própria tela diz qual migração rodar. Sem a 0009, tudo

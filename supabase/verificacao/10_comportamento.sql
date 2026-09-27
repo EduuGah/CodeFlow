@@ -422,6 +422,54 @@ select verificacao.recusa(
   'users_accent_check', 'cor que não existe'
 );
 
+-- ------------------------------------------------------------ itens gerais (0020)
+update public.users
+   set tema_editor = 'noturno', celebracao = 'estrelas', icone_sequencia = 'foguete', adesivos = array['pato', 'cafe']
+ where id = auth.uid();
+select verificacao.ok(
+  (select tema_editor = 'noturno' and celebracao = 'estrelas' and icone_sequencia = 'foguete'
+          and adesivos = array['pato', 'cafe'] from public.users where id = auth.uid()),
+  'tema do editor, celebração, ícone da sequência e adesivos ficam no perfil'
+);
+select verificacao.ok(
+  (select count(*) from public.store_items where tipo = 'editor') = 5,
+  'os temas do editor estão no catálogo do banco'
+);
+select verificacao.recusa(
+  $$update public.users set tema_editor = 'Noturno!' where id = auth.uid()$$,
+  'users_tema_editor_formato', 'tema do editor fora do formato'
+);
+select verificacao.recusa(
+  $$update public.users set celebracao = '' where id = auth.uid()$$,
+  'users_celebracao_formato', 'celebração vazia (tirar é nulo)'
+);
+select verificacao.recusa(
+  $$update public.users set icone_sequencia = repeat('a', 41) where id = auth.uid()$$,
+  'users_icone_sequencia_formato', 'ícone da sequência acima de 40 caracteres'
+);
+select verificacao.recusa(
+  $$update public.users set adesivos = array['a', 'b', 'c', 'd'] where id = auth.uid()$$,
+  'users_adesivos_formato', 'quatro adesivos'
+);
+select verificacao.recusa(
+  $$update public.users set adesivos = array['pato', ''] where id = auth.uid()$$,
+  'users_adesivos_formato', 'adesivo vazio'
+);
+select verificacao.recusa(
+  $$update public.users set adesivos = array['pato,cafe'] where id = auth.uid()$$,
+  'users_adesivos_formato', 'dois adesivos disfarçados de um, com vírgula'
+);
+select verificacao.recusa(
+  $$update public.users set adesivos = array['pato', null] where id = auth.uid()$$,
+  'users_adesivos_formato', 'adesivo nulo no meio da lista'
+);
+select verificacao.recusa(
+  $$update public.users set adesivos = array['<b>'] where id = auth.uid()$$,
+  'users_adesivos_formato', 'adesivo fora do formato'
+);
+update public.users set adesivos = '{}' where id = auth.uid();
+select verificacao.ok((select cardinality(adesivos) = 0 from public.users where id = auth.uid()), 'lista vazia de adesivos');
+
 -- ------------------------------------------------------------ foto
 insert into storage.objects (bucket_id, name) values ('avatars', '00000000-0000-4000-8000-00000000000d/foto.jpg');
 select verificacao.recusa(

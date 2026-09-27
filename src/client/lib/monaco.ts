@@ -53,6 +53,7 @@ import 'monaco-editor/languages/features/typescript/register';
 
 import EditorWorker from 'monaco-editor/editor/editor.worker?worker';
 import TsWorker from 'monaco-editor/languages/features/typescript/ts.worker?worker';
+import { nomeNoMonaco, TEMAS_DO_EDITOR } from './temas-do-editor';
 
 /**
  * O Monaco servido do próprio domínio.
@@ -91,21 +92,34 @@ self.MonacoEnvironment = {
   },
 };
 
-// O tema do produto: o `vs-dark` com o fundo dos blocos de código da aula
-// (`--color-editor`), para o editor e o `<pre>` ao lado dele serem a mesma
-// superfície — e para o esqueleto que aparece antes do editor ser idêntico.
-monaco.editor.defineTheme('codeflow', {
-  base: 'vs-dark',
-  inherit: true,
-  rules: [],
-  colors: {
-    'editor.background': '#17211f',
-    'editor.lineHighlightBackground': '#ffffff0a',
-    'editorLineNumber.foreground': '#ffffff59',
-    'editorLineNumber.activeForeground': '#ffffffb3',
-    'editorGutter.background': '#17211f',
-  },
-});
+// Os temas do editor (`temas-do-editor.ts`): um por paleta, com as cores de
+// token explícitas — é nelas que o teste de contraste confere a leitura. O
+// padrão tem o fundo dos blocos de código da aula (`--color-editor`), para o
+// editor e o `<pre>` ao lado dele serem a mesma superfície.
+const semCerquilha = (cor: string) => cor.replace('#', '');
+for (const tema of TEMAS_DO_EDITOR) {
+  monaco.editor.defineTheme(nomeNoMonaco(tema.id), {
+    base: tema.escuro ? 'vs-dark' : 'vs',
+    inherit: true,
+    rules: [
+      { token: '', foreground: semCerquilha(tema.texto) },
+      { token: 'keyword', foreground: semCerquilha(tema.cores.palavraChave) },
+      { token: 'string', foreground: semCerquilha(tema.cores.textoLiteral) },
+      { token: 'number', foreground: semCerquilha(tema.cores.numero) },
+      { token: 'comment', foreground: semCerquilha(tema.cores.comentario), fontStyle: 'italic' },
+      { token: 'type', foreground: semCerquilha(tema.cores.tipo) },
+      { token: 'type.identifier', foreground: semCerquilha(tema.cores.tipo) },
+    ],
+    colors: {
+      'editor.background': tema.fundo,
+      'editor.foreground': tema.texto,
+      'editor.lineHighlightBackground': tema.linhaAtual,
+      'editorLineNumber.foreground': tema.numeros,
+      'editorLineNumber.activeForeground': tema.texto,
+      'editorGutter.background': tema.fundo,
+    },
+  });
+}
 
 // O carregador do `@monaco-editor/react` tem dois caminhos: a instância
 // configurada aqui, ou `window.monaco` já existente. Os dois apontam para o

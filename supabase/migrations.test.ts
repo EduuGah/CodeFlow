@@ -115,6 +115,10 @@ describe('as tabelas esperadas existem', () => {
       'moldura',
       'fundo',
       'titulo',
+      'tema_editor',
+      'celebracao',
+      'icone_sequencia',
+      'adesivos',
     ]) {
       expect(TABELAS.get('users'), `users.${coluna}`).toContain(coluna);
     }
@@ -314,6 +318,27 @@ describe('a loja no banco', () => {
     );
     expect(noCodigo.size).toBeGreaterThan(0);
     expect(Object.fromEntries(noBanco)).toEqual(Object.fromEntries(noCodigo));
+  });
+
+  it('uma checagem redefinida depois não quebra quando a migração antiga roda de novo', () => {
+    // As migrações rodam de novo em ordem (é o que a verificação faz, duas
+    // vezes). Se a 0011 redefine uma lista e a 0020 a alarga, a 0011 rodando
+    // de novo recoloca a lista estreita — e falha nas linhas que a 0020
+    // permitiu. Toda definição que não é a mais nova precisa de `not valid`.
+    const definicoes = new Map<string, Array<{ nome: string; comando: string }>>();
+    for (const { nome, texto } of sql) {
+      for (const [comando, restricao] of semComentarios(texto).matchAll(/add constraint (\w+)\s+check[^;]*;/gi)) {
+        definicoes.set(restricao, [...(definicoes.get(restricao) ?? []), { nome, comando }]);
+      }
+    }
+    let conferidas = 0;
+    for (const [restricao, lista] of definicoes) {
+      for (const { nome, comando } of lista.slice(0, -1)) {
+        conferidas++;
+        expect(comando, `${restricao} em ${nome} é redefinida depois e precisa de "not valid"`).toMatch(/not valid\s*;$/i);
+      }
+    }
+    expect(conferidas, 'nenhuma checagem redefinida foi encontrada').toBeGreaterThan(0);
   });
 
   it('o registro de eventos aceita os mesmos tipos e as mesmas chaves que o código manda', () => {

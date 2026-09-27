@@ -369,6 +369,28 @@ teste de calibragem cobra que os itens só por moedas somem pelo menos 18
 semanas do aluno-modelo: as moedas têm destino até perto do fim do catálogo
 de aulas.
 
+### Depois da Loja 2.0: itens além do perfil (0020)
+
+Avatar, moldura, fundo e cor mudam o perfil. As categorias novas mudam o
+lugar onde se estuda — uma de cada vez, todas numa migração só (a 0020, que
+cresce e roda de novo):
+
+1. [x] **Temas do editor**: as cores do código nos exercícios e projetos.
+   Feito assim: cinco paletas à venda (Noturno, Papel, Floresta à noite,
+   Giz, Neon — nomes e cores próprios), preço e raridade do nível como os
+   outros cosméticos, e duas de graça: o padrão e o **alto contraste**
+   (acessibilidade não se vende). Cada cor de token é conferida contra o
+   fundo (AA; o alto contraste, AAA). A loja mostra um trecho de código na
+   paleta ("Ver no editor") sem carregar o Monaco; o inventário troca num
+   toque. Só o editor muda: os blocos de código da aula ficam no padrão.
+2. [ ] **Celebração ao concluir**: o efeito ao fechar uma aula ou projeto
+   (confete, estrelas, fogos, chuva de código), respeitando o movimento
+   reduzido.
+3. [ ] **Ícone da sequência**: a chama, ou outro (raio, foguete, café, planta
+   que cresce), onde a sequência aparece.
+4. [ ] **Adesivos no perfil**: até três, escolhidos no inventário, no
+   cabeçalho do perfil.
+
 Fora de escopo por decisão: loot box, sorteio pago com moeda, compra com
 dinheiro real de qualquer coisa que toque progresso (XP, nível, resposta,
 conclusão, conquista).

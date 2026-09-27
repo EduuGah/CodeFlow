@@ -115,12 +115,16 @@ const NOMES: Record<TipoDeItem, [string, string]> = {
   moldura: ['moldura', 'molduras'],
   fundo: ['fundo', 'fundos'],
   tema: ['cor', 'cores'],
+  editor: ['tema do editor', 'temas do editor'],
+  celebracao: ['celebração', 'celebrações'],
+  sequencia: ['ícone da sequência', 'ícones da sequência'],
+  adesivo: ['adesivo', 'adesivos'],
   consumivel: ['item para usar', 'itens para usar'],
 };
 
 /** "4 avatares, 2 molduras e 1 fundo" — os itens novos por tipo, na ordem da loja. */
 export function resumoDosItens(itens: ItemDaLoja[]): string {
-  const ordem: TipoDeItem[] = ['avatar', 'moldura', 'fundo', 'tema', 'consumivel'];
+  const ordem: TipoDeItem[] = ['avatar', 'moldura', 'fundo', 'tema', 'editor', 'celebracao', 'sequencia', 'adesivo', 'consumivel'];
   const partes = ordem
     .map((tipo) => [tipo, itens.filter((i) => i.tipo === tipo).length] as const)
     .filter(([, n]) => n > 0)

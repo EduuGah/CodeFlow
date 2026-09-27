@@ -19,6 +19,14 @@ export function mudancaDeEquipar(item: ItemDaLoja): Partial<MudancasDoPerfil> | 
       const acento = ACENTOS.find((a) => a.item === item.id);
       return acento ? { accent: acento.id } : null;
     }
+    case 'editor':
+      return { temaEditor: item.id.replace(/^editor-/, '') };
+    case 'celebracao':
+      return { celebracao: item.id.replace(/^celebracao-/, '') };
+    case 'sequencia':
+      return { iconeSequencia: item.id.replace(/^sequencia-/, '') };
+    // Adesivo não troca um pelo outro: são até três, escolhidos no inventário.
+    case 'adesivo':
     case 'consumivel':
       return null;
   }

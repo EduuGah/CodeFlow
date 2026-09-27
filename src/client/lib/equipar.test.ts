@@ -9,6 +9,7 @@ describe('o que equipar muda no perfil', () => {
     expect(mudancaDeEquipar(itemDaLoja('moldura-neon')!)).toEqual({ moldura: 'neon' });
     expect(mudancaDeEquipar(itemDaLoja('fundo-por-do-sol')!)).toEqual({ fundo: 'por-do-sol' });
     expect(mudancaDeEquipar(itemDaLoja('tema-meia-noite')!)).toEqual({ accent: 'meia-noite' });
+    expect(mudancaDeEquipar(itemDaLoja('editor-noturno')!)).toEqual({ temaEditor: 'noturno' });
   });
 
   it('consumível não se equipa', () => {

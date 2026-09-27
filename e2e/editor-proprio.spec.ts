@@ -77,7 +77,7 @@ test('o editor tem a cor dos blocos de código da aula', async ({ logado: page }
   await page.goto('/lesson/lesson-js-1');
   await irAteOEditor(page);
 
-  // `--color-editor` do index.css. O tema `codeflow` existe para o editor e o
+  // `--color-editor` do index.css. O tema padrão (`codeflow-padrao`) existe para o editor e o
   // `<pre>` ao lado dele serem a mesma superfície; se alguém voltar ao
   // `vs-dark`, aparece o cinza #1e1e1e aqui.
   const fundo = await page.evaluate(() => {
@@ -120,4 +120,32 @@ test('sem o Monaco, o Tab no textarea recua o código e o Esc devolve a navegaç
   await expect(area).toHaveValue(antes + '  ');
   const focado = await page.evaluate(() => document.activeElement?.tagName);
   expect(focado).not.toBe('BODY');
+});
+
+test('o tema do editor equipado pinta o editor: o fundo e as palavras-chave', async ({ logado: page, banco }) => {
+  test.setTimeout(120_000);
+  // O Papel é o único claro: se o tema não chegasse, o fundo seria o verde-escuro do padrão.
+  banco.perfil.tema_editor = 'papel';
+
+  await page.goto('/lesson/lesson-js-1');
+  await irAteOEditor(page);
+
+  const fundo = await page.evaluate(() => {
+    const el = document.querySelector('.monaco-editor .monaco-editor-background')!;
+    return getComputedStyle(el).backgroundColor;
+  });
+  expect(fundo).toBe('rgb(246, 241, 231)');
+
+  // A cor da palavra-chave é a da paleta (`#8a3b12`), a que o teste de contraste confere.
+  await page.evaluate(() => window.monaco!.editor.getModels()[0].setValue('const total = 1;'));
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        const token = [...document.querySelectorAll('.monaco-editor .view-line span span')].find(
+          (s) => s.textContent === 'const'
+        );
+        return token ? getComputedStyle(token).color : null;
+      })
+    )
+    .toBe('rgb(138, 59, 18)');
 });

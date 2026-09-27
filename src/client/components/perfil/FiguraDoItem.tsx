@@ -1,13 +1,16 @@
 import type { ItemDaLoja } from '../../lib/economia';
 import { ACENTOS } from '../../lib/tema';
+import { temaDoEditor } from '../../lib/temas-do-editor';
 import { AVATARES, AvatarDesenhado, avatarPreset } from '../ui/Avatar';
 import { FundoDesenhado, ehFundo } from '../ui/Fundo';
 import { ComMoldura, ehMoldura } from '../ui/Moldura';
 import { VinhetaChamaDeVolta, VinhetaFloco, VinhetaJanela, VinhetaRaioDuplo } from '../ui/Ilustracao';
+import { MiniaturaDoEditor } from './PreviaDoEditor';
 
 /**
  * A figura de um item da loja, na cor que ele tem: o floco, o raio, a janela
- * pintada, o avatar — e a moldura num avatar de graça, o fundo como capa.
+ * pintada, o avatar — e a moldura num avatar de graça, o fundo como capa, o
+ * tema do editor como uma janela de código nas cores dele.
  */
 export function FiguraDoItem({ item }: { item: ItemDaLoja }) {
   if (item.id === 'congelar-sequencia') return <VinhetaFloco size={56} />;
@@ -24,6 +27,9 @@ export function FiguraDoItem({ item }: { item: ItemDaLoja }) {
         <AvatarDesenhado preset={AVATARES[0]} size={56} />
       </ComMoldura>
     ) : null;
+  }
+  if (item.tipo === 'editor') {
+    return <MiniaturaDoEditor tema={temaDoEditor(item.id.replace('editor-', ''))} />;
   }
   if (item.tipo === 'fundo') {
     const id = item.id.replace('fundo-', '');

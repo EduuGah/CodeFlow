@@ -17,9 +17,12 @@
 -- ------------------------------------------------------------ catálogo
 
 -- A checagem do tipo nasceu na 0009 com três categorias; aqui ganha duas.
+-- `not valid`: uma migração posterior alarga a lista (a 0020), e rodar esta
+-- de novo depois dela não pode falhar nas linhas que aquela permitiu. A lista
+-- mais nova volta a valer quando a migração dela roda de novo.
 alter table public.store_items drop constraint if exists store_items_tipo_check;
 alter table public.store_items add constraint store_items_tipo_check
-  check (tipo in ('consumivel', 'tema', 'avatar', 'moldura', 'fundo'));
+  check (tipo in ('consumivel', 'tema', 'avatar', 'moldura', 'fundo')) not valid;
 
 -- Espelho de `ITENS` em `src/client/lib/economia.ts` (o teste de migrações
 -- confere preço e tipo de cada um).
@@ -44,9 +47,11 @@ on conflict (id) do update
 
 -- As cores de destaque que o perfil aceita: as quatro da 0007 e as três
 -- novas (`src/client/lib/tema.ts`).
+-- `not valid` pelo mesmo motivo da checagem do tipo, acima: uma cor nova numa
+-- migração posterior não pode fazer esta falhar quando rodar de novo.
 alter table public.users drop constraint if exists users_accent_check;
 alter table public.users add constraint users_accent_check
-  check (accent in ('floresta', 'oceano', 'brasa', 'ameixa', 'grafite', 'meia-noite', 'crepusculo'));
+  check (accent in ('floresta', 'oceano', 'brasa', 'ameixa', 'grafite', 'meia-noite', 'crepusculo')) not valid;
 
 -- O id curto do que está equipado (`neon`, `aurora`), ou nulo.
 alter table public.users add column if not exists moldura text;

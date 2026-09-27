@@ -29,7 +29,11 @@ const dublê = vi.hoisted(() => {
           resposta = desconhecida
             ? { data: null, error: { code: '42703', message: `column users.${desconhecida} does not exist` } }
             : {
-                data: Object.fromEntries(colunas.split(', ').map((c) => [c, c === 'display_name' ? 'Ana' : `valor-${c}`])),
+                data: Object.fromEntries(
+                  colunas
+                    .split(', ')
+                    .map((c) => [c, c === 'display_name' ? 'Ana' : c === 'adesivos' ? ['pato', 42, 'cafe'] : `valor-${c}`])
+                ),
                 error: null,
               };
           return construtor;
@@ -64,6 +68,7 @@ import { fetchPerfil, updatePerfil } from './perfil';
 const ATE_A_0007 = ['display_name', 'avatar', 'theme', 'accent'];
 const DA_0011 = ['moldura', 'fundo'];
 const DA_0012 = ['titulo'];
+const DA_0020 = ['tema_editor', 'celebracao', 'icone_sequencia', 'adesivos'];
 
 beforeEach(() => {
   dublê.estado.selecionadas = [];
@@ -75,10 +80,26 @@ beforeEach(() => {
 
 describe('a leitura do perfil acompanha o banco', () => {
   it('com todas as migrações, lê tudo numa consulta só', async () => {
-    dublê.estado.conhecidas = new Set([...ATE_A_0007, ...DA_0011, ...DA_0012]);
+    dublê.estado.conhecidas = new Set([...ATE_A_0007, ...DA_0011, ...DA_0012, ...DA_0020]);
     const perfil = await fetchPerfil('u1');
     expect(dublê.estado.selecionadas).toHaveLength(1);
-    expect(perfil).toMatchObject({ displayName: 'Ana', moldura: 'valor-moldura', titulo: 'valor-titulo' });
+    expect(perfil).toMatchObject({
+      displayName: 'Ana',
+      moldura: 'valor-moldura',
+      titulo: 'valor-titulo',
+      temaEditor: 'valor-tema_editor',
+      celebracao: 'valor-celebracao',
+      iconeSequencia: 'valor-icone_sequencia',
+      // O que não é texto na lista não passa.
+      adesivos: ['pato', 'cafe'],
+    });
+    expect(perfil.error).toBeUndefined();
+  });
+
+  it('sem a 0020, o perfil continua valendo — só sem os itens gerais', async () => {
+    dublê.estado.conhecidas = new Set([...ATE_A_0007, ...DA_0011, ...DA_0012]);
+    const perfil = await fetchPerfil('u1');
+    expect(perfil).toMatchObject({ titulo: 'valor-titulo', temaEditor: null, adesivos: null });
     expect(perfil.error).toBeUndefined();
   });
 
@@ -92,7 +113,7 @@ describe('a leitura do perfil acompanha o banco', () => {
   it('sem a 0011 nem a 0012, ainda lê nome, avatar e cor', async () => {
     dublê.estado.conhecidas = new Set(ATE_A_0007);
     const perfil = await fetchPerfil('u1');
-    expect(dublê.estado.selecionadas).toHaveLength(3);
+    expect(dublê.estado.selecionadas).toHaveLength(4);
     expect(perfil).toMatchObject({ displayName: 'Ana', accent: 'valor-accent', moldura: null, titulo: null });
     expect(perfil.error).toBeUndefined();
   });
@@ -118,6 +139,12 @@ describe('a gravação diz qual migração falta', () => {
     expect(error).toContain('0012_titulos.sql');
     expect(registro.registrar).toHaveBeenCalledWith('falha_de_escrita', { operacao: 'updatePerfil', codigo: 'PGRST204' });
     expect(JSON.stringify(registro.registrar.mock.calls)).not.toMatch(/schema cache/);
+  });
+
+  it('tema do editor (e os outros itens gerais) sem a 0020 pede a 0020', async () => {
+    dublê.estado.erroNaGravacao = semColuna;
+    expect((await updatePerfil('u1', { temaEditor: 'noturno' })).error).toContain('0020_itens_gerais.sql');
+    expect((await updatePerfil('u1', { adesivos: ['pato'] })).error).toContain('0020_itens_gerais.sql');
   });
 
   it('moldura sem a 0011 pede a 0011', async () => {
