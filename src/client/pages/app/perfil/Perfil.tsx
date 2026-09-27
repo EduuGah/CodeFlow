@@ -18,6 +18,7 @@ import { Button } from '../../../components/ui/Button';
 import { Card, cardClasses } from '../../../components/ui/Card';
 import { IconArrowRight, IconBolt, IconCoin, IconEdit, IconExit, IconFreeze } from '../../../components/ui/Icon';
 import { IconeDaSequencia } from '../../../components/ui/IconeDaSequencia';
+import { FileiraDeAdesivos } from '../../../components/perfil/FileiraDeAdesivos';
 import {
   VinhetaAlvo,
   VinhetaCaixa,
@@ -161,6 +162,7 @@ export function Perfil() {
             para o nível {level.level + 1}
             {level.proximoMudaTitulo ? ` — vira ${level.nextTitle}` : ''}
           </p>
+          <FileiraDeAdesivos ids={perfil.adesivos} size={36} className="mt-2" />
         </div>
 
         <div className="flex shrink-0 flex-col gap-2 sm:flex-row">

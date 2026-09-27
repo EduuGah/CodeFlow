@@ -1,13 +1,20 @@
 import type { ItemDaLoja } from './economia';
-import type { MudancasDoPerfil } from './perfil';
+import { MAXIMO_DE_ADESIVOS, type MudancasDoPerfil, type Perfil } from './perfil';
 import { ACENTOS } from './tema';
 
 /**
  * O que equipar um item muda no perfil — a mesma gravação que o inventário
  * faz, para a loja oferecer "Equipar agora" logo depois da compra e a prévia
  * mostrar o item no lugar certo. Consumível não se equipa: `null`.
+ *
+ * O adesivo não troca um pelo outro: entra no fim da lista do perfil — e,
+ * com ela cheia (ou com ele já lá), não há o que equipar agora: `null`, e a
+ * troca é no inventário.
  */
-export function mudancaDeEquipar(item: ItemDaLoja): Partial<MudancasDoPerfil> | null {
+export function mudancaDeEquipar(
+  item: ItemDaLoja,
+  perfil?: Pick<Perfil, 'adesivos'>
+): Partial<MudancasDoPerfil> | null {
   switch (item.tipo) {
     case 'avatar':
       return { avatar: `preset:${item.id.replace(/^avatar-/, '')}` };
@@ -25,8 +32,12 @@ export function mudancaDeEquipar(item: ItemDaLoja): Partial<MudancasDoPerfil> | 
       return { celebracao: item.id.replace(/^celebracao-/, '') };
     case 'sequencia':
       return { iconeSequencia: item.id.replace(/^sequencia-/, '') };
-    // Adesivo não troca um pelo outro: são até três, escolhidos no inventário.
-    case 'adesivo':
+    case 'adesivo': {
+      const id = item.id.replace(/^adesivo-/, '');
+      const atuais = perfil?.adesivos ?? [];
+      if (atuais.includes(id) || atuais.length >= MAXIMO_DE_ADESIVOS) return null;
+      return { adesivos: [...atuais, id] };
+    }
     case 'consumivel':
       return null;
   }

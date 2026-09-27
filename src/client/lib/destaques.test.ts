@@ -21,10 +21,20 @@ describe('os destaques da semana', () => {
     expect(ids(destaquesDaSemana(SEGUNDA, 1, [], AGORA))).toEqual(ids(destaquesDaSemana(SEGUNDA, 1, [], AGORA)));
   });
 
-  it('a semana seguinte troca os três', () => {
-    const esta = new Set(ids(destaquesDaSemana(SEGUNDA, 1, [], AGORA)));
-    const proxima = ids(destaquesDaSemana(somarDias(SEGUNDA, 7), 1, [], AGORA));
-    for (const id of proxima) expect(esta.has(id), id).toBe(false);
+  it('a semana seguinte troca os três, em todo o ciclo', () => {
+    // Com tudo à venda (o sazonal dentro da janela) e nada comprado, a vitrine
+    // anda de três em três. Fora da janela, o sazonal é pulado e o próximo da
+    // fila entra no lugar — aí um item pode aparecer duas semanas seguidas, e
+    // tudo bem: é o mesmo que acontece quando a pessoa já tem um da vez. Antes
+    // o teste olhava uma semana só, fora da janela, e passava ou falhava
+    // conforme o catálogo punha o sazonal naquela semana.
+    const NA_JANELA = new Date('2026-12-20T12:00:00');
+    const semanas = Math.ceil(ORDEM_DA_VITRINE.length / DESTAQUES_POR_SEMANA);
+    for (let s = 0; s < semanas; s++) {
+      const esta = new Set(ids(destaquesDaSemana(somarDias(SEGUNDA, 7 * s), 1, [], NA_JANELA)));
+      const proxima = ids(destaquesDaSemana(somarDias(SEGUNDA, 7 * (s + 1)), 1, [], NA_JANELA));
+      for (const id of proxima) expect(esta.has(id), `semana ${s + 1}: ${id}`).toBe(false);
+    }
   });
 
   it('pula o que a pessoa já tem, pelo nível ou pela compra', () => {

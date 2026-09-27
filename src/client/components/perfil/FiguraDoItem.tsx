@@ -5,6 +5,7 @@ import { AVATARES, AvatarDesenhado, avatarPreset } from '../ui/Avatar';
 import { FundoDesenhado, ehFundo } from '../ui/Fundo';
 import { ComMoldura, ehMoldura } from '../ui/Moldura';
 import { VinhetaChamaDeVolta, VinhetaFloco, VinhetaJanela, VinhetaRaioDuplo } from '../ui/Ilustracao';
+import { AdesivoDesenhado, ehAdesivo } from '../ui/Adesivo';
 import { IconeDaSequencia } from '../ui/IconeDaSequencia';
 import { FiguraDaCelebracao } from './PreviaDaCelebracao';
 import { MiniaturaDoEditor } from './PreviaDoEditor';
@@ -41,6 +42,10 @@ export function FiguraDoItem({ item }: { item: ItemDaLoja }) {
         <IconeDaSequencia icone={item.id.replace('sequencia-', '')} dias={30} size={32} />
       </span>
     );
+  }
+  if (item.tipo === 'adesivo') {
+    const id = item.id.replace('adesivo-', '');
+    return ehAdesivo(id) ? <AdesivoDesenhado id={id} size={56} giro={-6} /> : null;
   }
   if (item.tipo === 'fundo') {
     const id = item.id.replace('fundo-', '');

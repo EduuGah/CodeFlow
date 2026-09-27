@@ -280,6 +280,20 @@ export const ITENS: ItemDaLoja[] = [
   ).map(([id, title, description, nivel]) =>
     cosmetico(`sequencia-${id}`, 'sequencia', `Sequência ${title}`, description, nivel)
   ),
+  // Adesivos (0020): até três no cabeçalho do perfil, escolhidos no
+  // inventário. Desenhos em `ui/Adesivo` — o de ramos não é o logotipo do Git.
+  ...(
+    [
+      ['pato', 'Pato de borracha', 'O colega que escuta você explicar o bug até achar sozinho.', 3],
+      ['ola-mundo', 'Olá, mundo', 'O planeta dizendo oi: o primeiro programa de todo mundo.', 4],
+      ['bug', 'Bug fofo', 'Um besouro de olhos grandes. Esse não quebra nada.', 5],
+      ['cafe', 'Café', 'Uma caneca com coração de espuma.', 6],
+      ['terminal', 'Terminal', 'A janela preta, o prompt verde.', 7],
+      ['ramos', 'Ramos', 'Um ramo que sai e volta: o merge que deu certo.', 8],
+      ['chaves', 'Chaves', 'Abre e fecha um bloco.', 10],
+      ['foguete', 'Foguete', 'Decolando, de lado, como num notebook.', 12],
+    ] as const
+  ).map(([id, title, description, nivel]) => cosmetico(`adesivo-${id}`, 'adesivo', `Adesivo ${title}`, description, nivel)),
   // Só por moedas (0018): épicos sem nível que os abra. O nível abre o último
   // cosmético lá pela semana 13 do aluno-modelo; estes são para onde as
   // moedas vão depois disso (P2-16). O teste de calibragem cobra que somem

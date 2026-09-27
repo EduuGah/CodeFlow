@@ -41,7 +41,7 @@ Números lidos do catálogo, não de memória.
 | Projetos | 10, com 34 critérios de aceitação — os 3 capstones são página + API + banco (motor 7), os outros 7 são JavaScript puro |
 | Conceitos | 151, com grafo de pré-requisitos |
 | Flashcards | 67 (93 conceitos ainda sem cartão) |
-| Testes | 3.875 de unidade + ~496 de navegador |
+| Testes | 3.890 de unidade + ~498 de navegador |
 | Pacote | 3.095 kB (851 kB comprimido) no chunk principal — o corpo das aulas vai junto (é quase metade), e separá-lo é o maior problema de performance aberto (P2-1b do roadmap). Aula, revisão, refazer erros, projeto e admin são rotas sob demanda (`App.tsx`), e o Zod só entra no chunk do admin; o Monaco são mais 3.362 kB (869 kB) num chunk à parte, baixado só quando o primeiro editor monta, e o worker de TypeScript (7 MB) só quando um modelo JS/TS abre. O motor de TypeScript não acrescentou arquivo; o de React acrescentou um chunk de 143 kB (47 kB) com o React e o ReactDOM como texto, baixado só por um exercício de React; o de SQL acrescentou o worker (49 kB) e o SQLite em WebAssembly (658 kB), baixados só por um exercício de SQL; o de Python acrescentou o worker (~22 kB) e o Pyodide inteiro (~13,5 MB: o WebAssembly do CPython, a biblioteca padrão zipada, o manifesto de pacotes), copiados para `/pyodide/` na build e baixados só por um exercício de Python |
 
 ## 4. Decisões que não devem ser desfeitas sem motivo forte
@@ -129,7 +129,10 @@ chegando depois não pode disparar o efeito da conclusão de novo. **O ícone
 da sequência** (`lib/icones-da-sequencia.ts`, desenhos em
 `ui/IconeDaSequencia.tsx`) só troca o desenho — a conta é a mesma; a planta
 cresce nos marcos que já rendem moedas (7 e 30 dias), e **não há raio**,
-porque o raio já é o "2× XP" ao lado. **Os destaques da semana** (`lib/destaques.ts`)
+porque o raio já é o "2× XP" ao lado. **Os adesivos** (`ui/Adesivo.tsx`) são
+até três no cabeçalho do perfil, na ordem em que foram colados; o limite é
+`MAXIMO_DE_ADESIVOS` na tela e a checagem da 0020 no banco, conferidos iguais
+por teste. **Os destaques da semana** (`lib/destaques.ts`)
 são um rodízio fixo, não sorteio: nenhum fica mais barato nem some, e a
 vitrine aponta para o cartão do item em vez de repeti-lo (cada item mora numa
 seção só — e os testes que filtram por nome não viram loteria da semana).
@@ -449,6 +452,10 @@ src/client/components/  Componentes
                         paleta, medalha, alvo, gráfico, floco, raio duplo,
                         cartões, caixa, bússola, relógio,
                         balão, editor, e a janela pintada na cor do tema
+  ui/Adesivo.tsx        Os oito adesivos do perfil (recorte branco, arte na
+                        paleta `P`) e o filtro do que vale mostrar
+  ui/IconeDaSequencia.tsx
+                        O ícone da sequência equipado, no traço de `Icon`
   ui/Emblema.tsx        O emblema de cada trilha (símbolo branco sobre a cor)
   ui/Cena.tsx           As cenas (360 × 220, animadas quando entram na
                         tela): editor, aulas, página, correção, cartões, desafio,
@@ -464,8 +471,9 @@ src/client/components/  Componentes
                         diz qual ícone cada conquista e desafio leva;
                         `AnelDeNivel` e `CabecalhoDaSecao`; `PreviaDoEditor`
                         (o tema do editor sem o Monaco),
-                        `PreviaDaCelebracao` (figura e prévia que toca) e
-                        `PreviaDaSequencia` (o selo com os dias)
+                        `PreviaDaCelebracao` (figura e prévia que toca),
+                        `PreviaDaSequencia` (o selo com os dias) e
+                        `FileiraDeAdesivos` (os adesivos do cabeçalho)
   lesson/               Um componente por tipo de exercício; `ExerciseAction`
                         e `ExerciseFeedback` são o botão e o retorno de todos;
                         `ExercicioDoPasso` escolhe o componente pelo tipo
@@ -519,7 +527,7 @@ docs/curriculo.md       Roadmap de conteúdo — fonte canônica
 ```bash
 npm run typecheck   # inclui e2e/ e playwright.config.ts
 npm run lint        # ESLint mínimo: typescript-eslint + react-hooks
-npm test            # 3.875 testes
+npm test            # 3.890 testes
 npm run test:e2e    # ~484 no navegador (antes: npx playwright install chromium;
                     # com um Chromium já instalado: PW_CHROMIUM=/caminho/do/chrome)
 npm run build
@@ -887,6 +895,14 @@ Cada uma custou tempo. Não repita.
   `['a,b']` de `['a', 'b']`. A 0020 separa de novo e compara a contagem
   (`string_to_array`): um elemento com vírgula dá mais, um nulo dá menos. A
   verificação no banco tenta os dois.
+- **O texto de um item com desenho inclui o texto do SVG.** O `>_` do
+  adesivo Terminal entrava no `toHaveText` do item, embora o SVG seja
+  decorativo. Para conferir o que o leitor de tela ouve, `toMatchAriaSnapshot`.
+- **Um teste de vitrine que olha uma semana só depende de onde o catálogo pôs
+  cada item.** "A semana seguinte troca os três" passava até o sazonal (fora
+  da janela, pulado) cair na semana do teste — aí o próximo da fila entra no
+  lugar e aparece duas vezes, como deve. O teste agora anda o ciclo inteiro
+  com tudo à venda.
 - **Um laço sem fim de verdade num teste de jsdom trava o próprio `vitest`**:
   o jsdom roda os scripts na mesma thread, e o prazo do teste precisa dela
   para disparar. Para provar a guarda de laço, os testes usam um laço que
@@ -1127,9 +1143,9 @@ JavaScript, Página, Git, Terminal, TypeScript, Web e o resto de Python.
 ## 9. Pendências do lado do usuário
 
 - **Rodar `supabase/migrations/0020_itens_gerais.sql` no SQL Editor.** As
-  categorias novas da loja e as colunas do perfil onde elas moram. Ela cresce
-  a cada categoria que chega (hoje: temas do editor, celebrações e ícones da
-  sequência) e pode rodar de novo.
+  quatro categorias novas da loja (temas do editor, celebrações, ícones da
+  sequência, adesivos) e as colunas do perfil onde elas moram. Pode rodar de
+  novo — quem rodou uma versão anterior dela roda esta por cima.
   Sem ela, a loja mostra os temas e o banco recusa a compra; equipar diz qual
   migração rodar. A 0011 mudou (a checagem de tipo ficou `not valid`): quem
   já a rodou não precisa rodar de novo.

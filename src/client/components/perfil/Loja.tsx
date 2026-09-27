@@ -5,7 +5,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useStudentData } from '../../contexts/StudentDataContext';
 import { useTema } from '../../contexts/TemaContext';
 import { mudancaDeEquipar } from '../../lib/equipar';
-import { nomeParaMostrar } from '../../lib/perfil';
+import { MAXIMO_DE_ADESIVOS, nomeParaMostrar } from '../../lib/perfil';
 import { inicioDaSemana } from '../../lib/desafios';
 import { destaquesDaSemana } from '../../lib/destaques';
 import { fetchInativos } from '../../lib/loja-admin';
@@ -84,6 +84,7 @@ const FILTROS: Array<{ id: Filtro; rotulo: string }> = [
   { id: 'editor', rotulo: 'Editor' },
   { id: 'celebracao', rotulo: 'Celebrações' },
   { id: 'sequencia', rotulo: 'Sequência' },
+  { id: 'adesivo', rotulo: 'Adesivos' },
   { id: 'consumivel', rotulo: 'Consumíveis' },
 ];
 
@@ -167,7 +168,7 @@ export function Loja() {
 
   /** Logo depois da compra, sem ir ao inventário: a mesma gravação dele. */
   const equiparAgora = async (item: ItemDaLoja) => {
-    const mudanca = mudancaDeEquipar(item);
+    const mudanca = mudancaDeEquipar(item, perfil);
     if (!mudanca) return;
     setEquipandoAgora(true);
     if (mudanca.accent) mudarAcento(mudanca.accent);
@@ -198,7 +199,12 @@ export function Loja() {
   /** O perfil como ficaria com o item equipado — nada é gravado. */
   const perfilCom = (item: ItemDaLoja) => {
     const mudanca = mudancaDeEquipar(item) ?? {};
+    // O adesivo entra no fim; com a fileira cheia, a prévia mostra ele no
+    // lugar do último — como ficaria depois da troca no inventário.
+    const adesivo = item.tipo === 'adesivo' ? item.id.replace(/^adesivo-/, '') : null;
+    const atuais = (perfil.adesivos ?? []).filter((a) => a !== adesivo);
     return {
+      adesivos: adesivo ? [...atuais.slice(0, MAXIMO_DE_ADESIVOS - 1), adesivo] : perfil.adesivos,
       avatar: mudanca.avatar ?? perfil.avatar,
       moldura: mudanca.moldura ?? perfil.moldura,
       fundo: mudanca.fundo ?? perfil.fundo,
@@ -226,7 +232,13 @@ export function Loja() {
     if (item.tipo === 'editor') {
       return { rotulo: 'Ver no editor', conteudo: <PreviaDoEditor tema={temaDoEditor(mudancaDeEquipar(item)?.temaEditor)} /> };
     }
-    if (item.tipo === 'avatar' || item.tipo === 'moldura' || item.tipo === 'fundo' || item.tipo === 'tema') {
+    if (
+      item.tipo === 'avatar' ||
+      item.tipo === 'moldura' ||
+      item.tipo === 'fundo' ||
+      item.tipo === 'tema' ||
+      item.tipo === 'adesivo'
+    ) {
       return {
         rotulo: 'Ver no meu perfil',
         conteudo: <PreviaDoPerfil nome={nome} nivel={level.level} fotoDoGoogle={fotoDoGoogle} {...perfilCom(item)} />,
@@ -283,6 +295,12 @@ export function Loja() {
       titulo: 'Ícone da sequência',
       nota: 'O desenho ao lado dos seus dias seguidos, no início e no perfil. A conta é a mesma; a chama é de todo mundo.',
       itens: ITENS.filter((i) => i.tipo === 'sequencia' && naLoja(i)),
+    },
+    {
+      tipo: 'adesivo',
+      titulo: 'Adesivos',
+      nota: 'Até três no cabeçalho do seu perfil, ao lado do nome. Abrem por nível ou por moedas; escolha no inventário.',
+      itens: ITENS.filter((i) => i.tipo === 'adesivo' && naLoja(i)),
     },
   ];
 
@@ -471,8 +489,19 @@ export function Loja() {
           {comprado === RECUPERAR_SEQUENCIA && ` Sua sequência está em ${sequencia.atual} dia${sequencia.atual === 1 ? '' : 's'}.`}
           {equipadoAgora === comprado
             ? ' Equipado.'
-            : itemComprado &&
-              mudancaDeEquipar(itemComprado) && (
+            : itemComprado?.tipo === 'adesivo' && !mudancaDeEquipar(itemComprado, perfil)
+              ? (
+                  <>
+                    {' '}
+                    Já há {MAXIMO_DE_ADESIVOS} no perfil:{' '}
+                    <Link to="/app/perfil/inventario" className="font-semibold underline">
+                      troque no inventário
+                    </Link>
+                    .
+                  </>
+                )
+              : itemComprado &&
+                mudancaDeEquipar(itemComprado, perfil) && (
                 <>
                   {' '}
                   <Button

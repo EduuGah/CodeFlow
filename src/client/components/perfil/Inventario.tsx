@@ -19,6 +19,8 @@ import { IconCheck, IconLock } from '../ui/Icon';
 import { VinhetaFloco, VinhetaJanela, VinhetaRaioDuplo } from '../ui/Ilustracao';
 import { EscolherTitulo } from './EscolherTitulo';
 import { IconeDaSequencia } from '../ui/IconeDaSequencia';
+import { ADESIVOS, AdesivoDesenhado, adesivosValidos } from '../ui/Adesivo';
+import { MAXIMO_DE_ADESIVOS } from '../../lib/perfil';
 import { FiguraDaCelebracao } from './PreviaDaCelebracao';
 import { MiniaturaDoEditor } from './PreviaDoEditor';
 
@@ -59,6 +61,12 @@ interface Peca {
   local?: boolean;
   /** O que dizer quando der certo, se não for "<título> equipado". */
   feito?: string;
+  /**
+   * Para o que se usa vários de uma vez (os adesivos): tirar só este, e por
+   * que não dá para pôr mais um agora.
+   */
+  tirar?: () => Promise<{ error?: string }>;
+  cheio?: string;
 }
 
 /** Quantos cosméticos (os de graça e os de conquista incluídos) já são da pessoa. */
@@ -75,6 +83,7 @@ export function contarCosmeticos(
     ...TEMAS_DO_EDITOR.map((t) => (t.item ? itemDaLoja(t.item) : undefined)),
     ...CELEBRACOES.map((c) => (c.item ? itemDaLoja(c.item) : undefined)),
     ...ICONES_DA_SEQUENCIA.map((i) => (i.item ? itemDaLoja(i.item) : undefined)),
+    ...ADESIVOS.map((id) => itemDaLoja(`adesivo-${id}`)),
   ];
   // Um sazonal fora da janela só conta para quem o tem.
   const contaveis = itens.filter((i) => !i || visivel(i, nivel, purchases));
@@ -272,6 +281,30 @@ export function Inventario() {
     };
   });
 
+  // Os adesivos entram no fim da fileira e saem de onde estiverem; a ordem é
+  // a de quem colou primeiro.
+  const colados = adesivosValidos(perfil.adesivos);
+  const adesivos: Peca[] = ADESIVOS.map((id) => {
+    const item = itemDaLoja(`adesivo-${id}`);
+    const titulo = item?.title ?? id;
+    const restantes = colados.filter((a) => a !== id);
+    return {
+      chave: `adesivo-${id}`,
+      titulo,
+      figura: <AdesivoDesenhado id={id} size={48} />,
+      item,
+      posse: posseDe(item, level.level, purchases),
+      equipado: colados.includes(id),
+      equipar: () => salvarPerfil({ adesivos: [...colados, id] }),
+      feito: `${titulo} no perfil.`,
+      tirar: () => salvarPerfil({ adesivos: restantes.length > 0 ? restantes : null }),
+      cheio:
+        colados.length >= MAXIMO_DE_ADESIVOS && !colados.includes(id)
+          ? `Já há ${MAXIMO_DE_ADESIVOS} no perfil: tire um para colar este.`
+          : undefined,
+    };
+  });
+
   const equipar = async (peca: Peca) => {
     setEquipando(peca.chave);
     const { error } = await peca.equipar();
@@ -285,6 +318,18 @@ export function Inventario() {
               : `${peca.titulo} não foi equipado. ${error}`,
           }
         : { ok: true, texto: peca.feito ?? `${peca.titulo} equipado.` }
+    );
+  };
+
+  const tirar = async (peca: Peca) => {
+    if (!peca.tirar) return;
+    setEquipando(peca.chave);
+    const { error } = await peca.tirar();
+    setEquipando(null);
+    setAviso(
+      error
+        ? { ok: false, texto: `${peca.titulo} não saiu do perfil. ${error}` }
+        : { ok: true, texto: `${peca.titulo} saiu do perfil.` }
     );
   };
 
@@ -307,6 +352,11 @@ export function Inventario() {
       titulo: 'Ícone da sequência',
       nota: 'O desenho ao lado dos seus dias seguidos, no início e no perfil.',
       pecas: emOrdem(iconesDaSequencia),
+    },
+    {
+      titulo: 'Adesivos',
+      nota: `Até ${MAXIMO_DE_ADESIVOS} no cabeçalho do seu perfil, na ordem em que você colar.`,
+      pecas: emOrdem(adesivos),
     },
   ];
 
@@ -368,23 +418,40 @@ export function Inventario() {
                   {peca.posse.tem ? (
                     <span className="flex flex-wrap items-center gap-2">
                       {peca.equipado ? (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-success-50 px-2 py-0.5 text-xs font-semibold text-success-700">
-                          <IconCheck size={12} strokeWidth={3} />
-                          Equipado
-                        </span>
+                        <>
+                          <span className="inline-flex items-center gap-1 rounded-full bg-success-50 px-2 py-0.5 text-xs font-semibold text-success-700">
+                            <IconCheck size={12} strokeWidth={3} />
+                            {peca.tirar ? 'No perfil' : 'Equipado'}
+                          </span>
+                          {peca.tirar && (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-8"
+                              loading={equipando === peca.chave}
+                              onClick={() => void tirar(peca)}
+                              aria-label={`Tirar ${peca.titulo}`}
+                            >
+                              Tirar
+                            </Button>
+                          )}
+                        </>
                       ) : (
                         <Button
                           size="sm"
                           variant="outline"
                           className="h-8"
                           loading={equipando === peca.chave}
+                          disabled={peca.cheio !== undefined}
+                          title={peca.cheio}
                           onClick={() => void equipar(peca)}
-                          aria-label={`Equipar ${peca.titulo}`}
+                          aria-label={`${peca.tirar ? 'Colar' : 'Equipar'} ${peca.titulo}`}
                         >
-                          Equipar
+                          {peca.tirar ? 'Colar' : 'Equipar'}
                         </Button>
                       )}
                       <span className="label-mono text-ink-faint">{ORIGEM[peca.posse.origem]}</span>
+                      {peca.cheio && <span className="block w-full text-xs text-ink-soft">{peca.cheio}</span>}
                     </span>
                   ) : 'conquista' in peca.posse ? (
                     // Não se vende: o caminho é a conquista, e é para lá que o link leva.

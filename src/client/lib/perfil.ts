@@ -45,6 +45,9 @@ const AVISO_DA_0020 =
 
 export type Tema = 'sistema' | 'claro' | 'escuro';
 
+/** Quantos adesivos cabem no cabeçalho do perfil — o banco confere o mesmo (0020). */
+export const MAXIMO_DE_ADESIVOS = 3;
+
 /** O que se grava do perfil; `undefined` deixa a coluna como está. */
 export interface MudancasDoPerfil {
   displayName: string | null;

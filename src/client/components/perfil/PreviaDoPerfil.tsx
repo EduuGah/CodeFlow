@@ -1,6 +1,7 @@
 import { Avatar } from '../ui/Avatar';
 import { FundoDesenhado, ehFundo } from '../ui/Fundo';
 import { ComMoldura } from '../ui/Moldura';
+import { FileiraDeAdesivos } from './FileiraDeAdesivos';
 
 /**
  * O cabeçalho do perfil em miniatura, para ver um item antes de comprar.
@@ -17,6 +18,7 @@ export function PreviaDoPerfil({
   moldura,
   fundo,
   cor,
+  adesivos,
 }: {
   nome: string;
   nivel: number;
@@ -26,6 +28,7 @@ export function PreviaDoPerfil({
   fundo: string | null;
   /** A amostra da cor de destaque, ou `undefined` para a da página. */
   cor?: string;
+  adesivos?: readonly string[] | null;
 }) {
   return (
     <div className="overflow-hidden rounded-xl border border-line bg-surface" data-previa>
@@ -45,6 +48,7 @@ export function PreviaDoPerfil({
         <span className="min-w-24 flex-1 pt-1">
           <span className="block truncate text-sm font-bold text-ink">{nome}</span>
           <span className="label-mono block whitespace-nowrap text-ink-faint">Nível {nivel}</span>
+          <FileiraDeAdesivos ids={adesivos} size={28} className="mt-1" />
         </span>
         <span
           className="shrink-0 rounded-lg bg-brand-600 px-2.5 py-1 text-xs font-bold text-white"

@@ -399,8 +399,20 @@ cresce e roda de novo):
    início, no perfil e no progresso; a conta da sequência não muda. **Sem
    raio**: ele já é o "2× XP" do cabeçalho, e os dois lado a lado diriam a
    mesma coisa.
-4. [ ] **Adesivos no perfil**: até três, escolhidos no inventário, no
+4. [x] **Adesivos no perfil**: até três, escolhidos no inventário, no
    cabeçalho do perfil.
+   Feito assim: oito (Pato de borracha, Olá mundo, Bug fofo, Café, Terminal,
+   Ramos, Chaves, Foguete), desenhos próprios num recorte branco com sombra
+   — o de ramos é um grafo de commits qualquer, não o logotipo do Git.
+   Colados no inventário na ordem escolhida, tirados de onde estiverem; o
+   quarto não entra, e o botão diz por quê. O limite mora em
+   `MAXIMO_DE_ADESIVOS` e na checagem da 0020, e o teste de migrações
+   confere que são o mesmo número. "Equipar agora" cola no fim da fileira;
+   com ela cheia, a loja manda trocar no inventário, e a prévia mostra o
+   novo no lugar do último.
+
+Com as quatro, a 0020 fechou: 21 itens novos no catálogo e quatro colunas
+no perfil, numa migração que roda de novo sem erro.
 
 Fora de escopo por decisão: loot box, sorteio pago com moeda, compra com
 dinheiro real de qualquer coisa que toque progresso (XP, nível, resposta,

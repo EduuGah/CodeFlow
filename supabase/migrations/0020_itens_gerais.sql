@@ -36,7 +36,15 @@ insert into public.store_items (id, price, tipo) values
   ('sequencia-sol', 60, 'sequencia'),
   ('sequencia-cafe', 130, 'sequencia'),
   ('sequencia-foguete', 300, 'sequencia'),
-  ('sequencia-planta', 600, 'sequencia')
+  ('sequencia-planta', 600, 'sequencia'),
+  ('adesivo-pato', 10, 'adesivo'),
+  ('adesivo-ola-mundo', 60, 'adesivo'),
+  ('adesivo-bug', 90, 'adesivo'),
+  ('adesivo-cafe', 130, 'adesivo'),
+  ('adesivo-terminal', 160, 'adesivo'),
+  ('adesivo-ramos', 300, 'adesivo'),
+  ('adesivo-chaves', 420, 'adesivo'),
+  ('adesivo-foguete', 680, 'adesivo')
 on conflict (id) do update
   set price = excluded.price,
       tipo = excluded.tipo;

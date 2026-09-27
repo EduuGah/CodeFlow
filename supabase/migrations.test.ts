@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest';
 
 import { ITENS, MOEDAS } from '../src/client/lib/economia';
 import { POR_PERIODO, RECOMPENSA } from '../src/client/lib/desafios';
+import { MAXIMO_DE_ADESIVOS } from '../src/client/lib/perfil';
 import { CHAVES_DE_EVENTO, TIPOS_DE_EVENTO } from '../src/client/lib/registro';
 import { type RespostaEnviada, resumirFeedback, resumirResposta } from '../src/client/lib/resposta';
 
@@ -350,6 +351,13 @@ describe('a loja no banco', () => {
     expect([...tipos.matchAll(/'(\w+)'/g)].map((m) => m[1]).sort()).toEqual([...TIPOS_DE_EVENTO].sort());
     const chaves = zero19.match(/where k not in \(([^)]*)\)/i)![1];
     expect([...chaves.matchAll(/'(\w+)'/g)].map((m) => m[1]).sort()).toEqual([...CHAVES_DE_EVENTO].sort());
+  });
+
+  it('o limite de adesivos do banco é o mesmo da tela', () => {
+    // Abaixo, a tela deixaria colar um que o banco recusa; acima, o banco
+    // guardaria um que a tela não mostra.
+    const zero20 = semComentarios(sql.find((f) => f.nome.startsWith('0020'))!.texto);
+    expect(Number(zero20.match(/cardinality\(adesivos\) <= (\d+)/)![1])).toBe(MAXIMO_DE_ADESIVOS);
   });
 
   it('o teto de moedas usa os números da economia', () => {

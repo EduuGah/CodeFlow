@@ -514,6 +514,45 @@ test('o ícone da sequência equipado aparece no início e no perfil; a planta c
   await expect(page.locator('[data-icone-sequencia="planta"]').first()).toHaveAttribute('data-estagio', 'broto');
 });
 
+test('adesivos: até três no cabeçalho do perfil, colados e tirados no inventário', async ({ logado: page, banco }) => {
+  semear(banco);
+  const ontem = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
+  for (const id of ['pato', 'bug', 'terminal', 'cafe']) {
+    banco.purchases.push({ item: `adesivo-${id}`, price: 10, created_at: ontem });
+  }
+  await page.goto('/app/perfil/inventario');
+  await esperarConteudo(page);
+  const secao = page.getByRole('region', { name: 'Adesivos' });
+
+  for (const nome of ['Pato de borracha', 'Bug fofo', 'Terminal']) {
+    await secao.getByRole('button', { name: `Colar Adesivo ${nome}` }).click();
+    await expect(secao.getByRole('listitem').filter({ hasText: `Adesivo ${nome}` })).toContainText('No perfil');
+  }
+  expect(banco.perfil.adesivos).toEqual(['pato', 'bug', 'terminal']);
+
+  // O quarto não cabe: o botão diz por quê, em vez de sumir.
+  const cafe = secao.getByRole('listitem').filter({ hasText: 'Adesivo Café' });
+  await expect(cafe.getByRole('button', { name: 'Colar Adesivo Café' })).toBeDisabled();
+  await expect(cafe).toContainText('Já há 3 no perfil: tire um para colar este.');
+
+  await page.goto('/app/perfil');
+  await esperarConteudo(page);
+  // O que o leitor de tela ouve: os nomes, na ordem em que foram colados. (O
+  // texto cru do item traz o `>_` do desenho do terminal; o nome, não.)
+  await expect(page.getByRole('list', { name: 'Adesivos' })).toMatchAriaSnapshot(`
+    - list "Adesivos":
+      - listitem: Pato de borracha
+      - listitem: Bug fofo
+      - listitem: Terminal
+  `);
+
+  // Tirar o do meio: os outros ficam, na ordem.
+  await page.goto('/app/perfil/inventario');
+  await secao.getByRole('button', { name: 'Tirar Adesivo Bug fofo' }).click();
+  await expect.poll(() => banco.perfil.adesivos).toEqual(['pato', 'terminal']);
+  await expect(cafe.getByRole('button', { name: 'Colar Adesivo Café' })).toBeEnabled();
+});
+
 test('um título ganho por conquista se escolhe no inventário e aparece ao lado do nome', async ({
   logado: page,
   banco,

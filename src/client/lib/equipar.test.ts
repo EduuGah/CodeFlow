@@ -12,6 +12,14 @@ describe('o que equipar muda no perfil', () => {
     expect(mudancaDeEquipar(itemDaLoja('editor-noturno')!)).toEqual({ temaEditor: 'noturno' });
   });
 
+  it('o adesivo entra no fim da fileira — e, cheia ou com ele já lá, fica para o inventário', () => {
+    const pato = itemDaLoja('adesivo-pato')!;
+    expect(mudancaDeEquipar(pato)).toEqual({ adesivos: ['pato'] });
+    expect(mudancaDeEquipar(pato, { adesivos: ['bug'] })).toEqual({ adesivos: ['bug', 'pato'] });
+    expect(mudancaDeEquipar(pato, { adesivos: ['pato'] })).toBeNull();
+    expect(mudancaDeEquipar(pato, { adesivos: ['bug', 'cafe', 'terminal'] })).toBeNull();
+  });
+
   it('consumível não se equipa', () => {
     expect(mudancaDeEquipar(itemDaLoja('congelar-sequencia')!)).toBeNull();
     expect(mudancaDeEquipar(itemDaLoja('dobro-de-xp')!)).toBeNull();
