@@ -90,6 +90,14 @@ select verificacao.ok(
   'concluir projeto'
 );
 select verificacao.recusa($$select public.concluir('completed_lessons', 'Aula Inventada!')$$, 'id_invalido', 'id fora do formato do catálogo');
+select verificacao.recusa($$select public.concluir('completed_lessons', '-comeca-com-hifen')$$, 'id_invalido', 'id que não começa por letra ou dígito');
+select verificacao.recusa($$select public.concluir('completed_lessons', repeat('a', 101))$$, 'id_invalido', 'id acima de 100 caracteres');
+select verificacao.recusa($$select public.concluir('completed_lessons', '')$$, 'id_invalido', 'id vazio');
+select public.concluir('completed_lessons', repeat('a', 100));
+select verificacao.ok(
+  (select repeat('a', 100) = any(completed_lessons) from public.users where id = auth.uid()),
+  'id de 100 caracteres ainda vale'
+);
 select verificacao.recusa($$select public.concluir('role', 'admin')$$, 'coluna_invalida', 'concluir só mexe nas duas listas');
 
 -- Autopromoção continua barrada.
@@ -143,6 +151,17 @@ select public.comprar_item('avatar-raposa');
 select verificacao.ok(
   (select count(*) from public.purchases where user_id = auth.uid()) = 1,
   'dentro da janela, com saldo, compra'
+);
+-- A função devolve a linha gravada (relida pelo id, sem `returning` numa variável).
+select verificacao.ok(
+  (select (c).item = 'moldura-neon' and (c).price = 170 from (select public.comprar_item('moldura-neon') as c) x),
+  'comprar moldura devolve a compra com o preço do catálogo'
+);
+select verificacao.recusa($$select public.comprar_item('moldura-neon')$$, 'item_ja_possuido', 'moldura também se compra uma vez');
+select public.comprar_item('fundo-grade');
+select verificacao.ok(
+  (select count(*) from public.purchases where user_id = auth.uid()) = 3,
+  'fundo se compra como os outros cosméticos'
 );
 
 -- ------------------------------------------------------------ admin
@@ -249,6 +268,29 @@ select verificacao.recusa(
   'users_avatar_formato', 'avatar fora do formato'
 );
 update public.users set avatar = 'preset:raposa', display_name = 'D' where id = auth.uid();
+select verificacao.recusa(
+  $$update public.users set avatar = 'preset:Raposa!' where id = auth.uid()$$,
+  'users_avatar_formato', 'preset fora do formato'
+);
+
+-- ------------------------------------------------------------ molduras e fundos (0011)
+update public.users set moldura = 'neon', fundo = 'aurora' where id = auth.uid();
+select verificacao.ok(
+  (select moldura = 'neon' and fundo = 'aurora' from public.users where id = auth.uid()),
+  'moldura e fundo equipados'
+);
+select verificacao.recusa(
+  $$update public.users set moldura = '<script>' where id = auth.uid()$$,
+  'users_moldura_formato', 'moldura fora do formato'
+);
+select verificacao.recusa(
+  $$update public.users set fundo = repeat('a', 41) where id = auth.uid()$$,
+  'users_fundo_formato', 'fundo acima do tamanho'
+);
+select verificacao.ok(
+  (select count(*) from public.store_items where tipo in ('moldura', 'fundo')) = 9,
+  'o catálogo tem as molduras e os fundos'
+);
 
 -- ------------------------------------------------------------ foto
 insert into storage.objects (bucket_id, name) values ('avatars', '00000000-0000-4000-8000-00000000000d/foto.jpg');

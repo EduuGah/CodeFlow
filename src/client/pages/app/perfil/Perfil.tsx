@@ -11,6 +11,8 @@ import { AnelDeNivel } from '../../../components/perfil/AnelDeNivel';
 import { EditarPerfil } from '../../../components/perfil/EditarPerfil';
 import { contarCosmeticos } from '../../../components/perfil/Inventario';
 import { Avatar } from '../../../components/ui/Avatar';
+import { FundoDesenhado, ehFundo } from '../../../components/ui/Fundo';
+import { ComMoldura } from '../../../components/ui/Moldura';
 import { Button } from '../../../components/ui/Button';
 import { Card, cardClasses } from '../../../components/ui/Card';
 import { IconArrowRight, IconBolt, IconCoin, IconEdit, IconExit, IconFreeze, IconStreak } from '../../../components/ui/Icon';
@@ -126,9 +128,13 @@ export function Perfil() {
 
   return (
     <div className="space-y-6">
+      {/* A capa, quando há uma: acima do cabeçalho, nunca atrás do texto. */}
+      {ehFundo(perfil.fundo) && <FundoDesenhado id={perfil.fundo} className="h-20 w-full rounded-xl sm:h-24" />}
       <header className="flex flex-wrap items-center gap-4">
         <AnelDeNivel nivel={level.level} fracao={level.xpIntoLevel / level.xpForNextLevel}>
-          <Avatar escolhido={perfil.avatar} fotoDoGoogle={fotoDoGoogle} nome={nome} size={72} />
+          <ComMoldura moldura={perfil.moldura} size={72}>
+            <Avatar escolhido={perfil.avatar} fotoDoGoogle={fotoDoGoogle} nome={nome} size={72} />
+          </ComMoldura>
         </AnelDeNivel>
 
         <div className="min-w-0 flex-1 basis-40">

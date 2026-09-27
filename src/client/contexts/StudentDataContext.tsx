@@ -4,7 +4,7 @@ import { getExercises, getLessonsOfTrack, listConcepts, listFlashcards, listTrac
 import { useAuth } from './AuthContext';
 import { useTemaOpcional } from './TemaContext';
 import { fetchAttempts, fetchFlashcardReviews, fetchProgress } from '../lib/progress';
-import { fetchPerfil, fetchPurchases, recordPurchase, updatePerfil, type Acento, type Perfil, type Tema } from '../lib/perfil';
+import { fetchPerfil, fetchPurchases, recordPurchase, updatePerfil, type MudancasDoPerfil, type Perfil } from '../lib/perfil';
 import { conceptsNeedingReview, masteryByConcept, overallStats, type Attempt, type ConceptMastery } from '../lib/mastery';
 import { computeAchievements, computeXp, levelFromXp } from '../lib/gamification';
 import { countCards, dueCount, type FlashcardReview } from '../lib/review';
@@ -110,7 +110,7 @@ interface StudentData {
 
   /** Compra um item da loja. Devolve a mensagem de erro, se houver. */
   comprar: (itemId: string) => Promise<{ error?: string }>;
-  salvarPerfil: (mudancas: Partial<{ displayName: string | null; avatar: string | null; theme: Tema; accent: Acento }>) => Promise<{ error?: string }>;
+  salvarPerfil: (mudancas: Partial<MudancasDoPerfil>) => Promise<{ error?: string }>;
 }
 
 const StudentDataContext = createContext<StudentData | undefined>(undefined);
@@ -119,7 +119,7 @@ const StudentDataContext = createContext<StudentData | undefined>(undefined);
 let dependentes: Map<string, number> | undefined;
 const DEPENDENTES = () => (dependentes ??= dependentesPorConceito(listConcepts()));
 
-const PERFIL_VAZIO: Perfil = { displayName: null, avatar: null, theme: null, accent: null };
+const PERFIL_VAZIO: Perfil = { displayName: null, avatar: null, theme: null, accent: null, moldura: null, fundo: null };
 
 export function StudentDataProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
@@ -230,7 +230,7 @@ export function StudentDataProvider({ children }: { children: React.ReactNode })
   );
 
   const salvarPerfil = useCallback(
-    async (mudancas: Partial<{ displayName: string | null; avatar: string | null; theme: Tema; accent: Acento }>) => {
+    async (mudancas: Partial<MudancasDoPerfil>) => {
       if (!userId) return { error: 'Sem sessão.' };
       const resultado = await updatePerfil(userId, mudancas);
       if (resultado.error) return resultado;
@@ -240,6 +240,8 @@ export function StudentDataProvider({ children }: { children: React.ReactNode })
         ...(mudancas.avatar !== undefined ? { avatar: mudancas.avatar } : {}),
         ...(mudancas.theme !== undefined ? { theme: mudancas.theme } : {}),
         ...(mudancas.accent !== undefined ? { accent: mudancas.accent } : {}),
+        ...(mudancas.moldura !== undefined ? { moldura: mudancas.moldura } : {}),
+        ...(mudancas.fundo !== undefined ? { fundo: mudancas.fundo } : {}),
       }));
       return {};
     },

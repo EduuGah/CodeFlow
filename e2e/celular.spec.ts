@@ -32,6 +32,11 @@ test.describe('celular', () => {
         const culpados: string[] = [];
 
         for (const el of document.querySelectorAll('body *')) {
+          // O que mora dentro de um <svg> é cortado pela caixa dele (o
+          // `overflow: hidden` padrão do navegador): uma capa desenhada com
+          // `slice` tem traços além da caixa que ninguém vê nem rola. A caixa
+          // do <svg> em si continua medida aqui.
+          if (el.parentElement?.closest('svg')) continue;
           const r = el.getBoundingClientRect();
           if (r.width === 0) continue;
 

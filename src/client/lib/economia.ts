@@ -25,10 +25,10 @@ export interface Purchase {
 
 /**
  * A categoria do item — o que ele é e onde aparece. Consumível se gasta;
- * o resto é aparência, comprada uma vez. Novas categorias (moldura, fundo,
- * título) entram aqui e na checagem de `store_items` (0009) juntas.
+ * o resto é aparência, comprada uma vez. Categoria nova entra aqui e na
+ * checagem de `store_items` juntas (a 0011 trouxe moldura e fundo).
  */
-export type TipoDeItem = 'consumivel' | 'tema' | 'avatar';
+export type TipoDeItem = 'consumivel' | 'tema' | 'avatar' | 'moldura' | 'fundo';
 
 /**
  * Quão longe na jornada o item mora. Por ora acompanha o nível que o libera
@@ -138,6 +138,43 @@ export const ITENS: ItemDaLoja[] = [
     description,
     price,
     tipo: 'avatar' as const,
+    raridade,
+    nivelQueLibera,
+  })),
+  // Molduras: um anel pintado na borda do avatar, sem mudar o tamanho dele —
+  // cabe dentro do anel de nível do perfil. Desenhos em `ui/Moldura`.
+  ...(
+    [
+      ['minimal', 'Minimal', 'Um fio duplo, sem mais nada.', 90, 3, 'comum'],
+      ['terminal', 'Terminal', 'Traços verdes de fósforo, como um cursor piscando.', 110, 4, 'comum'],
+      ['pixel', 'Pixel', 'Blocos quadrados em volta, de um jogo antigo.', 140, 6, 'incomum'],
+      ['neon', 'Neon', 'Dois tubos acesos, rosa e ciano.', 170, 8, 'incomum'],
+      ['ouro', 'Ouro', 'Aro dourado com folhas de louro embaixo.', 240, 12, 'raro'],
+    ] as const
+  ).map(([id, title, description, price, nivelQueLibera, raridade]) => ({
+    id: `moldura-${id}`,
+    title: `Moldura ${title}`,
+    description,
+    price,
+    tipo: 'moldura' as const,
+    raridade,
+    nivelQueLibera,
+  })),
+  // Fundos: a capa do perfil, uma faixa acima do cabeçalho — o texto nunca
+  // fica sobre o desenho. Desenhos em `ui/Fundo`.
+  ...(
+    [
+      ['grade', 'Grade', 'Papel quadriculado de caderno de exercícios.', 100, 3, 'comum'],
+      ['circuito', 'Circuito', 'Uma placa verde, com trilhas e soldas.', 150, 6, 'incomum'],
+      ['por-do-sol', 'Pôr do sol', 'Laranja para roxo, o sol baixando no horizonte.', 180, 9, 'incomum'],
+      ['aurora', 'Aurora', 'Faixas verdes e violeta num céu de estrelas.', 220, 11, 'raro'],
+    ] as const
+  ).map(([id, title, description, price, nivelQueLibera, raridade]) => ({
+    id: `fundo-${id}`,
+    title: `Fundo ${title}`,
+    description,
+    price,
+    tipo: 'fundo' as const,
     raridade,
     nivelQueLibera,
   })),

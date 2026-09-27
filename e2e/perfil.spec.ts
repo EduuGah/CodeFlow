@@ -288,3 +288,40 @@ test('o histórico de compras mostra cada compra e o que sobrou depois dela', as
   await expect(historico.getByRole('listitem').first()).toContainText('Congelar a sequência');
   await expect(historico.getByRole('listitem').first()).toContainText(`sobraram ${antes - 60}`);
 });
+
+test('moldura e fundo comprados se equipam no inventário e aparecem no perfil', async ({ logado: page, banco }) => {
+  semear(banco);
+  const agora = new Date().toISOString();
+  banco.purchases = [
+    { item: 'moldura-neon', price: 170, created_at: agora },
+    { item: 'fundo-aurora', price: 220, created_at: agora },
+  ];
+  await page.goto('/app/perfil/inventario');
+  await esperarConteudo(page);
+
+  const molduras = page.getByRole('region', { name: 'Molduras' });
+  await expect(molduras.getByRole('listitem').filter({ hasText: 'Sem moldura' })).toContainText('Equipado');
+  const neon = molduras.getByRole('listitem').filter({ hasText: 'Moldura Neon' });
+  await expect(neon).toContainText('comprado');
+  await neon.getByRole('button', { name: 'Equipar Moldura Neon' }).click();
+  await expect(page.getByRole('status').filter({ hasText: 'Moldura Neon equipado.' })).toBeVisible();
+
+  const fundos = page.getByRole('region', { name: 'Fundos' });
+  await fundos.getByRole('button', { name: 'Equipar Fundo Aurora' }).click();
+  await expect(page.getByRole('status').filter({ hasText: 'Fundo Aurora equipado.' })).toBeVisible();
+  expect(banco.perfil.moldura).toBe('neon');
+  expect(banco.perfil.fundo).toBe('aurora');
+
+  // No perfil: a capa acima do cabeçalho, e o anel na borda do avatar.
+  await page.goto('/app/perfil');
+  await esperarConteudo(page);
+  await expect(page.locator('svg[data-fundo="aurora"]')).toBeVisible();
+  await expect(page.locator('[data-moldura="neon"]').first()).toBeVisible();
+
+  // Tirar é uma escolha também.
+  await page.goto('/app/perfil/inventario');
+  await esperarConteudo(page);
+  await page.getByRole('region', { name: 'Molduras' }).getByRole('button', { name: 'Equipar Sem moldura' }).click();
+  await expect(page.getByRole('status').filter({ hasText: 'Moldura tirada.' })).toBeVisible();
+  expect(banco.perfil.moldura).toBeNull();
+});

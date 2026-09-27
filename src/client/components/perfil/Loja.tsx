@@ -60,6 +60,8 @@ type Filtro = 'todos' | TipoDeItem;
 const FILTROS: Array<{ id: Filtro; rotulo: string }> = [
   { id: 'todos', rotulo: 'Todos' },
   { id: 'avatar', rotulo: 'Avatares' },
+  { id: 'moldura', rotulo: 'Molduras' },
+  { id: 'fundo', rotulo: 'Fundos' },
   { id: 'tema', rotulo: 'Temas' },
   { id: 'consumivel', rotulo: 'Consumíveis' },
 ];
@@ -109,6 +111,18 @@ export function Loja() {
       titulo: 'Avatares',
       nota: 'Os que não vêm de graça — cada um abre no nível dele, ou antes, com moedas. Escolha em editar perfil.',
       itens: ITENS.filter((i) => i.tipo === 'avatar'),
+    },
+    {
+      tipo: 'moldura',
+      titulo: 'Molduras',
+      nota: 'Um anel na borda do avatar, no perfil e no início. Abrem por nível ou por moedas; equipe no inventário.',
+      itens: ITENS.filter((i) => i.tipo === 'moldura'),
+    },
+    {
+      tipo: 'fundo',
+      titulo: 'Fundos',
+      nota: 'A capa do perfil, acima do seu nome. Abrem por nível ou por moedas; equipe no inventário.',
+      itens: ITENS.filter((i) => i.tipo === 'fundo'),
     },
   ];
 
@@ -241,6 +255,15 @@ export function Loja() {
               {' '}
               <Link to="/app/perfil/aparencia" className="font-semibold underline">
                 Aplicar na aparência
+              </Link>
+              .
+            </>
+          )}
+          {/^(avatar|moldura|fundo)-/.test(comprado) && (
+            <>
+              {' '}
+              <Link to="/app/perfil/inventario" className="font-semibold underline">
+                Equipar no inventário
               </Link>
               .
             </>

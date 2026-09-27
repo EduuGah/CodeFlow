@@ -223,9 +223,16 @@ validadas por uma função `equipar(p_categoria, p_item)` que confere posse
 4. **Prévia**: `Visualizar` aplica o item no próprio cabeçalho do perfil (ou na
    janela pintada, para tema) sem gravar; `Comprar`; `Equipar agora` no retorno
    da compra, com a moeda indo ao saldo (movimento curto, reduzível).
-5. **Molduras e fundos** (novas vinhetas no padrão pintado): Terminal, Neon,
+5. [x] **Molduras e fundos** (novas vinhetas no padrão pintado): Terminal, Neon,
    Pixel, Minimal, Ouro; fundos terminal, grade, circuito, pôr do sol, aurora.
    Interpretações próprias — nada de identidade de terceiros.
+   Feito assim (0011): cinco molduras (Minimal, Terminal, Pixel, Neon, Ouro)
+   como anel pintado **sobre a borda** do avatar, sem mudar o tamanho — cabe
+   dentro do anel de nível; quatro fundos (Grade, Circuito, Pôr do sol,
+   Aurora) como capa **acima** do cabeçalho do perfil, nunca atrás de texto.
+   Inventário com "Sem moldura"/"Sem fundo"; a leitura do perfil tolera banco
+   sem a 0011. De carona: as migrações perderam o cifrão dentro de texto
+   (o editor do Supabase se confunde), com teste.
 6. **Temas novos** como pares de tokens (`data-accent`) com o teste de
    contraste cobrindo cada um nas duas variantes: leituras próprias de "escuro
    de editor", "Drácula", "Nord", "Tokyo Night", "Solarized", "Matrix" — nomes

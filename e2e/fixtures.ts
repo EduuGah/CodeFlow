@@ -45,7 +45,14 @@ export interface BancoFalso {
   /** Compras já feitas na loja. */
   purchases: Array<{ item: string; price: number; created_at: string }>;
   /** O perfil editável. */
-  perfil: { display_name: string | null; avatar: string | null; theme: string | null; accent: string | null };
+  perfil: {
+    display_name: string | null;
+    avatar: string | null;
+    theme: string | null;
+    accent: string | null;
+    moldura?: string | null;
+    fundo?: string | null;
+  };
   /** Escritas registradas, para o teste conferir que o progresso foi salvo. */
   escritas: Array<{ tabela: string; corpo: unknown }>;
   /** Caminhos cuja leitura falha (500), para os testes de rede ruim. */
@@ -173,7 +180,7 @@ async function dublarSupabase(page: Page, banco: BancoFalso) {
       const linha = Array.isArray(corpo) ? corpo[0] : corpo;
       if (linha?.completed_lessons) banco.completed_lessons = linha.completed_lessons;
       if (linha?.completed_projects) banco.completed_projects = linha.completed_projects;
-      for (const campo of ['display_name', 'avatar', 'theme', 'accent'] as const) {
+      for (const campo of ['display_name', 'avatar', 'theme', 'accent', 'moldura', 'fundo'] as const) {
         if (campo in (linha ?? {})) banco.perfil[campo] = linha[campo];
       }
 

@@ -41,7 +41,7 @@ Números lidos do catálogo, não de memória.
 | Projetos | 10, com 34 critérios de aceitação — os 3 capstones são página + API + banco (motor 7), os outros 7 são JavaScript puro |
 | Conceitos | 151, com grafo de pré-requisitos |
 | Flashcards | 67 (93 conceitos ainda sem cartão) |
-| Testes | 3.472 de unidade + ~452 de navegador |
+| Testes | 3.474 de unidade + ~454 de navegador |
 | Pacote | 3.095 kB (851 kB comprimido) no chunk principal — o corpo das aulas vai junto (é quase metade), e separá-lo é o maior problema de performance aberto (P2-1b do roadmap). Aula, revisão, refazer erros, projeto e admin são rotas sob demanda (`App.tsx`), e o Zod só entra no chunk do admin; o Monaco são mais 3.362 kB (869 kB) num chunk à parte, baixado só quando o primeiro editor monta, e o worker de TypeScript (7 MB) só quando um modelo JS/TS abre. O motor de TypeScript não acrescentou arquivo; o de React acrescentou um chunk de 143 kB (47 kB) com o React e o ReactDOM como texto, baixado só por um exercício de React; o de SQL acrescentou o worker (49 kB) e o SQLite em WebAssembly (658 kB), baixados só por um exercício de SQL; o de Python acrescentou o worker (~22 kB) e o Pyodide inteiro (~13,5 MB: o WebAssembly do CPython, a biblioteca padrão zipada, o manifesto de pacotes), copiados para `/pyodide/` na build e baixados só por um exercício de Python |
 
 ## 4. Decisões que não devem ser desfeitas sem motivo forte
@@ -78,7 +78,11 @@ cada item ganhou raridade — que acompanha o nível que o libera e só existe
 no código, porque nenhuma regra do servidor a lê — e a loja, filtros por
 categoria e o saldo preso no topo; na segunda, o **inventário**
 (`/app/perfil/inventario`): o que é seu, de onde veio (`posseDe`), o que
-está equipado, e o que falta para o resto; na terceira, o **histórico de
+está equipado, e o que falta para o resto; na quinta (antes da quarta, que
+é a prévia), **molduras** — um anel pintado sobre a borda do avatar, sem
+mudar o tamanho, então cabe dentro do anel de nível — e **fundos**, a capa
+do perfil, uma faixa acima do cabeçalho: texto nunca fica sobre o desenho,
+e o contraste não depende de qual fundo a pessoa escolheu (0011); na terceira, o **histórico de
 compras**, com o que sobrou depois de cada uma — recontado até aquele
 instante, porque não há saldo guardado (`historicoDeCompras`). O que se
 compra: **congelar a sequência** (um dia sem estudar não
@@ -414,7 +418,8 @@ src/client/components/  `caderno/`: a resposta no formato do exercício
                         (`RespostaDoAluno`) e o enunciado numa linha
                         (`TextoEmLinha`, sem o leitor de Markdown inteiro)
 e2e/                    Playwright; `fixtures.ts` tem o dublê do Supabase
-supabase/migrations/    0001 a 0010, aplicadas em ordem (0010: o que foi
+supabase/migrations/    0001 a 0011, aplicadas em ordem (0011: molduras e
+                        fundos na loja e no perfil; 0010: o que foi
                         respondido em cada erro, para o Caderno de Erros;
                         0009: conclusão atômica, admin sem PII, demo imutável,
                         compra no servidor, ritmo de escrita; 0007: perfil,
@@ -427,7 +432,7 @@ docs/curriculo.md       Roadmap de conteúdo — fonte canônica
 ```bash
 npm run typecheck   # inclui e2e/ e playwright.config.ts
 npm run lint        # ESLint mínimo: typescript-eslint + react-hooks
-npm test            # 3.472 testes
+npm test            # 3.474 testes
 npm run test:e2e    # ~410 no navegador (antes: npx playwright install chromium;
                     # com um Chromium já instalado: PW_CHROMIUM=/caminho/do/chrome)
 npm run build
@@ -753,6 +758,10 @@ Cada uma custou tempo. Não repita.
   leitura nova com `.eq`/`.not` recebe o histórico inteiro, e a tela parece
   certa pelo motivo errado. A leitura do caderno ganhou os dois filtros dela
   em `fixtures.ts`; uma leitura filtrada nova precisa do mesmo.
+- **O SQL Editor do Supabase também se confunde com cifrão dentro de texto**
+  no corpo de uma função (`'…{0,99}$'` numa regex): ele o lê como começo de um
+  bloco `$$`. Âncora de fim se escreve como "nada fora do conjunto"
+  (`x !~ '[^a-z0-9-]'`). O mesmo teste recusa.
 - **O SQL Editor do Supabase corta função que grava resultado com INTO.** Um
   ajudante de RLS do editor lê `select … into x`, `returning … into x` e
   `execute … into x` como criação da tabela `x` e injeta comandos no meio do
@@ -1000,6 +1009,13 @@ Faltam ~19 aulas da lista original — outras trilhas do Fundamentos de
 JavaScript, Página, Git, Terminal, TypeScript, Web e o resto de Python.
 
 ## 9. Pendências do lado do usuário
+
+- **Rodar `supabase/migrations/0011_loja_molduras_fundos_cores.sql` no SQL
+  Editor.** Categorias novas no catálogo (`moldura`, `fundo`) e os itens delas,
+  e as colunas `users.moldura` e `users.fundo`. Sem ela, a loja mostra os
+  itens mas o banco recusa a compra ("não está à venda"), e equipar diz qual
+  migração rodar; o resto do perfil continua (a leitura tolera a falta das
+  colunas).
 
 - **Rodar `supabase/migrations/0010_caderno_de_erros.sql` no SQL Editor.** Duas
   colunas opcionais em `exercise_attempts` (`resposta`, `feedback`) com teto de

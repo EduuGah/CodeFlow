@@ -5,7 +5,9 @@ import { useStudentData } from '../../contexts/StudentDataContext';
 import { useTema } from '../../contexts/TemaContext';
 import { itemDaLoja, posseDe, RARIDADES, type ItemDaLoja, type Posse, type Purchase } from '../../lib/economia';
 import { ACENTOS } from '../../lib/tema';
-import { AVATARES, AvatarDesenhado } from '../ui/Avatar';
+import { AVATARES, AvatarDesenhado, avatarPreset } from '../ui/Avatar';
+import { FUNDOS, FundoDesenhado, ehFundo } from '../ui/Fundo';
+import { ComMoldura, MOLDURAS, ehMoldura } from '../ui/Moldura';
 import { Button } from '../ui/Button';
 import { SectionLabel, cardClasses } from '../ui/Card';
 import { IconCheck, IconLock } from '../ui/Icon';
@@ -20,7 +22,8 @@ import { VinhetaFloco, VinhetaJanela, VinhetaRaioDuplo } from '../ui/Ilustracao'
  * nível, comprada — porque a origem é parte do que ela significa. O que está
  * trancado diz o nível que abre e o preço, e leva à loja; nada aqui vende.
  *
- * Equipar é um toque: o avatar e a cor valem na hora e vão para a conta.
+ * Equipar é um toque: vale na hora e vai para a conta. Moldura e fundo têm
+ * também o "sem": tirar é uma escolha tão legítima quanto pôr.
  */
 
 const ORIGEM: Record<Extract<Posse, { tem: true }>['origem'], string> = {
@@ -37,13 +40,19 @@ interface Peca {
   posse: Posse;
   equipado: boolean;
   equipar: () => Promise<{ error?: string }>;
+  /** A cor vale neste aparelho mesmo se a conta não gravar; o resto, não. */
+  local?: boolean;
+  /** O que dizer quando der certo, se não for "<título> equipado". */
+  feito?: string;
 }
 
-/** Quantos cosméticos (avatares e cores, os de graça incluídos) já são da pessoa. */
+/** Quantos cosméticos (os de graça incluídos) já são da pessoa. */
 export function contarCosmeticos(nivel: number, purchases: Purchase[]): { seus: number; total: number } {
   const itens = [
     ...AVATARES.map((p) => itemDaLoja(`avatar-${p.id}`)),
     ...ACENTOS.map((a) => (a.item ? itemDaLoja(a.item) : undefined)),
+    ...MOLDURAS.map((id) => itemDaLoja(`moldura-${id}`)),
+    ...FUNDOS.map((id) => itemDaLoja(`fundo-${id}`)),
   ];
   return { seus: itens.filter((i) => posseDe(i, nivel, purchases).tem).length, total: itens.length };
 }
@@ -88,8 +97,68 @@ export function Inventario() {
         mudarAcento(a.id);
         return salvarPerfil({ accent: a.id });
       },
+      local: true,
     };
   });
+
+  // As molduras aparecem no avatar da própria pessoa (ou num de graça, se ela
+  // usa foto): é assim que ela vai vê-las.
+  const base = avatarPreset(perfil.avatar?.startsWith('preset:') ? perfil.avatar.slice('preset:'.length) : '') ?? AVATARES[0];
+  const molduraAtual = ehMoldura(perfil.moldura) ? perfil.moldura : null;
+  const molduras: Peca[] = [
+    {
+      chave: 'moldura-nenhuma',
+      titulo: 'Sem moldura',
+      figura: <AvatarDesenhado preset={base} size={48} />,
+      item: undefined,
+      posse: { tem: true, origem: 'livre' },
+      equipado: molduraAtual === null,
+      equipar: () => salvarPerfil({ moldura: null }),
+      feito: 'Moldura tirada.',
+    },
+    ...MOLDURAS.map((id): Peca => {
+      const item = itemDaLoja(`moldura-${id}`);
+      return {
+        chave: `moldura-${id}`,
+        titulo: item?.title ?? id,
+        figura: (
+          <ComMoldura moldura={id} size={48}>
+            <AvatarDesenhado preset={base} size={48} />
+          </ComMoldura>
+        ),
+        item,
+        posse: posseDe(item, level.level, purchases),
+        equipado: molduraAtual === id,
+        equipar: () => salvarPerfil({ moldura: id }),
+      };
+    }),
+  ];
+
+  const fundoAtual = ehFundo(perfil.fundo) ? perfil.fundo : null;
+  const fundos: Peca[] = [
+    {
+      chave: 'fundo-nenhum',
+      titulo: 'Sem fundo',
+      figura: <span className="block h-12 w-20 rounded-lg border border-dashed border-line-strong bg-sunken" />,
+      item: undefined,
+      posse: { tem: true, origem: 'livre' },
+      equipado: fundoAtual === null,
+      equipar: () => salvarPerfil({ fundo: null }),
+      feito: 'Fundo tirado.',
+    },
+    ...FUNDOS.map((id): Peca => {
+      const item = itemDaLoja(`fundo-${id}`);
+      return {
+        chave: `fundo-${id}`,
+        titulo: item?.title ?? id,
+        figura: <FundoDesenhado id={id} className="h-12 w-20 rounded-lg" />,
+        item,
+        posse: posseDe(item, level.level, purchases),
+        equipado: fundoAtual === id,
+        equipar: () => salvarPerfil({ fundo: id }),
+      };
+    }),
+  ];
 
   const equipar = async (peca: Peca) => {
     setEquipando(peca.chave);
@@ -97,13 +166,20 @@ export function Inventario() {
     setEquipando(null);
     setAviso(
       error
-        ? { ok: false, texto: `${peca.titulo} vale neste aparelho, mas não foi salvo na sua conta. ${error}` }
-        : { ok: true, texto: `${peca.titulo} equipado.` }
+        ? {
+            ok: false,
+            texto: peca.local
+              ? `${peca.titulo} vale neste aparelho, mas não foi salvo na sua conta. ${error}`
+              : `${peca.titulo} não foi equipado. ${error}`,
+          }
+        : { ok: true, texto: peca.feito ?? `${peca.titulo} equipado.` }
     );
   };
 
   const secoes = [
     { titulo: 'Avatares', nota: 'O que aparece no seu perfil e na tela inicial.', pecas: emOrdem(avatares) },
+    { titulo: 'Molduras', nota: 'Um anel na borda do seu avatar.', pecas: emOrdem(molduras) },
+    { titulo: 'Fundos', nota: 'A capa do seu perfil, acima do seu nome.', pecas: emOrdem(fundos) },
     { titulo: 'Cores de destaque', nota: 'A cor dos botões, das barras e dos destaques.', pecas: emOrdem(cores) },
   ];
 

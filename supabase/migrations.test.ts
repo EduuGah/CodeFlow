@@ -110,6 +110,8 @@ describe('as tabelas esperadas existem', () => {
       'avatar',
       'theme',
       'accent',
+      'moldura',
+      'fundo',
     ]) {
       expect(TABELAS.get('users'), `users.${coluna}`).toContain(coluna);
     }
@@ -262,11 +264,18 @@ describe('a loja no banco', () => {
   it('o catálogo do banco tem os mesmos itens, preços e tipos do código', () => {
     // A compra lê o preço de `store_items`. Um item novo em `ITENS` que não
     // entrasse aqui seria recusado como indisponível; um preço diferente faria
-    // a loja mostrar um número e cobrar outro.
-    const semente = zero9.match(/insert into public\.store_items \(id, price, tipo\) values([\s\S]*?)on conflict/i)![1];
-    const noBanco = [...semente.matchAll(/\('([\w-]+)',\s*(\d+),\s*'(\w+)'\)/g)]
-      .map(([, id, preco, tipo]) => ({ id, price: Number(preco), tipo }))
-      .sort((a, b) => a.id.localeCompare(b.id));
+    // a loja mostrar um número e cobrar outro. O catálogo é a soma das
+    // sementes de todas as migrações, em ordem (a mais nova vence).
+    const catalogo = new Map<string, { id: string; price: number; tipo: string }>();
+    for (const { texto } of sql) {
+      const limpo = semComentarios(texto);
+      for (const [, semente] of limpo.matchAll(/insert into public\.store_items \(id, price, tipo\) values([\s\S]*?)on conflict/gi)) {
+        for (const [, id, preco, tipo] of semente.matchAll(/\('([\w-]+)',\s*(\d+),\s*'(\w+)'\)/g)) {
+          catalogo.set(id, { id, price: Number(preco), tipo });
+        }
+      }
+    }
+    const noBanco = [...catalogo.values()].sort((a, b) => a.id.localeCompare(b.id));
     const noCodigo = ITENS.map((i) => ({ id: i.id, price: i.price, tipo: i.tipo })).sort((a, b) =>
       a.id.localeCompare(b.id)
     );
@@ -348,6 +357,18 @@ describe('o caderno no banco', () => {
 });
 
 describe('o editor do Supabase consegue rodar cada migração', () => {
+  it('nenhum texto entre aspas tem cifrão', () => {
+    // O mesmo editor se confunde com cifrão dentro de texto no corpo de uma
+    // função (`'…{0,99}$'` numa expressão regular): ele o lê como começo de
+    // um bloco `$$`. Âncora de fim se escreve como "nada fora do conjunto".
+    for (const { nome, texto } of sql) {
+      const semBlocos = semComentarios(texto).replace(/\/\*[\s\S]*?\*\//g, '');
+      for (const [literal] of semBlocos.matchAll(/'(?:[^']|'')*'/g)) {
+        expect(literal.includes('$'), `${nome}: ${literal}`).toBe(false);
+      }
+    }
+  });
+
   it('nenhum comando grava o resultado numa variável com INTO (só `insert into` de tabela)', () => {
     // O SQL Editor tem um ajudante de RLS que lê `select … into x`,
     // `returning … into x` e `execute … into x` como criação da tabela `x`, e

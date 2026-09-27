@@ -52,7 +52,9 @@ begin
 
   -- Os ids do catálogo: minúsculas, dígitos e hífen. Qualquer outra coisa é
   -- lixo que viraria moeda e XP (cada aula concluída rende os dois).
-  if p_id is null or p_id !~ '^[a-z0-9][a-z0-9-]{0,99}$' then
+  -- Sem âncora de fim com cifrão: o editor do Supabase se confunde com cifrão
+  -- dentro de texto no corpo da função. "Nada fora do conjunto" diz o mesmo.
+  if p_id is null or p_id !~ '^[a-z0-9]' or p_id ~ '[^a-z0-9-]' or char_length(p_id) > 100 then
     raise exception 'id_invalido' using errcode = '22023';
   end if;
 
@@ -223,7 +225,11 @@ alter table public.users add constraint users_display_name_tamanho
 
 alter table public.users drop constraint if exists users_avatar_formato;
 alter table public.users add constraint users_avatar_formato
-  check (avatar is null or avatar ~ '^preset:[a-z0-9-]{1,40}$' or avatar ~ '^https://') not valid;
+  check (
+    avatar is null
+    or (avatar ~ '^preset:[a-z0-9-]' and substr(avatar, 8) !~ '[^a-z0-9-]' and char_length(avatar) <= 47)
+    or avatar ~ '^https://'
+  ) not valid;
 
 -- ------------------------------------------------------------ 4. loja
 

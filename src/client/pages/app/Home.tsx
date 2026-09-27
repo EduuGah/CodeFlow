@@ -9,6 +9,7 @@ import { nomeParaMostrar } from '../../lib/perfil';
 import { PercursoCompacto } from '../../components/dashboard/Percurso';
 import { ListaDeDesafios } from '../../components/perfil/Desafios';
 import { Avatar } from '../../components/ui/Avatar';
+import { ComMoldura } from '../../components/ui/Moldura';
 import {
   IconArrowRight,
   IconBolt,
@@ -173,7 +174,9 @@ export function Home() {
                 {moedas.saldo}
               </span>
             )}
-            <Avatar escolhido={perfil.avatar} fotoDoGoogle={fotoDoGoogle} nome={nome} size={40} />
+            <ComMoldura moldura={perfil.moldura} size={40}>
+              <Avatar escolhido={perfil.avatar} fotoDoGoogle={fotoDoGoogle} nome={nome} size={40} />
+            </ComMoldura>
           </Link>
         )}
       </header>

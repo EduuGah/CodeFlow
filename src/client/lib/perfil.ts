@@ -30,7 +30,21 @@ function semMigracao(error: { code?: string; message: string }): boolean {
 const AVISO_DA_MIGRACAO =
   'O banco ainda não tem a tabela da loja e do perfil. Rode supabase/migrations/0007_perfil_e_loja.sql no SQL Editor do Supabase.';
 
+/** Moldura e fundo moram em colunas da 0011: sem ela, equipar diz o que rodar. */
+const AVISO_DA_0011 =
+  'O banco ainda não guarda molduras e fundos. Rode supabase/migrations/0011_loja_molduras_fundos_cores.sql no SQL Editor do Supabase.';
+
 export type Tema = 'sistema' | 'claro' | 'escuro';
+
+/** O que se grava do perfil; `undefined` deixa a coluna como está. */
+export interface MudancasDoPerfil {
+  displayName: string | null;
+  avatar: string | null;
+  theme: Tema;
+  accent: Acento;
+  moldura: string | null;
+  fundo: string | null;
+}
 export type Acento = 'floresta' | 'oceano' | 'brasa' | 'ameixa';
 
 export interface Perfil {
@@ -40,37 +54,46 @@ export interface Perfil {
   avatar: string | null;
   theme: Tema | null;
   accent: Acento | null;
+  /** O id curto da moldura equipada (`neon`), ou `null`. */
+  moldura: string | null;
+  /** O id curto do fundo equipado (`aurora`), ou `null`. */
+  fundo: string | null;
   error?: string;
 }
 
-const VAZIO: Perfil = { displayName: null, avatar: null, theme: null, accent: null };
+const VAZIO: Perfil = { displayName: null, avatar: null, theme: null, accent: null, moldura: null, fundo: null };
+
+const COLUNAS = 'display_name, avatar, theme, accent';
 
 export async function fetchPerfil(userId: string): Promise<Perfil> {
   if (!supabase) return { ...VAZIO, error: 'Supabase não configurado.' };
 
-  const { data, error } = await supabase
-    .from('users')
-    .select('display_name, avatar, theme, accent')
-    .eq('id', userId)
-    .maybeSingle();
+  const consulta = (colunas: string) => supabase!.from('users').select(colunas).eq('id', userId).maybeSingle();
+
+  let { data, error } = await consulta(`${COLUNAS}, moldura, fundo`);
+  // Banco sem a 0011: o perfil de antes continua valendo, sem moldura nem fundo.
+  if (error && semMigracao(error)) ({ data, error } = await consulta(COLUNAS));
 
   if (error) {
     console.error('Falha ao buscar o perfil:', error.message);
     return { ...VAZIO, error: 'Não foi possível carregar seu perfil.' };
   }
 
+  const linha = (data ?? null) as Record<string, string | null> | null;
   return {
-    displayName: data?.display_name ?? null,
-    avatar: data?.avatar ?? null,
-    theme: (data?.theme as Tema | null) ?? null,
-    accent: (data?.accent as Acento | null) ?? null,
+    displayName: linha?.display_name ?? null,
+    avatar: linha?.avatar ?? null,
+    theme: (linha?.theme as Tema | null) ?? null,
+    accent: (linha?.accent as Acento | null) ?? null,
+    moldura: linha?.moldura ?? null,
+    fundo: linha?.fundo ?? null,
   };
 }
 
 /** Grava só o que veio: `undefined` deixa a coluna como está. */
 export async function updatePerfil(
   userId: string,
-  mudancas: Partial<{ displayName: string | null; avatar: string | null; theme: Tema; accent: Acento }>
+  mudancas: Partial<MudancasDoPerfil>
 ): Promise<{ error?: string }> {
   if (!supabase) return { error: 'Supabase não configurado.' };
 
@@ -79,11 +102,20 @@ export async function updatePerfil(
   if (mudancas.avatar !== undefined) linha.avatar = mudancas.avatar;
   if (mudancas.theme !== undefined) linha.theme = mudancas.theme;
   if (mudancas.accent !== undefined) linha.accent = mudancas.accent;
+  if (mudancas.moldura !== undefined) linha.moldura = mudancas.moldura;
+  if (mudancas.fundo !== undefined) linha.fundo = mudancas.fundo;
 
   const { error } = await supabase.from('users').upsert(linha, { onConflict: 'id' });
   if (error) {
     console.error('Falha ao salvar o perfil:', error.message);
-    return { error: semMigracao(error) ? AVISO_DA_MIGRACAO : 'Não foi possível salvar. Tente de novo.' };
+    const daLoja = mudancas.moldura !== undefined || mudancas.fundo !== undefined;
+    return {
+      error: semMigracao(error)
+        ? daLoja
+          ? AVISO_DA_0011
+          : AVISO_DA_MIGRACAO
+        : 'Não foi possível salvar. Tente de novo.',
+    };
   }
   return {};
 }
