@@ -118,6 +118,7 @@ no SQL Editor do Supabase. Todas são idempotentes.
 | `0016_sazonais.sql` | O primeiro item sazonal (Fundo Fogos, de 15/12 a 15/01), com a janela de venda que o banco confere |
 | `0017_admin_da_loja.sql` | `definir_item_ativo`: o administrador tira um item da venda e devolve pela tela `/admin/loja` (a conta de demonstração não) |
 | `0018_so_por_moedas.sql` | Quatro épicos só por moedas (Dragão, Fênix, Engrenagens, Cidade): o destino das moedas depois que o nível abriu o resto |
+| `0019_eventos.sql` | O registro de eventos sem PII (só `insert`, com ritmo) e o agregado `saude_da_plataforma` para o painel de admin |
 
 Sem a 0007, o aplicativo carrega, mas editar o perfil, comprar na loja e
 enviar foto falham — e a própria tela diz qual migração rodar. Sem a 0009, tudo
@@ -141,7 +142,7 @@ Redirect URLs.
 
 ```bash
 npm run typecheck   # tipos, incluindo os testes de navegador
-npm test            # 3.749 testes de unidade, propriedade e componente (Vitest)
+npm test            # 3.767 testes de unidade, propriedade e componente (Vitest)
 npm run test:e2e    # 408 testes de navegador (Playwright, Chromium, celular e desktop)
 ```
 

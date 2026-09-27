@@ -1,7 +1,8 @@
+import { codigoDoErro, registrar } from './registro';
 import { supabase } from './supabase';
 import type { Attempt } from './mastery';
 import type { FlashcardReview, ReviewRating } from './review';
-import type { ExercisePerformance } from './admin';
+import type { ExercisePerformance, LinhaDeSaude } from './admin';
 import { lerResposta, resumirFeedback, resumirResposta, type EvidenciaDoErro, type RespostaEnviada } from './resposta';
 
 export interface UserProgress {
@@ -36,6 +37,7 @@ export async function fetchProgress(userId: string): Promise<UserProgress> {
 
   if (error) {
     console.error('Falha ao buscar progresso do aluno:', error.message);
+    registrar('falha_de_leitura', { operacao: 'fetchProgress', codigo: codigoDoErro(error) });
     return { ...EMPTY_PROGRESS, error: 'Não foi possível carregar seu progresso.' };
   }
 
@@ -117,7 +119,12 @@ export function markProjectCompleted(userId: string, projectId: string): Promise
 export interface Leitura<T> {
   dados: T[];
   erro?: string;
+  /** O código do erro do Postgres/PostgREST, para o registro (nunca a mensagem). */
+  codigo?: string;
 }
+
+/** Uma leitura acima disto vira `consulta_lenta` no registro. */
+export const CONSULTA_LENTA_MS = 2000;
 
 /**
  * Linhas por página. O Supabase corta toda resposta em `max-rows` (1.000 por
@@ -142,14 +149,18 @@ type Pagina = PromiseLike<{
  * leitura para quando juntou tudo — ou, sem contagem, na primeira página
  * incompleta.
  */
-export async function lerTodasAsPaginas<T>(consultar: (de: number, ate: number) => Pagina): Promise<Leitura<T>> {
+export async function lerTodasAsPaginas<T>(
+  consultar: (de: number, ate: number) => Pagina,
+  operacao?: string
+): Promise<Leitura<T>> {
   const dados: T[] = [];
   let total: number | null = null;
+  const inicio = Date.now();
 
   for (let pagina = 0; pagina < PAGINAS_NO_MAXIMO; pagina++) {
     const de = pagina * LINHAS_POR_PAGINA;
     const { data, error, count } = await consultar(de, de + LINHAS_POR_PAGINA - 1);
-    if (error) return { dados, erro: error.message };
+    if (error) return { dados, erro: error.message, codigo: codigoDoErro(error) };
 
     const linhas = (data ?? []) as T[];
     dados.push(...linhas);
@@ -159,6 +170,8 @@ export async function lerTodasAsPaginas<T>(consultar: (de: number, ate: number) 
     if (acabou || linhas.length === 0) break;
   }
 
+  const duracaoMs = Date.now() - inicio;
+  if (operacao && duracaoMs > CONSULTA_LENTA_MS) registrar('consulta_lenta', { operacao, duracaoMs });
   return { dados };
 }
 
@@ -222,7 +235,10 @@ export async function recordAttempt(userId: string, attempt: AttemptInput): Prom
     ({ error } = await supabase.from('exercise_attempts').insert(linha));
   }
 
-  if (error) console.error('Falha ao registrar tentativa:', error.message);
+  if (error) {
+    console.error('Falha ao registrar tentativa:', error.message);
+    registrar('falha_de_escrita', { operacao: 'recordAttempt', codigo: codigoDoErro(error), exercicio: attempt.exerciseId });
+  }
 }
 
 /**
@@ -252,6 +268,7 @@ export async function fetchSolvedExercises(
 
   if (error) {
     console.error('Falha ao buscar exercícios resolvidos:', error.message);
+    registrar('falha_de_leitura', { operacao: 'fetchSolvedExercises', codigo: codigoDoErro(error) });
     return [];
   }
 
@@ -279,10 +296,14 @@ export async function fetchAttempts(userId: string): Promise<Leitura<Attempt>> {
       .eq('user_id', userId)
       .order('created_at', { ascending: true })
       .order('id', { ascending: true })
-      .range(de, ate)
+      .range(de, ate),
+    'fetchAttempts'
   );
 
-  if (leitura.erro) console.error('Falha ao buscar tentativas:', leitura.erro);
+  if (leitura.erro) {
+    console.error('Falha ao buscar tentativas:', leitura.erro);
+    registrar('falha_de_leitura', { operacao: 'fetchAttempts', codigo: leitura.codigo });
+  }
 
   return {
     erro: leitura.erro ? 'Não foi possível carregar suas tentativas.' : undefined,
@@ -323,7 +344,8 @@ export async function fetchEvidencias(userId: string): Promise<Leitura<Evidencia
       .not('resposta', 'is', null)
       .order('created_at', { ascending: false })
       .order('id', { ascending: false })
-      .range(de, ate)
+      .range(de, ate),
+    'fetchEvidencias'
   );
 
   if (leitura.erro) {
@@ -332,6 +354,7 @@ export async function fetchEvidencias(userId: string): Promise<Leitura<Evidencia
       return { dados: [] };
     }
     console.error('Falha ao buscar o que foi respondido:', leitura.erro);
+    registrar('falha_de_leitura', { operacao: 'fetchEvidencias', codigo: leitura.codigo });
   }
 
   return {
@@ -359,7 +382,10 @@ export async function recordFlashcardReview(
     .from('flashcard_reviews')
     .insert({ user_id: userId, flashcard_id: flashcardId, rating });
 
-  if (error) console.error('Falha ao registrar revisão:', error.message);
+  if (error) {
+    console.error('Falha ao registrar revisão:', error.message);
+    registrar('falha_de_escrita', { operacao: 'recordFlashcardReview', codigo: codigoDoErro(error) });
+  }
 }
 
 /** Histórico de revisões do aluno. */
@@ -374,10 +400,14 @@ export async function fetchFlashcardReviews(userId: string): Promise<Leitura<Fla
       .eq('user_id', userId)
       .order('created_at', { ascending: true })
       .order('id', { ascending: true })
-      .range(de, ate)
+      .range(de, ate),
+    'fetchFlashcardReviews'
   );
 
-  if (leitura.erro) console.error('Falha ao buscar revisões:', leitura.erro);
+  if (leitura.erro) {
+    console.error('Falha ao buscar revisões:', leitura.erro);
+    registrar('falha_de_leitura', { operacao: 'fetchFlashcardReviews', codigo: leitura.codigo });
+  }
 
   return {
     erro: leitura.erro ? 'Não foi possível carregar suas revisões.' : undefined,
@@ -415,6 +445,7 @@ export async function fetchUserRole(userId: string): Promise<UserRole> {
 
   if (error) {
     console.error('Falha ao buscar o papel do usuário:', error.message);
+    registrar('falha_de_leitura', { operacao: 'fetchUserRole', codigo: codigoDoErro(error) });
     return 'student';
   }
 
@@ -438,6 +469,7 @@ export async function fetchExercisePerformance(): Promise<ExercisePerformance[]>
 
   if (error) {
     console.error('Falha ao buscar desempenho por exercício:', error.message);
+    registrar('falha_de_leitura', { operacao: 'fetchExercisePerformance', codigo: codigoDoErro(error) });
     return [];
   }
 
@@ -452,4 +484,22 @@ export async function fetchExercisePerformance(): Promise<ExercisePerformance[]>
     avgHintsUsed: Number(row.avg_hints_used ?? 0),
     attemptsPerStudent: Number(row.attempts_per_student ?? 0),
   }));
+}
+
+/**
+ * A saúde da plataforma: o agregado do registro de eventos (0019), por dia,
+ * tipo e onde — nunca quem. Só responde a admin. Sem a 0019, diz qual
+ * migração rodar.
+ */
+export async function fetchSaudeDaPlataforma(dias = 14): Promise<{ linhas: LinhaDeSaude[]; erro?: string }> {
+  if (!supabase) return { linhas: [] };
+  const { data, error } = await supabase.rpc('saude_da_plataforma', { p_dias: dias });
+  if (error) {
+    if (funcaoAusente(error)) {
+      return { linhas: [], erro: 'O banco ainda não registra eventos. Rode supabase/migrations/0019_eventos.sql no SQL Editor do Supabase.' };
+    }
+    console.error('Falha ao buscar a saúde da plataforma:', error.message);
+    return { linhas: [], erro: 'Não foi possível ler o registro de eventos.' };
+  }
+  return { linhas: (data ?? []) as LinhaDeSaude[] };
 }

@@ -7,6 +7,7 @@ import type { MensagemDeServico, RespostaDeServico } from './worker-servico';
 import type { SandboxProperty, SandboxTest } from './sandbox-core';
 import type { ErroDeCompilacao } from './typescript-core';
 import type { Troca } from './servidor-core';
+import { registrar } from './registro';
 
 export type { SandboxProperty, SandboxTest };
 
@@ -88,9 +89,14 @@ export function executeCode(
   return new Promise((resolve) => {
     let worker: Worker;
 
+    // Para o registro: qual motor falhou, se falhar. O prazo estourado pelo
+    // código do aluno não entra — é quase sempre o laço dele, não a plataforma.
+    const motor = opcoes.banco !== undefined ? 'servidor' : 'javascript';
+
     try {
       worker = opcoes.banco !== undefined ? new ServidorBancoWorker() : new SandboxWorker();
     } catch (error) {
+      registrar('falha_do_motor', { motor, etapa: 'criacao', nome: error instanceof Error ? error.name : undefined });
       resolve({
         output: '',
         logs: [],
@@ -118,6 +124,7 @@ export function executeCode(
     // Contar os 3s desde o `new Worker()` produzia "seu código passou de 3
     // segundos" para programas que nem tinham começado a rodar.
     timer = setTimeout(() => {
+      registrar('falha_do_motor', { motor, etapa: 'partida' });
       finish({
         output: '',
         logs: [],
@@ -153,6 +160,7 @@ export function executeCode(
     worker.onerror = (event) => {
       // Evita que o erro suba para o window.onerror da aplicação.
       event.preventDefault();
+      registrar('falha_do_motor', { motor, etapa: 'erro' });
       finish({
         output: '',
         logs: [],

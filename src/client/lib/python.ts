@@ -2,6 +2,7 @@ import PythonWorker from './python.worker?worker';
 import type { MensagemDoWorker } from './python.worker';
 import type { ExecucaoPython, ResultadoPython } from './python-core';
 import { EXECUTION_TIMEOUT_MS } from './sandbox';
+import { registrar } from './registro';
 
 export type { ExecucaoPython, ResultadoPython };
 
@@ -75,6 +76,8 @@ function preparar(): Promise<void> {
     };
   });
   pronto.catch(() => {
+    // A carga falhou (o WebAssembly não veio, ou não compilou a tempo).
+    registrar('falha_do_motor', { motor: 'python', etapa: 'carga' });
     if (worker === novo) descartar();
   });
   return pronto;

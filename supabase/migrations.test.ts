@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest';
 
 import { ITENS, MOEDAS } from '../src/client/lib/economia';
 import { POR_PERIODO, RECOMPENSA } from '../src/client/lib/desafios';
+import { CHAVES_DE_EVENTO, TIPOS_DE_EVENTO } from '../src/client/lib/registro';
 import { type RespostaEnviada, resumirFeedback, resumirResposta } from '../src/client/lib/resposta';
 
 /**
@@ -87,8 +88,9 @@ function colunasCriadas(texto: string): Map<string, Set<string>> {
 const TABELAS = colunasCriadas(tudo);
 
 describe('as tabelas esperadas existem', () => {
-  it('encontra users, exercise_attempts, flashcard_reviews, purchases e store_items', () => {
+  it('encontra users, exercise_attempts, flashcard_reviews, purchases, store_items e eventos', () => {
     expect([...TABELAS.keys()].sort()).toEqual([
+      'eventos',
       'exercise_attempts',
       'flashcard_reviews',
       'purchases',
@@ -312,6 +314,17 @@ describe('a loja no banco', () => {
     );
     expect(noCodigo.size).toBeGreaterThan(0);
     expect(Object.fromEntries(noBanco)).toEqual(Object.fromEntries(noCodigo));
+  });
+
+  it('o registro de eventos aceita os mesmos tipos e as mesmas chaves que o código manda', () => {
+    // Um tipo novo no código que o banco não conhece seria recusado em
+    // silêncio (o registro não registra a própria falha); uma chave a mais no
+    // banco abriria espaço para o que a lista branca não quer.
+    const zero19 = semComentarios(sql.find((f) => f.nome.startsWith('0019'))!.texto);
+    const tipos = zero19.match(/eventos_tipo_check\s+check \(tipo in \(([^)]*)\)/i)![1];
+    expect([...tipos.matchAll(/'(\w+)'/g)].map((m) => m[1]).sort()).toEqual([...TIPOS_DE_EVENTO].sort());
+    const chaves = zero19.match(/where k not in \(([^)]*)\)/i)![1];
+    expect([...chaves.matchAll(/'(\w+)'/g)].map((m) => m[1]).sort()).toEqual([...CHAVES_DE_EVENTO].sort());
   });
 
   it('o teto de moedas usa os números da economia', () => {

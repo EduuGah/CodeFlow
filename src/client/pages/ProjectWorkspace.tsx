@@ -17,6 +17,7 @@ import { MarkdownReader } from '../components/ui/MarkdownReader';
 import { Button } from '../components/ui/Button';
 import { Card, SectionLabel } from '../components/ui/Card';
 import { CodeEditor } from '../components/ui/CodeEditor';
+import { codigoDoErro, registrar } from '../lib/registro';
 import { Badge } from '../components/ui/Badge';
 import {
   IconCheckCircle,
@@ -195,6 +196,7 @@ export function ProjectWorkspace() {
         await markProjectCompleted(user.id, project.id);
       } catch (erro) {
         console.error('Falha ao salvar conclusão do projeto:', erro);
+        registrar('falha_de_escrita', { operacao: 'markProjectCompleted', codigo: codigoDoErro(erro) });
         setErroDeEntrega('A entrega não foi salva — a conexão falhou. Tente entregar de novo.');
         return;
       } finally {

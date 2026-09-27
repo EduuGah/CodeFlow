@@ -2,12 +2,16 @@ import { describe, expect, it } from 'vitest';
 
 import { getExercises, getLessonsOfTrack, listProjects, listTracks } from '../../content';
 import type { Exercise, Lesson } from '../../content/types';
+import { TIPOS_DE_EVENTO } from './registro';
 import {
   auditCatalog,
   diagnoseAll,
   diagnoseExercise,
   MINIMO_DE_ALUNOS,
+  resumirSaude,
+  ROTULO_DO_EVENTO,
   type ExercisePerformance,
+  type LinhaDeSaude,
 } from './admin';
 
 /**
@@ -168,5 +172,48 @@ describe('auditoria do catálogo real', () => {
     // Um exercício sem dica passa em todos os testes e ainda assim deixa o
     // aluno travado sem saída.
     expect(saude.exercisesWithoutHints).toEqual([]);
+  });
+});
+
+describe('a saúde da plataforma', () => {
+  const linha = (dia: string, tipo: LinhaDeSaude['tipo'], chave: string, eventos: number, pessoas: number): LinhaDeSaude => ({
+    dia,
+    tipo,
+    chave,
+    eventos,
+    pessoas,
+  });
+
+  it('soma por tipo, do mais frequente ao menos, com onde mais aconteceu', () => {
+    const resumo = resumirSaude([
+      linha('2026-09-27', 'falha_do_motor', 'python', 7, 3),
+      linha('2026-09-26', 'falha_do_motor', 'python', 5, 2),
+      linha('2026-09-26', 'falha_do_motor', 'sql', 1, 1),
+      linha('2026-09-27', 'consulta_lenta', 'fetchAttempts', 2, 2),
+    ]);
+    expect(resumo.map((r) => r.tipo)).toEqual(['falha_do_motor', 'consulta_lenta']);
+    expect(resumo[0]).toEqual({
+      tipo: 'falha_do_motor',
+      eventos: 13,
+      maisPessoasNumDia: 3,
+      principais: [
+        { chave: 'python', eventos: 12 },
+        { chave: 'sql', eventos: 1 },
+      ],
+    });
+  });
+
+  it('pessoas não se somam entre dias: a mesma pessoa em dois dias é "até 2 num dia", não 4', () => {
+    const [r] = resumirSaude([linha('2026-09-26', 'erro_de_tela', '/app', 2, 2), linha('2026-09-27', 'erro_de_tela', '/app', 2, 2)]);
+    expect(r.maisPessoasNumDia).toBe(2);
+  });
+
+  it('no máximo três lugares por tipo', () => {
+    const [r] = resumirSaude(['a', 'b', 'c', 'd'].map((c, i) => linha('2026-09-27', 'falha_de_leitura', c, i + 1, 1)));
+    expect(r.principais.map((p) => p.chave)).toEqual(['d', 'c', 'b']);
+  });
+
+  it('todo tipo de evento tem rótulo', () => {
+    for (const tipo of TIPOS_DE_EVENTO) expect(ROTULO_DO_EVENTO[tipo], tipo).toBeTruthy();
   });
 });

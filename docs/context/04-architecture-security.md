@@ -77,8 +77,8 @@ competição ou certificado.
 - **Frontend:** nada de `dangerouslySetInnerHTML`; o Markdown das aulas passa
   pelo `react-markdown` sem HTML cru. Cabeçalhos em `vercel.json` (nosniff,
   referrer, permissions); a CSP da aplicação está pendente (P2-7).
-- **Dados:** mínimo necessário, nada de senha, token ou código sensível em
-  registro.
+- **Dados:** mínimo necessário, nada de senha, token, código do aluno ou
+  mensagem de erro no registro de eventos.
 
 ## 5. Testes e observabilidade
 
@@ -91,5 +91,8 @@ competição ou certificado.
   com feedback errado sem um teste falhando.
 - **Um teste só vale se foi visto falhar:** cada regra nova é sabotada uma vez
   para provar que o teste a pega.
-- **Monitoramento:** ainda só `console.error`. O plano (P2-18) é um registro
-  com lista branca de campos, sem PII, numa tabela só de `insert`.
+- **Monitoramento:** `lib/registro.ts` manda eventos com lista branca de
+  campos — tipo, rota, operação, motor, nome e código do erro, duração —
+  para a tabela `eventos` (0019), que só recebe `insert` e ninguém lê pela
+  API. **Nunca a mensagem do erro**: ela carrega o que o aluno escreveu. A
+  administração vê o agregado ("Saúde", no painel).

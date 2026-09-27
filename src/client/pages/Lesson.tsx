@@ -26,6 +26,7 @@ import { EmblemaDaTrilha } from '../components/ui/Emblema';
 import { VinhetaMedalha } from '../components/ui/Ilustracao';
 import { MOEDAS } from '../lib/economia';
 import { XP } from '../lib/gamification';
+import { codigoDoErro, registrar } from '../lib/registro';
 
 /**
  * Aula em passos.
@@ -202,6 +203,7 @@ export function Lesson() {
       .then(() => setSalvamento((atual) => (atual?.aula === aula ? { aula, estado: 'salvo' } : atual)))
       .catch((erro) => {
         console.error('Falha ao salvar progresso da aula:', erro);
+        registrar('falha_de_escrita', { operacao: 'markLessonCompleted', codigo: codigoDoErro(erro) });
         setSalvamento((atual) => (atual?.aula === aula ? { aula, estado: 'falhou' } : atual));
       });
   }, []);

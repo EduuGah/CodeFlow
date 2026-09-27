@@ -41,7 +41,7 @@ Números lidos do catálogo, não de memória.
 | Projetos | 10, com 34 critérios de aceitação — os 3 capstones são página + API + banco (motor 7), os outros 7 são JavaScript puro |
 | Conceitos | 151, com grafo de pré-requisitos |
 | Flashcards | 67 (93 conceitos ainda sem cartão) |
-| Testes | 3.749 de unidade + ~478 de navegador |
+| Testes | 3.767 de unidade + ~484 de navegador |
 | Pacote | 3.095 kB (851 kB comprimido) no chunk principal — o corpo das aulas vai junto (é quase metade), e separá-lo é o maior problema de performance aberto (P2-1b do roadmap). Aula, revisão, refazer erros, projeto e admin são rotas sob demanda (`App.tsx`), e o Zod só entra no chunk do admin; o Monaco são mais 3.362 kB (869 kB) num chunk à parte, baixado só quando o primeiro editor monta, e o worker de TypeScript (7 MB) só quando um modelo JS/TS abre. O motor de TypeScript não acrescentou arquivo; o de React acrescentou um chunk de 143 kB (47 kB) com o React e o ReactDOM como texto, baixado só por um exercício de React; o de SQL acrescentou o worker (49 kB) e o SQLite em WebAssembly (658 kB), baixados só por um exercício de SQL; o de Python acrescentou o worker (~22 kB) e o Pyodide inteiro (~13,5 MB: o WebAssembly do CPython, a biblioteca padrão zipada, o manifesto de pacotes), copiados para `/pyodide/` na build e baixados só por um exercício de Python |
 
 ## 4. Decisões que não devem ser desfeitas sem motivo forte
@@ -135,6 +135,14 @@ que também abrem por nível. Nada compra resposta, dica nem avanço. Os
 cinco, dois por semana de seis; dias seguidos nunca repetem — e cumprir é
 receber: não há tabela de resgate. Os **níveis não têm teto**: o mínimo do
 nível *n* é `75·n·(n−1)`, e os títulos marcam faixas (Explorador… Mestre).
+
+**O registro de eventos nunca leva a mensagem de um erro** (`lib/registro.ts`,
+0019). A mensagem carrega o que o aluno escreveu, às vezes um e-mail; vai o
+nome do erro, o código do Postgres, a operação, o motor. A lista branca está
+nos dois lados — o cliente monta, o banco confere — e ninguém lê as linhas
+pela API, nem o admin: a seção "Saúde" do painel é o agregado. Falha nova de
+plataforma: `registrar(tipo, dados)` ao lado do `console.error`. O prazo
+estourado pelo código do aluno não é evento — é o laço dele.
 
 **Tema e cor de destaque são variáveis de CSS, não classes.** Todo token de
 cor do `@theme inline` aponta para uma variável em `:root`; o modo escuro e as
@@ -458,7 +466,8 @@ src/client/components/  `caderno/`: a resposta no formato do exercício
                         (`RespostaDoAluno`) e o enunciado numa linha
                         (`TextoEmLinha`, sem o leitor de Markdown inteiro)
 e2e/                    Playwright; `fixtures.ts` tem o dublê do Supabase
-supabase/migrations/    0001 a 0018, aplicadas em ordem (0018: épicos só
+supabase/migrations/    0001 a 0019, aplicadas em ordem (0019: registro
+                        de eventos; 0018: épicos só
                         por moedas; 0017: tirar item
                         da venda pela administração; 0016: o primeiro
                         sazonal; 0015: preços
@@ -479,8 +488,8 @@ docs/curriculo.md       Roadmap de conteúdo — fonte canônica
 ```bash
 npm run typecheck   # inclui e2e/ e playwright.config.ts
 npm run lint        # ESLint mínimo: typescript-eslint + react-hooks
-npm test            # 3.749 testes
-npm run test:e2e    # ~478 no navegador (antes: npx playwright install chromium;
+npm test            # 3.767 testes
+npm run test:e2e    # ~484 no navegador (antes: npx playwright install chromium;
                     # com um Chromium já instalado: PW_CHROMIUM=/caminho/do/chrome)
 npm run build
 
@@ -1072,6 +1081,11 @@ Faltam ~19 aulas da lista original — outras trilhas do Fundamentos de
 JavaScript, Página, Git, Terminal, TypeScript, Web e o resto de Python.
 
 ## 9. Pendências do lado do usuário
+
+- **Rodar `supabase/migrations/0019_eventos.sql` no SQL Editor.** O registro
+  de eventos. Sem ela, os eventos são recusados em silêncio (o registro não
+  registra a própria falha) e a seção "Saúde" do painel diz qual migração
+  rodar; nada mais muda.
 
 - **Rodar `supabase/migrations/0018_so_por_moedas.sql` no SQL Editor.** Só
   catálogo: os quatro épicos sem nível. Sem ela, a loja os mostra e o banco

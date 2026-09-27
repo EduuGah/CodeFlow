@@ -59,6 +59,10 @@ export interface BancoFalso {
    * venda — como fica depois de todas as migrações.
    */
   storeItems?: Array<{ id: string; price: number; tipo: string; ativo: boolean; disponivel_de: string | null; disponivel_ate: string | null }>;
+  /** O que o registro de eventos (0019) mandou, para o teste conferir o que saiu. */
+  eventos?: Array<{ tipo: string; dados: Record<string, unknown> }>;
+  /** O que `saude_da_plataforma` responde ao admin. */
+  saude?: Array<{ dia: string; tipo: string; chave: string; eventos: number; pessoas: number }>;
   /** Escritas registradas, para o teste conferir que o progresso foi salvo. */
   escritas: Array<{ tabela: string; corpo: unknown }>;
   /** Caminhos cuja leitura falha (500), para os testes de rede ruim. */
@@ -256,6 +260,16 @@ async function dublarSupabase(page: Page, banco: BancoFalso) {
       banco.purchases.push(linha);
       banco.escritas.push({ tabela: 'purchases', corpo: linha });
       return json(linha);
+    }
+
+    if (caminho === '/rest/v1/eventos') {
+      (banco.eventos ??= []).push(requisicao.postDataJSON());
+      return json(null, 201);
+    }
+
+    if (caminho === '/rest/v1/rpc/saude_da_plataforma') {
+      if (banco.role !== 'admin') return json({ code: '42501', message: 'apenas_admin' }, 403);
+      return json(banco.saude ?? []);
     }
 
     if (caminho === '/rest/v1/store_items') {

@@ -6,6 +6,7 @@ import { ErrorBoundary } from './components/ErrorBoundary'
 import { TemaProvider } from './contexts/TemaContext'
 import './index.css'
 import App from './App'
+import { instalarRegistroGlobal } from './lib/registro'
 
 // Um `import()` que falha porque o deploy trocou os nomes dos arquivos — a
 // aba ficou aberta de antes — vira uma recarga, uma vez só por sessão. Sem
@@ -24,6 +25,9 @@ window.addEventListener('vite:preloadError', (evento) => {
   evento.preventDefault()
   window.location.reload()
 })
+
+// Os erros que nenhuma tela pegou vão para o registro (sem mensagem, sem PII).
+instalarRegistroGlobal()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

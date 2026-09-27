@@ -221,6 +221,42 @@ select verificacao.ok((select ativo from public.store_items where id = 'avatar-u
 update public.store_items set ativo = false where id = 'avatar-urso';
 select verificacao.ok((select ativo from public.store_items where id = 'avatar-urso'), 'a loja não muda por UPDATE direto');
 
+-- ------------------------------------------------------------ eventos (0019)
+select set_config('request.jwt.claims', '{"sub": "00000000-0000-4000-8000-00000000000b", "email": "b@teste.local"}', true);
+insert into public.eventos (tipo, dados) values ('falha_de_leitura', '{"operacao": "fetchAttempts", "codigo": "57014"}');
+select verificacao.recusa($$select count(*) from public.eventos$$, 'permission denied', 'o aluno grava o evento e não lê nenhum (nem o próprio)');
+select verificacao.recusa(
+  $$insert into public.eventos (tipo, dados) values ('falha_de_leitura', '{"mensagem": "aluno@exemplo.com"}')$$,
+  'eventos_dados_formato', 'chave fora da lista branca'
+);
+select verificacao.recusa(
+  $$insert into public.eventos (tipo, dados) values ('falha_de_leitura', jsonb_build_object('rota', repeat('a', 1100)))$$,
+  'eventos_dados_formato', 'evento acima de 1 KiB'
+);
+select verificacao.recusa(
+  $$insert into public.eventos (tipo, dados) values ('qualquer_coisa', '{}')$$,
+  'eventos_tipo_check', 'tipo que não existe'
+);
+select verificacao.recusa(
+  $$insert into public.eventos (user_id, tipo, dados) values ('00000000-0000-4000-8000-00000000000a', 'erro_de_tela', '{}')$$,
+  'permission denied', 'evento em nome de outra pessoa'
+);
+-- Um laço de erro na tela: o excesso some em silêncio, sem erro de volta.
+insert into public.eventos (tipo, dados) select 'erro_de_tela', '{}' from generate_series(1, 40);
+select verificacao.recusa($$select public.saude_da_plataforma(14)$$, 'apenas_admin', 'aluno não lê a saúde');
+
+select set_config('request.jwt.claims', '{"sub": "00000000-0000-4000-8000-0000000000ad", "email": "adm@teste.local"}', true);
+select verificacao.ok(
+  (select sum(eventos) from public.saude_da_plataforma(14)) = 30,
+  'no máximo 30 por minuto da mesma pessoa (1 + 29 do laço)'
+);
+select verificacao.ok(
+  (select eventos = 1 and pessoas = 1 and chave = 'fetchAttempts'
+     from public.saude_da_plataforma(14) where tipo = 'falha_de_leitura'),
+  'a saúde agrega por tipo e onde, com quantas pessoas — sem dizer quem'
+);
+select verificacao.recusa($$select count(*) from public.eventos$$, 'permission denied', 'nem o admin lê as linhas do registro');
+
 -- ------------------------------------------------------------ anônimo
 set local role anon;
 select set_config('request.jwt.claims', '{}', true);
@@ -229,6 +265,11 @@ select verificacao.recusa($$select public.concluir('completed_lessons', 'lesson-
 select verificacao.recusa($$select public.desempenho_por_exercicio()$$, 'permission denied', 'anônimo não lê o painel');
 select verificacao.recusa($$select public.set_user_role('a@teste.local', 'admin')$$, 'permission denied', 'anônimo não promove ninguém');
 select verificacao.recusa($$select public.definir_item_ativo('avatar-urso', false)$$, 'permission denied', 'anônimo não mexe na loja');
+select verificacao.recusa(
+  $$insert into public.eventos (tipo, dados) values ('erro_de_tela', '{}')$$,
+  'permission denied', 'anônimo não grava evento'
+);
+select verificacao.recusa($$select public.saude_da_plataforma(14)$$, 'permission denied', 'anônimo não lê a saúde');
 
 -- ------------------------------------------------------------ ritmo
 set local role authenticated;

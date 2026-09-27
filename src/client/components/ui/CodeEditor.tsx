@@ -2,6 +2,7 @@ import { useEffect, useId, useRef, useState } from 'react';
 import Editor from '@monaco-editor/react';
 
 import type { LanguageId } from '../../../content/types';
+import { registrar } from '../../lib/registro';
 
 /**
  * O editor de código — o único.
@@ -46,6 +47,7 @@ function prepararMonaco(): Promise<void> {
       // novo que trocou os nomes dos arquivos) é a causa mais comum, e sem
       // isto a contingência parecia o comportamento normal do editor.
       console.error('[CodeFlow] O editor de código não carregou; entra o textarea.', erro);
+      registrar('falha_do_motor', { motor: 'editor', etapa: 'carga', nome: erro instanceof Error ? erro.name : undefined });
       estadoGlobal = 'falhou';
     }
   );

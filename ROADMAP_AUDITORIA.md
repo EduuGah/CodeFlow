@@ -97,9 +97,21 @@ A fazer, nesta ordem:
 5. Microinterações curtas, todas atrás de `prefers-reduced-motion`: moeda indo
    ao saldo na compra; pulso no contador de sequência no primeiro estudo do dia;
    anel de nível enchendo no aviso de nível.
-6. **Observabilidade leve** (P2-18): `lib/registro.ts` com lista branca, tabela
+6. [x] **Observabilidade leve** (P2-18): `lib/registro.ts` com lista branca, tabela
    `eventos` (0011) só com `insert` e ritmo, ganchos no `ErrorBoundary`,
    `unhandledrejection` e motores; "saúde" no painel de admin.
+   Feito assim (0019): a lista branca é o tipo, a rota (sem busca nem
+   âncora), a operação, o motor, a etapa, o nome do erro, o código do
+   Postgres, a duração e o id do exercício — **nunca** a mensagem, que
+   carrega o que o aluno escreveu. O banco confere de novo (chaves e 1 KiB),
+   o cliente só escreve `tipo` e `dados` (o `user_id` é sempre o
+   `auth.uid()`), ninguém lê as linhas pela API, e mais de 30 por minuto da
+   mesma pessoa somem em silêncio. Ganchos: `ErrorBoundary`, erros e
+   promessas sem tratamento deste site, as leituras e gravações de
+   `progress.ts`/`perfil.ts`, leitura paginada acima de 2 s, falha de
+   criação, partida, carga ou erro dos motores (o prazo estourado pelo
+   código do aluno **não** entra: é o laço dele, não a plataforma). A
+   administração vê "Saúde · últimos 14 dias" por tipo e onde, sem quem.
 
 ## Fase 6 — Aprendizado
 

@@ -1,3 +1,4 @@
+import { codigoDoErro, registrar } from './registro';
 import { supabase } from './supabase';
 import type { Purchase } from './economia';
 import { funcaoAusente, lerTodasAsPaginas, type Leitura } from './progress';
@@ -102,6 +103,7 @@ export async function fetchPerfil(userId: string): Promise<Perfil> {
 
   if (error) {
     console.error('Falha ao buscar o perfil:', error.message);
+    registrar('falha_de_leitura', { operacao: 'fetchPerfil', codigo: codigoDoErro(error) });
     return { ...VAZIO, error: 'Não foi possível carregar seu perfil.' };
   }
 
@@ -143,6 +145,7 @@ export async function updatePerfil(
   const { error } = await supabase.from('users').upsert(linha, { onConflict: 'id' });
   if (error) {
     console.error('Falha ao salvar o perfil:', error.message);
+    registrar('falha_de_escrita', { operacao: 'updatePerfil', codigo: codigoDoErro(error) });
     return { error: semMigracao(error) ? avisoDeMigracao(mudancas) : 'Não foi possível salvar. Tente de novo.' };
   }
   return {};
@@ -173,10 +176,14 @@ export async function fetchPurchases(userId: string): Promise<Leitura<Purchase>>
       .eq('user_id', userId)
       .order('created_at', { ascending: true })
       .order('id', { ascending: true })
-      .range(de, ate)
+      .range(de, ate),
+    'fetchPurchases'
   );
 
-  if (leitura.erro) console.error('Falha ao buscar compras:', leitura.erro);
+  if (leitura.erro) {
+    console.error('Falha ao buscar compras:', leitura.erro);
+    registrar('falha_de_leitura', { operacao: 'fetchPurchases', codigo: leitura.codigo });
+  }
 
   return {
     erro: leitura.erro ? 'Não foi possível carregar suas compras.' : undefined,
@@ -230,6 +237,7 @@ export async function recordPurchase(
 
   if (error) {
     console.error('Falha ao registrar compra:', error.message);
+    registrar('falha_de_escrita', { operacao: 'recordPurchase', codigo: codigoDoErro(error) });
     return { error: semMigracao(error) ? AVISO_DA_MIGRACAO : 'A compra não foi registrada. Tente de novo.' };
   }
   return { purchase: { item: data.item, price: data.price, createdAt: data.created_at } };
@@ -275,6 +283,7 @@ export async function uploadFoto(userId: string, foto: Blob): Promise<{ url?: st
   });
   if (error) {
     console.error('Falha ao enviar a foto:', error.message);
+    registrar('falha_de_escrita', { operacao: 'uploadFoto', codigo: codigoDoErro(error) });
     return { error: 'Não foi possível enviar a foto. Confira o tamanho e tente de novo.' };
   }
 

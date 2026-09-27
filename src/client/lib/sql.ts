@@ -2,6 +2,7 @@ import SqlWorker from './sql.worker?worker';
 import type { MensagemDoWorker } from './sql.worker';
 import type { ExecucaoSql, ResultadoSql } from './sql-core';
 import { EXECUTION_TIMEOUT_MS } from './sandbox';
+import { registrar } from './registro';
 
 export type { ExecucaoSql, ResultadoSql };
 
@@ -75,6 +76,8 @@ function preparar(): Promise<void> {
     };
   });
   pronto.catch(() => {
+    // A carga falhou (o WebAssembly não veio, ou não compilou a tempo).
+    registrar('falha_do_motor', { motor: 'sql', etapa: 'carga' });
     if (worker === novo) descartar();
   });
   return pronto;

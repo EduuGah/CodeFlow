@@ -2,12 +2,15 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import { getExercises, getLesson, getLessonsOfTrack, listProjects, listTracks } from '../../../content';
-import { fetchExercisePerformance } from '../../lib/progress';
+import { fetchExercisePerformance, fetchSaudeDaPlataforma } from '../../lib/progress';
 import {
   auditCatalog,
   diagnoseAll,
   MINIMO_DE_ALUNOS,
+  resumirSaude,
+  ROTULO_DO_EVENTO,
   type ExerciseDiagnosis,
+  type LinhaDeSaude,
   type ExercisePerformance,
 } from '../../lib/admin';
 import { IconArrowLeft, IconInfo } from '../../components/ui/Icon';
@@ -31,6 +34,9 @@ import { useDocumentTitle } from '../../hooks/useDocumentTitle';
  * conveniência.
  */
 
+/** A janela da seção de saúde. */
+const DIAS_DE_SAUDE = 14;
+
 const tomDoSinal: Record<ExerciseDiagnosis['signal'], BadgeTone> = {
   'revisar-enunciado': 'danger',
   'facil-demais': 'caution',
@@ -48,12 +54,16 @@ const rotuloDoSinal: Record<ExerciseDiagnosis['signal'], string> = {
 export function AdminContent() {
   useDocumentTitle('Administração');
   const [desempenho, setDesempenho] = useState<ExercisePerformance[] | null>(null);
+  const [plataforma, setPlataforma] = useState<{ linhas: LinhaDeSaude[]; erro?: string } | null>(null);
 
   useEffect(() => {
     let ativo = true;
 
     fetchExercisePerformance().then((dados) => {
       if (ativo) setDesempenho(dados);
+    });
+    fetchSaudeDaPlataforma(DIAS_DE_SAUDE).then((dados) => {
+      if (ativo) setPlataforma(dados);
     });
 
     return () => {
@@ -137,6 +147,50 @@ export function AdminContent() {
                   <span className="font-mono">{ids.join(', ')}</span>
                 </Card>
               ))}
+          </ul>
+        )}
+      </section>
+
+      <section className="mb-10" aria-labelledby="titulo-saude">
+        <h2 id="titulo-saude" className="label-mono mb-1 text-ink-faint">
+          Saúde · últimos {DIAS_DE_SAUDE} dias
+        </h2>
+        <p className="mb-4 text-sm leading-relaxed text-ink-soft">
+          O que quebrou do lado da plataforma, por tipo e onde. Vem do registro de eventos: sem mensagem de
+          erro, sem nome, sem e-mail — só o tipo, a operação ou o motor, e quantas vezes.
+        </p>
+        {!plataforma ? (
+          <Skeleton className="h-16 w-full rounded-xl" />
+        ) : plataforma.erro ? (
+          <Card tone="caution" className="text-sm text-energy-700">
+            {plataforma.erro}
+          </Card>
+        ) : plataforma.linhas.length === 0 ? (
+          <Card tone="success" className="flex items-start gap-2 text-sm leading-relaxed text-success-700">
+            <IconInfo size={16} className="mt-0.5 shrink-0" />
+            Nenhum evento registrado no período.
+          </Card>
+        ) : (
+          <ul className="space-y-2" data-saude>
+            {resumirSaude(plataforma.linhas).map((r) => (
+              <Card as="li" key={r.tipo}>
+                <div className="flex flex-wrap items-baseline justify-between gap-2">
+                  <span className="text-sm font-semibold text-ink">{ROTULO_DO_EVENTO[r.tipo]}</span>
+                  <span className="label-mono tabular-nums text-ink-faint">
+                    {r.eventos} {r.eventos === 1 ? 'vez' : 'vezes'} · até {r.maisPessoasNumDia}{' '}
+                    {r.maisPessoasNumDia === 1 ? 'pessoa' : 'pessoas'} num dia
+                  </span>
+                </div>
+                {r.principais.some((p) => p.chave) && (
+                  <p className="mt-1 text-xs leading-relaxed text-ink-soft">
+                    {r.principais
+                      .filter((p) => p.chave)
+                      .map((p) => `${p.chave} (${p.eventos})`)
+                      .join(' · ')}
+                  </p>
+                )}
+              </Card>
+            ))}
           </ul>
         )}
       </section>

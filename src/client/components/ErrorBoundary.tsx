@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { registrar } from '../lib/registro';
 import { buttonClasses } from './ui/Button';
 import { Card } from './ui/Card';
 import { IconArrowLeft, IconCloseCircle } from './ui/Icon';
@@ -31,6 +32,8 @@ export class ErrorBoundary extends React.Component<{ children: React.ReactNode }
 
   componentDidCatch(erro: Error, info: React.ErrorInfo) {
     console.error('Erro não tratado na interface:', erro, info.componentStack);
+    // Para o registro, o nome do erro e a rota — nunca a mensagem nem a pilha.
+    registrar('erro_de_tela', { nome: erro.name });
   }
 
   render() {

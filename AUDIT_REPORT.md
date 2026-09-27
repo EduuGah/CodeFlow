@@ -201,7 +201,7 @@ Legenda de estado: **Corrigido** (com teste, nesta rodada), **Parcial**,
 | P2-15 | Nenhum caminho para refazer um exercício errado; 62% dos conceitos sem flashcard | Parcial — caderno e refazer feitos (0010); faltam os flashcards |
 | P2-16 | Economia: cosméticos esgotam em ~8 semanas e competem com a liberação por nível | Corrigido (preço pelo nível, medido; épicos só por moedas depois da semana ~13) |
 | P2-17 | Documentação de arquitetura desatualizada | Corrigido |
-| P2-18 | Observabilidade: só `console.error` | Pendente |
+| P2-18 | Observabilidade: só `console.error` | Corrigido (0019) |
 | P3-1 | Código morto (funções, ícones, constantes) | Parcial |
 | P3-2 | Dependências sem uso e sobras do AI Studio | Corrigido |
 | P3-3 | Dois lockfiles (`bun.lock` e `package-lock.json`) | Pendente — investigar |
@@ -574,8 +574,12 @@ aplicação, os motores no navegador, o que ainda é autoridade do cliente) e
 `05` apontando para onde o roadmap mora de fato. Os princípios e as regras de
 trabalho dos dois ficaram como estavam.
 
-#### P2-18 · Observabilidade — Pendente
-Só `console.error`. Proposta na seção "Observabilidade".
+#### P2-18 · Observabilidade — Corrigido
+Era só `console.error`. Agora `lib/registro.ts` manda eventos com lista
+branca (nunca a mensagem do erro) para a tabela `eventos` (0019), que só
+recebe `insert` e não é lida pela API; a administração vê o agregado na
+seção "Saúde" do painel. Feito como a proposta da seção "Observabilidade",
+com uma correção: o prazo estourado pelo código do aluno não é registrado.
 
 ### P3 — baixo
 

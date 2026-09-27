@@ -53,6 +53,12 @@ const dublê = vi.hoisted(() => {
 
 vi.mock('./supabase', () => ({ supabase: dublê.cliente }));
 
+const registro = vi.hoisted(() => ({ registrar: vi.fn() }));
+vi.mock('./registro', async (original) => ({
+  ...(await original<typeof import('./registro')>()),
+  registrar: registro.registrar,
+}));
+
 import { fetchPerfil, updatePerfil } from './perfil';
 
 const ATE_A_0007 = ['display_name', 'avatar', 'theme', 'accent'];
@@ -64,6 +70,7 @@ beforeEach(() => {
   dublê.estado.gravadas = [];
   dublê.estado.erroNaGravacao = null;
   vi.spyOn(console, 'error').mockImplementation(() => {});
+  registro.registrar.mockClear();
 });
 
 describe('a leitura do perfil acompanha o banco', () => {
@@ -105,10 +112,12 @@ describe('a gravação diz qual migração falta', () => {
     expect(dublê.estado.gravadas).toEqual([{ id: 'u1', titulo: 'coruja' }]);
   });
 
-  it('título sem a 0012 pede a 0012', async () => {
+  it('título sem a 0012 pede a 0012 — e a falha vai para o registro, só com o código', async () => {
     dublê.estado.erroNaGravacao = semColuna;
     const { error } = await updatePerfil('u1', { titulo: 'coruja' });
     expect(error).toContain('0012_titulos.sql');
+    expect(registro.registrar).toHaveBeenCalledWith('falha_de_escrita', { operacao: 'updatePerfil', codigo: 'PGRST204' });
+    expect(JSON.stringify(registro.registrar.mock.calls)).not.toMatch(/schema cache/);
   });
 
   it('moldura sem a 0011 pede a 0011', async () => {

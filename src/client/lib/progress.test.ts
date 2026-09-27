@@ -78,6 +78,14 @@ const dublê = vi.hoisted(() => {
 
 vi.mock('./supabase', () => ({ supabase: dublê.cliente }));
 
+// O registro de eventos é de `registro.test.ts`; aqui, só se foi chamado e
+// com o quê — e nunca com a mensagem do erro.
+const registro = vi.hoisted(() => ({ registrar: vi.fn() }));
+vi.mock('./registro', async (original) => ({
+  ...(await original<typeof import('./registro')>()),
+  registrar: registro.registrar,
+}));
+
 const { fetchAttempts, fetchEvidencias, fetchExercisePerformance, LINHAS_POR_PAGINA, markLessonCompleted, recordAttempt } =
   await import('./progress');
 const { fetchPurchases, recordPurchase } = await import('./perfil');
@@ -88,6 +96,7 @@ beforeEach(() => {
   // As falhas simuladas aqui são registradas no console de propósito; no
   // teste, isso é ruído que ensinaria a ignorar o stderr.
   vi.spyOn(console, 'error').mockImplementation(() => {});
+  registro.registrar.mockClear();
   dublê.estado.chamadas = [];
   dublê.estado.responder = () => ({ data: [], error: null });
 });
@@ -199,6 +208,29 @@ describe('ler o histórico inteiro', () => {
 
     expect(dados).toHaveLength(LINHAS_POR_PAGINA);
     expect(erro).toMatch(/tentativas/);
+  });
+
+  it('a falha vai para o registro com o código e a operação, nunca com a mensagem', async () => {
+    dublê.estado.responder = () => ({
+      data: null,
+      error: { code: '57014', message: 'canceling statement due to statement timeout for aluno@exemplo.com' },
+    });
+
+    await fetchAttempts('u1');
+
+    expect(registro.registrar).toHaveBeenCalledWith('falha_de_leitura', { operacao: 'fetchAttempts', codigo: '57014' });
+    expect(JSON.stringify(registro.registrar.mock.calls)).not.toMatch(/timeout|aluno@/);
+  });
+
+  it('uma leitura inteira acima de dois segundos vira consulta lenta', async () => {
+    const agora = vi.spyOn(Date, 'now');
+    agora.mockReturnValueOnce(1_000).mockReturnValueOnce(3_500);
+    dublê.estado.responder = () => ({ data: [tentativa(0)], error: null });
+
+    await fetchAttempts('u1');
+    agora.mockRestore();
+
+    expect(registro.registrar).toHaveBeenCalledWith('consulta_lenta', { operacao: 'fetchAttempts', duracaoMs: 2_500 });
   });
 
   it('as compras também paginam e avisam a falha', async () => {

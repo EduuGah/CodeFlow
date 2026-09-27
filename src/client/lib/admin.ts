@@ -1,4 +1,5 @@
 import type { CodeExercise, Exercise, Lesson, Project } from '../../content/types';
+import type { TipoDeEvento } from './registro';
 
 /**
  * Diagnóstico de conteúdo para a administração.
@@ -155,4 +156,61 @@ export function auditCatalog(
     exercisesWithoutHints: exercises.filter((e) => e.hints.length === 0).map((e) => e.id),
     projectsWithoutSolution: projects.filter((p) => !p.referenceSolution).map((p) => p.id),
   };
+}
+
+// ------------------------------------------------------------ saúde
+
+/** Uma linha do agregado `saude_da_plataforma` (0019): um dia, um tipo, onde. */
+export interface LinhaDeSaude {
+  dia: string;
+  tipo: TipoDeEvento;
+  /** O motor, a operação ou a rota — o que diz onde aconteceu. */
+  chave: string;
+  eventos: number;
+  pessoas: number;
+}
+
+export const ROTULO_DO_EVENTO: Record<TipoDeEvento, string> = {
+  erro_de_tela: 'Tela que quebrou',
+  erro_nao_tratado: 'Erro fora das telas',
+  promessa_rejeitada: 'Promessa sem tratamento',
+  falha_de_leitura: 'Leitura que falhou',
+  falha_de_escrita: 'Gravação que falhou',
+  consulta_lenta: 'Leitura acima de 2 s',
+  falha_do_motor: 'Motor que não subiu',
+};
+
+export interface ResumoDeSaude {
+  tipo: TipoDeEvento;
+  eventos: number;
+  /** O dia com mais gente afetada: pessoas não se somam entre dias. */
+  maisPessoasNumDia: number;
+  /** Onde mais aconteceu, do mais frequente ao menos, até três. */
+  principais: Array<{ chave: string; eventos: number }>;
+}
+
+/** O agregado por tipo, do que mais aconteceu ao que menos. */
+export function resumirSaude(linhas: LinhaDeSaude[]): ResumoDeSaude[] {
+  const porTipo = new Map<TipoDeEvento, LinhaDeSaude[]>();
+  for (const linha of linhas) porTipo.set(linha.tipo, [...(porTipo.get(linha.tipo) ?? []), linha]);
+
+  return [...porTipo.entries()]
+    .map(([tipo, doTipo]) => {
+      const porChave = new Map<string, number>();
+      const pessoasPorDia = new Map<string, number>();
+      for (const l of doTipo) {
+        porChave.set(l.chave, (porChave.get(l.chave) ?? 0) + l.eventos);
+        pessoasPorDia.set(l.dia, (pessoasPorDia.get(l.dia) ?? 0) + l.pessoas);
+      }
+      return {
+        tipo,
+        eventos: doTipo.reduce((soma, l) => soma + l.eventos, 0),
+        maisPessoasNumDia: Math.max(0, ...pessoasPorDia.values()),
+        principais: [...porChave.entries()]
+          .map(([chave, eventos]) => ({ chave, eventos }))
+          .sort((a, b) => b.eventos - a.eventos || a.chave.localeCompare(b.chave))
+          .slice(0, 3),
+      };
+    })
+    .sort((a, b) => b.eventos - a.eventos || a.tipo.localeCompare(b.tipo));
 }
