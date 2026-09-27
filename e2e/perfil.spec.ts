@@ -351,3 +351,30 @@ test('uma cor nova comprada se aplica de verdade: o token da marca muda no naveg
   // As que não são dela continuam trancadas, dizendo o que abre.
   await expect(page.getByRole('button', { name: /Meia-noite/ })).toBeDisabled();
 });
+
+test('a prévia mostra o item no próprio perfil sem gravar, e "Equipar agora" grava depois da compra', async ({
+  logado: page,
+  banco,
+}) => {
+  semear(banco);
+  // Dezesseis aulas: saldo para a Pixel (140), que só abre de graça no nível 6.
+  banco.completed_lessons = Array.from({ length: 16 }, (_, i) => `lesson-js-${i + 1}`);
+  await page.goto('/app/perfil/loja');
+  await esperarConteudo(page);
+  await page.getByRole('group', { name: 'Mostrar' }).getByRole('button', { name: 'Molduras' }).click();
+
+  const pixel = page.getByRole('listitem').filter({ hasText: 'Moldura Pixel' });
+  await pixel.getByRole('button', { name: 'Ver no meu perfil' }).click();
+  await expect(pixel.getByRole('button', { name: 'Fechar a prévia' })).toHaveAttribute('aria-expanded', 'true');
+  await expect(pixel.locator('[data-previa] [data-moldura="pixel"]')).toBeVisible();
+  // Ver não é equipar: nada foi para o banco.
+  expect(banco.escritas.filter((e) => e.tabela === 'users')).toEqual([]);
+
+  await pixel.getByRole('button', { name: '140' }).click();
+  await pixel.getByRole('button', { name: /Confirmar por 140/ }).click();
+  const status = page.getByRole('status').filter({ hasText: 'Comprado: Moldura Pixel' });
+  await expect(status).toBeVisible();
+  await status.getByRole('button', { name: 'Equipar agora' }).click();
+  await expect(status).toContainText('Equipado.');
+  expect(banco.perfil.moldura).toBe('pixel');
+});

@@ -220,9 +220,18 @@ validadas por uma função `equipar(p_categoria, p_item)` que confere posse
    projetos, sem hora, entram como já ganhos em todas as linhas, e a tela
    diz quantas moedas são assim. A linha mais recente é, por teste, o saldo
    de hoje.
-4. **Prévia**: `Visualizar` aplica o item no próprio cabeçalho do perfil (ou na
+4. [x] **Prévia**: `Visualizar` aplica o item no próprio cabeçalho do perfil (ou na
    janela pintada, para tema) sem gravar; `Comprar`; `Equipar agora` no retorno
    da compra, com a moeda indo ao saldo (movimento curto, reduzível).
+   Feito assim: "Ver no meu perfil" abre, dentro do cartão, o cabeçalho do
+   perfil em miniatura com o item no lugar do que está equipado
+   (`PreviaDoPerfil`) — nome, nível, avatar, moldura, capa e, para cor, o
+   botão pintado com a amostra, sem mexer na página. Nada grava (o teste de
+   navegador confere que nenhuma escrita em `users` sai da prévia). Depois
+   da compra, "Equipar agora" grava num toque (`mudancaDeEquipar`, a mesma
+   tradução item → perfil para os quatro tipos). O movimento da moeda ficou
+   de fora: o saldo preso no topo já muda na hora, e o movimento seria
+   enfeite.
 5. [x] **Molduras e fundos** (novas vinhetas no padrão pintado): Terminal, Neon,
    Pixel, Minimal, Ouro; fundos terminal, grade, circuito, pôr do sol, aurora.
    Interpretações próprias — nada de identidade de terceiros.

@@ -41,7 +41,7 @@ Números lidos do catálogo, não de memória.
 | Projetos | 10, com 34 critérios de aceitação — os 3 capstones são página + API + banco (motor 7), os outros 7 são JavaScript puro |
 | Conceitos | 151, com grafo de pré-requisitos |
 | Flashcards | 67 (93 conceitos ainda sem cartão) |
-| Testes | 3.607 de unidade + ~456 de navegador |
+| Testes | 3.610 de unidade + ~460 de navegador |
 | Pacote | 3.095 kB (851 kB comprimido) no chunk principal — o corpo das aulas vai junto (é quase metade), e separá-lo é o maior problema de performance aberto (P2-1b do roadmap). Aula, revisão, refazer erros, projeto e admin são rotas sob demanda (`App.tsx`), e o Zod só entra no chunk do admin; o Monaco são mais 3.362 kB (869 kB) num chunk à parte, baixado só quando o primeiro editor monta, e o worker de TypeScript (7 MB) só quando um modelo JS/TS abre. O motor de TypeScript não acrescentou arquivo; o de React acrescentou um chunk de 143 kB (47 kB) com o React e o ReactDOM como texto, baixado só por um exercício de React; o de SQL acrescentou o worker (49 kB) e o SQLite em WebAssembly (658 kB), baixados só por um exercício de SQL; o de Python acrescentou o worker (~22 kB) e o Pyodide inteiro (~13,5 MB: o WebAssembly do CPython, a biblioteca padrão zipada, o manifesto de pacotes), copiados para `/pyodide/` na build e baixados só por um exercício de Python |
 
 ## 4. Decisões que não devem ser desfeitas sem motivo forte
@@ -84,7 +84,10 @@ mudar o tamanho, então cabe dentro do anel de nível — e **fundos**, a capa
 do perfil, uma faixa acima do cabeçalho: texto nunca fica sobre o desenho,
 e o contraste não depende de qual fundo a pessoa escolheu (0011); na terceira, o **histórico de
 compras**, com o que sobrou depois de cada uma — recontado até aquele
-instante, porque não há saldo guardado (`historicoDeCompras`). O que se
+instante, porque não há saldo guardado (`historicoDeCompras`); na quarta, a
+**prévia** — o cabeçalho do perfil em miniatura com o item no lugar, que
+não grava nada — e "Equipar agora" depois da compra (`lib/equipar.ts`, que
+traduz um item da loja no que muda no perfil). O que se
 compra: **congelar a sequência** (um dia sem estudar não
 zera; consumido sozinho no primeiro dia perdido depois da compra —
 `lib/sequencia.ts` reconta a corrente com os congelamentos), **dobro de XP por
@@ -433,8 +436,8 @@ docs/curriculo.md       Roadmap de conteúdo — fonte canônica
 ```bash
 npm run typecheck   # inclui e2e/ e playwright.config.ts
 npm run lint        # ESLint mínimo: typescript-eslint + react-hooks
-npm test            # 3.607 testes
-npm run test:e2e    # ~410 no navegador (antes: npx playwright install chromium;
+npm test            # 3.610 testes
+npm run test:e2e    # ~460 no navegador (antes: npx playwright install chromium;
                     # com um Chromium já instalado: PW_CHROMIUM=/caminho/do/chrome)
 npm run build
 

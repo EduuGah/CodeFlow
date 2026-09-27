@@ -1,9 +1,16 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 
+import { useAuth } from '../../contexts/AuthContext';
 import { useStudentData } from '../../contexts/StudentDataContext';
+import { useTema } from '../../contexts/TemaContext';
+import { mudancaDeEquipar } from '../../lib/equipar';
+import { nomeParaMostrar } from '../../lib/perfil';
+import { ACENTOS } from '../../lib/tema';
+import { PreviaDoPerfil } from './PreviaDoPerfil';
 import {
   HORAS_DE_DOBRO,
+  itemDaLoja,
   ITENS,
   MOEDAS,
   RARIDADES,
@@ -76,7 +83,15 @@ const COMO_GANHAR = [
 ];
 
 export function Loja() {
-  const { moedas, purchases, level, sequencia, dobro, comprar, incompleto, reload, historico } = useStudentData();
+  const { moedas, purchases, level, sequencia, dobro, comprar, incompleto, reload, historico, perfil, salvarPerfil } =
+    useStudentData();
+  const { user } = useAuth();
+  const { mudarAcento } = useTema();
+  const nome = nomeParaMostrar(perfil, user);
+  const fotoDoGoogle = user?.user_metadata?.avatar_url as string | undefined;
+  const [previa, setPrevia] = useState<string | null>(null);
+  const [equipandoAgora, setEquipandoAgora] = useState(false);
+  const [equipadoAgora, setEquipadoAgora] = useState<string | null>(null);
   const [confirmando, setConfirmando] = useState<string | null>(null);
   const [comprando, setComprando] = useState<string | null>(null);
   const [erro, setErro] = useState<string | null>(null);
@@ -90,7 +105,35 @@ export function Loja() {
     setComprando(null);
     setConfirmando(null);
     if (error) setErro(error);
-    else setComprado(item.id);
+    else {
+      setComprado(item.id);
+      setEquipadoAgora(null);
+    }
+  };
+
+  /** Logo depois da compra, sem ir ao inventário: a mesma gravação dele. */
+  const equiparAgora = async (item: ItemDaLoja) => {
+    const mudanca = mudancaDeEquipar(item);
+    if (!mudanca) return;
+    setEquipandoAgora(true);
+    if (mudanca.accent) mudarAcento(mudanca.accent);
+    const { error } = await salvarPerfil(mudanca);
+    setEquipandoAgora(false);
+    if (error) setErro(error);
+    else setEquipadoAgora(item.id);
+  };
+
+  const itemComprado = comprado ? itemDaLoja(comprado) : undefined;
+
+  /** O perfil como ficaria com o item equipado — nada é gravado. */
+  const perfilCom = (item: ItemDaLoja) => {
+    const mudanca = mudancaDeEquipar(item) ?? {};
+    return {
+      avatar: mudanca.avatar ?? perfil.avatar,
+      moldura: mudanca.moldura ?? perfil.moldura,
+      fundo: mudanca.fundo ?? perfil.fundo,
+      cor: mudanca.accent ? ACENTOS.find((a) => a.id === mudanca.accent)?.amostra : undefined,
+    };
   };
 
   const grupos: Array<{ tipo: TipoDeItem; titulo: string; nota: string; itens: ItemDaLoja[] }> = [
@@ -158,6 +201,25 @@ export function Loja() {
             </span>
           </span>
           <span className="text-sm leading-relaxed text-ink-soft">{item.description}</span>
+          {/* A prévia: o item no próprio cabeçalho da pessoa, antes de comprar. */}
+          {mudancaDeEquipar(item) && (
+            <>
+              <button
+                type="button"
+                className="inline-flex min-h-6 items-center self-start text-sm font-semibold text-brand-700 hover:underline"
+                aria-expanded={previa === item.id}
+                aria-controls={`previa-${item.id}`}
+                onClick={() => setPrevia((atual) => (atual === item.id ? null : item.id))}
+              >
+                {previa === item.id ? 'Fechar a prévia' : 'Ver no meu perfil'}
+              </button>
+              {previa === item.id && (
+                <div id={`previa-${item.id}`} className="animar-pousar">
+                  <PreviaDoPerfil nome={nome} nivel={level.level} fotoDoGoogle={fotoDoGoogle} {...perfilCom(item)} />
+                </div>
+              )}
+            </>
+          )}
           {item.nivelQueLibera !== undefined && !seu && (
             <span className="label-mono text-ink-faint">ou de graça no nível {item.nivelQueLibera}</span>
           )}
@@ -250,24 +312,26 @@ export function Loja() {
           Comprado: {ITENS.find((i) => i.id === comprado)?.title}.
           {comprado === 'congelar-sequencia' && ' Ele entra sozinho no primeiro dia sem estudo.'}
           {comprado === 'dobro-de-xp' && ` Vale a partir de agora, por ${HORAS_DE_DOBRO} horas.`}
-          {comprado.startsWith('tema-') && (
-            <>
-              {' '}
-              <Link to="/app/perfil/aparencia" className="font-semibold underline">
-                Aplicar na aparência
-              </Link>
-              .
-            </>
-          )}
-          {/^(avatar|moldura|fundo)-/.test(comprado) && (
-            <>
-              {' '}
-              <Link to="/app/perfil/inventario" className="font-semibold underline">
-                Equipar no inventário
-              </Link>
-              .
-            </>
-          )}
+          {equipadoAgora === comprado
+            ? ' Equipado.'
+            : itemComprado &&
+              mudancaDeEquipar(itemComprado) && (
+                <>
+                  {' '}
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="ml-1 h-8 align-middle"
+                    loading={equipandoAgora}
+                    onClick={() => void equiparAgora(itemComprado)}
+                  >
+                    Equipar agora
+                  </Button>{' '}
+                  <Link to="/app/perfil/inventario" className="font-semibold underline">
+                    ou ver no inventário
+                  </Link>
+                </>
+              )}
         </p>
       )}
 
