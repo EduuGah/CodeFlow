@@ -222,8 +222,11 @@ test('a loja filtra por categoria, mostra a raridade, e o saldo acompanha a rola
   await expect(filtros.getByRole('button', { name: 'Avatares' })).toHaveAttribute('aria-pressed', 'true');
   await expect(page.getByRole('region', { name: 'Avatares' })).toBeVisible();
   await expect(page.getByRole('region', { name: 'Para usar' })).toHaveCount(0);
+  const robo = page.getByRole('listitem').filter({ hasText: 'Avatar Robô' });
+  await expect(robo.getByText('Raro', { exact: true })).toBeVisible();
+  // Do nível 15 em diante, épico (a raridade sai do nível, como o preço).
   const alien = page.getByRole('listitem').filter({ hasText: 'Avatar Alien' });
-  await expect(alien.getByText('Raro', { exact: true })).toBeVisible();
+  await expect(alien.getByText('Épico', { exact: true })).toBeVisible();
 
   // O saldo fica à vista no topo depois de rolar até o fim da lista.
   await page.getByRole('region', { name: 'Avatares' }).getByRole('listitem').last().scrollIntoViewIfNeeded();
@@ -251,7 +254,7 @@ test('o inventário mostra o que é seu, de onde veio, e equipa com um toque', a
   const avatares = page.getByRole('region', { name: 'Avatares' });
   // O trancado diz o que abre e leva à loja; nada aqui vende.
   const alien = avatares.getByRole('listitem').filter({ hasText: 'Avatar Alien' });
-  await expect(alien).toContainText('Abre no nível 15, ou 150 moedas na loja');
+  await expect(alien).toContainText('Abre no nível 15, ou 1100 moedas na loja');
   await expect(alien.getByRole('button')).toHaveCount(0);
 
   // Um dos de graça: equipar grava na conta e a tela diz na hora.
@@ -357,7 +360,7 @@ test('a prévia mostra o item no próprio perfil sem gravar, e "Equipar agora" g
   banco,
 }) => {
   semear(banco);
-  // Dezesseis aulas: saldo para a Pixel (140), que só abre de graça no nível 6.
+  // Dezesseis aulas: saldo para a Pixel (130), que só abre de graça no nível 6.
   banco.completed_lessons = Array.from({ length: 16 }, (_, i) => `lesson-js-${i + 1}`);
   await page.goto('/app/perfil/loja');
   await esperarConteudo(page);
@@ -370,8 +373,8 @@ test('a prévia mostra o item no próprio perfil sem gravar, e "Equipar agora" g
   // Ver não é equipar: nada foi para o banco.
   expect(banco.escritas.filter((e) => e.tabela === 'users')).toEqual([]);
 
-  await pixel.getByRole('button', { name: '140' }).click();
-  await pixel.getByRole('button', { name: /Confirmar por 140/ }).click();
+  await pixel.getByRole('button', { name: '130' }).click();
+  await pixel.getByRole('button', { name: /Confirmar por 130/ }).click();
   const status = page.getByRole('status').filter({ hasText: 'Comprado: Moldura Pixel' });
   await expect(status).toBeVisible();
   await status.getByRole('button', { name: 'Equipar agora' }).click();

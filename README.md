@@ -114,6 +114,7 @@ no SQL Editor do Supabase. Todas são idempotentes.
 | `0012_titulos.sql` | O título escolhido pelo aluno (`users.titulo`) — ganho por conquista, nunca vendido |
 | `0013_recuperar_sequencia.sql` | O consumível "recuperar a sequência" no catálogo, e o teto de moedas que o conta como conta o congelamento |
 | `0014_loja_itens_novos.sql` | Quatro avatares (Capivara, Tucano, Tartaruga, Baleia), duas molduras (Chaves, Prisma) e dois fundos (Terminal, Mar) no catálogo |
+| `0015_precos_recalibrados.sql` | Os preços dos cosméticos saindo do nível que os abre, calibrados pelo aluno-modelo (`economia.calibragem.test.ts`) |
 
 Sem a 0007, o aplicativo carrega, mas editar o perfil, comprar na loja e
 enviar foto falham — e a própria tela diz qual migração rodar. Sem a 0009, tudo
@@ -137,7 +138,7 @@ Redirect URLs.
 
 ```bash
 npm run typecheck   # tipos, incluindo os testes de navegador
-npm test            # 3.655 testes de unidade, propriedade e componente (Vitest)
+npm test            # 3.715 testes de unidade, propriedade e componente (Vitest)
 npm run test:e2e    # 408 testes de navegador (Playwright, Chromium, celular e desktop)
 ```
 

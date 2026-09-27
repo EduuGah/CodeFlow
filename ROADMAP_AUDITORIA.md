@@ -291,10 +291,23 @@ validadas por uma função `equipar(p_categoria, p_item)` que confere posse
    faz da loja um investimento — quem tem mais ganha mais, e a pergunta
    deixa de ser "o que eu quero" para "quanto rende". Não volta sem um
    motivo pedagógico. O passe de revisão continua sem motivo para existir.
-10. **Economia recalibrada** com a simulação da auditoria como teste: comum ≈ 1
+10. [x] **Economia recalibrada** com a simulação da auditoria como teste: comum ≈ 1
     semana de estudo, incomum ≈ 2, raro ≈ 3–4, épico ≈ 5–6, lendário só por
     conquista ou evento. Um cosmético nunca abre por nível **antes** de caber
     no saldo de quem estuda no ritmo-modelo (o teste falha se abrir).
+    Feito assim (0015): a simulação virou `economia.calibragem.test.ts` — o
+    aluno-modelo roda as contas de verdade (`computeXp`, `desafiosConcluidos`,
+    `moedasGanhas`) sobre o catálogo de verdade, em cinco datas de início.
+    Medido: ~220 moedas por semana (os desafios reais rendem mais que a
+    estimativa de 175), nível 5 no dia 4, 10 na semana 4, 17 na 13. O preço
+    passou a sair do nível (`PRECO_DO_NIVEL`, 10 a 1.400) e a raridade também
+    (épico do 15 em diante). Regras cobradas no pior caso: nada abre pelo
+    nível antes de caber no saldo; do nível 6 em diante, cabe entre um quarto
+    e dois terços do caminho até o nível; épico custa 5 a 7 semanas;
+    consumível, menos de meia. As faixas "comum ≈ 1 semana" não couberam: os
+    níveis 3 a 5 chegam nos primeiros dias, e o que abre no dia 2 não pode
+    custar uma semana — custa 10 a 90. **Nenhum nível subiu**: ninguém perde o
+    que já abriu; só o preço muda, e uma compra feita guarda o que foi pago.
 11. **Destaques desta semana** (rodízio determinístico como os desafios, 3
     itens, sem contagem regressiva nem "últimas unidades") e integração com
     Novidades ("5 avatares novos chegaram à loja").

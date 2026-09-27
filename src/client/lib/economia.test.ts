@@ -10,7 +10,6 @@ import {
   moedasGastas,
   MOEDAS,
   posseDe,
-  RARIDADES,
   temItem,
 } from './economia';
 
@@ -90,22 +89,11 @@ describe('a loja', () => {
 });
 
 describe('a raridade', () => {
-  it('acompanha o nível que libera: até o 5 comum, do 6 ao 9 incomum, do 10 em diante raro', () => {
-    // Enquanto os preços não forem recalibrados pela raridade (etapa 10 da
-    // Loja 2.0), é o nível que diz quão longe na jornada o item mora.
-    for (const item of ITENS.filter((i) => i.nivelQueLibera !== undefined)) {
-      const nivel = item.nivelQueLibera!;
-      const esperada = nivel <= 5 ? 'comum' : nivel <= 9 ? 'incomum' : 'raro';
-      expect(item.raridade, item.id).toBe(esperada);
-    }
-  });
-
+  // As regras de preço e de raridade pelo nível, e o "nada à venda é
+  // lendário", moram em `economia.calibragem.test.ts`, junto da simulação que
+  // as justifica.
   it('consumível é comum: gastar não pode ser coisa rara', () => {
     for (const item of ITENS.filter((i) => i.tipo === 'consumivel')) expect(item.raridade, item.id).toBe('comum');
-  });
-
-  it('nada à venda é épico nem lendário: esses são de conquista', () => {
-    for (const item of ITENS) expect(RARIDADES[item.raridade].ordem, item.id).toBeLessThan(RARIDADES.epico.ordem);
   });
 });
 

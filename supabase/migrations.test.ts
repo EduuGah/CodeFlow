@@ -285,15 +285,18 @@ describe('a loja no banco', () => {
   });
 
   it('o teto de moedas usa os números da economia', () => {
-    // Um teto abaixo do que o histórico rende recusaria compras legítimas.
-    const teto = zero9.match(/function public\.teto_de_moedas[\s\S]*?\$\$([\s\S]*?)\$\$/i)![1];
+    // Um teto abaixo do que o histórico rende recusaria compras legítimas. A
+    // definição que vale é a da migração mais nova que o redefine (0013).
+    const ultima = [...sql].reverse().find((f) => /function public\.teto_de_moedas/i.test(semComentarios(f.texto)))!;
+    const teto = semComentarios(ultima.texto).match(/function public\.teto_de_moedas[\s\S]*?\$\$([\s\S]*?)\$\$/i)![1];
 
     expect(teto).toMatch(new RegExp(`aulas from progresso\\), 0\\) \\* ${MOEDAS.porAulaConcluida}\\b`));
     expect(teto).toMatch(new RegExp(`projetos from progresso\\), 0\\) \\* ${MOEDAS.porProjetoEntregue}\\b`));
     expect(teto).toContain(`dias.d * 2 * ${POR_PERIODO.dia} * ${RECOMPENSA.dia.moedas}`);
     expect(teto).toContain(`dias.w * 2 * ${POR_PERIODO.semana} * ${RECOMPENSA.semana.moedas}`);
     expect(teto).toContain(`* (${MOEDAS.porSemanaSeguida} + ${MOEDAS.porMesSeguido})`);
-    expect(teto).toContain(`item = 'congelar-sequencia'`);
+    // As duas proteções da sequência cobrem dias, e um dia coberto pode fechar um marco.
+    expect(teto).toContain(`item in ('congelar-sequencia', 'recuperar-sequencia')`);
   });
 
   it('comprar só pela função: o INSERT direto em purchases deixa de existir', () => {

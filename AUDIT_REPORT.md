@@ -199,7 +199,7 @@ Legenda de estado: **Corrigido** (com teste, nesta rodada), **Parcial**,
 | P2-13 | Camada de persistência e `StudentDataContext` sem testes | Corrigido |
 | P2-14 | 85% dos exercícios com ≤ 2 dicas; a diretriz pede 4 níveis | Pendente |
 | P2-15 | Nenhum caminho para refazer um exercício errado; 62% dos conceitos sem flashcard | Parcial — caderno e refazer feitos (0010); faltam os flashcards |
-| P2-16 | Economia: cosméticos esgotam em ~8 semanas e competem com a liberação por nível | Parcial (catálogo maior; recalibração pendente) |
+| P2-16 | Economia: cosméticos esgotam em ~8 semanas e competem com a liberação por nível | Parcial (competição resolvida e medida; catálogo por nível acaba na semana ~13) |
 | P2-17 | Documentação de arquitetura desatualizada | Parcial |
 | P2-18 | Observabilidade: só `console.error` | Pendente |
 | P3-1 | Código morto (funções, ícones, constantes) | Parcial |
@@ -557,9 +557,14 @@ quase ao mesmo tempo em que fica comprável — o Tema Oceano abre por nível
 **antes** de caber no saldo.
 Andou: o catálogo passou de 12 cosméticos à venda para 32 (molduras, fundos,
 três cores e quatro avatares novos, 0011 e 0014), com o último abrindo no
-nível 17, e três itens que só vêm por conquista. Falta a recalibração
-(etapa 10 da Loja 2.0): preço por raridade e o teste que reprova um
-cosmético que abre por nível antes de caber no saldo.
+nível 17, e três itens que só vêm por conquista. E a recalibração (0015,
+etapa 10 da Loja 2.0) resolveu a competição com o nível: o preço sai do
+nível, e `economia.calibragem.test.ts` reprova qualquer cosmético que abra
+pelo nível antes de caber no saldo do aluno-modelo, ou que custe tão pouco
+que as moedas sobrem. Comprar tudo custa ~11.700 moedas, umas 53 semanas.
+O que falta: o nível abre o último cosmético na semana ~13, e daí em diante
+as moedas voltam a ter só os consumíveis — o próximo passo é item só por
+moeda (sem nível) ou catálogo que cresça com o conteúdo.
 
 #### P2-17 · Documentação de arquitetura desatualizada — Parcial
 `CONTEXTO.md` e `README.md` atualizados nesta rodada. Falta reescrever
@@ -860,6 +865,12 @@ Sem dependência nova:
 
 Aluno-modelo: 5 aulas por semana, tudo de primeira e sem dica, 1 dos 2 desafios
 do dia e 1 dos 2 da semana.
+
+> **Atualização (etapa 10):** medido de novo com as contas de verdade
+> (`economia.calibragem.test.ts`, desafios reais em vez de "1 dos 2"): ~220
+> moedas por semana, nível 3 no dia 1, 5 no dia 4, 10 na semana 4, 17 na 13.
+> Os preços desta tabela são os de antes; os de agora saem do nível
+> (`PRECO_DO_NIVEL`, 10 a 1.400).
 
 | | Valor |
 | --- | --- |

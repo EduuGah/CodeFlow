@@ -120,14 +120,14 @@ select verificacao.recusa(
   'row-level security', 'o INSERT direto em purchases não existe mais'
 );
 
-select public.comprar_item('tema-oceano');
+select public.comprar_item('tema-brasa');
 select verificacao.ok(
-  (select price from public.purchases where user_id = auth.uid() and item = 'tema-oceano') = 120,
-  'o preço vem do catálogo do banco'
+  (select price from public.purchases where user_id = auth.uid() and item = 'tema-brasa') = 90,
+  'o preço vem do catálogo do banco (o da 0015, a mais nova)'
 );
-select verificacao.recusa($$select public.comprar_item('tema-oceano')$$, 'item_ja_possuido', 'cosmético não se compra duas vezes');
+select verificacao.recusa($$select public.comprar_item('tema-brasa')$$, 'item_ja_possuido', 'cosmético não se compra duas vezes');
 select public.comprar_item('dobro-de-xp');
--- 120 + 80 = 200: o teto de A. Mais um consumível passaria dele.
+-- 90 + 80 = 170 de um teto de 200. O congelamento (60) passaria dele.
 select verificacao.recusa($$select public.comprar_item('congelar-sequencia')$$, 'saldo_insuficiente', 'gasto acima do teto');
 select verificacao.recusa($$select public.comprar_item('item-que-nao-existe')$$, 'item_indisponivel', 'item fora do catálogo');
 
@@ -170,7 +170,7 @@ select verificacao.ok(
 );
 -- A função devolve a linha gravada (relida pelo id, sem `returning` numa variável).
 select verificacao.ok(
-  (select (c).item = 'moldura-neon' and (c).price = 170 from (select public.comprar_item('moldura-neon') as c) x),
+  (select (c).item = 'moldura-neon' and (c).price = 300 from (select public.comprar_item('moldura-neon') as c) x),
   'comprar moldura devolve a compra com o preço do catálogo'
 );
 select verificacao.recusa($$select public.comprar_item('moldura-neon')$$, 'item_ja_possuido', 'moldura também se compra uma vez');

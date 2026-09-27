@@ -31,9 +31,9 @@ export interface Purchase {
 export type TipoDeItem = 'consumivel' | 'tema' | 'avatar' | 'moldura' | 'fundo';
 
 /**
- * Quão longe na jornada o item mora. Por ora acompanha o nível que o libera
- * (`economia.test.ts` confere): até o 5 é comum, do 6 ao 9 incomum, do 10 em
- * diante raro. Épico e lendário ficam reservados: os itens de conquista
+ * Quão longe na jornada o item mora — sai do nível que o abre
+ * (`raridadeDoNivel`): até o 5 comum, do 6 ao 9 incomum, do 10 ao 14 raro, do
+ * 15 em diante épico. Lendário não se vende; os itens de conquista
  * (`exclusivos.ts`) dizem "De conquista" no lugar da raridade, porque o que os
  * marca é a origem. A raridade não mora no banco: nenhuma regra do servidor a lê.
  */
@@ -72,6 +72,55 @@ export const MOEDAS = {
 /** Duração do dobro de XP, em horas, a partir da compra. */
 export const HORAS_DE_DOBRO = 24;
 
+/**
+ * O preço de um cosmético, pelo nível que o abre.
+ *
+ * Calibrado pelo aluno-modelo (`economia.calibragem.test.ts`: cinco aulas por
+ * semana, de primeira e sem dica, rodando as contas de verdade sobre o
+ * catálogo de verdade). Duas regras, que o teste cobra:
+ *
+ * - **nunca abre pelo nível antes de caber no saldo** — senão comprar é
+ *   jogar moeda fora (era o caso do Tema Oceano: 120 moedas, aberto no nível
+ *   3, no segundo dia);
+ * - **do nível 6 em diante, comprar encurta a espera de verdade**: cabe entre
+ *   um quarto e dois terços do caminho até o nível.
+ *
+ * Os níveis 3 a 5 chegam nos primeiros dias, então os itens deles custam
+ * pouco — a primeira compra, e não uma poupança. Os últimos custam semanas: é
+ * para onde as moedas vão depois do começo.
+ */
+export const PRECO_DO_NIVEL: Readonly<Record<number, number>> = {
+  3: 10,
+  4: 60,
+  5: 90,
+  6: 130,
+  7: 160,
+  8: 300,
+  9: 350,
+  10: 420,
+  11: 600,
+  12: 680,
+  13: 800,
+  14: 950,
+  15: 1100,
+  16: 1250,
+  17: 1400,
+};
+
+/** Quão longe na jornada o item mora, pelo nível que o abre. */
+export function raridadeDoNivel(nivel: number): Raridade {
+  if (nivel <= 5) return 'comum';
+  if (nivel <= 9) return 'incomum';
+  if (nivel <= 14) return 'raro';
+  return 'epico';
+}
+
+function cosmetico(id: string, tipo: TipoDeItem, title: string, description: string, nivel: number): ItemDaLoja {
+  const price = PRECO_DO_NIVEL[nivel];
+  if (price === undefined) throw new Error(`sem preço para o nível ${nivel} (${id})`);
+  return { id, title, description, price, tipo, raridade: raridadeDoNivel(nivel), nivelQueLibera: nivel };
+}
+
 export const ITENS: ItemDaLoja[] = [
   {
     id: 'congelar-sequencia',
@@ -100,130 +149,62 @@ export const ITENS: ItemDaLoja[] = [
     tipo: 'consumivel',
     raridade: 'comum',
   },
-  {
-    id: 'tema-oceano',
-    title: 'Tema Oceano',
-    description: 'A cor de destaque em azul-profundo.',
-    price: 120,
-    tipo: 'tema',
-    raridade: 'comum',
-    nivelQueLibera: 3,
-  },
-  {
-    id: 'tema-brasa',
-    title: 'Tema Brasa',
-    description: 'A cor de destaque em laranja-queimado.',
-    price: 150,
-    tipo: 'tema',
-    raridade: 'comum',
-    nivelQueLibera: 5,
-  },
-  {
-    id: 'tema-ameixa',
-    title: 'Tema Ameixa',
-    description: 'A cor de destaque em roxo-ameixa.',
-    price: 200,
-    tipo: 'tema',
-    raridade: 'incomum',
-    nivelQueLibera: 8,
-  },
-  {
-    id: 'tema-grafite',
-    title: 'Tema Grafite',
-    description: 'A cor de destaque em cinza-azulado, sóbria como um editor à noite.',
-    price: 130,
-    tipo: 'tema',
-    raridade: 'comum',
-    nivelQueLibera: 4,
-  },
-  {
-    id: 'tema-meia-noite',
-    title: 'Tema Meia-noite',
-    description: 'A cor de destaque em índigo profundo.',
-    price: 170,
-    tipo: 'tema',
-    raridade: 'incomum',
-    nivelQueLibera: 7,
-  },
-  {
-    id: 'tema-crepusculo',
-    title: 'Tema Crepúsculo',
-    description: 'A cor de destaque em rosa de fim de tarde.',
-    price: 220,
-    tipo: 'tema',
-    raridade: 'raro',
-    nivelQueLibera: 10,
-  },
-  // Os avatares que não vêm de graça, do mais barato ao mais raro. O nível
-  // que abre cada um sobe junto com o preço: quem estuda chega neles de
-  // qualquer jeito; as moedas só encurtam a espera.
+  // Os cosméticos: só o nível que abre cada um. Preço e raridade saem dele
+  // (`PRECO_DO_NIVEL`, `raridadeDoNivel`) — quem estuda chega neles de
+  // qualquer jeito; as moedas encurtam a espera.
   ...(
     [
-      ['cometa', 'Cometa', 'Uma bola de luz com o rastro.', 90, 4, 'comum'],
-      ['raposa', 'Raposa', 'Laranja, orelhas em pé, focinho branco.', 90, 5, 'comum'],
-      ['coelho', 'Coelho', 'Orelhas compridas e dois dentinhos.', 90, 5, 'comum'],
-      ['urso', 'Urso', 'Marrom, redondo, focinho claro.', 100, 6, 'incomum'],
-      ['dino', 'Dino', 'Verde-água com a crista amarela.', 100, 7, 'incomum'],
-      ['panda', 'Panda', 'Branco e preto, manchas nos olhos.', 110, 8, 'incomum'],
-      ['robo', 'Robô', 'Cabeça de aço, olhos de led e antena.', 120, 10, 'raro'],
-      ['polvo', 'Polvo', 'Roxo, com os tentáculos embaixo.', 130, 12, 'raro'],
-      ['alien', 'Alien', 'Verde, olhos grandes e uma antena.', 150, 15, 'raro'],
-      // A fauna daqui (0014): nomes e desenhos próprios, no mesmo traço.
-      ['capivara', 'Capivara', 'Marrom, calma, focinho largo.', 110, 9, 'incomum'],
-      ['tucano', 'Tucano', 'Preto, papo branco e o bico laranja enorme.', 130, 11, 'raro'],
-      ['tartaruga', 'Tartaruga', 'Cabeça verde e o casco de placas atrás.', 140, 13, 'raro'],
-      ['baleia', 'Baleia', 'Azul, barriga clara e o esguicho em cima.', 160, 17, 'raro'],
+      ['tema-oceano', 'Tema Oceano', 'A cor de destaque em azul-profundo.', 3],
+      ['tema-grafite', 'Tema Grafite', 'A cor de destaque em cinza-azulado, sóbria como um editor à noite.', 4],
+      ['tema-brasa', 'Tema Brasa', 'A cor de destaque em laranja-queimado.', 5],
+      ['tema-meia-noite', 'Tema Meia-noite', 'A cor de destaque em índigo profundo.', 7],
+      ['tema-ameixa', 'Tema Ameixa', 'A cor de destaque em roxo-ameixa.', 8],
+      ['tema-crepusculo', 'Tema Crepúsculo', 'A cor de destaque em rosa de fim de tarde.', 10],
     ] as const
-  ).map(([id, title, description, price, nivelQueLibera, raridade]) => ({
-    id: `avatar-${id}`,
-    title: `Avatar ${title}`,
-    description,
-    price,
-    tipo: 'avatar' as const,
-    raridade,
-    nivelQueLibera,
-  })),
+  ).map(([id, title, description, nivel]) => cosmetico(id, 'tema', title, description, nivel)),
+  ...(
+    [
+      ['cometa', 'Cometa', 'Uma bola de luz com o rastro.', 4],
+      ['raposa', 'Raposa', 'Laranja, orelhas em pé, focinho branco.', 5],
+      ['coelho', 'Coelho', 'Orelhas compridas e dois dentinhos.', 5],
+      ['urso', 'Urso', 'Marrom, redondo, focinho claro.', 6],
+      ['dino', 'Dino', 'Verde-água com a crista amarela.', 7],
+      ['panda', 'Panda', 'Branco e preto, manchas nos olhos.', 8],
+      // A fauna daqui (0014): nomes e desenhos próprios, no mesmo traço.
+      ['capivara', 'Capivara', 'Marrom, calma, focinho largo.', 9],
+      ['robo', 'Robô', 'Cabeça de aço, olhos de led e antena.', 10],
+      ['tucano', 'Tucano', 'Preto, papo branco e o bico laranja enorme.', 11],
+      ['polvo', 'Polvo', 'Roxo, com os tentáculos embaixo.', 12],
+      ['tartaruga', 'Tartaruga', 'Cabeça verde e o casco de placas atrás.', 13],
+      ['alien', 'Alien', 'Verde, olhos grandes e uma antena.', 15],
+      ['baleia', 'Baleia', 'Azul, barriga clara e o esguicho em cima.', 17],
+    ] as const
+  ).map(([id, title, description, nivel]) => cosmetico(`avatar-${id}`, 'avatar', `Avatar ${title}`, description, nivel)),
   // Molduras: um anel pintado na borda do avatar, sem mudar o tamanho dele —
   // cabe dentro do anel de nível do perfil. Desenhos em `ui/Moldura`.
   ...(
     [
-      ['minimal', 'Minimal', 'Um fio duplo, sem mais nada.', 90, 3, 'comum'],
-      ['terminal', 'Terminal', 'Traços verdes de fósforo, como um cursor piscando.', 110, 4, 'comum'],
-      ['pixel', 'Pixel', 'Blocos quadrados em volta, de um jogo antigo.', 140, 6, 'incomum'],
-      ['neon', 'Neon', 'Dois tubos acesos, rosa e ciano.', 170, 8, 'incomum'],
-      ['chaves', 'Chaves', 'As chaves de um bloco de código, uma de cada lado.', 150, 9, 'incomum'],
-      ['ouro', 'Ouro', 'Aro dourado com folhas de louro embaixo.', 240, 12, 'raro'],
-      ['prisma', 'Prisma', 'Seis arcos do espectro: a luz aberta em cores.', 200, 14, 'raro'],
+      ['minimal', 'Minimal', 'Um fio duplo, sem mais nada.', 3],
+      ['terminal', 'Terminal', 'Traços verdes de fósforo, como um cursor piscando.', 4],
+      ['pixel', 'Pixel', 'Blocos quadrados em volta, de um jogo antigo.', 6],
+      ['neon', 'Neon', 'Dois tubos acesos, rosa e ciano.', 8],
+      ['chaves', 'Chaves', 'As chaves de um bloco de código, uma de cada lado.', 9],
+      ['ouro', 'Ouro', 'Aro dourado com folhas de louro embaixo.', 12],
+      ['prisma', 'Prisma', 'Seis arcos do espectro: a luz aberta em cores.', 14],
     ] as const
-  ).map(([id, title, description, price, nivelQueLibera, raridade]) => ({
-    id: `moldura-${id}`,
-    title: `Moldura ${title}`,
-    description,
-    price,
-    tipo: 'moldura' as const,
-    raridade,
-    nivelQueLibera,
-  })),
+  ).map(([id, title, description, nivel]) => cosmetico(`moldura-${id}`, 'moldura', `Moldura ${title}`, description, nivel)),
   // Fundos: a capa do perfil, uma faixa acima do cabeçalho — o texto nunca
   // fica sobre o desenho. Desenhos em `ui/Fundo`.
   ...(
     [
-      ['grade', 'Grade', 'Papel quadriculado de caderno de exercícios.', 100, 3, 'comum'],
-      ['terminal', 'Terminal', 'A tela preta, o prompt e o cursor piscando.', 120, 5, 'comum'],
-      ['circuito', 'Circuito', 'Uma placa verde, com trilhas e soldas.', 150, 6, 'incomum'],
-      ['por-do-sol', 'Pôr do sol', 'Laranja para roxo, o sol baixando no horizonte.', 180, 9, 'incomum'],
-      ['aurora', 'Aurora', 'Faixas verdes e violeta num céu de estrelas.', 220, 11, 'raro'],
-      ['mar', 'Mar', 'Três ondas, das escuras às claras, e o sol em cima.', 200, 13, 'raro'],
+      ['grade', 'Grade', 'Papel quadriculado de caderno de exercícios.', 3],
+      ['terminal', 'Terminal', 'A tela preta, o prompt e o cursor piscando.', 5],
+      ['circuito', 'Circuito', 'Uma placa verde, com trilhas e soldas.', 6],
+      ['por-do-sol', 'Pôr do sol', 'Laranja para roxo, o sol baixando no horizonte.', 9],
+      ['aurora', 'Aurora', 'Faixas verdes e violeta num céu de estrelas.', 11],
+      ['mar', 'Mar', 'Três ondas, das escuras às claras, e o sol em cima.', 13],
     ] as const
-  ).map(([id, title, description, price, nivelQueLibera, raridade]) => ({
-    id: `fundo-${id}`,
-    title: `Fundo ${title}`,
-    description,
-    price,
-    tipo: 'fundo' as const,
-    raridade,
-    nivelQueLibera,
-  })),
+  ).map(([id, title, description, nivel]) => cosmetico(`fundo-${id}`, 'fundo', `Fundo ${title}`, description, nivel)),
 ];
 
 export function itemDaLoja(id: string): ItemDaLoja | undefined {
