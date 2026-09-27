@@ -200,7 +200,7 @@ Legenda de estado: **Corrigido** (com teste, nesta rodada), **Parcial**,
 | P2-14 | 85% dos exercícios com ≤ 2 dicas; a diretriz pede 4 níveis | Pendente |
 | P2-15 | Nenhum caminho para refazer um exercício errado; 62% dos conceitos sem flashcard | Parcial — caderno e refazer feitos (0010); faltam os flashcards |
 | P2-16 | Economia: cosméticos esgotam em ~8 semanas e competem com a liberação por nível | Corrigido (preço pelo nível, medido; épicos só por moedas depois da semana ~13) |
-| P2-17 | Documentação de arquitetura desatualizada | Parcial |
+| P2-17 | Documentação de arquitetura desatualizada | Corrigido |
 | P2-18 | Observabilidade: só `console.error` | Pendente |
 | P3-1 | Código morto (funções, ícones, constantes) | Parcial |
 | P3-2 | Dependências sem uso e sobras do AI Studio | Corrigido |
@@ -567,9 +567,12 @@ diante as moedas só tinham os consumíveis — virou a 0018: quatro épicos só
 por moedas (~24 semanas do aluno-modelo, com teste). Resta, como melhoria e
 não como defeito, um catálogo que cresça junto com as aulas.
 
-#### P2-17 · Documentação de arquitetura desatualizada — Parcial
-`CONTEXTO.md` e `README.md` atualizados nesta rodada. Falta reescrever
-`docs/context/04` e `05` (ver tabela acima).
+#### P2-17 · Documentação de arquitetura desatualizada — Corrigido
+`CONTEXTO.md` e `README.md` atualizados na primeira rodada; `docs/context/04`
+reescrito para a pilha que existe (Supabase com RLS, nenhum servidor de
+aplicação, os motores no navegador, o que ainda é autoridade do cliente) e
+`05` apontando para onde o roadmap mora de fato. Os princípios e as regras de
+trabalho dos dois ficaram como estavam.
 
 #### P2-18 · Observabilidade — Pendente
 Só `console.error`. Proposta na seção "Observabilidade".

@@ -66,7 +66,10 @@ A fazer, nesta ordem:
 5. [x] **P3-1** removidos `LINHAS_DO_PRELUDIO` e
    `VERSAO_DO_TYPESCRIPT_NO_NAVEGADOR`; `IconShop` fica para a Loja 2.0;
    `getDefaultTrack` fica (o E2E do painel usa). Falta decidir `bun.lock` (P3-3).
-6. **P2-17** reescrever `docs/context/04` e `05` para o que existe.
+6. [x] **P2-17** reescrever `docs/context/04` e `05` para o que existe.
+   Feito: o `04` diz a pilha real e onde cada regra mora; o `05` manteve as
+   regras de trabalho e trocou a lista de fases do plano original por onde
+   o roadmap está.
 
 ## Fase 4 — Performance
 
