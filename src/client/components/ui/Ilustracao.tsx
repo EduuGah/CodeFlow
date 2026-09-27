@@ -152,6 +152,17 @@ export const VinhetaFloco = (p: VinhetaProps) => (
   </Vinheta>
 );
 
+/** A chama acesa de novo, com a seta que volta: a sequência recuperada. */
+export const VinhetaChamaDeVolta = (p: VinhetaProps) => (
+  <Vinheta {...p}>
+    <Sombra cy={44} rx={12} />
+    <path d="M40.5 29A17 17 0 1 1 36 12" stroke={P.azul} strokeWidth={2.8} strokeLinecap="round" fill="none" />
+    <path d="M37.5 5.5L36.5 12.5 29.5 11.5" stroke={P.azul} strokeWidth={2.8} strokeLinecap="round" strokeLinejoin="round" fill="none" />
+    <path d="M24 12c4.5 5 9 8.5 9 15a9 9 0 0 1-18 0c0-4.5 2.6-7.2 4.5-9.8.9 2.6 1.9 3.6 3.6 4.4-.9-4.4 0-7.6.9-9.6z" fill={P.laranja} />
+    <path d="M24 23c2.2 2.4 4 4 4 6.8a4 4 0 0 1-8 0c0-2.2 1.4-3.4 2.4-4.6.4 1.2.9 1.8 1.6 2.2-.3-1.8-.3-3 0-4.4z" fill={P.dourado} />
+  </Vinheta>
+);
+
 /** Raio amarelo com o selo "2×". */
 export const VinhetaRaioDuplo = (p: VinhetaProps) => (
   <Vinheta {...p}>

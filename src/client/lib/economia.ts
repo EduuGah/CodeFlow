@@ -1,5 +1,5 @@
 import type { Attempt } from './mastery';
-import { correntesComInicio, correntesDaHistoria, diaLocal, somarDias } from './sequencia';
+import { correntesComInicio, correntesDaHistoria, diaLocal, protecoesDaSequencia, somarDias } from './sequencia';
 import { fechamentoDasAulas } from './study';
 
 /**
@@ -78,6 +78,15 @@ export const ITENS: ItemDaLoja[] = [
     description:
       'Um dia sem estudar não zera a sua sequência. É usado sozinho no primeiro dia perdido depois da compra — um por dia.',
     price: 60,
+    tipo: 'consumivel',
+    raridade: 'comum',
+  },
+  {
+    id: 'recuperar-sequencia',
+    title: 'Recuperar a sequência',
+    description:
+      'Para quem esqueceu de congelar: cobre um dia perdido, se a compra for no dia seguinte (ou no outro, tendo estudado no meio). Uma por semana.',
+    price: 90,
     tipo: 'consumivel',
     raridade: 'comum',
   },
@@ -237,8 +246,7 @@ export function moedasGanhas(entrada: {
   const aulas = entrada.completedLessons.length * MOEDAS.porAulaConcluida;
   const projetos = entrada.completedProjects.length * MOEDAS.porProjetoEntregue;
 
-  const congelamentos = entrada.purchases.filter((p) => p.item === 'congelar-sequencia');
-  const correntes = correntesDaHistoria(entrada.attempts, congelamentos, entrada.hoje);
+  const correntes = correntesDaHistoria(entrada.attempts, protecoesDaSequencia(entrada.purchases), entrada.hoje);
   const sequencia = correntes.reduce(
     (soma, dias) =>
       soma + (dias >= 7 ? MOEDAS.porSemanaSeguida : 0) + (dias >= 30 ? MOEDAS.porMesSeguido : 0),
@@ -286,9 +294,8 @@ export function historicoDeCompras(entrada: {
     else semData += MOEDAS.porAulaConcluida;
   }
 
-  const congelamentos = entrada.purchases.filter((p) => p.item === 'congelar-sequencia');
   const marcos: Array<{ dia: string; moedas: number }> = [];
-  for (const { inicio, dias } of correntesComInicio(entrada.attempts, congelamentos, entrada.hoje)) {
+  for (const { inicio, dias } of correntesComInicio(entrada.attempts, protecoesDaSequencia(entrada.purchases), entrada.hoje)) {
     if (dias >= 7) marcos.push({ dia: somarDias(inicio, 6), moedas: MOEDAS.porSemanaSeguida });
     if (dias >= 30) marcos.push({ dia: somarDias(inicio, 29), moedas: MOEDAS.porMesSeguido });
   }

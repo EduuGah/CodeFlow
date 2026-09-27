@@ -6,6 +6,7 @@ import { useStudentData } from '../../contexts/StudentDataContext';
 import { useTema } from '../../contexts/TemaContext';
 import { mudancaDeEquipar } from '../../lib/equipar';
 import { nomeParaMostrar } from '../../lib/perfil';
+import { diaLocal, RECUPERAR_SEQUENCIA, somarDias } from '../../lib/sequencia';
 import { ACENTOS } from '../../lib/tema';
 import { PreviaDoPerfil } from './PreviaDoPerfil';
 import {
@@ -83,8 +84,20 @@ const COMO_GANHAR = [
 ];
 
 export function Loja() {
-  const { moedas, purchases, level, sequencia, dobro, comprar, incompleto, reload, historico, perfil, salvarPerfil } =
-    useStudentData();
+  const {
+    moedas,
+    purchases,
+    level,
+    sequencia,
+    recuperacao,
+    dobro,
+    comprar,
+    incompleto,
+    reload,
+    historico,
+    perfil,
+    salvarPerfil,
+  } = useStudentData();
   const { user } = useAuth();
   const { mudarAcento } = useTema();
   const nome = nomeParaMostrar(perfil, user);
@@ -171,8 +184,11 @@ export function Loja() {
 
   const cartao = (item: ItemDaLoja) => {
     const seu = temItem(item, level.level, purchases);
+    // A recuperação só se vende quando salva alguma coisa: comprada sem um dia
+    // para cobrir, seriam moedas jogadas fora.
+    const semEfeito = item.id === RECUPERAR_SEQUENCIA && !recuperacao;
     // Com o histórico incompleto o saldo não é confiável — nem para mais, nem para menos.
-    const daPara = !incompleto && moedas.saldo >= item.price;
+    const daPara = !incompleto && !semEfeito && moedas.saldo >= item.price;
     const estaConfirmando = confirmando === item.id;
     const liberadoPorNivel = item.nivelQueLibera !== undefined && level.level >= item.nivelQueLibera;
 
@@ -228,6 +244,13 @@ export function Loja() {
               {sequencia.congelamentosRestantes} guardado{sequencia.congelamentosRestantes === 1 ? '' : 's'}
             </span>
           )}
+          {item.id === RECUPERAR_SEQUENCIA && (
+            <span className={`label-mono ${recuperacao ? 'text-brand-700' : 'text-ink-faint'}`}>
+              {recuperacao
+                ? `cobre ${recuperacao.dia === somarDias(diaLocal(new Date()), -1) ? 'ontem' : 'anteontem'}: a sequência volta a ${recuperacao.para} dias`
+                : 'nada para recuperar agora'}
+            </span>
+          )}
           {item.id === 'dobro-de-xp' && dobro && (
             <span className="label-mono text-brand-700">
               ativo até {dobro.ate.toLocaleString('pt-BR', { weekday: 'short', hour: '2-digit', minute: '2-digit' })}
@@ -249,7 +272,13 @@ export function Loja() {
             ) : (
               <>
                 <span className="label-mono text-ink-faint">
-                  {incompleto ? 'saldo indisponível' : daPara ? 'dá para comprar' : `faltam ${item.price - moedas.saldo}`}
+                  {incompleto
+                    ? 'saldo indisponível'
+                    : semEfeito
+                      ? 'sem uso agora'
+                      : daPara
+                        ? 'dá para comprar'
+                        : `faltam ${item.price - moedas.saldo}`}
                 </span>
                 <Button
                   size="sm"
@@ -257,7 +286,7 @@ export function Loja() {
                   disabled={!daPara}
                   onClick={() => setConfirmando(item.id)}
                   icon={daPara ? <IconCoin size={15} /> : <IconLock size={15} />}
-                  title={daPara || incompleto ? undefined : `Faltam ${item.price - moedas.saldo} moedas`}
+                  title={daPara || incompleto || semEfeito ? undefined : `Faltam ${item.price - moedas.saldo} moedas`}
                 >
                   {item.price}
                 </Button>
@@ -312,6 +341,7 @@ export function Loja() {
           Comprado: {ITENS.find((i) => i.id === comprado)?.title}.
           {comprado === 'congelar-sequencia' && ' Ele entra sozinho no primeiro dia sem estudo.'}
           {comprado === 'dobro-de-xp' && ` Vale a partir de agora, por ${HORAS_DE_DOBRO} horas.`}
+          {comprado === RECUPERAR_SEQUENCIA && ` Sua sequência está em ${sequencia.atual} dia${sequencia.atual === 1 ? '' : 's'}.`}
           {equipadoAgora === comprado
             ? ' Equipado.'
             : itemComprado &&

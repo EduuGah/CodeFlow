@@ -140,6 +140,22 @@ select verificacao.recusa($$select public.teto_de_moedas(auth.uid())$$, 'permiss
 
 reset role;
 
+-- O teto conta a recuperação da sequência (0013) como conta o congelamento:
+-- um dia coberto a mais, que pode fechar um marco. D tem um dia de atividade:
+-- 1·2·2·15 + 1·2·2·50 + ceil(2/7)·130 = 390; com seis proteções, ceil(8/7) = 2.
+select verificacao.ok(public.teto_de_moedas('00000000-0000-4000-8000-00000000000d') = 390, 'teto de D sem proteções');
+insert into public.purchases (user_id, item, price)
+  select '00000000-0000-4000-8000-00000000000d', 'recuperar-sequencia', 90 from generate_series(1, 6);
+select verificacao.ok(
+  public.teto_de_moedas('00000000-0000-4000-8000-00000000000d') = 520,
+  'recuperação soma ao teto como o congelamento'
+);
+delete from public.purchases where user_id = '00000000-0000-4000-8000-00000000000d';
+select verificacao.ok(
+  (select price from public.store_items where id = 'recuperar-sequencia') = 90,
+  'recuperar a sequência está no catálogo'
+);
+
 -- Fora da janela de disponibilidade, o item não se vende.
 update public.store_items set disponivel_ate = now() - interval '1 day' where id = 'avatar-cometa';
 update public.users set completed_lessons = array(select 'aula-' || n from generate_series(1, 50) n)

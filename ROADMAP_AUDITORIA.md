@@ -274,11 +274,23 @@ validadas por uma função `equipar(p_categoria, p_item)` que confere posse
    e a loja não os mostra. No inventário, "De conquista" no lugar da
    raridade; o trancado diz a conquista e o progresso e leva às
    conquistas, que dizem "Dá a Moldura Chama".
-9. **Consumíveis novos**, sem pay-to-win: *recuperar a sequência* (cobre um dia
+9. [x] **Consumíveis novos**, sem pay-to-win: *recuperar a sequência* (cobre um dia
    perdido nos últimos 2 dias, uma vez por semana, derivado como o
    congelamento); *booster de moedas* (+25% nas moedas de aula e desafio por
    24 h, janela como o dobro). "Passe de revisão" só se a Fase 6 criar alguma
    penalidade — hoje não há, e ele não deve existir sem motivo.
+   Feito assim (0013): **recuperar a sequência** (90 moedas) — a compra no
+   dia seguinte ao dia perdido (ou no outro, se entre eles houve estudo)
+   cobre aquele dia; o congelamento, comprado antes, vem primeiro; uma
+   recuperação por semana, contada pelo dia da compra. A loja só vende
+   quando ela salva alguma coisa (`efeitoDeRecuperar`: a mesma conta, com a
+   compra de mentira acrescentada) e diz "cobre ontem: a sequência volta a
+   N dias". O teto do servidor soma a recuperação como soma o congelamento
+   (um dia coberto pode fechar um marco que rende moedas).
+   **O booster de moedas ficou de fora, por decisão**: moeda que rende moeda
+   faz da loja um investimento — quem tem mais ganha mais, e a pergunta
+   deixa de ser "o que eu quero" para "quanto rende". Não volta sem um
+   motivo pedagógico. O passe de revisão continua sem motivo para existir.
 10. **Economia recalibrada** com a simulação da auditoria como teste: comum ≈ 1
     semana de estudo, incomum ≈ 2, raro ≈ 3–4, épico ≈ 5–6, lendário só por
     conquista ou evento. Um cosmético nunca abre por nível **antes** de caber

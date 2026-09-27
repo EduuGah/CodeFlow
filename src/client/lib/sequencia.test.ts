@@ -1,7 +1,13 @@
 import { describe, expect, it } from 'vitest';
 
 import type { Attempt } from './mastery';
-import { calcularSequencia, correntesDaHistoria } from './sequencia';
+import {
+  calcularSequencia,
+  correntesDaHistoria,
+  efeitoDeRecuperar,
+  protecoesDaSequencia,
+  RECUPERAR_SEQUENCIA,
+} from './sequencia';
 
 const em = (dia: string, hora = '10:00'): Attempt => ({
   exerciseId: 'ex',
@@ -87,6 +93,133 @@ describe('congelar a sequência', () => {
     expect(s.diasCongelados).toEqual(['2026-03-07', '2026-03-08']);
     expect(s.atual).toBe(5);
     expect(s.congelamentosRestantes).toBe(0);
+  });
+});
+
+describe('recuperar a sequência', () => {
+  // Hoje é 10/03. Estudou de 05 a 08, perdeu o 09.
+  const semana = ['2026-03-05', '2026-03-06', '2026-03-07', '2026-03-08'].map((d) => em(d));
+  const recuperar = (dia: string, hora = '09:00') => ({
+    item: RECUPERAR_SEQUENCIA,
+    createdAt: new Date(`${dia}T${hora}:00`).toISOString(),
+  });
+
+  it('comprada no dia seguinte, cobre o dia perdido', () => {
+    const s = calcularSequencia(semana, [recuperar('2026-03-10')], hoje);
+    expect(s.diasRecuperados).toEqual(['2026-03-09']);
+    expect(s.atual).toBe(5);
+    expect(s.diasCongelados).toEqual([]);
+    // E não é contada como congelamento guardado.
+    expect(s.congelamentosRestantes).toBe(0);
+  });
+
+  it('comprada dois dias depois, só cobre se o dia do meio teve estudo', () => {
+    // Perdeu o 08, estudou o 09, compra no 10: une as duas correntes.
+    const comMeio = [em('2026-03-05'), em('2026-03-06'), em('2026-03-07'), em('2026-03-09')];
+    const s = calcularSequencia(comMeio, [recuperar('2026-03-10')], hoje);
+    expect(s.diasRecuperados).toEqual(['2026-03-08']);
+    expect(s.atual).toBe(5);
+    // Sem estudo no meio, são dois dias perdidos: uma recuperação não salva, e não é gasta.
+    const semMeio = calcularSequencia([em('2026-03-05'), em('2026-03-06'), em('2026-03-07')], [recuperar('2026-03-10')], hoje);
+    expect(semMeio.diasRecuperados).toEqual([]);
+    expect(semMeio.atual).toBe(0);
+  });
+
+  it('não volta mais que isso no tempo', () => {
+    // Perdeu o 07; comprar no 10 é tarde demais, mesmo tendo estudado 08 e 09.
+    const s = calcularSequencia(
+      [em('2026-03-05'), em('2026-03-06'), em('2026-03-08'), em('2026-03-09')],
+      [recuperar('2026-03-10')],
+      hoje
+    );
+    expect(s.diasRecuperados).toEqual([]);
+    expect(s.atual).toBe(2);
+  });
+
+  it('comprada antes do buraco não serve: para isso existe o congelamento', () => {
+    const s = calcularSequencia(semana, [recuperar('2026-03-08')], hoje);
+    expect(s.diasRecuperados).toEqual([]);
+    expect(s.atual).toBe(0);
+  });
+
+  it('uma por semana: a segunda, em menos de sete dias, não cobre nada', () => {
+    // Perdeu o 03 e o 07; recuperou o 03 comprando no 04, e tenta o 07 comprando no 08.
+    const dias = ['2026-03-01', '2026-03-02', '2026-03-04', '2026-03-05', '2026-03-06', '2026-03-08', '2026-03-09'].map((d) =>
+      em(d)
+    );
+    const s = calcularSequencia(dias, [recuperar('2026-03-04'), recuperar('2026-03-08')], hoje);
+    expect(s.diasRecuperados).toEqual(['2026-03-03']);
+    expect(s.atual).toBe(2);
+  });
+
+  it('com sete dias entre as compras, as duas valem', () => {
+    // Perdeu o 03 (compra no 04) e o 10 (compra no 11, sete dias depois).
+    const dias = ['2026-03-01', '2026-03-02', '2026-03-04', '2026-03-05', '2026-03-06', '2026-03-07', '2026-03-08', '2026-03-09'].map(
+      (d) => em(d)
+    );
+    const s = calcularSequencia(dias, [recuperar('2026-03-04'), recuperar('2026-03-11')], new Date('2026-03-11T15:00:00'));
+    expect(s.diasRecuperados).toEqual(['2026-03-03', '2026-03-10']);
+    expect(s.atual).toBe(10);
+    // Seis dias depois, a segunda ainda não vale.
+    const cedo = calcularSequencia(
+      [...dias.filter((a) => a.createdAt !== em('2026-03-09').createdAt)],
+      [recuperar('2026-03-04'), recuperar('2026-03-10')],
+      hoje
+    );
+    expect(cedo.diasRecuperados).toEqual(['2026-03-03']);
+  });
+
+  it('o congelamento vem primeiro: a recuperação só cobre o que ele não cobriu', () => {
+    const s = calcularSequencia(semana, [compra('2026-03-01'), recuperar('2026-03-10')], hoje);
+    expect(s.diasCongelados).toEqual(['2026-03-09']);
+    expect(s.diasRecuperados).toEqual([]);
+  });
+
+  it('o dia recuperado une as correntes da história (os marcos de sequência contam com ele)', () => {
+    const quatroETres = [
+      ...['2026-03-01', '2026-03-02', '2026-03-03', '2026-03-04'].map((d) => em(d)),
+      ...['2026-03-06', '2026-03-07', '2026-03-08'].map((d) => em(d)),
+    ];
+    expect(correntesDaHistoria(quatroETres, [], hoje)).toEqual([4, 3]);
+    expect(correntesDaHistoria(quatroETres, [recuperar('2026-03-06')], hoje)).toEqual([8]);
+  });
+
+  it('as proteções da sequência são o congelamento e a recuperação — nada mais', () => {
+    const compras = [
+      { item: 'congelar-sequencia', createdAt: '' },
+      { item: RECUPERAR_SEQUENCIA, createdAt: '' },
+      { item: 'dobro-de-xp', createdAt: '' },
+      { item: 'tema-oceano', createdAt: '' },
+    ];
+    expect(protecoesDaSequencia(compras).map((c) => c.item)).toEqual(['congelar-sequencia', RECUPERAR_SEQUENCIA]);
+  });
+});
+
+describe('o que uma recuperação comprada agora faria', () => {
+  const recuperar = (dia: string) => ({ item: RECUPERAR_SEQUENCIA, createdAt: new Date(`${dia}T09:00:00`).toISOString() });
+
+  it('perdeu ontem: salva, e diz de quanto para quanto', () => {
+    const efeito = efeitoDeRecuperar([em('2026-03-07'), em('2026-03-08')], [], hoje);
+    expect(efeito).toEqual({ dia: '2026-03-09', de: 0, para: 3 });
+  });
+
+  it('nada perdido, nada a recuperar', () => {
+    expect(efeitoDeRecuperar([em('2026-03-08'), em('2026-03-09')], [], hoje)).toBeNull();
+  });
+
+  it('sem corrente antes do buraco, não há o que salvar', () => {
+    expect(efeitoDeRecuperar([], [], hoje)).toBeNull();
+    // Primeiro estudo foi hoje: o dia de ontem não protege nada.
+    expect(efeitoDeRecuperar([em('2026-03-10')], [], hoje)).toBeNull();
+  });
+
+  it('já recuperou nesta semana: a loja não vende outra', () => {
+    const dias = ['2026-03-04', '2026-03-06', '2026-03-07', '2026-03-08'].map((d) => em(d));
+    expect(efeitoDeRecuperar(dias, [recuperar('2026-03-06')], hoje)).toBeNull();
+  });
+
+  it('já recuperado, não se vende de novo para o mesmo dia', () => {
+    expect(efeitoDeRecuperar([em('2026-03-07'), em('2026-03-08')], [recuperar('2026-03-10')], hoje)).toBeNull();
   });
 });
 

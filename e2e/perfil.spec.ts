@@ -475,3 +475,53 @@ test('um item de conquista não tem preço: abre com a conquista, equipa e apare
   await esperarConteudo(page);
   await expect(page.getByText('Moldura Chama')).toHaveCount(0);
 });
+
+test('recuperar a sequência: a loja só vende quando salva, e a sequência volta na hora', async ({
+  logado: page,
+  banco,
+}) => {
+  // Cinco dias seguidos até anteontem; ontem, nada. Vinte aulas dão saldo
+  // para duas — o botão trancado depois tem que ser por falta de uso, não
+  // por falta de moedas (a primeira versão deste teste não via a diferença).
+  const dia = (n: number) => {
+    const d = new Date();
+    d.setDate(d.getDate() - n);
+    d.setHours(10, 0, 0, 0);
+    return d.toISOString();
+  };
+  banco.completed_lessons = Array.from({ length: 20 }, (_, i) => `lesson-js-${i + 1}`);
+  banco.attempts = [2, 3, 4, 5, 6].map((n) => ({
+    exercise_id: `ex-js-1-${n}`,
+    lesson_id: 'lesson-js-1',
+    concepts: ['variaveis'],
+    correct: true,
+    hints_used: 0,
+    created_at: dia(n),
+  }));
+
+  await page.goto('/app/perfil/loja');
+  await esperarConteudo(page);
+  // Na seção dos consumíveis: depois da compra, o histórico tem uma linha com o mesmo nome.
+  const recuperar = page
+    .getByRole('region', { name: 'Para usar' })
+    .getByRole('listitem')
+    .filter({ hasText: 'Recuperar a sequência' });
+  await expect(recuperar).toContainText('cobre ontem: a sequência volta a 6 dias');
+
+  await recuperar.getByRole('button', { name: '90' }).click();
+  await recuperar.getByRole('button', { name: /Confirmar por 90/ }).click();
+  await expect(
+    page.getByRole('status').filter({ hasText: 'Comprado: Recuperar a sequência. Sua sequência está em 6 dias.' })
+  ).toBeVisible();
+  expect(banco.purchases.map((p) => p.item)).toEqual(['recuperar-sequencia']);
+
+  // Recuperado, não há mais o que salvar: a loja não vende outra.
+  await expect(recuperar).toContainText('nada para recuperar agora');
+  await expect(recuperar.getByRole('button', { name: '90' })).toBeDisabled();
+  await expect(recuperar).toContainText('sem uso agora');
+
+  // E o perfil conta o dia recuperado.
+  await page.goto('/app/perfil');
+  await esperarConteudo(page);
+  await expect(page.getByText('Sequência', { exact: true }).locator('..')).toContainText(/6\s*dias/);
+});

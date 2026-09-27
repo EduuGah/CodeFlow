@@ -15,7 +15,13 @@ import {
   unsolvedExerciseIds,
   type ResumePoint,
 } from '../lib/study';
-import { calcularSequencia, type Sequencia } from '../lib/sequencia';
+import {
+  calcularSequencia,
+  efeitoDeRecuperar,
+  protecoesDaSequencia,
+  type EfeitoDeRecuperar,
+  type Sequencia,
+} from '../lib/sequencia';
 import { desafiosAtuais, desafiosConcluidos, type EstadoDoDesafio } from '../lib/desafios';
 import {
   dobroAtivo,
@@ -74,6 +80,8 @@ interface StudentData {
 
   /** A sequência de dias, com congelamentos. `streak` é o atalho para `sequencia.atual`. */
   sequencia: Sequencia;
+  /** O que uma recuperação comprada agora salvaria, ou `null` se nada. */
+  recuperacao: EfeitoDeRecuperar | null;
   streak: number;
   daysAway: number | null;
   resume: ResumePoint | null;
@@ -268,10 +276,9 @@ export function StudentDataProvider({ children }: { children: React.ReactNode })
       moedasDeDesafios: concluidos.reduce((s, d) => s + d.recompensa.moedas, 0),
     });
     const gastas = moedasGastas(purchases);
-    const sequencia = calcularSequencia(
-      attempts,
-      purchases.filter((p) => p.item === 'congelar-sequencia')
-    );
+    const protecoes = protecoesDaSequencia(purchases);
+    const sequencia = calcularSequencia(attempts, protecoes);
+    const recuperacao = efeitoDeRecuperar(attempts, protecoes);
 
     return {
       loading,
@@ -289,6 +296,7 @@ export function StudentDataProvider({ children }: { children: React.ReactNode })
       conceptsToReview: conceptsNeedingReview(conceptIds, attempts),
       stats: overallStats(attempts),
       sequencia,
+      recuperacao,
       streak: sequencia.atual,
       daysAway: daysSinceLastStudy(attempts),
       resume: lastActivity(attempts),

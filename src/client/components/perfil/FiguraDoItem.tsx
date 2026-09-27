@@ -3,7 +3,7 @@ import { ACENTOS } from '../../lib/tema';
 import { AVATARES, AvatarDesenhado, avatarPreset } from '../ui/Avatar';
 import { FundoDesenhado, ehFundo } from '../ui/Fundo';
 import { ComMoldura, ehMoldura } from '../ui/Moldura';
-import { VinhetaFloco, VinhetaJanela, VinhetaRaioDuplo } from '../ui/Ilustracao';
+import { VinhetaChamaDeVolta, VinhetaFloco, VinhetaJanela, VinhetaRaioDuplo } from '../ui/Ilustracao';
 
 /**
  * A figura de um item da loja, na cor que ele tem: o floco, o raio, a janela
@@ -11,6 +11,7 @@ import { VinhetaFloco, VinhetaJanela, VinhetaRaioDuplo } from '../ui/Ilustracao'
  */
 export function FiguraDoItem({ item }: { item: ItemDaLoja }) {
   if (item.id === 'congelar-sequencia') return <VinhetaFloco size={56} />;
+  if (item.id === 'recuperar-sequencia') return <VinhetaChamaDeVolta size={56} />;
   if (item.id === 'dobro-de-xp') return <VinhetaRaioDuplo size={56} />;
   if (item.tipo === 'tema') {
     const acento = ACENTOS.find((a) => a.item === item.id);

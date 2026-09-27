@@ -4,7 +4,7 @@ import type { Attempt } from './mastery';
 import type { FlashcardReview } from './review';
 import { emDobro, janelasDeDobro, type Purchase } from './economia';
 import { desafiosConcluidos, type DesafioConcluido } from './desafios';
-import { calcularSequencia, correntesDaHistoria } from './sequencia';
+import { calcularSequencia, correntesDaHistoria, protecoesDaSequencia } from './sequencia';
 import { fechamentoDasAulas } from './study';
 
 /**
@@ -265,7 +265,7 @@ export function computeAchievements(
   const conceitosPraticados = new Set(attempts.flatMap((a) => a.concepts));
   const cartoesRevisados = new Set(reviews.map((r) => r.flashcardId));
 
-  const congelamentos = purchases.filter((p) => p.item === 'congelar-sequencia');
+  const congelamentos = protecoesDaSequencia(purchases);
   const sequencia = calcularSequencia(attempts, congelamentos, input.hoje);
   const maiorCorrente = Math.max(0, ...correntesDaHistoria(attempts, congelamentos, input.hoje));
 
