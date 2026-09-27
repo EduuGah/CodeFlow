@@ -111,6 +111,7 @@ no SQL Editor do Supabase. Todas são idempotentes.
 | `0009_integridade.sql` | Conclusão de aula atômica, painel de admin por agregado (sem ler dados pessoais), contas demo imutáveis, compra validada no banco (`store_items` + `comprar_item`) e limite de ritmo de escrita |
 | `0010_caderno_de_erros.sql` | O que o aluno respondeu em cada erro (`resposta`, `feedback`), para o Caderno de Erros — sem texto livre na conta de demonstração |
 | `0011_loja_molduras_fundos_cores.sql` | Molduras e fundos na loja (categorias e itens) e no perfil (`users.moldura`, `users.fundo`) |
+| `0012_titulos.sql` | O título escolhido pelo aluno (`users.titulo`) — ganho por conquista, nunca vendido |
 
 Sem a 0007, o aplicativo carrega, mas editar o perfil, comprar na loja e
 enviar foto falham — e a própria tela diz qual migração rodar. Sem a 0009, tudo
@@ -134,7 +135,7 @@ Redirect URLs.
 
 ```bash
 npm run typecheck   # tipos, incluindo os testes de navegador
-npm test            # 3.610 testes de unidade, propriedade e componente (Vitest)
+npm test            # 3.632 testes de unidade, propriedade e componente (Vitest)
 npm run test:e2e    # 408 testes de navegador (Playwright, Chromium, celular e desktop)
 ```
 

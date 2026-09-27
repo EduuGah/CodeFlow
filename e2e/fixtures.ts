@@ -52,6 +52,7 @@ export interface BancoFalso {
     accent: string | null;
     moldura?: string | null;
     fundo?: string | null;
+    titulo?: string | null;
   };
   /** Escritas registradas, para o teste conferir que o progresso foi salvo. */
   escritas: Array<{ tabela: string; corpo: unknown }>;
@@ -180,7 +181,7 @@ async function dublarSupabase(page: Page, banco: BancoFalso) {
       const linha = Array.isArray(corpo) ? corpo[0] : corpo;
       if (linha?.completed_lessons) banco.completed_lessons = linha.completed_lessons;
       if (linha?.completed_projects) banco.completed_projects = linha.completed_projects;
-      for (const campo of ['display_name', 'avatar', 'theme', 'accent', 'moldura', 'fundo'] as const) {
+      for (const campo of ['display_name', 'avatar', 'theme', 'accent', 'moldura', 'fundo', 'titulo'] as const) {
         if (campo in (linha ?? {})) banco.perfil[campo] = linha[campo];
       }
 

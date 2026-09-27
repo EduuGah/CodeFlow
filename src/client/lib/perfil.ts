@@ -34,6 +34,10 @@ const AVISO_DA_MIGRACAO =
 const AVISO_DA_0011 =
   'O banco ainda não guarda molduras e fundos. Rode supabase/migrations/0011_loja_molduras_fundos_cores.sql no SQL Editor do Supabase.';
 
+/** O título escolhido mora numa coluna da 0012. */
+const AVISO_DA_0012 =
+  'O banco ainda não guarda títulos. Rode supabase/migrations/0012_titulos.sql no SQL Editor do Supabase.';
+
 export type Tema = 'sistema' | 'claro' | 'escuro';
 
 /** O que se grava do perfil; `undefined` deixa a coluna como está. */
@@ -44,6 +48,7 @@ export interface MudancasDoPerfil {
   accent: Acento;
   moldura: string | null;
   fundo: string | null;
+  titulo: string | null;
 }
 export type Acento = 'floresta' | 'oceano' | 'brasa' | 'ameixa' | 'grafite' | 'meia-noite' | 'crepusculo';
 
@@ -58,21 +63,42 @@ export interface Perfil {
   moldura: string | null;
   /** O id curto do fundo equipado (`aurora`), ou `null`. */
   fundo: string | null;
+  /** O id do título escolhido (`coruja`), ou `null`; se a pessoa o tem, é derivado. */
+  titulo: string | null;
   error?: string;
 }
 
-const VAZIO: Perfil = { displayName: null, avatar: null, theme: null, accent: null, moldura: null, fundo: null };
+const VAZIO: Perfil = {
+  displayName: null,
+  avatar: null,
+  theme: null,
+  accent: null,
+  moldura: null,
+  fundo: null,
+  titulo: null,
+};
 
-const COLUNAS = 'display_name, avatar, theme, accent';
+/**
+ * As colunas lidas, da mais nova para a mais antiga: num banco sem a 0012,
+ * a leitura cai para a de antes, e assim por diante até a 0007. O perfil
+ * que já existia continua valendo; só o que é novo fica vazio.
+ */
+const COLUNAS_POR_MIGRACAO = [
+  'display_name, avatar, theme, accent, moldura, fundo, titulo',
+  'display_name, avatar, theme, accent, moldura, fundo',
+  'display_name, avatar, theme, accent',
+];
 
 export async function fetchPerfil(userId: string): Promise<Perfil> {
   if (!supabase) return { ...VAZIO, error: 'Supabase não configurado.' };
 
   const consulta = (colunas: string) => supabase!.from('users').select(colunas).eq('id', userId).maybeSingle();
 
-  let { data, error } = await consulta(`${COLUNAS}, moldura, fundo`);
-  // Banco sem a 0011: o perfil de antes continua valendo, sem moldura nem fundo.
-  if (error && semMigracao(error)) ({ data, error } = await consulta(COLUNAS));
+  let { data, error } = await consulta(COLUNAS_POR_MIGRACAO[0]);
+  for (const colunas of COLUNAS_POR_MIGRACAO.slice(1)) {
+    if (!error || !semMigracao(error)) break;
+    ({ data, error } = await consulta(colunas));
+  }
 
   if (error) {
     console.error('Falha ao buscar o perfil:', error.message);
@@ -87,7 +113,15 @@ export async function fetchPerfil(userId: string): Promise<Perfil> {
     accent: (linha?.accent as Acento | null) ?? null,
     moldura: linha?.moldura ?? null,
     fundo: linha?.fundo ?? null,
+    titulo: linha?.titulo ?? null,
   };
+}
+
+/** Qual migração falta, pela coluna mais nova que a gravação tocou. */
+function avisoDeMigracao(mudancas: Partial<MudancasDoPerfil>): string {
+  if (mudancas.titulo !== undefined) return AVISO_DA_0012;
+  if (mudancas.moldura !== undefined || mudancas.fundo !== undefined) return AVISO_DA_0011;
+  return AVISO_DA_MIGRACAO;
 }
 
 /** Grava só o que veio: `undefined` deixa a coluna como está. */
@@ -104,18 +138,12 @@ export async function updatePerfil(
   if (mudancas.accent !== undefined) linha.accent = mudancas.accent;
   if (mudancas.moldura !== undefined) linha.moldura = mudancas.moldura;
   if (mudancas.fundo !== undefined) linha.fundo = mudancas.fundo;
+  if (mudancas.titulo !== undefined) linha.titulo = mudancas.titulo;
 
   const { error } = await supabase.from('users').upsert(linha, { onConflict: 'id' });
   if (error) {
     console.error('Falha ao salvar o perfil:', error.message);
-    const daLoja = mudancas.moldura !== undefined || mudancas.fundo !== undefined;
-    return {
-      error: semMigracao(error)
-        ? daLoja
-          ? AVISO_DA_0011
-          : AVISO_DA_MIGRACAO
-        : 'Não foi possível salvar. Tente de novo.',
-    };
+    return { error: semMigracao(error) ? avisoDeMigracao(mudancas) : 'Não foi possível salvar. Tente de novo.' };
   }
   return {};
 }

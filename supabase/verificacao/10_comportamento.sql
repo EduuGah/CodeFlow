@@ -291,6 +291,24 @@ select verificacao.ok(
   (select count(*) from public.store_items where tipo in ('moldura', 'fundo')) = 9,
   'o catálogo tem as molduras e os fundos'
 );
+-- ------------------------------------------------------------ títulos (0012)
+update public.users set titulo = 'coruja' where id = auth.uid();
+select verificacao.ok((select titulo = 'coruja' from public.users where id = auth.uid()), 'título escolhido');
+select verificacao.recusa(
+  $$update public.users set titulo = 'Rei do Universo' where id = auth.uid()$$,
+  'users_titulo_formato', 'título fora do formato'
+);
+select verificacao.recusa(
+  $$update public.users set titulo = '' where id = auth.uid()$$,
+  'users_titulo_formato', 'título vazio (tirar é nulo)'
+);
+update public.users set titulo = null where id = auth.uid();
+select verificacao.ok((select titulo is null from public.users where id = auth.uid()), 'sem título');
+select verificacao.ok(
+  not exists (select 1 from public.store_items where id like 'titulo-%'),
+  'nenhum título à venda'
+);
+
 update public.users set accent = 'meia-noite' where id = auth.uid();
 select verificacao.ok((select accent = 'meia-noite' from public.users where id = auth.uid()), 'cor nova aceita no perfil');
 select verificacao.recusa(

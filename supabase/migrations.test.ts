@@ -112,6 +112,7 @@ describe('as tabelas esperadas existem', () => {
       'accent',
       'moldura',
       'fundo',
+      'titulo',
     ]) {
       expect(TABELAS.get('users'), `users.${coluna}`).toContain(coluna);
     }

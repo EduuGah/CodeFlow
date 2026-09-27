@@ -1,5 +1,6 @@
 import { corDaTrilha } from '../../lib/cores-das-trilhas';
 import { CATEGORIAS_DE_CONQUISTA, type Achievement, type CategoriaDeConquista } from '../../lib/gamification';
+import { TITULOS_DE_CONQUISTA } from '../../lib/titulos';
 import { Card } from '../ui/Card';
 import { IconFlag, IconTrack } from '../ui/Icon';
 import { iconeDaConquista } from './icones';
@@ -52,6 +53,16 @@ export function Medalha({ conquista, size = 44 }: { conquista: Achievement; size
       <Icone size={Math.round(size * 0.5)} strokeWidth={conquista.unlocked ? 2 : 1.75} />
     </span>
   );
+}
+
+/**
+ * O título que a conquista dá, dito ao lado dela: é assim que a pessoa
+ * descobre que "Vinte e cinco bugs" vira "Detetive de Bugs" no nome.
+ */
+function tituloQueDa(conquista: Achievement): string | null {
+  const titulo = TITULOS_DE_CONQUISTA.find((t) => t.conquistas.includes(conquista.id));
+  if (!titulo) return null;
+  return titulo.conquistas.length === 1 ? `Dá o título ${titulo.nome}` : `Parte do título ${titulo.nome}`;
 }
 
 /** Uma pastilha entre 0 e 100 — porcentagem do progresso, ou 100 se já aberta. */
@@ -117,7 +128,7 @@ function Destaque({ conquistas }: { conquistas: Achievement[] }) {
 function EmblemaCompacto({ conquista }: { conquista: Achievement }) {
   const percent = percentual(conquista);
   return (
-    <li title={conquista.description}>
+    <li title={[conquista.description, tituloQueDa(conquista)].filter(Boolean).join(' — ')}>
       <div
         className={`flex h-full flex-col items-center gap-1.5 rounded-lg border p-2.5 text-center ${
           conquista.unlocked ? 'border-line bg-surface' : 'border-line bg-sunken'
@@ -189,6 +200,9 @@ export function Conquistas({ conquistas }: { conquistas: Achievement[] }) {
                         {c.title}
                       </span>
                       <span className="block text-xs leading-relaxed text-ink-soft">{c.description}</span>
+                      {tituloQueDa(c) && (
+                        <span className="mt-1 block text-xs font-semibold text-brand-700">{tituloQueDa(c)}</span>
+                      )}
                       {c.progresso && !c.unlocked && (
                         <span className="mt-1.5 flex items-center gap-2">
                           <span

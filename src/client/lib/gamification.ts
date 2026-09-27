@@ -286,6 +286,9 @@ export function computeAchievements(
     }
   }
   const tiposResolvidos = new Set([...exerciciosResolvidos].map((id) => tipoDoExercicio.get(id)));
+  const resolvidosDoTipo = (tipo: string) => [...exerciciosResolvidos].filter((id) => tipoDoExercicio.get(id) === tipo).length;
+  // Exercícios diferentes de laço resolvidos — pelo conceito que a tentativa carrega.
+  const lacosResolvidos = new Set(acertos.filter((a) => a.concepts.includes('loops')).map((a) => a.exerciseId)).size;
 
   // Hora local de cada tentativa — para as conquistas de horário.
   const horas = attempts.map((a) => new Date(a.createdAt).getHours());
@@ -514,6 +517,30 @@ export function computeAchievements(
       description: 'Você resolveu um exercício de escrever o teste — e ele pegou as sabotagens.',
       categoria: 'habilidades',
       unlocked: tiposResolvidos.has('write-test'),
+    },
+    {
+      id: 'vinte-e-cinco-bugs',
+      title: 'Vinte e cinco bugs',
+      description: 'Vinte e cinco exercícios diferentes de encontrar o bug resolvidos.',
+      categoria: 'habilidades',
+      unlocked: resolvidosDoTipo('find-bug') >= 25,
+      progresso: contagem(resolvidosDoTipo('find-bug'), 25),
+    },
+    {
+      id: 'quinze-lacos',
+      title: 'Quinze laços',
+      description: 'Quinze exercícios diferentes de laço resolvidos — repetir sem se perder na contagem.',
+      categoria: 'habilidades',
+      unlocked: lacosResolvidos >= 15,
+      progresso: contagem(lacosResolvidos, 15),
+    },
+    {
+      id: 'dez-testes',
+      title: 'Dez testes escritos',
+      description: 'Dez exercícios de escrever o teste resolvidos, cada um pegando as sabotagens.',
+      categoria: 'habilidades',
+      unlocked: resolvidosDoTipo('write-test') >= 10,
+      progresso: contagem(resolvidosDoTipo('write-test'), 10),
     },
     {
       id: 'trilha-sem-dica',

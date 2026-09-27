@@ -378,3 +378,52 @@ test('a prévia mostra o item no próprio perfil sem gravar, e "Equipar agora" g
   await expect(status).toContainText('Equipado.');
   expect(banco.perfil.moldura).toBe('pixel');
 });
+
+test('um título ganho por conquista se escolhe no inventário e aparece ao lado do nome', async ({
+  logado: page,
+  banco,
+}) => {
+  semear(banco);
+  // Um acerto às duas da manhã (hora local) abre "Coruja".
+  const madrugada = new Date();
+  madrugada.setDate(madrugada.getDate() - 1);
+  madrugada.setHours(2, 0, 0, 0);
+  banco.attempts.push({
+    exercise_id: 'ex-js-3-c',
+    lesson_id: 'lesson-js-3',
+    concepts: ['condicoes'],
+    correct: true,
+    hints_used: 0,
+    created_at: madrugada.toISOString(),
+  });
+  // Um título gravado que as conquistas não abrem não aparece.
+  banco.perfil.titulo = 'lenda-do-percurso';
+
+  await page.goto('/app/perfil');
+  await esperarConteudo(page);
+  await expect(page.locator('[data-titulo]')).toHaveCount(0);
+
+  await page.goto('/app/perfil/inventario');
+  await esperarConteudo(page);
+  const titulos = page.getByRole('region', { name: 'Títulos' });
+  await expect(titulos.getByRole('listitem').filter({ hasText: 'Sem título' })).toContainText('Em uso');
+
+  // O trancado diz a conquista que falta, com o progresso — e não vende nada.
+  const detetive = titulos.getByRole('listitem').filter({ hasText: 'Detetive de Bugs' });
+  await expect(detetive).toContainText('Falta a conquista Vinte e cinco bugs (0/25)');
+  await expect(detetive.getByRole('link')).toHaveAttribute('href', '/app/perfil/conquistas');
+
+  await titulos.getByRole('button', { name: 'Usar Coruja' }).click();
+  await expect(page.getByRole('status').filter({ hasText: 'Coruja aparece ao lado do seu nome.' })).toBeVisible();
+  expect(banco.perfil.titulo).toBe('coruja');
+  await expect(titulos.getByRole('listitem').filter({ hasText: 'Coruja' })).toContainText('Em uso');
+
+  await page.goto('/app/perfil');
+  await esperarConteudo(page);
+  await expect(page.locator('[data-titulo]')).toHaveText('Título: Coruja');
+
+  // E as conquistas dizem qual título cada uma dá.
+  await page.goto('/app/perfil/conquistas');
+  await esperarConteudo(page);
+  await expect(page.getByRole('listitem').filter({ hasText: 'Coruja' }).first()).toContainText('Dá o título Coruja');
+});

@@ -251,9 +251,19 @@ validadas por uma função `equipar(p_categoria, p_item)` que confere posse
    OKLCH (mesma luminosidade por degrau, outro matiz). Verde, âmbar e
    vermelho ficaram de fora de propósito: são sucesso, "ainda não" e erro.
    O teste de contraste itera `ACENTOS` (as sete × os dois modos).
-7. **Badges e títulos**: "Caçador de Bugs" (conquista de 100 `find-bug`), "Mestre
+7. [x] **Badges e títulos**: "Caçador de Bugs" (conquista de 100 `find-bug`), "Mestre
    dos Loops", "Full Stack Apprentice" (trilhas da etapa 5)… Título aparece
    ao lado do nome (`Carlos — Caçador de Bugs`).
+   Feito assim (0012): doze títulos (`lib/titulos.ts`), cada um aberto por
+   uma ou mais conquistas — três conquistas novas para isso (vinte e cinco
+   bugs, quinze laços, dez testes escritos; o catálogo só tem 74 `find-bug`,
+   então "100" nunca abriria, e um teste confere que cada contagem cabe no
+   catálogo). Nomes que servem a qualquer pessoa: "Detetive de Bugs",
+   "Mestre dos Laços", "Aprendiz Full Stack" (as etapas da web, das
+   ferramentas e da aplicação — conferido pelas trilhas, não pelo índice).
+   Escolhe-se no inventário; aparece ao lado do nome no perfil; as
+   conquistas dizem "Dá o título …". Nenhum título está na loja (teste e
+   verificação no banco).
 8. **Itens exclusivos de conquista** (sem preço): "Chama de 30 dias", "Moldura
    React" (trilha React completa).
 9. **Consumíveis novos**, sem pay-to-win: *recuperar a sequência* (cobre um dia

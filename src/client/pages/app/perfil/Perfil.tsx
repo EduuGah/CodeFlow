@@ -6,6 +6,7 @@ import { useStudentData } from '../../../contexts/StudentDataContext';
 import { useTema } from '../../../contexts/TemaContext';
 import { proximaFaixa, xpMinimoDoNivel } from '../../../lib/gamification';
 import { nomeParaMostrar } from '../../../lib/perfil';
+import { tituloParaMostrar } from '../../../lib/titulos';
 import { ACENTOS, TEMAS } from '../../../lib/tema';
 import { AnelDeNivel } from '../../../components/perfil/AnelDeNivel';
 import { EditarPerfil } from '../../../components/perfil/EditarPerfil';
@@ -125,6 +126,7 @@ export function Perfil() {
   const faixa = proximaFaixa(level.level);
   const nomeDoTema = TEMAS.find((t) => t.id === tema)?.title ?? tema;
   const corDeDestaque = ACENTOS.find((a) => a.id === acento);
+  const titulo = tituloParaMostrar(perfil.titulo, achievements);
 
   return (
     <div className="space-y-6">
@@ -138,7 +140,16 @@ export function Perfil() {
         </AnelDeNivel>
 
         <div className="min-w-0 flex-1 basis-40">
-          <h1 className="truncate text-xl font-extrabold tracking-tight text-ink sm:text-2xl">{nome}</h1>
+          {/* O título ao lado do nome, e embaixo dele quando o nome é longo. */}
+          <div className="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-0.5">
+            <h1 className="min-w-0 max-w-full truncate text-xl font-extrabold tracking-tight text-ink sm:text-2xl">{nome}</h1>
+            {titulo && (
+              <span className="text-sm font-semibold text-brand-700" data-titulo>
+                <span className="sr-only">Título: </span>
+                {titulo}
+              </span>
+            )}
+          </div>
           <p className="label-mono text-ink-faint">
             Nível {level.level} · {level.title}
           </p>

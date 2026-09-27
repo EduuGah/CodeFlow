@@ -119,7 +119,7 @@ const StudentDataContext = createContext<StudentData | undefined>(undefined);
 let dependentes: Map<string, number> | undefined;
 const DEPENDENTES = () => (dependentes ??= dependentesPorConceito(listConcepts()));
 
-const PERFIL_VAZIO: Perfil = { displayName: null, avatar: null, theme: null, accent: null, moldura: null, fundo: null };
+const PERFIL_VAZIO: Perfil = { displayName: null, avatar: null, theme: null, accent: null, moldura: null, fundo: null, titulo: null };
 
 export function StudentDataProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
@@ -234,15 +234,13 @@ export function StudentDataProvider({ children }: { children: React.ReactNode })
       if (!userId) return { error: 'Sem sessão.' };
       const resultado = await updatePerfil(userId, mudancas);
       if (resultado.error) return resultado;
-      setPerfil((atual) => ({
-        ...atual,
-        ...(mudancas.displayName !== undefined ? { displayName: mudancas.displayName } : {}),
-        ...(mudancas.avatar !== undefined ? { avatar: mudancas.avatar } : {}),
-        ...(mudancas.theme !== undefined ? { theme: mudancas.theme } : {}),
-        ...(mudancas.accent !== undefined ? { accent: mudancas.accent } : {}),
-        ...(mudancas.moldura !== undefined ? { moldura: mudancas.moldura } : {}),
-        ...(mudancas.fundo !== undefined ? { fundo: mudancas.fundo } : {}),
-      }));
+      // Os nomes de `MudancasDoPerfil` são os de `Perfil`, então o que foi
+      // gravado entra inteiro — sem uma linha por campo, que o título novo
+      // esqueceu e o teste de navegador pegou: gravava, mas a tela não via.
+      const gravadas = Object.fromEntries(
+        Object.entries(mudancas).filter(([, valor]) => valor !== undefined)
+      ) as Partial<MudancasDoPerfil>;
+      setPerfil((atual) => ({ ...atual, ...gravadas }));
       return {};
     },
     [userId]

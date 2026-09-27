@@ -12,6 +12,7 @@ import { Button } from '../ui/Button';
 import { SectionLabel, cardClasses } from '../ui/Card';
 import { IconCheck, IconLock } from '../ui/Icon';
 import { VinhetaFloco, VinhetaJanela, VinhetaRaioDuplo } from '../ui/Ilustracao';
+import { EscolherTitulo } from './EscolherTitulo';
 
 /**
  * O inventário: tudo o que é da pessoa, por categoria, e o que falta para o
@@ -273,6 +274,8 @@ export function Inventario() {
           </ul>
         </section>
       ))}
+
+      <EscolherTitulo onAviso={setAviso} />
 
       <section aria-label="Para usar">
         <SectionLabel as="h2" className="mb-0.5">
