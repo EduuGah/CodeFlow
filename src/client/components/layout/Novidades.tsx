@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useStudentData } from '../../contexts/StudentDataContext';
 import { inicioDaSemana } from '../../lib/desafios';
-import { ITENS } from '../../lib/economia';
+import { aVenda, ITENS } from '../../lib/economia';
 import { estadoAtual, guardarVisto, lerVisto, novidades, resumoDosItens, type Novidade } from '../../lib/novidades';
 import { diaLocal } from '../../lib/sequencia';
 import { Medalha } from '../perfil/Conquistas';
@@ -23,8 +23,11 @@ import { VinhetaAlvo, VinhetaCaixa, VinhetaMedalha } from '../ui/Ilustracao';
  */
 const DURACAO_MS = 6000;
 
-/** Os ids do catálogo, para o aviso de itens novos na loja. */
-const IDS_DA_LOJA = ITENS.map((i) => i.id);
+/**
+ * Os ids do que está à venda agora, para o aviso de itens novos na loja: um
+ * sazonal vira notícia quando a janela abre, e não quando o código chega.
+ */
+const idsAVenda = () => ITENS.filter((i) => aVenda(i)).map((i) => i.id);
 
 /** Para onde o "ver" de cada aviso leva. */
 function destino(novidade: Novidade): { para: string; rotulo: string } {
@@ -54,7 +57,7 @@ export function Novidades() {
       desafios,
       hoje,
       segunda: inicioDaSemana(hoje),
-      itensDaLoja: IDS_DA_LOJA,
+      itensDaLoja: idsAVenda(),
     });
   }, [loading, level.level, achievements, desafios]);
 

@@ -56,6 +56,31 @@ export interface ItemDaLoja {
   raridade: Raridade;
   /** Nível a partir do qual o item é liberado de graça. Só cosméticos. */
   nivelQueLibera?: number;
+  /**
+   * Janela de venda, em ISO (UTC), para os sazonais — a mesma de
+   * `store_items.disponivel_de`/`disponivel_ate`, que o banco confere na
+   * compra. Fora dela o item não se vende; quem comprou continua com ele.
+   */
+  disponivelDe?: string;
+  disponivelAte?: string;
+}
+
+/** Se o item está à venda agora: dentro da janela, quando ele tem uma. */
+export function aVenda(item: ItemDaLoja, agora: Date = new Date()): boolean {
+  const t = agora.getTime();
+  if (item.disponivelDe && t < Date.parse(item.disponivelDe)) return false;
+  if (item.disponivelAte && t >= Date.parse(item.disponivelAte)) return false;
+  return true;
+}
+
+/**
+ * O que a loja e o inventário mostram: o que está à venda, e o que já é da
+ * pessoa mesmo fora da janela. Um sazonal que passou não aparece para quem
+ * não o tem — nem como "volta ano que vem", que seria a promessa de um
+ * sistema de eventos que não existe.
+ */
+export function visivel(item: ItemDaLoja, nivel: number, purchases: Purchase[], agora: Date = new Date()): boolean {
+  return aVenda(item, agora) || posseDe(item, nivel, purchases).tem;
 }
 
 export const MOEDAS = {
@@ -205,6 +230,19 @@ export const ITENS: ItemDaLoja[] = [
       ['mar', 'Mar', 'Três ondas, das escuras às claras, e o sol em cima.', 13],
     ] as const
   ).map(([id, title, description, nivel]) => cosmetico(`fundo-${id}`, 'fundo', `Fundo ${title}`, description, nivel)),
+  // Sazonais (0016): só por moedas, só na janela, sem nível que abra. Quem
+  // comprou fica com o item depois; a janela não se repete sozinha.
+  {
+    id: 'fundo-fogos',
+    title: 'Fundo Fogos',
+    description: 'Fogos de fim de ano num céu de verão.',
+    price: 400,
+    tipo: 'fundo',
+    raridade: 'raro',
+    // De 15/12/2026 a 15/01/2027, no horário de Brasília.
+    disponivelDe: '2026-12-15T03:00:00.000Z',
+    disponivelAte: '2027-01-16T03:00:00.000Z',
+  },
 ];
 
 export function itemDaLoja(id: string): ItemDaLoja | undefined {

@@ -1,4 +1,4 @@
-import { ITENS, posseDe, type ItemDaLoja, type Purchase } from './economia';
+import { aVenda, ITENS, posseDe, type ItemDaLoja, type Purchase } from './economia';
 
 /**
  * Os destaques da semana: três cosméticos na vitrine, trocados na segunda.
@@ -41,15 +41,23 @@ export function indiceDaSemana(segunda: string): number {
   return Math.floor(dias / 7);
 }
 
-/** Os destaques da semana de `segunda` para quem tem esse nível e essas compras. */
-export function destaquesDaSemana(segunda: string, nivel: number, purchases: Purchase[]): ItemDaLoja[] {
+/**
+ * Os destaques da semana de `segunda` para quem tem esse nível e essas
+ * compras. Um sazonal só entra dentro da janela dele.
+ */
+export function destaquesDaSemana(
+  segunda: string,
+  nivel: number,
+  purchases: Purchase[],
+  agora: Date = new Date()
+): ItemDaLoja[] {
   const n = ORDEM_DA_VITRINE.length;
   if (n === 0) return [];
   const inicio = (((indiceDaSemana(segunda) * DESTAQUES_POR_SEMANA) % n) + n) % n;
   const escolhidos: ItemDaLoja[] = [];
   for (let k = 0; k < n && escolhidos.length < DESTAQUES_POR_SEMANA; k++) {
     const item = ORDEM_DA_VITRINE[(inicio + k) % n];
-    if (!posseDe(item, nivel, purchases).tem) escolhidos.push(item);
+    if (aVenda(item, agora) && !posseDe(item, nivel, purchases).tem) escolhidos.push(item);
   }
   return escolhidos;
 }

@@ -320,8 +320,17 @@ validadas por uma função `equipar(p_categoria, p_item)` que confere posse
     mais barato nem some. Nas Novidades, "Chegou à loja: 4 avatares, 2
     molduras e 1 fundo", um aviso só; quem já usava o aplicativo antes do
     aviso existir compara com o catálogo de antes da Loja 2.0.
-12. **Sazonais**: `disponivelDe`/`disponivelAte` já valem no servidor; a tela
+12. [x] **Sazonais**: `disponivelDe`/`disponivelAte` já valem no servidor; a tela
     mostra "até <data>" sem pressão. Nada de sistema de eventos.
+    Feito assim (0016): a janela mora também em `ITENS` (`aVenda`,
+    `visivel`), e um teste confere que é a mesma do banco. Fora dela o item
+    some da loja, do inventário, da vitrine e da contagem — para quem não o
+    tem; quem comprou continua com ele. O cartão diz "à venda até 15 de
+    janeiro · depois, quem comprou fica com ele", no horário de Brasília, e
+    nada mais. Sazonal não abre por nível e cabe no saldo em metade da
+    janela (teste de calibragem). O primeiro é o Fundo Fogos (15/12 a 15/01),
+    e o aviso de "chegou à loja" o anuncia quando a janela abre, não quando o
+    código chega.
 13. **Admin da loja**: mesma decisão do conteúdo — a tela **gera** a linha do
     catálogo (TS + SQL) para revisão em pull request, em vez de escrever no
     banco. Ativar/desativar pode ser um `update` de `ativo` por função de admin.

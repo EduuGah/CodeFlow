@@ -15,7 +15,7 @@ import { P } from './Ilustracao';
  */
 
 /** Os da loja. */
-export const FUNDOS = ['grade', 'terminal', 'circuito', 'por-do-sol', 'mar', 'aurora'] as const;
+export const FUNDOS = ['grade', 'terminal', 'circuito', 'por-do-sol', 'mar', 'aurora', 'fogos'] as const;
 /** Os que não se vendem: abrem por conquista (`lib/exclusivos.ts`). */
 export const FUNDOS_DE_CONQUISTA = ['constelacao'] as const;
 export type IdDeFundo = (typeof FUNDOS)[number] | (typeof FUNDOS_DE_CONQUISTA)[number];
@@ -25,6 +25,15 @@ const TODOS: readonly string[] = [...FUNDOS, ...FUNDOS_DE_CONQUISTA];
 export function ehFundo(valor: unknown): valor is IdDeFundo {
   return typeof valor === 'string' && TODOS.includes(valor);
 }
+
+/** Os fogos: centro, raio e cor de cada estouro — os maiores no miolo. */
+const ESTOUROS: Array<[number, number, number, string]> = [
+  [150, 36, 16, P.dourado],
+  [196, 44, 12, '#ff7cc0'],
+  [118, 48, 10, '#6fd3ff'],
+  [60, 30, 9, '#9af0c0'],
+  [262, 32, 10, P.laranja],
+];
 
 /**
  * As linhas de código do terminal: recuo e comprimento. Ficam no miolo da
@@ -164,6 +173,34 @@ function Desenho({ id, gradiente }: { id: IdDeFundo; gradiente: string }): React
               fill={cor as string}
             />
           ))}
+        </>
+      );
+    // Noite de verão e os estouros: raios em volta de cada centro, e a fagulha no meio.
+    case 'fogos':
+      return (
+        <>
+          <rect width="320" height="80" fill="#15163a" />
+          {ESTOUROS.map(([cx, cy, r, cor]) => (
+            <g key={`${cx}-${cy}`}>
+              {Array.from({ length: 12 }, (_, i) => {
+                const a = (i / 12) * 2 * Math.PI;
+                return (
+                  <line
+                    key={i}
+                    x1={cx + Math.cos(a) * r * 0.35}
+                    y1={cy + Math.sin(a) * r * 0.35}
+                    x2={cx + Math.cos(a) * r}
+                    y2={cy + Math.sin(a) * r}
+                    stroke={cor}
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                  />
+                );
+              })}
+              <circle cx={cx} cy={cy} r="1.8" fill={P.creme} />
+            </g>
+          ))}
+          <path d="M150 80 V56" stroke={P.dourado} strokeOpacity="0.5" strokeWidth="1.2" strokeDasharray="2 3" />
         </>
       );
     // Céu de tinta com poeira de estrelas, e as maiores ligadas em desenho.

@@ -12,6 +12,7 @@ import { diaLocal, RECUPERAR_SEQUENCIA, somarDias } from '../../lib/sequencia';
 import { ACENTOS } from '../../lib/tema';
 import { PreviaDoPerfil } from './PreviaDoPerfil';
 import {
+  aVenda,
   HORAS_DE_DOBRO,
   itemDaLoja,
   ITENS,
@@ -21,6 +22,7 @@ import {
   type ItemDaLoja,
   type Raridade,
   type TipoDeItem,
+  visivel,
 } from '../../lib/economia';
 import { FiguraDoItem } from './FiguraDoItem';
 import { Button } from '../ui/Button';
@@ -84,6 +86,19 @@ const COMO_GANHAR = [
   { Icone: IconStreak, texto: '7 dias seguidos', valor: MOEDAS.porSemanaSeguida },
   { Icone: IconStreak, texto: '30 dias seguidos', valor: MOEDAS.porMesSeguido },
 ];
+
+/**
+ * "15 de janeiro": o último dia inteiro da janela (o fim é exclusivo), no
+ * horário de Brasília — o da janela. No fuso do aparelho, um navegador em UTC
+ * diria "16", porque a janela fecha às 3h UTC.
+ */
+function ultimoDiaDaJanela(ate: string): string {
+  return new Date(Date.parse(ate) - 1).toLocaleDateString('pt-BR', {
+    day: 'numeric',
+    month: 'long',
+    timeZone: 'America/Sao_Paulo',
+  });
+}
 
 export function Loja() {
   const {
@@ -171,31 +186,31 @@ export function Loja() {
       tipo: 'consumivel',
       titulo: 'Para usar',
       nota: 'Consumíveis: cada compra é um uso.',
-      itens: ITENS.filter((i) => i.tipo === 'consumivel'),
+      itens: ITENS.filter((i) => i.tipo === 'consumivel' && visivel(i, level.level, purchases)),
     },
     {
       tipo: 'tema',
       titulo: 'Cores de destaque',
       nota: 'Abrem por nível ou por moedas — o que vier primeiro. Aplicam-se na aparência.',
-      itens: ITENS.filter((i) => i.tipo === 'tema'),
+      itens: ITENS.filter((i) => i.tipo === 'tema' && visivel(i, level.level, purchases)),
     },
     {
       tipo: 'avatar',
       titulo: 'Avatares',
       nota: 'Os que não vêm de graça — cada um abre no nível dele, ou antes, com moedas. Escolha em editar perfil.',
-      itens: ITENS.filter((i) => i.tipo === 'avatar'),
+      itens: ITENS.filter((i) => i.tipo === 'avatar' && visivel(i, level.level, purchases)),
     },
     {
       tipo: 'moldura',
       titulo: 'Molduras',
       nota: 'Um anel na borda do avatar, no perfil e no início. Abrem por nível ou por moedas; equipe no inventário.',
-      itens: ITENS.filter((i) => i.tipo === 'moldura'),
+      itens: ITENS.filter((i) => i.tipo === 'moldura' && visivel(i, level.level, purchases)),
     },
     {
       tipo: 'fundo',
       titulo: 'Fundos',
       nota: 'A capa do perfil, acima do seu nome. Abrem por nível ou por moedas; equipe no inventário.',
-      itens: ITENS.filter((i) => i.tipo === 'fundo'),
+      itens: ITENS.filter((i) => i.tipo === 'fundo' && visivel(i, level.level, purchases)),
     },
   ];
 
@@ -265,6 +280,12 @@ export function Loja() {
           )}
           {item.nivelQueLibera !== undefined && !seu && (
             <span className="label-mono text-ink-faint">ou de graça no nível {item.nivelQueLibera}</span>
+          )}
+          {/* O sazonal diz até quando, e só: sem relógio, sem "últimos dias". */}
+          {item.disponivelAte && !seu && aVenda(item) && (
+            <span className="label-mono text-ink-faint">
+              à venda até {ultimoDiaDaJanela(item.disponivelAte)} · depois, quem comprou fica com ele
+            </span>
           )}
           {item.id === 'congelar-sequencia' && sequencia.congelamentosRestantes > 0 && (
             <span className="label-mono text-brand-700">

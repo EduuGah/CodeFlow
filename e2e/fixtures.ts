@@ -87,7 +87,9 @@ function jwtFalso(expira: number): string {
 }
 
 function sessaoFalsa() {
-  const expira = Math.floor(Date.now() / 1000) + 60 * 60;
+  // Longe no futuro: os testes que fixam o relógio da página (os sazonais, em
+  // dezembro) não podem ver a sessão vencida e entrar num laço de renovação.
+  const expira = Math.floor(Date.UTC(2100, 0, 1) / 1000);
 
   return {
     access_token: jwtFalso(expira),

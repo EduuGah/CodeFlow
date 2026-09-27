@@ -555,3 +555,37 @@ test('os destaques da semana são três que a pessoa não tem, e levam ao cartã
   await page.getByRole('group', { name: 'Mostrar' }).getByRole('button', { name: 'Fundos' }).click();
   await expect(vitrine).toHaveCount(0);
 });
+
+test('um sazonal aparece só na janela, diz até quando sem relógio, e fica com quem comprou', async ({
+  logado: page,
+  banco,
+}) => {
+  // Quarenta e cinco aulas: saldo para o Fundo Fogos (400).
+  banco.completed_lessons = Array.from({ length: 45 }, (_, i) => `lesson-js-${(i % 20) + 1}-${i}`);
+  const fundos = () => page.getByRole('region', { name: 'Fundos' });
+  const fogos = () => fundos().getByRole('listitem').filter({ hasText: 'Fundo Fogos' });
+
+  // Antes da janela: nem sinal dele.
+  await page.clock.setFixedTime(new Date('2026-12-10T12:00:00-03:00'));
+  await page.goto('/app/perfil/loja');
+  await esperarConteudo(page);
+  await expect(fundos()).toBeVisible();
+  await expect(fogos()).toHaveCount(0);
+
+  // Dentro: à venda, com a data e mais nada.
+  await page.clock.setFixedTime(new Date('2026-12-20T12:00:00-03:00'));
+  await page.reload();
+  await esperarConteudo(page);
+  await expect(fogos()).toContainText('à venda até 15 de janeiro · depois, quem comprou fica com ele');
+  await expect(fogos()).not.toContainText(/restam|termina em|últimos/i);
+  await fogos().getByRole('button', { name: '400' }).click();
+  await fogos().getByRole('button', { name: /Confirmar por 400/ }).click();
+  await expect(page.getByRole('status').filter({ hasText: 'Comprado: Fundo Fogos' })).toBeVisible();
+
+  // Depois: quem comprou continua vendo, como dele.
+  await page.clock.setFixedTime(new Date('2027-01-20T12:00:00-03:00'));
+  await page.reload();
+  await esperarConteudo(page);
+  await expect(fogos()).toContainText('seu');
+  await expect(fogos()).not.toContainText('à venda até');
+});

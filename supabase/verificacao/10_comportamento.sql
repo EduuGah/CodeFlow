@@ -155,6 +155,14 @@ select verificacao.ok(
   (select price from public.store_items where id = 'recuperar-sequencia') = 90,
   'recuperar a sequência está no catálogo'
 );
+-- O sazonal (0016) chega com a janela; fora dela a compra é recusada pelo
+-- mesmo caminho do avatar-cometa, logo abaixo. A conferência não depende da
+-- data em que roda.
+select verificacao.ok(
+  (select disponivel_de = '2026-12-15T03:00:00Z' and disponivel_ate = '2027-01-16T03:00:00Z'
+     from public.store_items where id = 'fundo-fogos'),
+  'o sazonal tem a janela de dezembro a janeiro'
+);
 
 -- Fora da janela de disponibilidade, o item não se vende.
 update public.store_items set disponivel_ate = now() - interval '1 day' where id = 'avatar-cometa';
@@ -304,8 +312,8 @@ select verificacao.recusa(
   'users_fundo_formato', 'fundo acima do tamanho'
 );
 select verificacao.ok(
-  (select count(*) from public.store_items where tipo in ('moldura', 'fundo')) = 13,
-  'o catálogo tem as molduras e os fundos (9 da 0011, 4 da 0014)'
+  (select count(*) from public.store_items where tipo in ('moldura', 'fundo')) = 14,
+  'o catálogo tem as molduras e os fundos (9 da 0011, 4 da 0014, 1 da 0016)'
 );
 select verificacao.ok(
   (select count(*) from public.store_items where id in ('avatar-capivara', 'avatar-tucano', 'avatar-tartaruga', 'avatar-baleia')) = 4,

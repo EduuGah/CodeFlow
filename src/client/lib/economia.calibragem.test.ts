@@ -158,6 +158,18 @@ describe('os preços', () => {
     }
   });
 
+  it('um sazonal cabe no saldo na metade da janela, sem precisar de poupança antiga', () => {
+    // Quem começa a juntar quando a janela abre consegue comprar antes de ela
+    // fechar, com folga: o sazonal não pode virar corrida.
+    const porSemana = (CURVAS[0][69].moedas - CURVAS[0][13].moedas) / 8;
+    const sazonais = ITENS.filter((i) => i.disponivelDe && i.disponivelAte);
+    for (const item of sazonais) {
+      const semanas = (Date.parse(item.disponivelAte!) - Date.parse(item.disponivelDe!)) / (7 * 24 * 60 * 60 * 1000);
+      expect(item.nivelQueLibera, `${item.id} não abre por nível`).toBeUndefined();
+      expect(item.price, item.id).toBeLessThanOrEqual((porSemana * semanas) / 2);
+    }
+  });
+
   it('nada à venda é lendário: lendário é de conquista ou de evento', () => {
     for (const item of ITENS) expect(RARIDADES[item.raridade].ordem, item.id).toBeLessThan(RARIDADES.lendario.ordem);
   });

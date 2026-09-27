@@ -284,6 +284,28 @@ describe('a loja no banco', () => {
     expect(noBanco).toEqual(noCodigo);
   });
 
+  it('a janela de cada sazonal no banco é a mesma do código', () => {
+    // A loja esconde o item fora da janela de `ITENS`; o banco recusa fora da
+    // de `store_items`. Duas janelas diferentes venderiam o que a tela não
+    // mostra, ou mostrariam o que o banco recusa.
+    const noBanco = new Map<string, { de: string; ate: string }>();
+    for (const { texto } of sql) {
+      for (const [, de, ate, id] of semComentarios(texto).matchAll(
+        /update public\.store_items\s+set disponivel_de = '([^']+)',\s*disponivel_ate = '([^']+)'\s+where id = '([\w-]+)'/gi
+      )) {
+        noBanco.set(id, { de: new Date(de).toISOString(), ate: new Date(ate).toISOString() });
+      }
+    }
+    const noCodigo = new Map(
+      ITENS.filter((i) => i.disponivelDe || i.disponivelAte).map((i) => [
+        i.id,
+        { de: new Date(i.disponivelDe!).toISOString(), ate: new Date(i.disponivelAte!).toISOString() },
+      ])
+    );
+    expect(noCodigo.size).toBeGreaterThan(0);
+    expect(Object.fromEntries(noBanco)).toEqual(Object.fromEntries(noCodigo));
+  });
+
   it('o teto de moedas usa os números da economia', () => {
     // Um teto abaixo do que o histórico rende recusaria compras legítimas. A
     // definição que vale é a da migração mais nova que o redefine (0013).

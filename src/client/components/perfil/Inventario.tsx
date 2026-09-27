@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 
 import { useStudentData } from '../../contexts/StudentDataContext';
 import { useTema } from '../../contexts/TemaContext';
-import { itemDaLoja, posseDe, RARIDADES, type ItemDaLoja, type Posse, type Purchase } from '../../lib/economia';
+import { itemDaLoja, posseDe, RARIDADES, visivel, type ItemDaLoja, type Posse, type Purchase } from '../../lib/economia';
 import { ITENS_DE_CONQUISTA, posseDeConquista, type ItemDeConquista, type PosseDeConquista } from '../../lib/exclusivos';
 import type { Achievement } from '../../lib/gamification';
 import { ACENTOS } from '../../lib/tema';
@@ -67,9 +67,11 @@ export function contarCosmeticos(
     ...MOLDURAS.map((id) => itemDaLoja(`moldura-${id}`)),
     ...FUNDOS.map((id) => itemDaLoja(`fundo-${id}`)),
   ];
-  const daLoja = itens.filter((i) => posseDe(i, nivel, purchases).tem).length;
+  // Um sazonal fora da janela só conta para quem o tem.
+  const contaveis = itens.filter((i) => !i || visivel(i, nivel, purchases));
+  const daLoja = contaveis.filter((i) => posseDe(i, nivel, purchases).tem).length;
   const deConquista = ITENS_DE_CONQUISTA.filter((i) => posseDeConquista(i, conquistas).tem).length;
-  return { seus: daLoja + deConquista, total: itens.length + ITENS_DE_CONQUISTA.length };
+  return { seus: daLoja + deConquista, total: contaveis.length + ITENS_DE_CONQUISTA.length };
 }
 
 /** Equipado primeiro, depois o que é seu, depois o que falta — pelo nível que abre (conquista por último). */
@@ -183,7 +185,11 @@ export function Inventario() {
       equipar: () => salvarPerfil({ fundo: null }),
       feito: 'Fundo tirado.',
     },
-    ...FUNDOS.map((id): Peca => {
+    ...FUNDOS.filter((id) => {
+      // O sazonal fora da janela não aparece para quem não o tem.
+      const item = itemDaLoja(`fundo-${id}`);
+      return !item || visivel(item, level.level, purchases);
+    }).map((id): Peca => {
       const item = itemDaLoja(`fundo-${id}`);
       return {
         chave: `fundo-${id}`,

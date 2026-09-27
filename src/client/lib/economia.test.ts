@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import type { Attempt } from './mastery';
 import {
+  aVenda,
   dobroAtivo,
   historicoDeCompras,
   ITENS,
@@ -11,6 +12,7 @@ import {
   MOEDAS,
   posseDe,
   temItem,
+  visivel,
 } from './economia';
 
 const em = (dia: string): Attempt => ({
@@ -85,6 +87,37 @@ describe('a loja', () => {
     expect(dobroAtivo(compras, new Date('2026-03-10T12:00:00.000Z'))?.ate.toISOString()).toBe('2026-03-11T10:00:00.000Z');
     expect(dobroAtivo(compras, new Date('2026-03-11T10:00:00.000Z'))).toBeNull();
     expect(dobroAtivo(compras, new Date('2026-03-10T09:59:00.000Z'))).toBeNull();
+  });
+});
+
+describe('os sazonais', () => {
+  const fogos = itemDaLoja('fundo-fogos')!;
+  const antes = new Date('2026-12-14T23:59:00-03:00');
+  const primeiroDia = new Date('2026-12-15T00:00:00-03:00');
+  const ultimoDia = new Date('2027-01-15T23:59:00-03:00');
+  const depois = new Date('2027-01-16T00:00:00-03:00');
+
+  it('estão à venda só dentro da janela, no horário de Brasília', () => {
+    expect(aVenda(fogos, antes)).toBe(false);
+    expect(aVenda(fogos, primeiroDia)).toBe(true);
+    expect(aVenda(fogos, ultimoDia)).toBe(true);
+    expect(aVenda(fogos, depois)).toBe(false);
+  });
+
+  it('fora da janela, só quem comprou vê — e continua com ele', () => {
+    expect(visivel(fogos, 30, [], depois)).toBe(false);
+    const comprou = [{ item: 'fundo-fogos', price: 400, createdAt: '2026-12-20T12:00:00.000Z' }];
+    expect(visivel(fogos, 1, comprou, depois)).toBe(true);
+    expect(posseDe(fogos, 1, comprou).tem).toBe(true);
+  });
+
+  it('não abrem por nível: nível nenhum dá um sazonal', () => {
+    expect(fogos.nivelQueLibera).toBeUndefined();
+    expect(posseDe(fogos, 99, []).tem).toBe(false);
+  });
+
+  it('item sem janela está sempre à venda', () => {
+    expect(aVenda(itemDaLoja('tema-oceano')!, depois)).toBe(true);
   });
 });
 
