@@ -21,8 +21,8 @@ alter table public.store_items add constraint store_items_tipo_check
   check (tipo in ('consumivel', 'tema', 'avatar', 'moldura', 'fundo', 'editor', 'celebracao', 'sequencia', 'adesivo'));
 
 -- Espelho de `ITENS` em `src/client/lib/economia.ts` (o teste de migrações
--- confere preço e tipo de cada um). O padrão e o alto contraste do editor, e o
--- confete, são de todo mundo e não estão à venda.
+-- confere preço e tipo de cada um). O padrão e o alto contraste do editor, o
+-- confete e a chama são de todo mundo e não estão à venda.
 insert into public.store_items (id, price, tipo) values
   ('editor-noturno', 60, 'editor'),
   ('editor-papel', 130, 'editor'),
@@ -32,7 +32,11 @@ insert into public.store_items (id, price, tipo) values
   ('celebracao-estrelas', 90, 'celebracao'),
   ('celebracao-bolhas', 160, 'celebracao'),
   ('celebracao-codigo', 350, 'celebracao'),
-  ('celebracao-fogos', 680, 'celebracao')
+  ('celebracao-fogos', 680, 'celebracao'),
+  ('sequencia-sol', 60, 'sequencia'),
+  ('sequencia-cafe', 130, 'sequencia'),
+  ('sequencia-foguete', 300, 'sequencia'),
+  ('sequencia-planta', 600, 'sequencia')
 on conflict (id) do update
   set price = excluded.price,
       tipo = excluded.tipo;

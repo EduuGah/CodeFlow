@@ -4,7 +4,8 @@ import { getConcept, getTrackProgress, listTracks } from '../../../../content';
 import { CabecalhoDaSecao } from '../../../components/perfil/CabecalhoDaSecao';
 import { Badge, type BadgeTone } from '../../../components/ui/Badge';
 import { Card, SectionLabel } from '../../../components/ui/Card';
-import { IconBolt, IconStreak } from '../../../components/ui/Icon';
+import { IconBolt } from '../../../components/ui/Icon';
+import { IconeDaSequencia } from '../../../components/ui/IconeDaSequencia';
 import { EmblemaDaTrilha } from '../../../components/ui/Emblema';
 import { VinhetaCaixa, VinhetaGrafico } from '../../../components/ui/Ilustracao';
 import { Carregando, Skeleton } from '../../../components/ui/Skeleton';
@@ -32,7 +33,7 @@ const tonePorNivel: Record<ConceptMastery['level'], BadgeTone> = {
 
 export function PerfilProgresso() {
   useDocumentTitle('Progresso');
-  const { loading, level, xp, mastery, stats, sequencia, completedLessons, dobro } = useStudentData();
+  const { loading, level, xp, mastery, stats, sequencia, completedLessons, dobro, perfil } = useStudentData();
 
   const comHistorico = mastery.filter((m) => m.attempts > 0);
   const faixa = proximaFaixa(level.level);
@@ -151,7 +152,7 @@ export function PerfilProgresso() {
 
           <Card as="section" aria-labelledby="titulo-constancia" className="flex flex-wrap items-center gap-4">
             <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-energy-50 text-energy-700" aria-hidden>
-              <IconStreak size={24} />
+              <IconeDaSequencia icone={perfil.iconeSequencia} dias={sequencia.atual} size={24} />
             </span>
             <div className="min-w-0 flex-1">
               <h2 id="titulo-constancia" className="font-bold text-ink">

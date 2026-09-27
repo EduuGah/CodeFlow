@@ -14,6 +14,7 @@ import { ACENTOS } from '../../lib/tema';
 import { celebrar } from '../../lib/celebrar';
 import { temaDoEditor } from '../../lib/temas-do-editor';
 import { PreviaDaCelebracao } from './PreviaDaCelebracao';
+import { PreviaDaSequencia } from './PreviaDaSequencia';
 import { PreviaDoEditor } from './PreviaDoEditor';
 import { PreviaDoPerfil } from './PreviaDoPerfil';
 import {
@@ -82,6 +83,7 @@ const FILTROS: Array<{ id: Filtro; rotulo: string }> = [
   { id: 'tema', rotulo: 'Cores' },
   { id: 'editor', rotulo: 'Editor' },
   { id: 'celebracao', rotulo: 'Celebrações' },
+  { id: 'sequencia', rotulo: 'Sequência' },
   { id: 'consumivel', rotulo: 'Consumíveis' },
 ];
 
@@ -215,6 +217,12 @@ export function Loja() {
       const id = item.id.replace(/^celebracao-/, '');
       return { rotulo: 'Ver a celebração', conteudo: <PreviaDaCelebracao id={id} />, aoAbrir: () => celebrar('aula', id) };
     }
+    if (item.tipo === 'sequencia') {
+      return {
+        rotulo: 'Ver na sequência',
+        conteudo: <PreviaDaSequencia id={item.id.replace(/^sequencia-/, '')} dias={sequencia.atual} />,
+      };
+    }
     if (item.tipo === 'editor') {
       return { rotulo: 'Ver no editor', conteudo: <PreviaDoEditor tema={temaDoEditor(mudancaDeEquipar(item)?.temaEditor)} /> };
     }
@@ -269,6 +277,12 @@ export function Loja() {
       titulo: 'Celebrações',
       nota: 'O que toca na tela quando uma aula ou um projeto fecha. O confete é de todo mundo; nenhuma toca se o seu sistema pede menos movimento.',
       itens: ITENS.filter((i) => i.tipo === 'celebracao' && naLoja(i)),
+    },
+    {
+      tipo: 'sequencia',
+      titulo: 'Ícone da sequência',
+      nota: 'O desenho ao lado dos seus dias seguidos, no início e no perfil. A conta é a mesma; a chama é de todo mundo.',
+      itens: ITENS.filter((i) => i.tipo === 'sequencia' && naLoja(i)),
     },
   ];
 

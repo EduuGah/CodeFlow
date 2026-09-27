@@ -5,6 +5,7 @@ import { AVATARES, AvatarDesenhado, avatarPreset } from '../ui/Avatar';
 import { FundoDesenhado, ehFundo } from '../ui/Fundo';
 import { ComMoldura, ehMoldura } from '../ui/Moldura';
 import { VinhetaChamaDeVolta, VinhetaFloco, VinhetaJanela, VinhetaRaioDuplo } from '../ui/Ilustracao';
+import { IconeDaSequencia } from '../ui/IconeDaSequencia';
 import { FiguraDaCelebracao } from './PreviaDaCelebracao';
 import { MiniaturaDoEditor } from './PreviaDoEditor';
 
@@ -33,6 +34,14 @@ export function FiguraDoItem({ item }: { item: ItemDaLoja }) {
     return <MiniaturaDoEditor tema={temaDoEditor(item.id.replace('editor-', ''))} />;
   }
   if (item.tipo === 'celebracao') return <FiguraDaCelebracao id={item.id.replace('celebracao-', '')} largura={88} />;
+  if (item.tipo === 'sequencia') {
+    // Como no início: o ícone no selo da sequência. A planta aparece já árvore.
+    return (
+      <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-energy-50 text-energy-700">
+        <IconeDaSequencia icone={item.id.replace('sequencia-', '')} dias={30} size={32} />
+      </span>
+    );
+  }
   if (item.tipo === 'fundo') {
     const id = item.id.replace('fundo-', '');
     return ehFundo(id) ? <FundoDesenhado id={id} className="h-14 w-24 rounded-lg" /> : null;

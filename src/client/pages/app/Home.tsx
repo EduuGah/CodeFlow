@@ -17,9 +17,9 @@ import {
   IconCoin,
   IconPractice,
   IconReview,
-  IconStreak,
   IconTarget,
 } from '../../components/ui/Icon';
+import { IconeDaSequencia } from '../../components/ui/IconeDaSequencia';
 import { buttonClasses } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { CenaAulas } from '../../components/ui/Cena';
@@ -164,7 +164,7 @@ export function Home() {
                 className="flex items-center gap-1.5 rounded-lg bg-energy-50 px-2.5 py-1.5 text-sm font-bold text-energy-700"
                 title={sequencia.estudouHoje ? 'Hoje já contou' : 'Estude hoje para manter'}
               >
-                <IconStreak size={16} />
+                <IconeDaSequencia icone={perfil.iconeSequencia} dias={streak} size={16} />
                 {streak} {streak === 1 ? 'dia' : 'dias'}
               </span>
             )}

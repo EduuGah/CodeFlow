@@ -440,6 +440,11 @@ select verificacao.ok(
     and not exists (select 1 from public.store_items where id = 'celebracao-confete'),
   'as celebrações estão no catálogo do banco, e o confete (de todo mundo) não'
 );
+select verificacao.ok(
+  (select count(*) from public.store_items where tipo = 'sequencia') = 4
+    and not exists (select 1 from public.store_items where id = 'sequencia-chama'),
+  'os ícones da sequência estão no catálogo do banco, e a chama (de todo mundo) não'
+);
 select verificacao.recusa(
   $$update public.users set tema_editor = 'Noturno!' where id = auth.uid()$$,
   'users_tema_editor_formato', 'tema do editor fora do formato'

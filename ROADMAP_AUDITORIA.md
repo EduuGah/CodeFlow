@@ -392,8 +392,13 @@ cresce e roda de novo):
    verdade). **Nenhuma toca para quem pediu menos movimento — a comprada
    inclusive**, nem nos disparos atrasados; a loja diz isso no lugar de tocar
    escondido. A prévia toca no clique de quem pediu, não ao montar.
-3. [ ] **Ícone da sequência**: a chama, ou outro (raio, foguete, café, planta
-   que cresce), onde a sequência aparece.
+3. [x] **Ícone da sequência**: a chama, ou outro, onde a sequência aparece.
+   Feito assim: Sol, Café, Foguete e **Planta que cresce** (broto, muda aos
+   7 dias, árvore aos 30 — os marcos que já rendem moedas), e a chama de
+   todo mundo; no traço dos outros ícones, com a cor do lugar onde está. No
+   início, no perfil e no progresso; a conta da sequência não muda. **Sem
+   raio**: ele já é o "2× XP" do cabeçalho, e os dois lado a lado diriam a
+   mesma coisa.
 4. [ ] **Adesivos no perfil**: até três, escolhidos no inventário, no
    cabeçalho do perfil.
 

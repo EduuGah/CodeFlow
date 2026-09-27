@@ -8,6 +8,7 @@ import { ITENS_DE_CONQUISTA, posseDeConquista, type ItemDeConquista, type PosseD
 import type { Achievement } from '../../lib/gamification';
 import { ACENTOS } from '../../lib/tema';
 import { CELEBRACAO_PADRAO, CELEBRACOES, celebracao } from '../../lib/celebracoes';
+import { ICONE_DA_SEQUENCIA_PADRAO, ICONES_DA_SEQUENCIA, iconeDaSequencia } from '../../lib/icones-da-sequencia';
 import { TEMA_DO_EDITOR_PADRAO, TEMAS_DO_EDITOR, temaDoEditor } from '../../lib/temas-do-editor';
 import { AVATARES, AvatarDesenhado, avatarPreset } from '../ui/Avatar';
 import { FUNDOS, FundoDesenhado, ehFundo, type IdDeFundo } from '../ui/Fundo';
@@ -17,6 +18,7 @@ import { SectionLabel, cardClasses } from '../ui/Card';
 import { IconCheck, IconLock } from '../ui/Icon';
 import { VinhetaFloco, VinhetaJanela, VinhetaRaioDuplo } from '../ui/Ilustracao';
 import { EscolherTitulo } from './EscolherTitulo';
+import { IconeDaSequencia } from '../ui/IconeDaSequencia';
 import { FiguraDaCelebracao } from './PreviaDaCelebracao';
 import { MiniaturaDoEditor } from './PreviaDoEditor';
 
@@ -72,6 +74,7 @@ export function contarCosmeticos(
     ...FUNDOS.map((id) => itemDaLoja(`fundo-${id}`)),
     ...TEMAS_DO_EDITOR.map((t) => (t.item ? itemDaLoja(t.item) : undefined)),
     ...CELEBRACOES.map((c) => (c.item ? itemDaLoja(c.item) : undefined)),
+    ...ICONES_DA_SEQUENCIA.map((i) => (i.item ? itemDaLoja(i.item) : undefined)),
   ];
   // Um sazonal fora da janela só conta para quem o tem.
   const contaveis = itens.filter((i) => !i || visivel(i, nivel, purchases));
@@ -248,6 +251,27 @@ export function Inventario() {
     };
   });
 
+  // O ícone no selo da sequência, com os dias de agora: a planta aparece no
+  // tamanho que teria.
+  const iconeAtual = iconeDaSequencia(perfil.iconeSequencia).id;
+  const iconesDaSequencia: Peca[] = ICONES_DA_SEQUENCIA.map((icone) => {
+    const item = icone.item ? itemDaLoja(icone.item) : undefined;
+    return {
+      chave: `sequencia-${icone.id}`,
+      titulo: item?.title ?? `Sequência ${icone.title}`,
+      figura: (
+        <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-energy-50 text-energy-700">
+          <IconeDaSequencia icone={icone.id} dias={sequencia.atual} size={26} />
+        </span>
+      ),
+      item,
+      posse: posseDe(item, level.level, purchases),
+      equipado: iconeAtual === icone.id,
+      equipar: () =>
+        salvarPerfil({ iconeSequencia: icone.id === ICONE_DA_SEQUENCIA_PADRAO.id ? null : icone.id }),
+    };
+  });
+
   const equipar = async (peca: Peca) => {
     setEquipando(peca.chave);
     const { error } = await peca.equipar();
@@ -278,6 +302,11 @@ export function Inventario() {
       titulo: 'Celebrações',
       nota: 'O que toca quando uma aula ou um projeto fecha. Para ver antes, a loja toca cada uma.',
       pecas: emOrdem(celebracoes),
+    },
+    {
+      titulo: 'Ícone da sequência',
+      nota: 'O desenho ao lado dos seus dias seguidos, no início e no perfil.',
+      pecas: emOrdem(iconesDaSequencia),
     },
   ];
 

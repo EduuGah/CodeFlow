@@ -481,6 +481,39 @@ test.describe('celebrações, com menos movimento pedido', () => {
   });
 });
 
+test('o ícone da sequência equipado aparece no início e no perfil; a planta cresce com os dias', async ({
+  logado: page,
+  banco,
+}) => {
+  semear(banco);
+  // Comprados antes: a posse vem do histórico, como na conta de verdade.
+  const ontem = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
+  banco.purchases.push(
+    { item: 'sequencia-foguete', price: 300, created_at: ontem },
+    { item: 'sequencia-planta', price: 600, created_at: ontem }
+  );
+  await page.goto('/app/perfil/inventario');
+  await esperarConteudo(page);
+  const secao = page.getByRole('region', { name: 'Ícone da sequência' });
+  await secao.getByRole('button', { name: 'Equipar Sequência Foguete' }).click();
+  await expect.poll(() => banco.perfil.icone_sequencia).toBe('foguete');
+
+  await page.goto('/app');
+  await esperarConteudo(page);
+  await expect(page.locator('[data-icone-sequencia="foguete"]').first()).toBeVisible();
+
+  await page.goto('/app/perfil');
+  await esperarConteudo(page);
+  await expect(page.locator('[data-icone-sequencia="foguete"]').first()).toBeVisible();
+
+  // A planta, com a sequência de quatro dias do histórico semeado: ainda broto.
+  await page.goto('/app/perfil/inventario');
+  await secao.getByRole('button', { name: 'Equipar Sequência Planta que cresce' }).click();
+  await expect.poll(() => banco.perfil.icone_sequencia).toBe('planta');
+  await page.goto('/app');
+  await expect(page.locator('[data-icone-sequencia="planta"]').first()).toHaveAttribute('data-estagio', 'broto');
+});
+
 test('um título ganho por conquista se escolhe no inventário e aparece ao lado do nome', async ({
   logado: page,
   banco,

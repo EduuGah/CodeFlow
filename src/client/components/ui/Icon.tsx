@@ -41,6 +41,9 @@ function Base({ size = 20, children, ...props }: IconProps) {
   );
 }
 
+/** A mesma base, para um ícone desenhado fora daqui (`IconeDaSequencia`). */
+export { Base as IconeBase };
+
 /* ---------------------------------------------------------------- marca */
 
 /** Colchetes com um fluxo entre eles: código que corre. É a marca. */

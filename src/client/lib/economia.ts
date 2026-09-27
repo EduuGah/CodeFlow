@@ -268,6 +268,18 @@ export const ITENS: ItemDaLoja[] = [
   ).map(([id, title, description, nivel]) =>
     cosmetico(`celebracao-${id}`, 'celebracao', `Celebração ${title}`, description, nivel)
   ),
+  // Ícones da sequência (0020): só o desenho ao lado dos dias seguidos; a
+  // conta é a mesma. A chama é de todo mundo. Desenhos em `ui/IconeDaSequencia`.
+  ...(
+    [
+      ['sol', 'Sol', 'Um sol que nasce a cada dia estudado.', 4],
+      ['cafe', 'Café', 'A xícara de todo dia, fumegando.', 6],
+      ['foguete', 'Foguete', 'Subindo, um dia de cada vez.', 8],
+      ['planta', 'Planta que cresce', 'Broto, muda e árvore: cresce com a sequência, aos 7 e aos 30 dias.', 11],
+    ] as const
+  ).map(([id, title, description, nivel]) =>
+    cosmetico(`sequencia-${id}`, 'sequencia', `Sequência ${title}`, description, nivel)
+  ),
   // Só por moedas (0018): épicos sem nível que os abra. O nível abre o último
   // cosmético lá pela semana 13 do aluno-modelo; estes são para onde as
   // moedas vão depois disso (P2-16). O teste de calibragem cobra que somem

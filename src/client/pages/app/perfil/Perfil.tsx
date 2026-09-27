@@ -16,7 +16,8 @@ import { FundoDesenhado, ehFundo } from '../../../components/ui/Fundo';
 import { ComMoldura } from '../../../components/ui/Moldura';
 import { Button } from '../../../components/ui/Button';
 import { Card, cardClasses } from '../../../components/ui/Card';
-import { IconArrowRight, IconBolt, IconCoin, IconEdit, IconExit, IconFreeze, IconStreak } from '../../../components/ui/Icon';
+import { IconArrowRight, IconBolt, IconCoin, IconEdit, IconExit, IconFreeze } from '../../../components/ui/Icon';
+import { IconeDaSequencia } from '../../../components/ui/IconeDaSequencia';
 import {
   VinhetaAlvo,
   VinhetaCaixa,
@@ -189,7 +190,7 @@ export function Perfil() {
         <div className={cardClasses({ padding: 'sm', className: 'min-w-0' })}>
           <dt className="label-mono text-ink-faint">Sequência</dt>
           <dd className="mt-1 flex items-center gap-1.5 text-xl font-extrabold tabular-nums text-ink">
-            <IconStreak size={18} className="text-energy-700" />
+            <IconeDaSequencia icone={perfil.iconeSequencia} dias={sequencia.atual} size={18} className="text-energy-700" />
             {sequencia.atual}
             <span className="text-sm font-normal text-ink-soft">{sequencia.atual === 1 ? 'dia' : 'dias'}</span>
           </dd>
