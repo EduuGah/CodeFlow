@@ -28,8 +28,11 @@ describe('os destaques da semana', () => {
   });
 
   it('pula o que a pessoa já tem, pelo nível ou pela compra', () => {
-    // No nível 30 tudo que abre por nível já é dela: não sobra vitrine.
-    expect(destaquesDaSemana(SEGUNDA, 30, [], AGORA)).toEqual([]);
+    // No nível 30 tudo que abre por nível já é dela: na vitrine, só o que
+    // nenhum nível abre (os itens só por moedas).
+    const noNivel30 = destaquesDaSemana(SEGUNDA, 30, [], AGORA);
+    expect(noNivel30.length).toBeGreaterThan(0);
+    for (const item of noNivel30) expect(item.nivelQueLibera, item.id).toBeUndefined();
     const [primeiro] = destaquesDaSemana(SEGUNDA, 1, [], AGORA);
     expect(ids(destaquesDaSemana(SEGUNDA, 1, [compra(primeiro.id)], AGORA))).not.toContain(primeiro.id);
   });

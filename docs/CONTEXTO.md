@@ -41,7 +41,7 @@ Números lidos do catálogo, não de memória.
 | Projetos | 10, com 34 critérios de aceitação — os 3 capstones são página + API + banco (motor 7), os outros 7 são JavaScript puro |
 | Conceitos | 151, com grafo de pré-requisitos |
 | Flashcards | 67 (93 conceitos ainda sem cartão) |
-| Testes | 3.747 de unidade + ~478 de navegador |
+| Testes | 3.749 de unidade + ~478 de navegador |
 | Pacote | 3.095 kB (851 kB comprimido) no chunk principal — o corpo das aulas vai junto (é quase metade), e separá-lo é o maior problema de performance aberto (P2-1b do roadmap). Aula, revisão, refazer erros, projeto e admin são rotas sob demanda (`App.tsx`), e o Zod só entra no chunk do admin; o Monaco são mais 3.362 kB (869 kB) num chunk à parte, baixado só quando o primeiro editor monta, e o worker de TypeScript (7 MB) só quando um modelo JS/TS abre. O motor de TypeScript não acrescentou arquivo; o de React acrescentou um chunk de 143 kB (47 kB) com o React e o ReactDOM como texto, baixado só por um exercício de React; o de SQL acrescentou o worker (49 kB) e o SQLite em WebAssembly (658 kB), baixados só por um exercício de SQL; o de Python acrescentou o worker (~22 kB) e o Pyodide inteiro (~13,5 MB: o WebAssembly do CPython, a biblioteca padrão zipada, o manifesto de pacotes), copiados para `/pyodide/` na build e baixados só por um exercício de Python |
 
 ## 4. Decisões que não devem ser desfeitas sem motivo forte
@@ -108,7 +108,9 @@ catálogo de verdade, em cinco datas de início: nada abre pelo nível antes de
 caber no saldo, e do nível 6 em diante comprar encurta a espera sem ser de
 graça. Mexeu em recompensa, desafio ou no começo do catálogo, esse teste diz
 se os preços ainda fazem sentido. **Nível de item nunca sobe** (tiraria o que
-alguém já abriu); preço pode mudar. **Os destaques da semana** (`lib/destaques.ts`)
+alguém já abriu); preço pode mudar. **Há itens sem nível**: os épicos só por
+moedas (0018) são o destino das moedas depois da semana ~13, quando o nível
+já abriu todo o resto — o teste de calibragem cobra que somem meses. **Os destaques da semana** (`lib/destaques.ts`)
 são um rodízio fixo, não sorteio: nenhum fica mais barato nem some, e a
 vitrine aponta para o cartão do item em vez de repeti-lo (cada item mora numa
 seção só — e os testes que filtram por nome não viram loteria da semana).
@@ -456,7 +458,8 @@ src/client/components/  `caderno/`: a resposta no formato do exercício
                         (`RespostaDoAluno`) e o enunciado numa linha
                         (`TextoEmLinha`, sem o leitor de Markdown inteiro)
 e2e/                    Playwright; `fixtures.ts` tem o dublê do Supabase
-supabase/migrations/    0001 a 0017, aplicadas em ordem (0017: tirar item
+supabase/migrations/    0001 a 0018, aplicadas em ordem (0018: épicos só
+                        por moedas; 0017: tirar item
                         da venda pela administração; 0016: o primeiro
                         sazonal; 0015: preços
                         recalibrados; 0014: itens
@@ -476,7 +479,7 @@ docs/curriculo.md       Roadmap de conteúdo — fonte canônica
 ```bash
 npm run typecheck   # inclui e2e/ e playwright.config.ts
 npm run lint        # ESLint mínimo: typescript-eslint + react-hooks
-npm test            # 3.747 testes
+npm test            # 3.749 testes
 npm run test:e2e    # ~478 no navegador (antes: npx playwright install chromium;
                     # com um Chromium já instalado: PW_CHROMIUM=/caminho/do/chrome)
 npm run build
@@ -1069,6 +1072,10 @@ Faltam ~19 aulas da lista original — outras trilhas do Fundamentos de
 JavaScript, Página, Git, Terminal, TypeScript, Web e o resto de Python.
 
 ## 9. Pendências do lado do usuário
+
+- **Rodar `supabase/migrations/0018_so_por_moedas.sql` no SQL Editor.** Só
+  catálogo: os quatro épicos sem nível. Sem ela, a loja os mostra e o banco
+  recusa a compra.
 
 - **Rodar `supabase/migrations/0017_admin_da_loja.sql` no SQL Editor.** A
   função que tira um item da venda pela tela `/admin/loja`. Sem ela, o botão

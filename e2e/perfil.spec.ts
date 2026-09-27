@@ -227,6 +227,10 @@ test('a loja filtra por categoria, mostra a raridade, e o saldo acompanha a rola
   // Do nível 15 em diante, épico (a raridade sai do nível, como o preço).
   const alien = page.getByRole('listitem').filter({ hasText: 'Avatar Alien' });
   await expect(alien.getByText('Épico', { exact: true })).toBeVisible();
+  // O épico só por moedas diz que nenhum nível o abre.
+  const dragao = page.getByRole('listitem').filter({ hasText: 'Avatar Dragão' });
+  await expect(dragao).toContainText('só por moedas: nenhum nível abre');
+  await expect(dragao).not.toContainText('ou de graça no nível');
 
   // O saldo fica à vista no topo depois de rolar até o fim da lista.
   await page.getByRole('region', { name: 'Avatares' }).getByRole('listitem').last().scrollIntoViewIfNeeded();

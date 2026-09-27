@@ -150,6 +150,18 @@ describe('os preços', () => {
     }
   });
 
+  it('os itens só por moedas somam meses de estudo: as moedas têm destino depois que o nível abriu tudo', () => {
+    // O nível abre o último cosmético lá pela semana 13; o catálogo de aulas
+    // dura umas 31. Os itens sem nível nem janela são o que sobra para
+    // comprar nesse intervalo — e precisam cobrir boa parte dele.
+    const porSemana = (CURVAS[0][69].moedas - CURVAS[0][13].moedas) / 8;
+    const soPorMoedas = ITENS.filter(
+      (i) => i.tipo !== 'consumivel' && i.nivelQueLibera === undefined && !i.disponivelDe && !i.disponivelAte
+    );
+    const semanas = soPorMoedas.reduce((soma, i) => soma + i.price, 0) / porSemana;
+    expect(semanas).toBeGreaterThanOrEqual(18);
+  });
+
   it('consumível custa menos de meia semana: gastar não pode ser caro', () => {
     const porSemana = (CURVAS[0][69].moedas - CURVAS[0][13].moedas) / 8;
     for (const item of ITENS.filter((i) => i.tipo === 'consumivel')) {

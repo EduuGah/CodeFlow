@@ -298,6 +298,9 @@ export function Loja() {
           {item.nivelQueLibera !== undefined && !seu && (
             <span className="label-mono text-ink-faint">ou de graça no nível {item.nivelQueLibera}</span>
           )}
+          {item.nivelQueLibera === undefined && !item.disponivelAte && item.tipo !== 'consumivel' && !seu && (
+            <span className="label-mono text-ink-faint">só por moedas: nenhum nível abre</span>
+          )}
           {/* O sazonal diz até quando, e só: sem relógio, sem "últimos dias". */}
           {item.disponivelAte && !seu && aVenda(item) && (
             <span className="label-mono text-ink-faint">

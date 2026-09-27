@@ -346,9 +346,13 @@ validadas por uma função `equipar(p_categoria, p_item)` que confere posse
     liberada ao cliente só se a recusa a não-admin vier antes da primeira
     escrita.
 
-Com isso a Loja 2.0 fecha as treze etapas. O que ficou registrado como
-próximo passo: item só por moeda (sem nível) ou catálogo que cresça com o
-conteúdo, porque o nível abre o último cosmético na semana ~13 (P2-16).
+Com isso a Loja 2.0 fecha as treze etapas. Depois delas, o passo que ficou
+registrado — o nível abre o último cosmético na semana ~13 (P2-16) — virou a
+0018: quatro épicos **só por moedas**, sem nível que os abra (Avatar Dragão,
+Avatar Fênix, Moldura Engrenagens, Fundo Cidade), de 1.200 a 1.500 moedas. O
+teste de calibragem cobra que os itens só por moedas somem pelo menos 18
+semanas do aluno-modelo: as moedas têm destino até perto do fim do catálogo
+de aulas.
 
 Fora de escopo por decisão: loot box, sorteio pago com moeda, compra com
 dinheiro real de qualquer coisa que toque progresso (XP, nível, resposta,

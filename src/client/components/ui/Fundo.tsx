@@ -15,7 +15,7 @@ import { P } from './Ilustracao';
  */
 
 /** Os da loja. */
-export const FUNDOS = ['grade', 'terminal', 'circuito', 'por-do-sol', 'mar', 'aurora', 'fogos'] as const;
+export const FUNDOS = ['grade', 'terminal', 'circuito', 'por-do-sol', 'mar', 'aurora', 'fogos', 'cidade'] as const;
 /** Os que não se vendem: abrem por conquista (`lib/exclusivos.ts`). */
 export const FUNDOS_DE_CONQUISTA = ['constelacao'] as const;
 export type IdDeFundo = (typeof FUNDOS)[number] | (typeof FUNDOS_DE_CONQUISTA)[number];
@@ -25,6 +25,12 @@ const TODOS: readonly string[] = [...FUNDOS, ...FUNDOS_DE_CONQUISTA];
 export function ehFundo(valor: unknown): valor is IdDeFundo {
   return typeof valor === 'string' && TODOS.includes(valor);
 }
+
+/** Os prédios da cidade: x, largura e topo — os mais altos no miolo. */
+const PREDIOS: Array<[number, number, number]> = [
+  [0, 34, 52], [30, 26, 44], [58, 30, 56], [92, 22, 38], [112, 30, 30],
+  [146, 24, 24], [168, 32, 34], [204, 22, 42], [228, 34, 50], [264, 26, 46], [292, 28, 56],
+];
 
 /** Os fogos: centro, raio e cor de cada estouro — os maiores no miolo. */
 const ESTOUROS: Array<[number, number, number, string]> = [
@@ -172,6 +178,32 @@ function Desenho({ id, gradiente }: { id: IdDeFundo; gradiente: string }): React
               d={`M0 ${y} ${'q20 -8 40 0 '.repeat(8)}V80 H0 Z`}
               fill={cor as string}
             />
+          ))}
+        </>
+      );
+    // A cidade à noite: a lua, os prédios em silhueta e as janelas acesas.
+    case 'cidade':
+      return (
+        <>
+          <rect width="320" height="80" fill="#1b2447" />
+          <circle cx="250" cy="22" r="9" fill={P.creme} fillOpacity="0.9" />
+          <circle cx="254" cy="19" r="8" fill="#1b2447" />
+          {PREDIOS.map(([x, largura, topo]) => (
+            <g key={x}>
+              <rect x={x} y={topo} width={largura} height={80 - topo} fill="#2c3868" />
+              {Array.from({ length: Math.floor((80 - topo - 6) / 8) }, (_, linha) =>
+                Array.from({ length: Math.floor((largura - 4) / 7) }, (_, coluna) => (
+                  <rect
+                    key={`${linha}-${coluna}`}
+                    x={x + 4 + coluna * 7}
+                    y={topo + 5 + linha * 8}
+                    width="3"
+                    height="3.5"
+                    fill={(x + linha * 3 + coluna * 5) % 4 === 0 ? P.dourado : '#3b4a86'}
+                  />
+                ))
+              )}
+            </g>
           ))}
         </>
       );

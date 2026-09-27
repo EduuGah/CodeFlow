@@ -230,6 +230,18 @@ export const ITENS: ItemDaLoja[] = [
       ['mar', 'Mar', 'Três ondas, das escuras às claras, e o sol em cima.', 13],
     ] as const
   ).map(([id, title, description, nivel]) => cosmetico(`fundo-${id}`, 'fundo', `Fundo ${title}`, description, nivel)),
+  // Só por moedas (0018): épicos sem nível que os abra. O nível abre o último
+  // cosmético lá pela semana 13 do aluno-modelo; estes são para onde as
+  // moedas vão depois disso (P2-16). O teste de calibragem cobra que somem
+  // semanas de estudo, e não dias.
+  ...(
+    [
+      ['avatar-dragao', 'avatar', 'Avatar Dragão', 'Verde, chifres dourados e olhos de fenda.', 1500],
+      ['avatar-fenix', 'avatar', 'Avatar Fênix', 'Laranja, com a crista em chamas.', 1400],
+      ['moldura-engrenagens', 'moldura', 'Moldura Engrenagens', 'Um aro de metal com dentes, como uma engrenagem.', 1200],
+      ['fundo-cidade', 'fundo', 'Fundo Cidade', 'Prédios à noite, a lua e as janelas acesas.', 1300],
+    ] as const
+  ).map(([id, tipo, title, description, price]): ItemDaLoja => ({ id, tipo, title, description, price, raridade: 'epico' })),
   // Sazonais (0016): só por moedas, só na janela, sem nível que abra. Quem
   // comprou fica com o item depois; a janela não se repete sozinha.
   {

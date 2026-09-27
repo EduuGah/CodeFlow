@@ -199,7 +199,7 @@ Legenda de estado: **Corrigido** (com teste, nesta rodada), **Parcial**,
 | P2-13 | Camada de persistência e `StudentDataContext` sem testes | Corrigido |
 | P2-14 | 85% dos exercícios com ≤ 2 dicas; a diretriz pede 4 níveis | Pendente |
 | P2-15 | Nenhum caminho para refazer um exercício errado; 62% dos conceitos sem flashcard | Parcial — caderno e refazer feitos (0010); faltam os flashcards |
-| P2-16 | Economia: cosméticos esgotam em ~8 semanas e competem com a liberação por nível | Parcial (competição resolvida e medida; catálogo por nível acaba na semana ~13) |
+| P2-16 | Economia: cosméticos esgotam em ~8 semanas e competem com a liberação por nível | Corrigido (preço pelo nível, medido; épicos só por moedas depois da semana ~13) |
 | P2-17 | Documentação de arquitetura desatualizada | Parcial |
 | P2-18 | Observabilidade: só `console.error` | Pendente |
 | P3-1 | Código morto (funções, ícones, constantes) | Parcial |
@@ -550,7 +550,7 @@ servidor, teste, refatorar).
   alternativa) e 8 verificações novas no Postgres (sabotado o gatilho da
   demo). **Falta:** flashcards para os 93 conceitos sem cartão.
 
-#### P2-16 · Economia se esgota e compete com o nível — Parcial
+#### P2-16 · Economia se esgota e compete com o nível — Corrigido
 Ver a seção "Economia". Em resumo: ~175 moedas/semana, todos os cosméticos em
 ~8 semanas (o catálogo dura ~31), e a maioria dos cosméticos abre por nível
 quase ao mesmo tempo em que fica comprável — o Tema Oceano abre por nível
@@ -562,9 +562,10 @@ etapa 10 da Loja 2.0) resolveu a competição com o nível: o preço sai do
 nível, e `economia.calibragem.test.ts` reprova qualquer cosmético que abra
 pelo nível antes de caber no saldo do aluno-modelo, ou que custe tão pouco
 que as moedas sobrem. Comprar tudo custa ~11.700 moedas, umas 53 semanas.
-O que falta: o nível abre o último cosmético na semana ~13, e daí em diante
-as moedas voltam a ter só os consumíveis — o próximo passo é item só por
-moeda (sem nível) ou catálogo que cresça com o conteúdo.
+E o que faltava — o nível abre o último cosmético na semana ~13, e daí em
+diante as moedas só tinham os consumíveis — virou a 0018: quatro épicos só
+por moedas (~24 semanas do aluno-modelo, com teste). Resta, como melhoria e
+não como defeito, um catálogo que cresça junto com as aulas.
 
 #### P2-17 · Documentação de arquitetura desatualizada — Parcial
 `CONTEXTO.md` e `README.md` atualizados nesta rodada. Falta reescrever

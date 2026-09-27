@@ -333,12 +333,16 @@ select verificacao.recusa(
   'users_fundo_formato', 'fundo acima do tamanho'
 );
 select verificacao.ok(
-  (select count(*) from public.store_items where tipo in ('moldura', 'fundo')) = 14,
-  'o catálogo tem as molduras e os fundos (9 da 0011, 4 da 0014, 1 da 0016)'
+  (select count(*) from public.store_items where tipo in ('moldura', 'fundo')) = 16,
+  'o catálogo tem as molduras e os fundos (9 da 0011, 4 da 0014, 1 da 0016, 2 da 0018)'
 );
 select verificacao.ok(
   (select count(*) from public.store_items where id in ('avatar-capivara', 'avatar-tucano', 'avatar-tartaruga', 'avatar-baleia')) = 4,
   'os avatares da 0014 estão no catálogo'
+);
+select verificacao.ok(
+  (select count(*) from public.store_items where id in ('avatar-dragao', 'avatar-fenix') and price >= 1400) = 2,
+  'os épicos só por moedas da 0018 estão no catálogo'
 );
 -- Os itens de conquista (`lib/exclusivos.ts`) não estão no catálogo: a
 -- compra os recusa, e equipar usa as mesmas colunas.

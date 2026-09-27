@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 /**
  * Avatares da plataforma, e a foto.
  *
- * Vinte e três figuras cheias — formas preenchidas, cor, sem contorno —, cada
+ * Vinte e cinco figuras cheias — formas preenchidas, cor, sem contorno —, cada
  * uma sobre um fundo próprio. É o mesmo padrão das janelas em miniatura da
  * aparência: o objeto em pequeno, pintado, e não um ícone de traço fino. As
  * primeiras versões eram ícones de linha sobre um círculo e pareciam
@@ -14,7 +14,8 @@ import type { ReactNode } from 'react';
  * mais clara no focinho, orelhas ou antenas fora da cabeça. Os abstratos
  * (folha, onda, estrela…) são formas cheias em tom claro sobre a cor.
  *
- * Dez são de todo mundo; treze abrem por nível ou pela loja
+ * Dez são de todo mundo; treze abrem por nível ou pela loja; dois só pela
+ * loja
  * (`lib/economia.ts`). O avatar escolhido é guardado como `preset:<id>`; uma
  * foto enviada é a URL dela; e sem nenhum dos dois, vale a foto do Google ou
  * a inicial do nome.
@@ -386,6 +387,53 @@ export const AVATARES: AvatarPreset[] = [
         <circle cx="30.5" cy="26.5" r="2.2" fill={ESCURO} />
         <circle cx="13" cy="30" r="2.1" fill={ROSA} opacity={0.85} />
         <circle cx="35" cy="30" r="2.1" fill={ROSA} opacity={0.85} />
+      </g>
+    ),
+  },
+  // ----------------------------------------------------------- só por moedas
+  {
+    id: 'dragao',
+    title: 'Dragão',
+    fundo: '#e3f1e7',
+    desenho: (
+      <g>
+        <path d="M14 14 9.5 4.5 18.5 11z" fill="#f2d27a" />
+        <path d="M34 14 38.5 4.5 29.5 11z" fill="#f2d27a" />
+        <path d="M9 21 3 17.5 7.5 28z" fill="#2f7a58" />
+        <path d="M39 21 45 17.5 40.5 28z" fill="#2f7a58" />
+        <path d="M24 10c9 0 16 6 16 15s-7 16-16 16S8 34 8 25s7-15 16-15z" fill="#3f8f6b" />
+        <ellipse cx="24" cy="31" rx="9.5" ry="6.8" fill="#9fd8b0" />
+        <ellipse cx="17.5" cy="21.5" rx="2.5" ry="2.9" fill="#f2d27a" />
+        <ellipse cx="30.5" cy="21.5" rx="2.5" ry="2.9" fill="#f2d27a" />
+        <ellipse cx="17.5" cy="21.5" rx="0.9" ry="2.4" fill={ESCURO} />
+        <ellipse cx="30.5" cy="21.5" rx="0.9" ry="2.4" fill={ESCURO} />
+        <ellipse cx="21" cy="30" rx="1.2" ry="1.6" fill={ESCURO} />
+        <ellipse cx="27" cy="30" rx="1.2" ry="1.6" fill={ESCURO} />
+      </g>
+    ),
+  },
+  {
+    id: 'fenix',
+    title: 'Fênix',
+    fundo: '#fde7d6',
+    desenho: (
+      <g>
+        {/* A crista em leque, cinco labaredas: é ela que diz fênix, e não pinto. */}
+        {[-56, -28, 0, 28, 56].map((giro, i) => (
+          <path
+            key={giro}
+            d="M24 0c4 5 4.8 9 2.3 13.5h-4.6C19.2 9 20 5 24 0z"
+            fill={i % 2 ? '#d0503f' : '#e5b84a'}
+            transform={`rotate(${giro} 24 17)`}
+          />
+        ))}
+        <path d="M10.5 30c-4-1-6.5-4.5-6.5-8.5 3 2 5.5 2.5 8 2z" fill="#d0503f" />
+        <path d="M37.5 30c4-1 6.5-4.5 6.5-8.5-3 2-5.5 2.5-8 2z" fill="#d0503f" />
+        <circle cx="24" cy="26" r="14" fill="#e0672f" />
+        <ellipse cx="24" cy="28.5" rx="9.5" ry="8.5" fill="#f6b26b" />
+        <circle cx="19.8" cy="25" r="2.1" fill={ESCURO} />
+        <circle cx="28.2" cy="25" r="2.1" fill={ESCURO} />
+        <path d="M21.6 29h4.8L24 33.4z" fill="#f2d27a" />
       </g>
     ),
   },

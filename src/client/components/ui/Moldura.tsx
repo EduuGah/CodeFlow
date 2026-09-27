@@ -14,7 +14,7 @@ import { P } from './Ilustracao';
  */
 
 /** As da loja. */
-export const MOLDURAS = ['minimal', 'terminal', 'pixel', 'chaves', 'neon', 'prisma', 'ouro'] as const;
+export const MOLDURAS = ['minimal', 'terminal', 'pixel', 'chaves', 'neon', 'prisma', 'ouro', 'engrenagens'] as const;
 /** As que não se vendem: abrem por conquista (`lib/exclusivos.ts`). */
 export const MOLDURAS_DE_CONQUISTA = ['chama', 'orbita'] as const;
 export type IdDeMoldura = (typeof MOLDURAS)[number] | (typeof MOLDURAS_DE_CONQUISTA)[number];
@@ -155,6 +155,27 @@ const DESENHOS: Record<IdDeMoldura, ReactNode> = {
         );
       })}
       <circle cx="50" cy="50" r="42" fill="none" stroke={P.creme} strokeWidth="1.5" />
+    </>
+  ),
+  // Aro de metal com os dentes de uma engrenagem, e um fio de bronze por dentro.
+  engrenagens: (
+    <>
+      {/* Os dentes saem para fora do aro: é o recorte que faz a engrenagem. */}
+      {emVolta(18, 47.4).map(({ x, y, angulo }, i) => (
+        <rect
+          key={i}
+          x={x - 3}
+          y={y - 2.4}
+          width="6"
+          height="4.8"
+          rx="0.8"
+          fill="#7b8794"
+          transform={`rotate(${angulo} ${x} ${y})`}
+        />
+      ))}
+      <circle cx="50" cy="50" r="43.6" fill="none" stroke="#7b8794" strokeWidth="5" />
+      <circle cx="50" cy="50" r="45.4" fill="none" stroke="#c9d2dc" strokeWidth="1" />
+      <circle cx="50" cy="50" r="41.3" fill="none" stroke={P.douradoEscuro} strokeWidth="1.4" />
     </>
   ),
   // Brasa no aro e labaredas para fora, a de dentro mais clara: trinta dias acesos.
