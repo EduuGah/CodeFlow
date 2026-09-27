@@ -41,7 +41,7 @@ Números lidos do catálogo, não de memória.
 | Projetos | 10, com 34 critérios de aceitação — os 3 capstones são página + API + banco (motor 7), os outros 7 são JavaScript puro |
 | Conceitos | 151, com grafo de pré-requisitos |
 | Flashcards | 67 (93 conceitos ainda sem cartão) |
-| Testes | 3.654 de unidade + ~466 de navegador |
+| Testes | 3.655 de unidade + ~466 de navegador |
 | Pacote | 3.095 kB (851 kB comprimido) no chunk principal — o corpo das aulas vai junto (é quase metade), e separá-lo é o maior problema de performance aberto (P2-1b do roadmap). Aula, revisão, refazer erros, projeto e admin são rotas sob demanda (`App.tsx`), e o Zod só entra no chunk do admin; o Monaco são mais 3.362 kB (869 kB) num chunk à parte, baixado só quando o primeiro editor monta, e o worker de TypeScript (7 MB) só quando um modelo JS/TS abre. O motor de TypeScript não acrescentou arquivo; o de React acrescentou um chunk de 143 kB (47 kB) com o React e o ReactDOM como texto, baixado só por um exercício de React; o de SQL acrescentou o worker (49 kB) e o SQLite em WebAssembly (658 kB), baixados só por um exercício de SQL; o de Python acrescentou o worker (~22 kB) e o Pyodide inteiro (~13,5 MB: o WebAssembly do CPython, a biblioteca padrão zipada, o manifesto de pacotes), copiados para `/pyodide/` na build e baixados só por um exercício de Python |
 
 ## 4. Decisões que não devem ser desfeitas sem motivo forte
@@ -99,7 +99,11 @@ mesmas colunas da 0011; na nona, **recuperar a sequência** (0013) — a
 compra depois do dia perdido o cobre, uma por semana, e a loja só a vende
 quando ela salva alguma coisa (`efeitoDeRecuperar` roda a mesma conta com a
 compra acrescentada). O booster de moedas **não existe por decisão**: moeda
-que rende moeda faz da loja um investimento. O que se
+que rende moeda faz da loja um investimento. Fora das etapas, a 0014 trouxe
+itens novos — a fauna daqui (Capivara, Tucano, Tartaruga, Baleia), as
+molduras Chaves e Prisma, os fundos Terminal e Mar. **Uma capa deixa o que
+importa no miolo** (x de ~100 a ~220, y de ~24 a ~56): a miniatura da loja
+corta os lados e a capa larga do perfil corta em cima e embaixo. O que se
 compra: **congelar a sequência** (um dia sem estudar não
 zera; consumido sozinho no primeiro dia perdido depois da compra —
 `lib/sequencia.ts` reconta a corrente com os congelamentos), **dobro de XP por
@@ -434,7 +438,8 @@ src/client/components/  `caderno/`: a resposta no formato do exercício
                         (`RespostaDoAluno`) e o enunciado numa linha
                         (`TextoEmLinha`, sem o leitor de Markdown inteiro)
 e2e/                    Playwright; `fixtures.ts` tem o dublê do Supabase
-supabase/migrations/    0001 a 0013, aplicadas em ordem (0013: recuperar
+supabase/migrations/    0001 a 0014, aplicadas em ordem (0014: itens
+                        novos no catálogo; 0013: recuperar
                         a sequência e o teto que a conta; 0012: o título
                         escolhido; 0011: molduras e
                         fundos na loja e no perfil; 0010: o que foi
@@ -450,7 +455,7 @@ docs/curriculo.md       Roadmap de conteúdo — fonte canônica
 ```bash
 npm run typecheck   # inclui e2e/ e playwright.config.ts
 npm run lint        # ESLint mínimo: typescript-eslint + react-hooks
-npm test            # 3.654 testes
+npm test            # 3.655 testes
 npm run test:e2e    # ~466 no navegador (antes: npx playwright install chromium;
                     # com um Chromium já instalado: PW_CHROMIUM=/caminho/do/chrome)
 npm run build
@@ -1034,6 +1039,11 @@ Faltam ~19 aulas da lista original — outras trilhas do Fundamentos de
 JavaScript, Página, Git, Terminal, TypeScript, Web e o resto de Python.
 
 ## 9. Pendências do lado do usuário
+
+- **Rodar `supabase/migrations/0014_loja_itens_novos.sql` no SQL Editor.** Só
+  catálogo: quatro avatares, duas molduras, dois fundos. Sem ela, a loja
+  mostra os itens mas o banco recusa a compra ("não está disponível agora");
+  pelo nível, eles abrem do mesmo jeito.
 
 - **Rodar `supabase/migrations/0013_recuperar_sequencia.sql` no SQL Editor.**
   O item "recuperar a sequência" no catálogo e o teto de moedas que o conta.

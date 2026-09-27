@@ -199,7 +199,7 @@ Legenda de estado: **Corrigido** (com teste, nesta rodada), **Parcial**,
 | P2-13 | Camada de persistência e `StudentDataContext` sem testes | Corrigido |
 | P2-14 | 85% dos exercícios com ≤ 2 dicas; a diretriz pede 4 níveis | Pendente |
 | P2-15 | Nenhum caminho para refazer um exercício errado; 62% dos conceitos sem flashcard | Parcial — caderno e refazer feitos (0010); faltam os flashcards |
-| P2-16 | Economia: cosméticos esgotam em ~8 semanas e competem com a liberação por nível | Pendente (Loja 2.0) |
+| P2-16 | Economia: cosméticos esgotam em ~8 semanas e competem com a liberação por nível | Parcial (catálogo maior; recalibração pendente) |
 | P2-17 | Documentação de arquitetura desatualizada | Parcial |
 | P2-18 | Observabilidade: só `console.error` | Pendente |
 | P3-1 | Código morto (funções, ícones, constantes) | Parcial |
@@ -550,11 +550,16 @@ servidor, teste, refatorar).
   alternativa) e 8 verificações novas no Postgres (sabotado o gatilho da
   demo). **Falta:** flashcards para os 93 conceitos sem cartão.
 
-#### P2-16 · Economia se esgota e compete com o nível — Pendente (Loja 2.0)
+#### P2-16 · Economia se esgota e compete com o nível — Parcial
 Ver a seção "Economia". Em resumo: ~175 moedas/semana, todos os cosméticos em
 ~8 semanas (o catálogo dura ~31), e a maioria dos cosméticos abre por nível
 quase ao mesmo tempo em que fica comprável — o Tema Oceano abre por nível
 **antes** de caber no saldo.
+Andou: o catálogo passou de 12 cosméticos à venda para 32 (molduras, fundos,
+três cores e quatro avatares novos, 0011 e 0014), com o último abrindo no
+nível 17, e três itens que só vêm por conquista. Falta a recalibração
+(etapa 10 da Loja 2.0): preço por raridade e o teste que reprova um
+cosmético que abre por nível antes de caber no saldo.
 
 #### P2-17 · Documentação de arquitetura desatualizada — Parcial
 `CONTEXTO.md` e `README.md` atualizados nesta rodada. Falta reescrever

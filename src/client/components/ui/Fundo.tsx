@@ -15,7 +15,7 @@ import { P } from './Ilustracao';
  */
 
 /** Os da loja. */
-export const FUNDOS = ['grade', 'circuito', 'por-do-sol', 'aurora'] as const;
+export const FUNDOS = ['grade', 'terminal', 'circuito', 'por-do-sol', 'mar', 'aurora'] as const;
 /** Os que não se vendem: abrem por conquista (`lib/exclusivos.ts`). */
 export const FUNDOS_DE_CONQUISTA = ['constelacao'] as const;
 export type IdDeFundo = (typeof FUNDOS)[number] | (typeof FUNDOS_DE_CONQUISTA)[number];
@@ -25,6 +25,19 @@ const TODOS: readonly string[] = [...FUNDOS, ...FUNDOS_DE_CONQUISTA];
 export function ehFundo(valor: unknown): valor is IdDeFundo {
   return typeof valor === 'string' && TODOS.includes(valor);
 }
+
+/**
+ * As linhas de código do terminal: recuo e comprimento. Ficam no miolo da
+ * capa (x de 112 a 214, y de 24 a 56) — a miniatura da loja corta os lados e
+ * a capa larga corta em cima e embaixo, e o que sobra nos dois é o meio.
+ */
+const LINHAS_DO_TERMINAL: Array<[number, number, string]> = [
+  [0, 58, '#3ddc84'],
+  [10, 80, '#9af0c0'],
+  [10, 44, '#e5b84a'],
+  [20, 70, '#9af0c0'],
+  [0, 30, '#3ddc84'],
+];
 
 /**
  * As estrelas da constelação, e quais se ligam: um mapa de conceitos no céu.
@@ -113,6 +126,43 @@ function Desenho({ id, gradiente }: { id: IdDeFundo; gradiente: string }): React
             [150, 26],
           ].map(([x, y], i) => (
             <circle key={i} cx={x} cy={y} r={i % 3 ? 1.2 : 1.8} fill={P.creme} />
+          ))}
+        </>
+      );
+    // A tela preta do terminal: o prompt, linhas de código e o cursor.
+    case 'terminal':
+      return (
+        <>
+          <rect width="320" height="80" fill="#0f1a14" />
+          {/* Nos lados, o que rolou antes: apagado, só enche a capa larga. */}
+          {[16, 240].map((x) =>
+            [22, 32, 42, 52].map((y, i) => (
+              <rect key={`${x}-${y}`} x={x + (i % 2) * 8} y={y} width={56 - (i % 3) * 12} height="3" rx="1.5" fill="#3ddc84" fillOpacity="0.18" />
+            ))
+          )}
+          {LINHAS_DO_TERMINAL.map(([recuo, largura, cor], i) => (
+            <rect key={i} x={124 + recuo} y={24 + i * 7} width={largura} height="4" rx="2" fill={cor} fillOpacity="0.9" />
+          ))}
+          <path d="M110 24l5 3.5-5 3.5" stroke="#3ddc84" strokeWidth="2.2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+          <rect x={124 + 30 + 5} y="52" width="6" height="5" fill="#3ddc84" />
+        </>
+      );
+    // O mar: céu claro, o sol e três ondas, das escuras de baixo às claras de cima.
+    case 'mar':
+      return (
+        <>
+          <rect width="320" height="80" fill="#d6ecf7" />
+          <circle cx="188" cy="27" r="11" fill={P.dourado} />
+          {[
+            ['#6fb3e6', 36],
+            ['#2f6fb0', 48],
+            ['#1d4f86', 60],
+          ].map(([cor, y]) => (
+            <path
+              key={cor}
+              d={`M0 ${y} ${'q20 -8 40 0 '.repeat(8)}V80 H0 Z`}
+              fill={cor as string}
+            />
           ))}
         </>
       );

@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 /**
  * Avatares da plataforma, e a foto.
  *
- * Dezenove figuras cheias — formas preenchidas, cor, sem contorno —, cada
+ * Vinte e três figuras cheias — formas preenchidas, cor, sem contorno —, cada
  * uma sobre um fundo próprio. É o mesmo padrão das janelas em miniatura da
  * aparência: o objeto em pequeno, pintado, e não um ícone de traço fino. As
  * primeiras versões eram ícones de linha sobre um círculo e pareciam
@@ -14,7 +14,7 @@ import type { ReactNode } from 'react';
  * mais clara no focinho, orelhas ou antenas fora da cabeça. Os abstratos
  * (folha, onda, estrela…) são formas cheias em tom claro sobre a cor.
  *
- * Dez são de todo mundo; nove abrem por nível ou pela loja
+ * Dez são de todo mundo; treze abrem por nível ou pela loja
  * (`lib/economia.ts`). O avatar escolhido é guardado como `preset:<id>`; uma
  * foto enviada é a URL dela; e sem nenhum dos dois, vale a foto do Google ou
  * a inicial do nome.
@@ -316,6 +316,76 @@ export const AVATARES: AvatarPreset[] = [
         <ellipse cx="18" cy="24.5" rx="3.4" ry="5.2" transform="rotate(22 18 24.5)" fill={ESCURO} />
         <ellipse cx="30" cy="24.5" rx="3.4" ry="5.2" transform="rotate(-22 30 24.5)" fill={ESCURO} />
         <path d="M22 34h4" stroke={ESCURO} strokeWidth={1.6} strokeLinecap="round" />
+      </g>
+    ),
+  },
+  {
+    id: 'capivara',
+    title: 'Capivara',
+    fundo: '#dce8c8',
+    desenho: (
+      <g>
+        {/* Cabeça quadrada, orelhas pequenas no alto, olhos miúdos em cima e o
+            focinho largo e rombudo: é isso que a separa do urso. */}
+        <ellipse cx="11.5" cy="13" rx="2.6" ry="2.2" fill="#6e4a2f" />
+        <ellipse cx="36.5" cy="13" rx="2.6" ry="2.2" fill="#6e4a2f" />
+        <rect x="8" y="12.5" width="32" height="28" rx="8.5" fill="#9b6a43" />
+        <rect x="10.5" y="23" width="27" height="16" rx="7" fill="#b98a5e" />
+        <circle cx="16" cy="18.5" r="1.7" fill={ESCURO} />
+        <circle cx="32" cy="18.5" r="1.7" fill={ESCURO} />
+        <rect x="19" y="25.5" width="2.4" height="4" rx="1.2" fill={ESCURO} />
+        <rect x="26.6" y="25.5" width="2.4" height="4" rx="1.2" fill={ESCURO} />
+        <path d="M21.5 34.5h5" stroke={ESCURO} strokeWidth={1.4} strokeLinecap="round" />
+      </g>
+    ),
+  },
+  {
+    id: 'tucano',
+    title: 'Tucano',
+    fundo: '#cfe7f5',
+    desenho: (
+      <g>
+        <circle cx="19" cy="24" r="13" fill="#23262b" />
+        <ellipse cx="16" cy="29.5" rx="7.5" ry="6.5" fill={CLARO} />
+        <path d="M27 17c8-1.5 14 1.5 17 7-4.5 3.5-10.5 4.5-16 3.5z" fill="#f08a3c" />
+        <path d="M27 17c8-1.5 14 1.5 17 7-5-2-11-3-17-2z" fill="#e5b84a" />
+        <path d="M41.5 22.5c1.2.4 2 .9 2.5 1.5-.8.6-1.8 1.1-2.9 1.5z" fill="#23262b" />
+        <circle cx="22" cy="19" r="3.8" fill="#6fd3ff" />
+        <circle cx="22" cy="19" r="1.9" fill={ESCURO} />
+      </g>
+    ),
+  },
+  {
+    id: 'tartaruga',
+    title: 'Tartaruga',
+    fundo: '#f3e7c9',
+    desenho: (
+      <g>
+        <ellipse cx="24" cy="34" rx="17" ry="11" fill="#5b7f34" />
+        <path d="M24 26.5l4.5 2.6v5.2L24 36.9l-4.5-2.6v-5.2z" fill="#86a95a" />
+        <path d="M13.5 30.5l3.5 2v4l-3.5 2-2.8-1.6v-4.8zM34.5 30.5l2.8 1.6v4.8l-2.8 1.6-3.5-2v-4z" fill="#86a95a" />
+        <circle cx="24" cy="18" r="10" fill="#9cc46a" />
+        <ellipse cx="24" cy="21.5" rx="5.5" ry="3.8" fill="#c3dc9a" />
+        <circle cx="20" cy="16.5" r="2" fill={ESCURO} />
+        <circle cx="28" cy="16.5" r="2" fill={ESCURO} />
+        <path d="M21.5 22q2.5 1.8 5 0" stroke={ESCURO} strokeWidth={1.4} fill="none" strokeLinecap="round" />
+      </g>
+    ),
+  },
+  {
+    id: 'baleia',
+    title: 'Baleia',
+    fundo: '#d6ecf7',
+    desenho: (
+      <g>
+        <path d="M24 13V8.5" stroke="#6fb3e6" strokeWidth={2} strokeLinecap="round" />
+        <path d="M24 9c-2.5-3-5.5-3.4-8-1.6M24 9c2.5-3 5.5-3.4 8-1.6" stroke="#6fb3e6" strokeWidth={2} fill="none" strokeLinecap="round" />
+        <path d="M7.5 28c0-9 7.4-15 16.5-15s16.5 6 16.5 15-7.4 13.5-16.5 13.5S7.5 37 7.5 28z" fill="#2f6fb0" />
+        <path d="M12.5 31.5c3 5.2 7 7.4 11.5 7.4s8.5-2.2 11.5-7.4c-3.2 1.8-7.2 2.8-11.5 2.8s-8.3-1-11.5-2.8z" fill="#cfe6f7" />
+        <circle cx="17.5" cy="26.5" r="2.2" fill={ESCURO} />
+        <circle cx="30.5" cy="26.5" r="2.2" fill={ESCURO} />
+        <circle cx="13" cy="30" r="2.1" fill={ROSA} opacity={0.85} />
+        <circle cx="35" cy="30" r="2.1" fill={ROSA} opacity={0.85} />
       </g>
     ),
   },

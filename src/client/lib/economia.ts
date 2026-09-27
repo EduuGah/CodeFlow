@@ -33,8 +33,9 @@ export type TipoDeItem = 'consumivel' | 'tema' | 'avatar' | 'moldura' | 'fundo';
 /**
  * Quão longe na jornada o item mora. Por ora acompanha o nível que o libera
  * (`economia.test.ts` confere): até o 5 é comum, do 6 ao 9 incomum, do 10 em
- * diante raro. Épico e lendário existem para os itens de conquista, que ainda
- * não chegaram. A raridade não mora no banco: nenhuma regra do servidor a lê.
+ * diante raro. Épico e lendário ficam reservados: os itens de conquista
+ * (`exclusivos.ts`) dizem "De conquista" no lugar da raridade, porque o que os
+ * marca é a origem. A raridade não mora no banco: nenhuma regra do servidor a lê.
  */
 export type Raridade = 'comum' | 'incomum' | 'raro' | 'epico' | 'lendario';
 
@@ -167,6 +168,11 @@ export const ITENS: ItemDaLoja[] = [
       ['robo', 'Robô', 'Cabeça de aço, olhos de led e antena.', 120, 10, 'raro'],
       ['polvo', 'Polvo', 'Roxo, com os tentáculos embaixo.', 130, 12, 'raro'],
       ['alien', 'Alien', 'Verde, olhos grandes e uma antena.', 150, 15, 'raro'],
+      // A fauna daqui (0014): nomes e desenhos próprios, no mesmo traço.
+      ['capivara', 'Capivara', 'Marrom, calma, focinho largo.', 110, 9, 'incomum'],
+      ['tucano', 'Tucano', 'Preto, papo branco e o bico laranja enorme.', 130, 11, 'raro'],
+      ['tartaruga', 'Tartaruga', 'Cabeça verde e o casco de placas atrás.', 140, 13, 'raro'],
+      ['baleia', 'Baleia', 'Azul, barriga clara e o esguicho em cima.', 160, 17, 'raro'],
     ] as const
   ).map(([id, title, description, price, nivelQueLibera, raridade]) => ({
     id: `avatar-${id}`,
@@ -185,7 +191,9 @@ export const ITENS: ItemDaLoja[] = [
       ['terminal', 'Terminal', 'Traços verdes de fósforo, como um cursor piscando.', 110, 4, 'comum'],
       ['pixel', 'Pixel', 'Blocos quadrados em volta, de um jogo antigo.', 140, 6, 'incomum'],
       ['neon', 'Neon', 'Dois tubos acesos, rosa e ciano.', 170, 8, 'incomum'],
+      ['chaves', 'Chaves', 'As chaves de um bloco de código, uma de cada lado.', 150, 9, 'incomum'],
       ['ouro', 'Ouro', 'Aro dourado com folhas de louro embaixo.', 240, 12, 'raro'],
+      ['prisma', 'Prisma', 'Seis arcos do espectro: a luz aberta em cores.', 200, 14, 'raro'],
     ] as const
   ).map(([id, title, description, price, nivelQueLibera, raridade]) => ({
     id: `moldura-${id}`,
@@ -201,9 +209,11 @@ export const ITENS: ItemDaLoja[] = [
   ...(
     [
       ['grade', 'Grade', 'Papel quadriculado de caderno de exercícios.', 100, 3, 'comum'],
+      ['terminal', 'Terminal', 'A tela preta, o prompt e o cursor piscando.', 120, 5, 'comum'],
       ['circuito', 'Circuito', 'Uma placa verde, com trilhas e soldas.', 150, 6, 'incomum'],
       ['por-do-sol', 'Pôr do sol', 'Laranja para roxo, o sol baixando no horizonte.', 180, 9, 'incomum'],
       ['aurora', 'Aurora', 'Faixas verdes e violeta num céu de estrelas.', 220, 11, 'raro'],
+      ['mar', 'Mar', 'Três ondas, das escuras às claras, e o sol em cima.', 200, 13, 'raro'],
     ] as const
   ).map(([id, title, description, price, nivelQueLibera, raridade]) => ({
     id: `fundo-${id}`,

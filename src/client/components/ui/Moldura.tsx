@@ -14,7 +14,7 @@ import { P } from './Ilustracao';
  */
 
 /** As da loja. */
-export const MOLDURAS = ['minimal', 'terminal', 'pixel', 'neon', 'ouro'] as const;
+export const MOLDURAS = ['minimal', 'terminal', 'pixel', 'chaves', 'neon', 'prisma', 'ouro'] as const;
 /** As que não se vendem: abrem por conquista (`lib/exclusivos.ts`). */
 export const MOLDURAS_DE_CONQUISTA = ['chama', 'orbita'] as const;
 export type IdDeMoldura = (typeof MOLDURAS)[number] | (typeof MOLDURAS_DE_CONQUISTA)[number];
@@ -24,6 +24,12 @@ const TODAS: readonly string[] = [...MOLDURAS, ...MOLDURAS_DE_CONQUISTA];
 export function ehMoldura(valor: unknown): valor is IdDeMoldura {
   return typeof valor === 'string' && TODAS.includes(valor);
 }
+
+/** Uma chave `{` na borda esquerda; a da direita é o espelho dela. */
+const CHAVE = 'M10 29C6.2 29 5.5 31.5 5.5 35V43C5.5 46.5 4 48.8 1.8 50C4 51.2 5.5 53.5 5.5 57V65C5.5 68.5 6.2 71 10 71';
+
+/** As seis cores do prisma, em arcos iguais a partir do topo. */
+const ESPECTRO = ['#e5484d', '#f08a3c', '#e5b84a', '#5daa5a', '#2563a8', '#9a5ba8'];
 
 /** Uma labareda com a ponta para cima, centrada na origem; quem usa gira e escala. */
 const LABAREDA = 'M0 -6 C2.6 -2.6 3.6 -0.4 3.6 1.6 A3.6 3.6 0 0 1 -3.6 1.6 C-3.6 -0.4 -2.6 -2.6 0 -6 Z';
@@ -105,6 +111,50 @@ const DESENHOS: Record<IdDeMoldura, ReactNode> = {
         })
       )}
       <circle cx="50" cy="95" r="3.2" fill={P.dourado} />
+    </>
+  ),
+  // Aro de editor escuro e as duas chaves de um bloco de código, uma de cada lado.
+  chaves: (
+    <>
+      <circle cx="50" cy="50" r="46" fill="none" stroke="#24324a" strokeWidth="6" />
+      <circle cx="50" cy="50" r="42.5" fill="none" stroke="#7aa2f7" strokeOpacity="0.5" strokeWidth="1" />
+      {[false, true].map((direita) => (
+        <path
+          key={String(direita)}
+          d={CHAVE}
+          fill="none"
+          stroke={P.dourado}
+          strokeWidth="3.2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          transform={direita ? 'translate(100 0) scale(-1 1)' : undefined}
+        />
+      ))}
+      <circle cx="50" cy="4" r="2.4" fill="#7aa2f7" />
+      <circle cx="50" cy="96" r="2.4" fill="#7aa2f7" />
+    </>
+  ),
+  // Seis arcos do espectro, e um fio claro por dentro: a luz aberta em cores.
+  prisma: (
+    <>
+      {ESPECTRO.map((cor, i) => {
+        const volta = 2 * Math.PI * 46;
+        const arco = volta / ESPECTRO.length;
+        return (
+          <circle
+            key={cor}
+            cx="50"
+            cy="50"
+            r="46"
+            fill="none"
+            stroke={cor}
+            strokeWidth="7"
+            strokeDasharray={`${arco} ${volta - arco}`}
+            strokeDashoffset={volta / 4 - i * arco}
+          />
+        );
+      })}
+      <circle cx="50" cy="50" r="42" fill="none" stroke={P.creme} strokeWidth="1.5" />
     </>
   ),
   // Brasa no aro e labaredas para fora, a de dentro mais clara: trinta dias acesos.
