@@ -54,6 +54,11 @@ export interface BancoFalso {
     fundo?: string | null;
     titulo?: string | null;
   };
+  /**
+   * O catálogo do banco (`store_items`). Ausente, espelha `ITENS` com tudo à
+   * venda — como fica depois de todas as migrações.
+   */
+  storeItems?: Array<{ id: string; price: number; tipo: string; ativo: boolean; disponivel_de: string | null; disponivel_ate: string | null }>;
   /** Escritas registradas, para o teste conferir que o progresso foi salvo. */
   escritas: Array<{ tabela: string; corpo: unknown }>;
   /** Caminhos cuja leitura falha (500), para os testes de rede ruim. */
@@ -251,6 +256,39 @@ async function dublarSupabase(page: Page, banco: BancoFalso) {
       banco.purchases.push(linha);
       banco.escritas.push({ tabela: 'purchases', corpo: linha });
       return json(linha);
+    }
+
+    if (caminho === '/rest/v1/store_items') {
+      const catalogo =
+        banco.storeItems ??
+        ITENS.map((i) => ({
+          id: i.id,
+          price: i.price,
+          tipo: i.tipo,
+          ativo: true,
+          disponivel_de: i.disponivelDe ?? null,
+          disponivel_ate: i.disponivelAte ?? null,
+        }));
+      const soInativos = url.searchParams.get('ativo') === 'eq.false';
+      return json(catalogo.filter((l) => !soInativos || !l.ativo));
+    }
+
+    if (caminho === '/rest/v1/rpc/definir_item_ativo') {
+      const { p_item, p_ativo } = requisicao.postDataJSON() as { p_item: string; p_ativo: boolean };
+      if (banco.role !== 'admin') return json({ code: '42501', message: 'apenas_admin' }, 403);
+      banco.storeItems ??= ITENS.map((i) => ({
+        id: i.id,
+        price: i.price,
+        tipo: i.tipo,
+        ativo: true,
+        disponivel_de: i.disponivelDe ?? null,
+        disponivel_ate: i.disponivelAte ?? null,
+      }));
+      const linha = banco.storeItems.find((l) => l.id === p_item);
+      if (!linha) return json({ code: 'P0002', message: 'item_desconhecido' }, 404);
+      linha.ativo = p_ativo;
+      banco.escritas.push({ tabela: 'rpc/definir_item_ativo', corpo: { p_item, p_ativo } });
+      return json(null);
     }
 
     if (caminho === '/rest/v1/rpc/desempenho_por_exercicio') {

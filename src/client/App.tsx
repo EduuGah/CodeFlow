@@ -39,6 +39,7 @@ const ProjectWorkspace = lazy(() =>
   import('./pages/ProjectWorkspace').then((m) => ({ default: m.ProjectWorkspace }))
 );
 const AdminContent = lazy(() => import('./pages/admin/AdminContent').then((m) => ({ default: m.AdminContent })));
+const AdminLoja = lazy(() => import('./pages/admin/AdminLoja').then((m) => ({ default: m.AdminLoja })));
 const AdminNewExercise = lazy(() =>
   import('./pages/admin/AdminNewExercise').then((m) => ({ default: m.AdminNewExercise }))
 );
@@ -153,6 +154,14 @@ function App() {
           element={
             <AdminRoute>
               <AdminContent />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/loja"
+          element={
+            <AdminRoute>
+              <AdminLoja />
             </AdminRoute>
           }
         />

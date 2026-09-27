@@ -41,7 +41,7 @@ Números lidos do catálogo, não de memória.
 | Projetos | 10, com 34 critérios de aceitação — os 3 capstones são página + API + banco (motor 7), os outros 7 são JavaScript puro |
 | Conceitos | 151, com grafo de pré-requisitos |
 | Flashcards | 67 (93 conceitos ainda sem cartão) |
-| Testes | 3.737 de unidade + ~472 de navegador |
+| Testes | 3.747 de unidade + ~478 de navegador |
 | Pacote | 3.095 kB (851 kB comprimido) no chunk principal — o corpo das aulas vai junto (é quase metade), e separá-lo é o maior problema de performance aberto (P2-1b do roadmap). Aula, revisão, refazer erros, projeto e admin são rotas sob demanda (`App.tsx`), e o Zod só entra no chunk do admin; o Monaco são mais 3.362 kB (869 kB) num chunk à parte, baixado só quando o primeiro editor monta, e o worker de TypeScript (7 MB) só quando um modelo JS/TS abre. O motor de TypeScript não acrescentou arquivo; o de React acrescentou um chunk de 143 kB (47 kB) com o React e o ReactDOM como texto, baixado só por um exercício de React; o de SQL acrescentou o worker (49 kB) e o SQLite em WebAssembly (658 kB), baixados só por um exercício de SQL; o de Python acrescentou o worker (~22 kB) e o Pyodide inteiro (~13,5 MB: o WebAssembly do CPython, a biblioteca padrão zipada, o manifesto de pacotes), copiados para `/pyodide/` na build e baixados só por um exercício de Python |
 
 ## 4. Decisões que não devem ser desfeitas sem motivo forte
@@ -112,7 +112,11 @@ alguém já abriu); preço pode mudar. **Os destaques da semana** (`lib/destaque
 são um rodízio fixo, não sorteio: nenhum fica mais barato nem some, e a
 vitrine aponta para o cartão do item em vez de repeti-lo (cada item mora numa
 seção só — e os testes que filtram por nome não viram loteria da semana).
-**Sazonal tem a janela em dois lugares** — `ITENS` (a tela) e `store_items`
+**A administração da loja não grava item** (`/admin/loja`): mostra
+onde o banco discorda do código (quase sempre uma migração que não rodou —
+é o primeiro lugar a olhar quando a compra recusa), liga e desliga `ativo`
+(`definir_item_ativo`, que recusa a conta admin de demonstração, pública) e
+gera as linhas de um item novo para o pull request. **Sazonal tem a janela em dois lugares** — `ITENS` (a tela) e `store_items`
 (a compra) — e `migrations.test.ts` confere que são a mesma; o texto da
 janela é no horário de Brasília. Para testar uma data no navegador, o
 `page.clock` fixa o relógio da página (a sessão falsa vence em 2100 por isso). **Uma capa deixa o que
@@ -452,7 +456,8 @@ src/client/components/  `caderno/`: a resposta no formato do exercício
                         (`RespostaDoAluno`) e o enunciado numa linha
                         (`TextoEmLinha`, sem o leitor de Markdown inteiro)
 e2e/                    Playwright; `fixtures.ts` tem o dublê do Supabase
-supabase/migrations/    0001 a 0016, aplicadas em ordem (0016: o primeiro
+supabase/migrations/    0001 a 0017, aplicadas em ordem (0017: tirar item
+                        da venda pela administração; 0016: o primeiro
                         sazonal; 0015: preços
                         recalibrados; 0014: itens
                         novos no catálogo; 0013: recuperar
@@ -471,8 +476,8 @@ docs/curriculo.md       Roadmap de conteúdo — fonte canônica
 ```bash
 npm run typecheck   # inclui e2e/ e playwright.config.ts
 npm run lint        # ESLint mínimo: typescript-eslint + react-hooks
-npm test            # 3.737 testes
-npm run test:e2e    # ~472 no navegador (antes: npx playwright install chromium;
+npm test            # 3.747 testes
+npm run test:e2e    # ~478 no navegador (antes: npx playwright install chromium;
                     # com um Chromium já instalado: PW_CHROMIUM=/caminho/do/chrome)
 npm run build
 
@@ -1064,6 +1069,10 @@ Faltam ~19 aulas da lista original — outras trilhas do Fundamentos de
 JavaScript, Página, Git, Terminal, TypeScript, Web e o resto de Python.
 
 ## 9. Pendências do lado do usuário
+
+- **Rodar `supabase/migrations/0017_admin_da_loja.sql` no SQL Editor.** A
+  função que tira um item da venda pela tela `/admin/loja`. Sem ela, o botão
+  diz qual migração rodar; o resto da tela (banco × código, gerador) funciona.
 
 - **Rodar `supabase/migrations/0016_sazonais.sql` no SQL Editor.** O Fundo
   Fogos com a janela de 15/12 a 15/01. Sem ela, em dezembro a loja mostra o

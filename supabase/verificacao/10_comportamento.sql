@@ -201,6 +201,26 @@ select verificacao.ok(
 select verificacao.ok((select count(*) from public.users) = 1, 'admin NÃO lê a linha (e-mail, nome) de mais ninguém');
 select verificacao.ok((select count(*) from public.exercise_attempts) = 0, 'admin NÃO lê as tentativas cruas dos outros');
 
+-- Admin da loja (0017): tira da venda e devolve; a compra respeita.
+select public.definir_item_ativo('avatar-urso', false);
+select verificacao.ok((select not ativo from public.store_items where id = 'avatar-urso'), 'admin tira um item da venda');
+select verificacao.recusa(
+  $$select public.definir_item_ativo('item-que-nao-existe', false)$$,
+  'item_desconhecido', 'item fora do catálogo do banco'
+);
+select set_config('request.jwt.claims', '{"sub": "00000000-0000-4000-8000-00000000000b", "email": "b@teste.local"}', true);
+select verificacao.recusa($$select public.comprar_item('avatar-urso')$$, 'item_indisponivel', 'item fora da venda não se compra');
+select verificacao.recusa(
+  $$select public.definir_item_ativo('avatar-urso', true)$$,
+  'apenas_admin', 'aluno não mexe na loja'
+);
+select set_config('request.jwt.claims', '{"sub": "00000000-0000-4000-8000-0000000000ad", "email": "adm@teste.local"}', true);
+select public.definir_item_ativo('avatar-urso', true);
+select verificacao.ok((select ativo from public.store_items where id = 'avatar-urso'), 'admin devolve o item à venda');
+-- Nem com o papel de admin a escrita direta passa: não há policy de escrita.
+update public.store_items set ativo = false where id = 'avatar-urso';
+select verificacao.ok((select ativo from public.store_items where id = 'avatar-urso'), 'a loja não muda por UPDATE direto');
+
 -- ------------------------------------------------------------ anônimo
 set local role anon;
 select set_config('request.jwt.claims', '{}', true);
@@ -208,6 +228,7 @@ select verificacao.recusa($$select public.comprar_item('dobro-de-xp')$$, 'permis
 select verificacao.recusa($$select public.concluir('completed_lessons', 'lesson-js-1')$$, 'permission denied', 'anônimo não conclui');
 select verificacao.recusa($$select public.desempenho_por_exercicio()$$, 'permission denied', 'anônimo não lê o painel');
 select verificacao.recusa($$select public.set_user_role('a@teste.local', 'admin')$$, 'permission denied', 'anônimo não promove ninguém');
+select verificacao.recusa($$select public.definir_item_ativo('avatar-urso', false)$$, 'permission denied', 'anônimo não mexe na loja');
 
 -- ------------------------------------------------------------ ritmo
 set local role authenticated;
@@ -373,6 +394,20 @@ set local role authenticated;
 select verificacao.recusa(
   $$insert into storage.objects (bucket_id, name) values ('avatars', auth.uid()::text || '/foto.jpg')$$,
   'row-level security', 'conta demo não sobe foto'
+);
+
+-- O admin de demonstração é admin (0008), mas é público: não mexe na loja.
+reset role;
+select set_config(
+  'request.jwt.claims',
+  json_build_object('sub', (select id from auth.users where email = 'admin@demo.codeflow.app'), 'email', 'admin@demo.codeflow.app')::text,
+  true
+);
+set local role authenticated;
+select verificacao.ok(public.is_admin(), 'a conta admin de demonstração é admin');
+select verificacao.recusa(
+  $$select public.definir_item_ativo('avatar-urso', false)$$,
+  'conta_demo', 'o admin de demonstração não tira item da loja de ninguém'
 );
 
 -- ------------------------------------------------------------ contas demo

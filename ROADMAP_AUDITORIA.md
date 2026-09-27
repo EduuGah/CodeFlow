@@ -331,9 +331,24 @@ validadas por uma função `equipar(p_categoria, p_item)` que confere posse
     janela (teste de calibragem). O primeiro é o Fundo Fogos (15/12 a 15/01),
     e o aviso de "chegou à loja" o anuncia quando a janela abre, não quando o
     código chega.
-13. **Admin da loja**: mesma decisão do conteúdo — a tela **gera** a linha do
+13. [x] **Admin da loja**: mesma decisão do conteúdo — a tela **gera** a linha do
     catálogo (TS + SQL) para revisão em pull request, em vez de escrever no
     banco. Ativar/desativar pode ser um `update` de `ativo` por função de admin.
+    Feito assim (0017, `/admin/loja`): a tela põe o banco ao lado do código
+    (`compararCatalogo`) e diz cada divergência — preço antigo, item que o
+    banco não tem, janela diferente —, que quase sempre é uma migração que
+    não rodou; tira um item da venda e devolve por `definir_item_ativo`, que
+    recusa quem não é admin **e a conta admin de demonstração** (é pública:
+    tirar item da loja de todo mundo não pode estar a um clique de qualquer
+    visitante); e gera a tupla de `ITENS` e a linha do `insert`, com preço e
+    raridade do nível. A loja esconde o que saiu da venda (menos para quem já
+    tem). O teste de segurança das migrações passou a aceitar função de admin
+    liberada ao cliente só se a recusa a não-admin vier antes da primeira
+    escrita.
+
+Com isso a Loja 2.0 fecha as treze etapas. O que ficou registrado como
+próximo passo: item só por moeda (sem nível) ou catálogo que cresça com o
+conteúdo, porque o nível abre o último cosmético na semana ~13 (P2-16).
 
 Fora de escopo por decisão: loot box, sorteio pago com moeda, compra com
 dinheiro real de qualquer coisa que toque progresso (XP, nível, resposta,

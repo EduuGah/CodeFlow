@@ -90,9 +90,14 @@ export function AdminContent() {
           Saúde do catálogo e como os alunos estão reagindo a ele.
         </p>
 
-        <Link to="/admin/novo-exercicio" className={buttonClasses({ className: 'mt-4' })}>
-          Criar exercício
-        </Link>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <Link to="/admin/novo-exercicio" className={buttonClasses()}>
+            Criar exercício
+          </Link>
+          <Link to="/admin/loja" className={buttonClasses({ variant: 'outline' })}>
+            Loja
+          </Link>
+        </div>
       </header>
 
       <section className="mb-10">

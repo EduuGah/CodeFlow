@@ -231,14 +231,22 @@ describe('segurança', () => {
         new RegExp(`revoke\\b[^;\\n]*\\bon function public\\.${nome}\\b`, 'i')
       );
 
-      // A exceção deliberada é a porta que o aluno usa (a compra): liberada
-      // para `authenticated`, e então o corpo só pode agir sobre quem chama.
+      // As exceções deliberadas são liberadas para `authenticated`: a porta
+      // que o aluno usa (a compra), e então o corpo só pode agir sobre quem
+      // chama; ou a porta de administração (a loja, 0017), e então a recusa
+      // a quem não é admin vem **antes** da primeira escrita.
       const liberadaAoCliente = new RegExp(
         `grant execute on function public\\.${nome}\\b[^;]*\\bto\\b[^;]*\\bauthenticated\\b`,
         'i'
       ).test(semComentarios(tudo));
       if (liberadaAoCliente) {
-        expect(corpo, `${nome} é porta do cliente e não se prende a auth.uid()`).toMatch(/auth\.uid\(\)/);
+        const recusaNaoAdmin = corpo.search(/if not public\.is_admin\(\) then\s+raise/i);
+        const primeiraEscrita = corpo.search(/\b(insert|update|delete)\b/i);
+        const portaDeAdmin = recusaNaoAdmin !== -1 && recusaNaoAdmin < primeiraEscrita;
+        expect(
+          /auth\.uid\(\)/.test(corpo) || portaDeAdmin,
+          `${nome} é porta do cliente e nem se prende a auth.uid() nem recusa quem não é admin antes de escrever`
+        ).toBe(true);
       }
     }
 

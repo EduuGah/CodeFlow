@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import { useAuth } from '../../contexts/AuthContext';
@@ -8,6 +8,7 @@ import { mudancaDeEquipar } from '../../lib/equipar';
 import { nomeParaMostrar } from '../../lib/perfil';
 import { inicioDaSemana } from '../../lib/desafios';
 import { destaquesDaSemana } from '../../lib/destaques';
+import { fetchInativos } from '../../lib/loja-admin';
 import { diaLocal, RECUPERAR_SEQUENCIA, somarDias } from '../../lib/sequencia';
 import { ACENTOS } from '../../lib/tema';
 import { PreviaDoPerfil } from './PreviaDoPerfil';
@@ -121,6 +122,20 @@ export function Loja() {
   const fotoDoGoogle = user?.user_metadata?.avatar_url as string | undefined;
   const [previa, setPrevia] = useState<string | null>(null);
   const [realce, setRealce] = useState<string | null>(null);
+  // O que a administração tirou da venda (0017). Sem resposta, nada some: o
+  // banco recusa a compra de qualquer jeito.
+  const [inativos, setInativos] = useState<Set<string>>(() => new Set());
+  useEffect(() => {
+    let vivo = true;
+    fetchInativos().then((ids) => {
+      if (vivo) setInativos(ids);
+    });
+    return () => {
+      vivo = false;
+    };
+  }, []);
+  const naLoja = (item: ItemDaLoja) =>
+    visivel(item, level.level, purchases) && (!inativos.has(item.id) || temItem(item, level.level, purchases));
   const [equipandoAgora, setEquipandoAgora] = useState(false);
   const [equipadoAgora, setEquipadoAgora] = useState<string | null>(null);
   const [confirmando, setConfirmando] = useState<string | null>(null);
@@ -157,7 +172,9 @@ export function Loja() {
   const itemComprado = comprado ? itemDaLoja(comprado) : undefined;
 
   // Com o histórico incompleto, a posse também não é confiável: sem vitrine.
-  const destaques = incompleto ? [] : destaquesDaSemana(inicioDaSemana(diaLocal(new Date())), level.level, purchases);
+  const destaques = incompleto
+    ? []
+    : destaquesDaSemana(inicioDaSemana(diaLocal(new Date())), level.level, purchases).filter((i) => !inativos.has(i.id));
 
   /** Da vitrine ao cartão do item, na seção dele, com um realce breve. */
   const irAoItem = (id: string) => {
@@ -186,31 +203,31 @@ export function Loja() {
       tipo: 'consumivel',
       titulo: 'Para usar',
       nota: 'Consumíveis: cada compra é um uso.',
-      itens: ITENS.filter((i) => i.tipo === 'consumivel' && visivel(i, level.level, purchases)),
+      itens: ITENS.filter((i) => i.tipo === 'consumivel' && naLoja(i)),
     },
     {
       tipo: 'tema',
       titulo: 'Cores de destaque',
       nota: 'Abrem por nível ou por moedas — o que vier primeiro. Aplicam-se na aparência.',
-      itens: ITENS.filter((i) => i.tipo === 'tema' && visivel(i, level.level, purchases)),
+      itens: ITENS.filter((i) => i.tipo === 'tema' && naLoja(i)),
     },
     {
       tipo: 'avatar',
       titulo: 'Avatares',
       nota: 'Os que não vêm de graça — cada um abre no nível dele, ou antes, com moedas. Escolha em editar perfil.',
-      itens: ITENS.filter((i) => i.tipo === 'avatar' && visivel(i, level.level, purchases)),
+      itens: ITENS.filter((i) => i.tipo === 'avatar' && naLoja(i)),
     },
     {
       tipo: 'moldura',
       titulo: 'Molduras',
       nota: 'Um anel na borda do avatar, no perfil e no início. Abrem por nível ou por moedas; equipe no inventário.',
-      itens: ITENS.filter((i) => i.tipo === 'moldura' && visivel(i, level.level, purchases)),
+      itens: ITENS.filter((i) => i.tipo === 'moldura' && naLoja(i)),
     },
     {
       tipo: 'fundo',
       titulo: 'Fundos',
       nota: 'A capa do perfil, acima do seu nome. Abrem por nível ou por moedas; equipe no inventário.',
-      itens: ITENS.filter((i) => i.tipo === 'fundo' && visivel(i, level.level, purchases)),
+      itens: ITENS.filter((i) => i.tipo === 'fundo' && naLoja(i)),
     },
   ];
 
