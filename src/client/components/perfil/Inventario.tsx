@@ -4,10 +4,12 @@ import { Link } from 'react-router-dom';
 import { useStudentData } from '../../contexts/StudentDataContext';
 import { useTema } from '../../contexts/TemaContext';
 import { itemDaLoja, posseDe, RARIDADES, type ItemDaLoja, type Posse, type Purchase } from '../../lib/economia';
+import { ITENS_DE_CONQUISTA, posseDeConquista, type ItemDeConquista, type PosseDeConquista } from '../../lib/exclusivos';
+import type { Achievement } from '../../lib/gamification';
 import { ACENTOS } from '../../lib/tema';
 import { AVATARES, AvatarDesenhado, avatarPreset } from '../ui/Avatar';
-import { FUNDOS, FundoDesenhado, ehFundo } from '../ui/Fundo';
-import { ComMoldura, MOLDURAS, ehMoldura } from '../ui/Moldura';
+import { FUNDOS, FundoDesenhado, ehFundo, type IdDeFundo } from '../ui/Fundo';
+import { ComMoldura, MOLDURAS, ehMoldura, type IdDeMoldura } from '../ui/Moldura';
 import { Button } from '../ui/Button';
 import { SectionLabel, cardClasses } from '../ui/Card';
 import { IconCheck, IconLock } from '../ui/Icon';
@@ -22,15 +24,19 @@ import { EscolherTitulo } from './EscolherTitulo';
  * tenho, e o que estou usando". Cada coisa diz de onde veio — de graça, pelo
  * nível, comprada — porque a origem é parte do que ela significa. O que está
  * trancado diz o nível que abre e o preço, e leva à loja; nada aqui vende.
+ * Os itens de conquista não têm preço: o trancado diz a conquista que falta.
  *
  * Equipar é um toque: vale na hora e vai para a conta. Moldura e fundo têm
  * também o "sem": tirar é uma escolha tão legítima quanto pôr.
  */
 
-const ORIGEM: Record<Extract<Posse, { tem: true }>['origem'], string> = {
+type PosseDaPeca = Posse | PosseDeConquista;
+
+const ORIGEM: Record<Extract<PosseDaPeca, { tem: true }>['origem'], string> = {
   livre: 'de graça',
   nivel: 'pelo nível',
   compra: 'comprado',
+  conquista: 'pela conquista',
 };
 
 interface Peca {
@@ -38,7 +44,9 @@ interface Peca {
   titulo: string;
   figura: ReactNode;
   item: ItemDaLoja | undefined;
-  posse: Posse;
+  posse: PosseDaPeca;
+  /** Não se vende: abre por conquista. */
+  exclusivo?: boolean;
   equipado: boolean;
   equipar: () => Promise<{ error?: string }>;
   /** A cor vale neste aparelho mesmo se a conta não gravar; o resto, não. */
@@ -47,26 +55,32 @@ interface Peca {
   feito?: string;
 }
 
-/** Quantos cosméticos (os de graça incluídos) já são da pessoa. */
-export function contarCosmeticos(nivel: number, purchases: Purchase[]): { seus: number; total: number } {
+/** Quantos cosméticos (os de graça e os de conquista incluídos) já são da pessoa. */
+export function contarCosmeticos(
+  nivel: number,
+  purchases: Purchase[],
+  conquistas: Achievement[]
+): { seus: number; total: number } {
   const itens = [
     ...AVATARES.map((p) => itemDaLoja(`avatar-${p.id}`)),
     ...ACENTOS.map((a) => (a.item ? itemDaLoja(a.item) : undefined)),
     ...MOLDURAS.map((id) => itemDaLoja(`moldura-${id}`)),
     ...FUNDOS.map((id) => itemDaLoja(`fundo-${id}`)),
   ];
-  return { seus: itens.filter((i) => posseDe(i, nivel, purchases).tem).length, total: itens.length };
+  const daLoja = itens.filter((i) => posseDe(i, nivel, purchases).tem).length;
+  const deConquista = ITENS_DE_CONQUISTA.filter((i) => posseDeConquista(i, conquistas).tem).length;
+  return { seus: daLoja + deConquista, total: itens.length + ITENS_DE_CONQUISTA.length };
 }
 
-/** Equipado primeiro, depois o que é seu, depois o que falta — pelo nível que abre. */
+/** Equipado primeiro, depois o que é seu, depois o que falta — pelo nível que abre (conquista por último). */
 function emOrdem(pecas: Peca[]): Peca[] {
   const peso = (p: Peca) => (p.equipado ? 0 : p.posse.tem ? 1 : 2);
-  const nivel = (p: Peca) => (p.posse.tem ? 0 : (p.posse.nivel ?? 99));
+  const nivel = (p: Peca) => (p.posse.tem ? 0 : 'nivel' in p.posse ? (p.posse.nivel ?? 99) : 100);
   return [...pecas].sort((a, b) => peso(a) - peso(b) || nivel(a) - nivel(b));
 }
 
 export function Inventario() {
-  const { perfil, level, purchases, sequencia, dobro, salvarPerfil } = useStudentData();
+  const { perfil, level, purchases, sequencia, dobro, salvarPerfil, achievements } = useStudentData();
   const { acento, mudarAcento } = useTema();
   const [equipando, setEquipando] = useState<string | null>(null);
   const [aviso, setAviso] = useState<{ ok: boolean; texto: string } | null>(null);
@@ -102,6 +116,15 @@ export function Inventario() {
     };
   });
 
+  /** O que todo item de conquista tem em comum: sem preço, posse pela conquista. */
+  const deConquista = (item: ItemDeConquista) => ({
+    chave: item.id,
+    titulo: item.title,
+    item: undefined,
+    posse: posseDeConquista(item, achievements),
+    exclusivo: true,
+  });
+
   // As molduras aparecem no avatar da própria pessoa (ou num de graça, se ela
   // usa foto): é assim que ela vai vê-las.
   const base = avatarPreset(perfil.avatar?.startsWith('preset:') ? perfil.avatar.slice('preset:'.length) : '') ?? AVATARES[0];
@@ -133,6 +156,19 @@ export function Inventario() {
         equipar: () => salvarPerfil({ moldura: id }),
       };
     }),
+    ...ITENS_DE_CONQUISTA.filter((i) => i.tipo === 'moldura').map((item): Peca => {
+      const id = item.curto as IdDeMoldura;
+      return {
+        ...deConquista(item),
+        figura: (
+          <ComMoldura moldura={id} size={48}>
+            <AvatarDesenhado preset={base} size={48} />
+          </ComMoldura>
+        ),
+        equipado: molduraAtual === id,
+        equipar: () => salvarPerfil({ moldura: id }),
+      };
+    }),
   ];
 
   const fundoAtual = ehFundo(perfil.fundo) ? perfil.fundo : null;
@@ -155,6 +191,15 @@ export function Inventario() {
         figura: <FundoDesenhado id={id} className="h-12 w-20 rounded-lg" />,
         item,
         posse: posseDe(item, level.level, purchases),
+        equipado: fundoAtual === id,
+        equipar: () => salvarPerfil({ fundo: id }),
+      };
+    }),
+    ...ITENS_DE_CONQUISTA.filter((i) => i.tipo === 'fundo').map((item): Peca => {
+      const id = item.curto as IdDeFundo;
+      return {
+        ...deConquista(item),
+        figura: <FundoDesenhado id={id} className="h-12 w-20 rounded-lg" />,
         equipado: fundoAtual === id,
         equipar: () => salvarPerfil({ fundo: id }),
       };
@@ -184,7 +229,7 @@ export function Inventario() {
     { titulo: 'Cores de destaque', nota: 'A cor dos botões, das barras e dos destaques.', pecas: emOrdem(cores) },
   ];
 
-  const { seus, total } = contarCosmeticos(level.level, purchases);
+  const { seus, total } = contarCosmeticos(level.level, purchases, achievements);
 
   return (
     <div className="space-y-6">
@@ -237,6 +282,7 @@ export function Inventario() {
                     {peca.item && (
                       <span className="text-xs font-semibold text-ink-faint">{RARIDADES[peca.item.raridade].rotulo}</span>
                     )}
+                    {peca.exclusivo && <span className="text-xs font-semibold text-ink-faint">De conquista</span>}
                   </span>
                   {peca.posse.tem ? (
                     <span className="flex flex-wrap items-center gap-2">
@@ -259,6 +305,22 @@ export function Inventario() {
                       )}
                       <span className="label-mono text-ink-faint">{ORIGEM[peca.posse.origem]}</span>
                     </span>
+                  ) : 'conquista' in peca.posse ? (
+                    // Não se vende: o caminho é a conquista, e é para lá que o link leva.
+                    <p className="text-xs leading-relaxed text-ink-soft">
+                      Abre com a conquista{' '}
+                      <span className="font-semibold text-ink">{peca.posse.conquista?.title}</span>
+                      {peca.posse.conquista?.progresso && (
+                        <span className="tabular-nums">
+                          {' '}
+                          ({peca.posse.conquista.progresso.atual}/{peca.posse.conquista.progresso.meta})
+                        </span>
+                      )}
+                      .{' '}
+                      <Link to="/app/perfil/conquistas" className="font-semibold text-brand-700 underline">
+                        Ver conquistas
+                      </Link>
+                    </p>
                   ) : (
                     // Uma frase com o link dentro: é texto corrido, e é assim que se lê.
                     <p className="text-xs leading-relaxed text-ink-soft">

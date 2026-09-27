@@ -121,7 +121,7 @@ export function Perfil() {
   const feitosHoje = desafios.dia.filter((d) => d.concluido).length;
   const feitosNaSemana = desafios.semana.filter((d) => d.concluido).length;
   const conquistasAbertas = achievements.filter((c) => c.unlocked).length;
-  const cosmeticos = contarCosmeticos(level.level, purchases);
+  const cosmeticos = contarCosmeticos(level.level, purchases, achievements);
   const praticados = mastery.filter((m) => m.attempts > 0).length;
   const faixa = proximaFaixa(level.level);
   const nomeDoTema = TEMAS.find((t) => t.id === tema)?.title ?? tema;

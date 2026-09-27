@@ -14,12 +14,30 @@ import { P } from './Ilustracao';
  * (`slice`): o que importa fica no meio.
  */
 
+/** Os da loja. */
 export const FUNDOS = ['grade', 'circuito', 'por-do-sol', 'aurora'] as const;
-export type IdDeFundo = (typeof FUNDOS)[number];
+/** Os que não se vendem: abrem por conquista (`lib/exclusivos.ts`). */
+export const FUNDOS_DE_CONQUISTA = ['constelacao'] as const;
+export type IdDeFundo = (typeof FUNDOS)[number] | (typeof FUNDOS_DE_CONQUISTA)[number];
+
+const TODOS: readonly string[] = [...FUNDOS, ...FUNDOS_DE_CONQUISTA];
 
 export function ehFundo(valor: unknown): valor is IdDeFundo {
-  return typeof valor === 'string' && (FUNDOS as readonly string[]).includes(valor);
+  return typeof valor === 'string' && TODOS.includes(valor);
 }
+
+/**
+ * As estrelas da constelação, e quais se ligam: um mapa de conceitos no céu.
+ * Todas na faixa do meio (28 a 52): numa tela larga, o `slice` corta em cima
+ * e embaixo.
+ */
+const ESTRELAS: Array<[number, number]> = [
+  [34, 46], [62, 30], [96, 42], [120, 28], [150, 50],
+  [188, 34], [214, 52], [246, 30], [272, 46], [300, 34],
+];
+const LIGACOES: Array<[number, number]> = [
+  [0, 1], [1, 2], [2, 3], [2, 4], [4, 5], [5, 6], [5, 7], [7, 8], [8, 9],
+];
 
 function Desenho({ id, gradiente }: { id: IdDeFundo; gradiente: string }): ReactNode {
   switch (id) {
@@ -95,6 +113,34 @@ function Desenho({ id, gradiente }: { id: IdDeFundo; gradiente: string }): React
             [150, 26],
           ].map(([x, y], i) => (
             <circle key={i} cx={x} cy={y} r={i % 3 ? 1.2 : 1.8} fill={P.creme} />
+          ))}
+        </>
+      );
+    // Céu de tinta com poeira de estrelas, e as maiores ligadas em desenho.
+    case 'constelacao':
+      return (
+        <>
+          <rect width="320" height="80" fill="#141836" />
+          {Array.from({ length: 28 }, (_, i) => (
+            <circle key={`p${i}`} cx={(i * 83) % 320} cy={(i * 37) % 80} r="0.8" fill={P.creme} fillOpacity="0.55" />
+          ))}
+          {LIGACOES.map(([a, b]) => (
+            <line
+              key={`${a}-${b}`}
+              x1={ESTRELAS[a][0]}
+              y1={ESTRELAS[a][1]}
+              x2={ESTRELAS[b][0]}
+              y2={ESTRELAS[b][1]}
+              stroke="#8fa8ff"
+              strokeOpacity="0.6"
+              strokeWidth="1"
+            />
+          ))}
+          {ESTRELAS.map(([x, y], i) => (
+            <g key={i}>
+              <circle cx={x} cy={y} r="4" fill={P.dourado} fillOpacity="0.25" />
+              <circle cx={x} cy={y} r={i % 3 ? 1.8 : 2.4} fill={i % 4 ? P.creme : P.dourado} />
+            </g>
           ))}
         </>
       );

@@ -1,5 +1,6 @@
 import { corDaTrilha } from '../../lib/cores-das-trilhas';
 import { CATEGORIAS_DE_CONQUISTA, type Achievement, type CategoriaDeConquista } from '../../lib/gamification';
+import { ITENS_DE_CONQUISTA } from '../../lib/exclusivos';
 import { TITULOS_DE_CONQUISTA } from '../../lib/titulos';
 import { Card } from '../ui/Card';
 import { IconFlag, IconTrack } from '../ui/Icon';
@@ -56,13 +57,21 @@ export function Medalha({ conquista, size = 44 }: { conquista: Achievement; size
 }
 
 /**
- * O título que a conquista dá, dito ao lado dela: é assim que a pessoa
- * descobre que "Vinte e cinco bugs" vira "Detetive de Bugs" no nome.
+ * O que a conquista dá, dito ao lado dela: é assim que a pessoa descobre que
+ * "Vinte e cinco bugs" vira "Detetive de Bugs" no nome, e que trinta dias
+ * seguidos acendem a Moldura Chama.
  */
-function tituloQueDa(conquista: Achievement): string | null {
-  const titulo = TITULOS_DE_CONQUISTA.find((t) => t.conquistas.includes(conquista.id));
-  if (!titulo) return null;
-  return titulo.conquistas.length === 1 ? `Dá o título ${titulo.nome}` : `Parte do título ${titulo.nome}`;
+function oQueDa(conquista: Achievement): string | null {
+  const partes: string[] = [];
+  for (const titulo of TITULOS_DE_CONQUISTA.filter((t) => t.conquistas.includes(conquista.id))) {
+    partes.push(titulo.conquistas.length === 1 ? `o título ${titulo.nome}` : `parte do título ${titulo.nome}`);
+  }
+  for (const item of ITENS_DE_CONQUISTA.filter((i) => i.conquista === conquista.id)) {
+    partes.push(`${item.tipo === 'moldura' ? 'a' : 'o'} ${item.title}`);
+  }
+  if (partes.length === 0) return null;
+  const lista = partes.length === 1 ? partes[0] : `${partes.slice(0, -1).join(', ')} e ${partes[partes.length - 1]}`;
+  return `Dá ${lista}`;
 }
 
 /** Uma pastilha entre 0 e 100 — porcentagem do progresso, ou 100 se já aberta. */
@@ -128,7 +137,7 @@ function Destaque({ conquistas }: { conquistas: Achievement[] }) {
 function EmblemaCompacto({ conquista }: { conquista: Achievement }) {
   const percent = percentual(conquista);
   return (
-    <li title={[conquista.description, tituloQueDa(conquista)].filter(Boolean).join(' — ')}>
+    <li title={[conquista.description, oQueDa(conquista)].filter(Boolean).join(' — ')}>
       <div
         className={`flex h-full flex-col items-center gap-1.5 rounded-lg border p-2.5 text-center ${
           conquista.unlocked ? 'border-line bg-surface' : 'border-line bg-sunken'
@@ -200,9 +209,7 @@ export function Conquistas({ conquistas }: { conquistas: Achievement[] }) {
                         {c.title}
                       </span>
                       <span className="block text-xs leading-relaxed text-ink-soft">{c.description}</span>
-                      {tituloQueDa(c) && (
-                        <span className="mt-1 block text-xs font-semibold text-brand-700">{tituloQueDa(c)}</span>
-                      )}
+                      {oQueDa(c) && <span className="mt-1 block text-xs font-semibold text-brand-700">{oQueDa(c)}</span>}
                       {c.progresso && !c.unlocked && (
                         <span className="mt-1.5 flex items-center gap-2">
                           <span

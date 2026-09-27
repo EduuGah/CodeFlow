@@ -427,3 +427,51 @@ test('um título ganho por conquista se escolhe no inventário e aparece ao lado
   await esperarConteudo(page);
   await expect(page.getByRole('listitem').filter({ hasText: 'Coruja' }).first()).toContainText('Dá o título Coruja');
 });
+
+test('um item de conquista não tem preço: abre com a conquista, equipa e aparece no perfil', async ({
+  logado: page,
+  banco,
+}) => {
+  // Trinta dias seguidos, um acerto por dia: abre "Um mês seguido", e a Moldura Chama.
+  banco.attempts = Array.from({ length: 30 }, (_, i) => {
+    const dia = new Date();
+    dia.setDate(dia.getDate() - i);
+    dia.setHours(9, 0, 0, 0);
+    return {
+      exercise_id: `ex-js-1-${i}`,
+      lesson_id: 'lesson-js-1',
+      concepts: ['variaveis'],
+      correct: true,
+      hints_used: 0,
+      created_at: dia.toISOString(),
+    };
+  });
+
+  await page.goto('/app/perfil/inventario');
+  await esperarConteudo(page);
+  const molduras = page.getByRole('region', { name: 'Molduras' });
+
+  // A trancada diz a conquista que falta e leva às conquistas — nada de preço.
+  const orbita = molduras.getByRole('listitem').filter({ hasText: 'Moldura Órbita' });
+  await expect(orbita).toContainText('De conquista');
+  await expect(orbita).toContainText('Abre com a conquista React, completa');
+  await expect(orbita).not.toContainText('moedas');
+  await expect(orbita.getByRole('link')).toHaveAttribute('href', '/app/perfil/conquistas');
+
+  const chama = molduras.getByRole('listitem').filter({ hasText: 'Moldura Chama' });
+  await expect(chama).toContainText('pela conquista');
+  await chama.getByRole('button', { name: 'Equipar Moldura Chama' }).click();
+  await expect(page.getByRole('status').filter({ hasText: 'Moldura Chama equipado.' })).toBeVisible();
+  expect(banco.perfil.moldura).toBe('chama');
+  // Nenhuma compra saiu daqui.
+  expect(banco.escritas.filter((e) => e.tabela === 'purchases')).toEqual([]);
+
+  await page.goto('/app/perfil');
+  await esperarConteudo(page);
+  await expect(page.locator('[data-moldura="chama"]').first()).toBeVisible();
+
+  // E a loja não vende o que é de conquista.
+  await page.goto('/app/perfil/loja');
+  await esperarConteudo(page);
+  await expect(page.getByText('Moldura Chama')).toHaveCount(0);
+});

@@ -264,8 +264,16 @@ validadas por uma função `equipar(p_categoria, p_item)` que confere posse
    Escolhe-se no inventário; aparece ao lado do nome no perfil; as
    conquistas dizem "Dá o título …". Nenhum título está na loja (teste e
    verificação no banco).
-8. **Itens exclusivos de conquista** (sem preço): "Chama de 30 dias", "Moldura
+8. [x] **Itens exclusivos de conquista** (sem preço): "Chama de 30 dias", "Moldura
    React" (trilha React completa).
+   Feito assim (`lib/exclusivos.ts`, sem migração — as colunas da 0011 já
+   servem): Moldura Chama (um mês seguido), Moldura Órbita (a trilha de
+   React completa — órbita e planetas, desenho próprio, nada do logotipo
+   do React) e Fundo Constelação (vinte e cinco conceitos). Fora de `ITENS`
+   e do catálogo do banco: `comprar_item` os recusa (verificação no banco),
+   e a loja não os mostra. No inventário, "De conquista" no lugar da
+   raridade; o trancado diz a conquista e o progresso e leva às
+   conquistas, que dizem "Dá a Moldura Chama".
 9. **Consumíveis novos**, sem pay-to-win: *recuperar a sequência* (cobre um dia
    perdido nos últimos 2 dias, uma vez por semana, derivado como o
    congelamento); *booster de moedas* (+25% nas moedas de aula e desafio por

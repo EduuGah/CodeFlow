@@ -13,12 +13,20 @@ import { P } from './Ilustracao';
  * raio 50; cada moldura mora entre o raio 42 e o 50.
  */
 
+/** As da loja. */
 export const MOLDURAS = ['minimal', 'terminal', 'pixel', 'neon', 'ouro'] as const;
-export type IdDeMoldura = (typeof MOLDURAS)[number];
+/** As que não se vendem: abrem por conquista (`lib/exclusivos.ts`). */
+export const MOLDURAS_DE_CONQUISTA = ['chama', 'orbita'] as const;
+export type IdDeMoldura = (typeof MOLDURAS)[number] | (typeof MOLDURAS_DE_CONQUISTA)[number];
+
+const TODAS: readonly string[] = [...MOLDURAS, ...MOLDURAS_DE_CONQUISTA];
 
 export function ehMoldura(valor: unknown): valor is IdDeMoldura {
-  return typeof valor === 'string' && (MOLDURAS as readonly string[]).includes(valor);
+  return typeof valor === 'string' && TODAS.includes(valor);
 }
+
+/** Uma labareda com a ponta para cima, centrada na origem; quem usa gira e escala. */
+const LABAREDA = 'M0 -6 C2.6 -2.6 3.6 -0.4 3.6 1.6 A3.6 3.6 0 0 1 -3.6 1.6 C-3.6 -0.4 -2.6 -2.6 0 -6 Z';
 
 /** Pontos igualmente espaçados num círculo, a partir do topo. */
 function emVolta(n: number, raio: number): Array<{ x: number; y: number; angulo: number }> {
@@ -97,6 +105,51 @@ const DESENHOS: Record<IdDeMoldura, ReactNode> = {
         })
       )}
       <circle cx="50" cy="95" r="3.2" fill={P.dourado} />
+    </>
+  ),
+  // Brasa no aro e labaredas para fora, a de dentro mais clara: trinta dias acesos.
+  chama: (
+    <>
+      <circle cx="50" cy="50" r="45" fill="none" stroke="#8a2a1c" strokeWidth="6" />
+      {emVolta(14, 45).map(({ x, y, angulo }, i) => (
+        <g key={i} transform={`translate(${x} ${y}) rotate(${angulo})`}>
+          <path d={LABAREDA} fill={P.laranja} transform="scale(1.15)" />
+          <path d={LABAREDA} fill={P.dourado} transform="translate(0 1.2) scale(0.6)" />
+        </g>
+      ))}
+    </>
+  ),
+  // Um aro de céu com a órbita tracejada e três planetas nela — um com anel.
+  orbita: (
+    <>
+      <circle cx="50" cy="50" r="46" fill="none" stroke="#1d2748" strokeWidth="7" />
+      <circle cx="50" cy="50" r="46" fill="none" stroke="#8fa8ff" strokeWidth="1" strokeDasharray="2.5 3" />
+      {[
+        { angulo: -60, r: 4.6, cor: P.laranja },
+        { angulo: 70, r: 3.6, cor: '#6fd3ff' },
+        { angulo: 190, r: 5, cor: P.dourado, anel: true },
+      ].map(({ angulo, r, cor, anel }) => {
+        const rad = (angulo * Math.PI) / 180;
+        const x = 50 + 46 * Math.cos(rad);
+        const y = 50 + 46 * Math.sin(rad);
+        return (
+          <g key={angulo}>
+            <circle cx={x} cy={y} r={r} fill={cor} />
+            {anel && (
+              <ellipse
+                cx={x}
+                cy={y}
+                rx={r + 3}
+                ry="1.4"
+                fill="none"
+                stroke={P.creme}
+                strokeWidth="1.2"
+                transform={`rotate(-20 ${x} ${y})`}
+              />
+            )}
+          </g>
+        );
+      })}
     </>
   ),
 };

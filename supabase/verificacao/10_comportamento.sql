@@ -291,6 +291,18 @@ select verificacao.ok(
   (select count(*) from public.store_items where tipo in ('moldura', 'fundo')) = 9,
   'o catálogo tem as molduras e os fundos'
 );
+-- Os itens de conquista (`lib/exclusivos.ts`) não estão no catálogo: a
+-- compra os recusa, e equipar usa as mesmas colunas.
+select verificacao.recusa(
+  $$select public.comprar_item('moldura-chama')$$,
+  'item_indisponivel', 'item de conquista não se compra'
+);
+update public.users set moldura = 'chama', fundo = 'constelacao' where id = auth.uid();
+select verificacao.ok(
+  (select moldura = 'chama' and fundo = 'constelacao' from public.users where id = auth.uid()),
+  'item de conquista se equipa nas mesmas colunas'
+);
+
 -- ------------------------------------------------------------ títulos (0012)
 update public.users set titulo = 'coruja' where id = auth.uid();
 select verificacao.ok((select titulo = 'coruja' from public.users where id = auth.uid()), 'título escolhido');
