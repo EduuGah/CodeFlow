@@ -11,7 +11,9 @@ import { destaquesDaSemana } from '../../lib/destaques';
 import { fetchInativos } from '../../lib/loja-admin';
 import { diaLocal, RECUPERAR_SEQUENCIA, somarDias } from '../../lib/sequencia';
 import { ACENTOS } from '../../lib/tema';
+import { celebrar } from '../../lib/celebrar';
 import { temaDoEditor } from '../../lib/temas-do-editor';
+import { PreviaDaCelebracao } from './PreviaDaCelebracao';
 import { PreviaDoEditor } from './PreviaDoEditor';
 import { PreviaDoPerfil } from './PreviaDoPerfil';
 import {
@@ -79,6 +81,7 @@ const FILTROS: Array<{ id: Filtro; rotulo: string }> = [
   { id: 'fundo', rotulo: 'Fundos' },
   { id: 'tema', rotulo: 'Cores' },
   { id: 'editor', rotulo: 'Editor' },
+  { id: 'celebracao', rotulo: 'Celebrações' },
   { id: 'consumivel', rotulo: 'Consumíveis' },
 ];
 
@@ -203,10 +206,15 @@ export function Loja() {
 
   /**
    * A prévia de cada categoria, onde o item aparece de verdade: o que muda o
-   * perfil, no cabeçalho; o tema do editor, num trecho de código. Nada é
-   * gravado.
+   * perfil, no cabeçalho; o tema do editor, num trecho de código; a
+   * celebração, tocando na tela. Nada é gravado.
    */
-  const previaDe = (item: ItemDaLoja): { rotulo: string; conteudo: ReactNode } | null => {
+  const previaDe = (item: ItemDaLoja): { rotulo: string; conteudo: ReactNode; aoAbrir?: () => void } | null => {
+    if (item.tipo === 'celebracao') {
+      // Toca no clique de quem pediu, não ao montar a prévia.
+      const id = item.id.replace(/^celebracao-/, '');
+      return { rotulo: 'Ver a celebração', conteudo: <PreviaDaCelebracao id={id} />, aoAbrir: () => celebrar('aula', id) };
+    }
     if (item.tipo === 'editor') {
       return { rotulo: 'Ver no editor', conteudo: <PreviaDoEditor tema={temaDoEditor(mudancaDeEquipar(item)?.temaEditor)} /> };
     }
@@ -255,6 +263,12 @@ export function Loja() {
       titulo: 'Temas do editor',
       nota: 'As cores do código nos exercícios e projetos. O padrão e o alto contraste são de todo mundo; estes abrem por nível ou por moedas.',
       itens: ITENS.filter((i) => i.tipo === 'editor' && naLoja(i)),
+    },
+    {
+      tipo: 'celebracao',
+      titulo: 'Celebrações',
+      nota: 'O que toca na tela quando uma aula ou um projeto fecha. O confete é de todo mundo; nenhuma toca se o seu sistema pede menos movimento.',
+      itens: ITENS.filter((i) => i.tipo === 'celebracao' && naLoja(i)),
     },
   ];
 
@@ -312,7 +326,10 @@ export function Loja() {
                 className="inline-flex min-h-6 items-center self-start text-sm font-semibold text-brand-700 hover:underline"
                 aria-expanded={previa === item.id}
                 aria-controls={`previa-${item.id}`}
-                onClick={() => setPrevia((atual) => (atual === item.id ? null : item.id))}
+                onClick={() => {
+                  if (previa !== item.id) previaDoItem.aoAbrir?.();
+                  setPrevia((atual) => (atual === item.id ? null : item.id));
+                }}
               >
                 {previa === item.id ? 'Fechar a prévia' : previaDoItem.rotulo}
               </button>

@@ -1,4 +1,4 @@
-import { AULA_CURTA, concluirAula, esperarConteudo, expect, test } from './fixtures';
+import { AULA_CURTA, canvasDeConfete, concluirAula, esperarConteudo, expect, test } from './fixtures';
 
 /**
  * Comemoração e a preferência por menos movimento.
@@ -18,20 +18,6 @@ import { AULA_CURTA, concluirAula, esperarConteudo, expect, test } from './fixtu
  * termina" numa solução de referência que leva dezenas de milissegundos.
  */
 test.describe.configure({ mode: 'serial' });
-
-/**
- * Conta os canvas do confete.
- *
- * Contar `canvas` sem qualificar não serve: o Monaco cria três por conta própria
- * (a barra de rolagem e o minimapa), e um teste assim passa medindo o editor em
- * vez da comemoração. O confete é o único que a biblioteca pendura direto no
- * `body`.
- */
-async function canvasDeConfete(page: import('@playwright/test').Page) {
-  return page.evaluate(
-    () => [...document.querySelectorAll('canvas')].filter((c) => c.parentElement === document.body).length
-  );
-}
 
 /**
  * Conclui a aula inteira.

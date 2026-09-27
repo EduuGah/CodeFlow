@@ -5,6 +5,7 @@ import { AVATARES, AvatarDesenhado, avatarPreset } from '../ui/Avatar';
 import { FundoDesenhado, ehFundo } from '../ui/Fundo';
 import { ComMoldura, ehMoldura } from '../ui/Moldura';
 import { VinhetaChamaDeVolta, VinhetaFloco, VinhetaJanela, VinhetaRaioDuplo } from '../ui/Ilustracao';
+import { FiguraDaCelebracao } from './PreviaDaCelebracao';
 import { MiniaturaDoEditor } from './PreviaDoEditor';
 
 /**
@@ -31,6 +32,7 @@ export function FiguraDoItem({ item }: { item: ItemDaLoja }) {
   if (item.tipo === 'editor') {
     return <MiniaturaDoEditor tema={temaDoEditor(item.id.replace('editor-', ''))} />;
   }
+  if (item.tipo === 'celebracao') return <FiguraDaCelebracao id={item.id.replace('celebracao-', '')} largura={88} />;
   if (item.tipo === 'fundo') {
     const id = item.id.replace('fundo-', '');
     return ehFundo(id) ? <FundoDesenhado id={id} className="h-14 w-24 rounded-lg" /> : null;

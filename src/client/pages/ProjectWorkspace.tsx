@@ -4,6 +4,7 @@ import { Link, useParams } from 'react-router-dom';
 import { getProject, listProjects } from '../../content';
 import { LANGUAGE_LABELS, type TestCase } from '../../content/types';
 import { useAuth } from '../contexts/AuthContext';
+import { useStudentDataOpcional } from '../contexts/StudentDataContext';
 import { fetchProgress, markProjectCompleted } from '../lib/progress';
 import { executeCode, abrirServidorVivo, type ExecutionResult } from '../lib/sandbox';
 import { executarPagina } from '../lib/pagina';
@@ -60,6 +61,7 @@ type Aba = 'enunciado' | 'codigo';
 export function ProjectWorkspace() {
   const { id } = useParams();
   const { user } = useAuth();
+  const estiloDaCelebracao = useStudentDataOpcional()?.perfil.celebracao;
 
   const project = (id ? getProject(id) : undefined) ?? listProjects()[0];
 
@@ -205,7 +207,7 @@ export function ProjectWorkspace() {
     }
 
     setIsCompleted(true);
-    celebrar('projeto');
+    celebrar('projeto', estiloDaCelebracao);
   };
 
   const abas: Array<{ id: Aba; label: string; Icone: typeof IconLesson }> = [

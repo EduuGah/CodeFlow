@@ -1,4 +1,4 @@
-import { esperarConteudo, expect, test, type BancoFalso } from './fixtures';
+import { canvasDeConfete, esperarConteudo, expect, test, type BancoFalso } from './fixtures';
 
 /**
  * O perfil e as suas páginas: nome e avatar, a loja, os desafios, as
@@ -345,7 +345,8 @@ test('uma cor nova comprada se aplica de verdade: o token da marca muda no naveg
   await expect(crepusculo).toBeEnabled();
   await crepusculo.click();
   await expect(page.locator('html')).toHaveAttribute('data-accent', 'crepusculo');
-  expect(banco.perfil.accent).toBe('crepusculo');
+  // A cor vale na página antes de a gravação chegar: esperar por ela, não ler já.
+  await expect.poll(() => banco.perfil.accent).toBe('crepusculo');
 
   // O que a pessoa vê é o token resolvido, não o atributo.
   const { ACENTOS } = await import('../src/client/lib/tema');
@@ -426,6 +427,58 @@ test('um tema do editor se vê num trecho de código, se compra, e se troca no i
   await expect.poll(() => banco.perfil.tema_editor).toBeNull();
   // Os outros vendidos continuam trancados, com o nível e o preço.
   await expect(secao.getByRole('listitem').filter({ hasText: 'Editor Neon' })).toContainText('Abre no nível 13');
+});
+
+test.describe('celebrações, com movimento', () => {
+  test.use({ reducedMotion: 'no-preference' });
+
+  test('uma celebração toca na loja no clique, se compra e se equipa no inventário', async ({
+    logado: page,
+    banco,
+  }) => {
+    semear(banco);
+    // Dezesseis aulas: saldo para as Bolhas (160), que só abrem de graça no nível 7.
+    banco.completed_lessons = Array.from({ length: 16 }, (_, i) => `lesson-js-${i + 1}`);
+    await page.goto('/app/perfil/loja');
+    await esperarConteudo(page);
+    await page.getByRole('group', { name: 'Mostrar' }).getByRole('button', { name: 'Celebrações' }).click();
+
+    const bolhas = page.getByRole('listitem').filter({ hasText: 'Celebração Bolhas' });
+    // Nada toca ao abrir a página: só no clique de quem pediu.
+    expect(await canvasDeConfete(page)).toBe(0);
+    await bolhas.getByRole('button', { name: 'Ver a celebração' }).click();
+    await expect.poll(() => canvasDeConfete(page)).toBeGreaterThan(0);
+    await expect(bolhas.getByRole('button', { name: 'Tocar de novo' })).toBeVisible();
+    expect(banco.escritas.filter((e) => e.tabela === 'users')).toEqual([]);
+
+    await bolhas.getByRole('button', { name: '160' }).click();
+    await bolhas.getByRole('button', { name: /Confirmar por 160/ }).click();
+    const status = page.getByRole('status').filter({ hasText: 'Comprado: Celebração Bolhas' });
+    await status.getByRole('button', { name: 'Equipar agora' }).click();
+    await expect(status).toContainText('Equipado.');
+    expect(banco.perfil.celebracao).toBe('bolhas');
+
+    await page.goto('/app/perfil/inventario');
+    const secao = page.getByRole('region', { name: 'Celebrações' });
+    await secao.getByRole('button', { name: 'Equipar Celebração Confete' }).click();
+    await expect.poll(() => banco.perfil.celebracao).toBeNull();
+  });
+});
+
+test.describe('celebrações, com menos movimento pedido', () => {
+  test.use({ reducedMotion: 'reduce' });
+
+  test('a loja diz que nenhuma toca, em vez de tocar escondido', async ({ logado: page, banco }) => {
+    semear(banco);
+    await page.goto('/app/perfil/loja');
+    await esperarConteudo(page);
+    await page.getByRole('group', { name: 'Mostrar' }).getByRole('button', { name: 'Celebrações' }).click();
+    const estrelas = page.getByRole('listitem').filter({ hasText: 'Celebração Estrelas' });
+    await estrelas.getByRole('button', { name: 'Ver a celebração' }).click();
+    await expect(estrelas).toContainText('Seu sistema pede menos movimento');
+    await page.waitForTimeout(1500);
+    expect(await canvasDeConfete(page)).toBe(0);
+  });
 });
 
 test('um título ganho por conquista se escolhe no inventário e aparece ao lado do nome', async ({

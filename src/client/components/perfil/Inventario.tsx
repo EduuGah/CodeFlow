@@ -7,6 +7,7 @@ import { itemDaLoja, posseDe, RARIDADES, visivel, type ItemDaLoja, type Posse, t
 import { ITENS_DE_CONQUISTA, posseDeConquista, type ItemDeConquista, type PosseDeConquista } from '../../lib/exclusivos';
 import type { Achievement } from '../../lib/gamification';
 import { ACENTOS } from '../../lib/tema';
+import { CELEBRACAO_PADRAO, CELEBRACOES, celebracao } from '../../lib/celebracoes';
 import { TEMA_DO_EDITOR_PADRAO, TEMAS_DO_EDITOR, temaDoEditor } from '../../lib/temas-do-editor';
 import { AVATARES, AvatarDesenhado, avatarPreset } from '../ui/Avatar';
 import { FUNDOS, FundoDesenhado, ehFundo, type IdDeFundo } from '../ui/Fundo';
@@ -16,6 +17,7 @@ import { SectionLabel, cardClasses } from '../ui/Card';
 import { IconCheck, IconLock } from '../ui/Icon';
 import { VinhetaFloco, VinhetaJanela, VinhetaRaioDuplo } from '../ui/Ilustracao';
 import { EscolherTitulo } from './EscolherTitulo';
+import { FiguraDaCelebracao } from './PreviaDaCelebracao';
 import { MiniaturaDoEditor } from './PreviaDoEditor';
 
 /**
@@ -69,6 +71,7 @@ export function contarCosmeticos(
     ...MOLDURAS.map((id) => itemDaLoja(`moldura-${id}`)),
     ...FUNDOS.map((id) => itemDaLoja(`fundo-${id}`)),
     ...TEMAS_DO_EDITOR.map((t) => (t.item ? itemDaLoja(t.item) : undefined)),
+    ...CELEBRACOES.map((c) => (c.item ? itemDaLoja(c.item) : undefined)),
   ];
   // Um sazonal fora da janela só conta para quem o tem.
   const contaveis = itens.filter((i) => !i || visivel(i, nivel, purchases));
@@ -231,6 +234,20 @@ export function Inventario() {
     };
   });
 
+  const celebracaoAtual = celebracao(perfil.celebracao).id;
+  const celebracoes: Peca[] = CELEBRACOES.map((c) => {
+    const item = c.item ? itemDaLoja(c.item) : undefined;
+    return {
+      chave: `celebracao-${c.id}`,
+      titulo: item?.title ?? `Celebração ${c.title}`,
+      figura: <FiguraDaCelebracao id={c.id} largura={56} />,
+      item,
+      posse: posseDe(item, level.level, purchases),
+      equipado: celebracaoAtual === c.id,
+      equipar: () => salvarPerfil({ celebracao: c.id === CELEBRACAO_PADRAO.id ? null : c.id }),
+    };
+  });
+
   const equipar = async (peca: Peca) => {
     setEquipando(peca.chave);
     const { error } = await peca.equipar();
@@ -256,6 +273,11 @@ export function Inventario() {
       titulo: 'Temas do editor',
       nota: 'As cores do código nos exercícios e projetos. O padrão e o alto contraste são de todo mundo.',
       pecas: emOrdem(temasDoEditor),
+    },
+    {
+      titulo: 'Celebrações',
+      nota: 'O que toca quando uma aula ou um projeto fecha. Para ver antes, a loja toca cada uma.',
+      pecas: emOrdem(celebracoes),
     },
   ];
 

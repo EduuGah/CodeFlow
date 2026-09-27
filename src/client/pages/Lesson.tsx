@@ -4,6 +4,7 @@ import { Link, Navigate, useParams } from 'react-router-dom';
 import { getLesson, getLessonAfter } from '../../content';
 import { LANGUAGE_LABELS } from '../../content/types';
 import { useAuth } from '../contexts/AuthContext';
+import { useStudentDataOpcional } from '../contexts/StudentDataContext';
 import { fetchProgress, fetchSolvedExercises, markLessonCompleted } from '../lib/progress';
 import { buildLessonSteps } from '../lib/lesson-steps';
 import {
@@ -61,6 +62,10 @@ import { codigoDoErro, registrar } from '../lib/registro';
 export function Lesson() {
   const { id } = useParams();
   const { user } = useAuth();
+  // A celebração equipada, lida no instante da conclusão: por referência, para
+  // o perfil chegar depois não disparar o efeito da conclusão de novo.
+  const estiloDaCelebracao = useRef<string | null | undefined>(null);
+  estiloDaCelebracao.current = useStudentDataOpcional()?.perfil.celebracao;
 
   const lesson = id ? getLesson(id) : undefined;
   const steps = useMemo(() => (lesson ? buildLessonSteps(lesson) : []), [lesson]);
@@ -220,7 +225,7 @@ export function Lesson() {
     // Com sessão, espera saber se a aula já estava concluída.
     if (userId && !progressoCarregado) return;
 
-    celebrar('aula');
+    celebrar('aula', estiloDaCelebracao.current);
     setCompletedLessons((ids) => (ids.includes(lessonId) ? ids : [...ids, lessonId]));
 
     // Visitante sem sessão conclui a aula na tela; só não gera histórico.

@@ -41,7 +41,7 @@ Números lidos do catálogo, não de memória.
 | Projetos | 10, com 34 critérios de aceitação — os 3 capstones são página + API + banco (motor 7), os outros 7 são JavaScript puro |
 | Conceitos | 151, com grafo de pré-requisitos |
 | Flashcards | 67 (93 conceitos ainda sem cartão) |
-| Testes | 3.840 de unidade + ~488 de navegador |
+| Testes | 3.863 de unidade + ~494 de navegador |
 | Pacote | 3.095 kB (851 kB comprimido) no chunk principal — o corpo das aulas vai junto (é quase metade), e separá-lo é o maior problema de performance aberto (P2-1b do roadmap). Aula, revisão, refazer erros, projeto e admin são rotas sob demanda (`App.tsx`), e o Zod só entra no chunk do admin; o Monaco são mais 3.362 kB (869 kB) num chunk à parte, baixado só quando o primeiro editor monta, e o worker de TypeScript (7 MB) só quando um modelo JS/TS abre. O motor de TypeScript não acrescentou arquivo; o de React acrescentou um chunk de 143 kB (47 kB) com o React e o ReactDOM como texto, baixado só por um exercício de React; o de SQL acrescentou o worker (49 kB) e o SQLite em WebAssembly (658 kB), baixados só por um exercício de SQL; o de Python acrescentou o worker (~22 kB) e o Pyodide inteiro (~13,5 MB: o WebAssembly do CPython, a biblioteca padrão zipada, o manifesto de pacotes), copiados para `/pyodide/` na build e baixados só por um exercício de Python |
 
 ## 4. Decisões que não devem ser desfeitas sem motivo forte
@@ -120,7 +120,12 @@ contingência usam as mesmas cores, para a troca continuar invisível. **Só o
 editor muda**: os blocos de código da aula e as saídas ficam no verde do
 padrão — são material da aula, não o espaço de quem escreve. A prévia da loja
 não carrega o Monaco: é um trecho já separado em tokens, com os mesmos papéis
-que `monaco.ts` pinta. **Os destaques da semana** (`lib/destaques.ts`)
+que `monaco.ts` pinta. **As celebrações** (`lib/celebracoes.ts`, o movimento
+em `celebrar.ts`) seguem a regra do confete: **quem pediu menos movimento não
+recebe nenhuma, nem a comprada**, e a loja diz isso em vez de vender algo que
+nunca vai tocar; a prévia toca no clique, não ao montar. A aula lê a
+celebração equipada por referência, no instante da conclusão — o perfil
+chegando depois não pode disparar o efeito da conclusão de novo. **Os destaques da semana** (`lib/destaques.ts`)
 são um rodízio fixo, não sorteio: nenhum fica mais barato nem some, e a
 vitrine aponta para o cartão do item em vez de repeti-lo (cada item mora numa
 seção só — e os testes que filtram por nome não viram loteria da semana).
@@ -393,6 +398,8 @@ src/client/lib/         Lógica pura e testada
   temas-do-editor.ts    As paletas do editor de código (o Monaco, o
                         esqueleto, a miniatura da loja), com teste de
                         contraste por cor de token
+  celebracoes.ts        O catálogo das celebrações; como cada uma se move
+                        (os disparos do confete) fica em `celebrar.ts`
   sequencia.ts          A sequência de dias com congelamentos; as correntes
                         da história (com o dia em que cada uma começou), para
                         os marcos valerem uma vez e terem data
@@ -450,7 +457,8 @@ src/client/components/  Componentes
                         categoria, a aparência (modo e cor); `icones.tsx`
                         diz qual ícone cada conquista e desafio leva;
                         `AnelDeNivel` e `CabecalhoDaSecao`; `PreviaDoEditor`
-                        (o tema do editor sem o Monaco)
+                        (o tema do editor sem o Monaco) e
+                        `PreviaDaCelebracao` (figura e prévia que toca)
   lesson/               Um componente por tipo de exercício; `ExerciseAction`
                         e `ExerciseFeedback` são o botão e o retorno de todos;
                         `ExercicioDoPasso` escolhe o componente pelo tipo
@@ -504,7 +512,7 @@ docs/curriculo.md       Roadmap de conteúdo — fonte canônica
 ```bash
 npm run typecheck   # inclui e2e/ e playwright.config.ts
 npm run lint        # ESLint mínimo: typescript-eslint + react-hooks
-npm test            # 3.840 testes
+npm test            # 3.863 testes
 npm run test:e2e    # ~484 no navegador (antes: npx playwright install chromium;
                     # com um Chromium já instalado: PW_CHROMIUM=/caminho/do/chrome)
 npm run build
@@ -1113,7 +1121,8 @@ JavaScript, Página, Git, Terminal, TypeScript, Web e o resto de Python.
 
 - **Rodar `supabase/migrations/0020_itens_gerais.sql` no SQL Editor.** As
   categorias novas da loja e as colunas do perfil onde elas moram. Ela cresce
-  a cada categoria que chega (hoje: os temas do editor) e pode rodar de novo.
+  a cada categoria que chega (hoje: temas do editor e celebrações) e pode
+  rodar de novo.
   Sem ela, a loja mostra os temas e o banco recusa a compra; equipar diz qual
   migração rodar. A 0011 mudou (a checagem de tipo ficou `not valid`): quem
   já a rodou não precisa rodar de novo.

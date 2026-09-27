@@ -435,6 +435,11 @@ select verificacao.ok(
   (select count(*) from public.store_items where tipo = 'editor') = 5,
   'os temas do editor estão no catálogo do banco'
 );
+select verificacao.ok(
+  (select count(*) from public.store_items where tipo = 'celebracao') = 4
+    and not exists (select 1 from public.store_items where id = 'celebracao-confete'),
+  'as celebrações estão no catálogo do banco, e o confete (de todo mundo) não'
+);
 select verificacao.recusa(
   $$update public.users set tema_editor = 'Noturno!' where id = auth.uid()$$,
   'users_tema_editor_formato', 'tema do editor fora do formato'

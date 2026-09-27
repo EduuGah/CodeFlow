@@ -255,6 +255,19 @@ export const ITENS: ItemDaLoja[] = [
       ['neon', 'Neon', 'Roxo de fliperama, com as cores acesas.', 13],
     ] as const
   ).map(([id, title, description, nivel]) => cosmetico(`editor-${id}`, 'editor', `Editor ${title}`, description, nivel)),
+  // Celebrações (0020): o que toca ao concluir. O confete é de todo mundo; o
+  // movimento de cada uma mora em `celebrar.ts`, e nenhuma toca para quem
+  // pediu menos movimento.
+  ...(
+    [
+      ['estrelas', 'Estrelas', 'Estrelas douradas que se abrem no alto e descem devagar.', 5],
+      ['bolhas', 'Bolhas', 'Bolhas de sabão que sobem da borda da tela, em vez de cair.', 7],
+      ['codigo', 'Chuva de código', 'Chaves, parênteses e ponto e vírgula caindo do alto.', 9],
+      ['fogos', 'Fogos', 'Três estouros no céu: um de cada lado, e o maior no meio.', 12],
+    ] as const
+  ).map(([id, title, description, nivel]) =>
+    cosmetico(`celebracao-${id}`, 'celebracao', `Celebração ${title}`, description, nivel)
+  ),
   // Só por moedas (0018): épicos sem nível que os abra. O nível abre o último
   // cosmético lá pela semana 13 do aluno-modelo; estes são para onde as
   // moedas vão depois disso (P2-16). O teste de calibragem cobra que somem

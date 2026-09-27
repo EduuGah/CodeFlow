@@ -367,6 +367,20 @@ export const test = base.extend<{ banco: BancoFalso; logado: Page }>({
  * progresso do aluno. Um teste que lê a página nesse instante encontra caixas
  * cinzas, não acha nada errado, e passa — que é o pior modo de falha.
  */
+/**
+ * Conta os canvas do confete (e das outras celebrações).
+ *
+ * Contar `canvas` sem qualificar não serve: o Monaco cria três por conta própria
+ * (a barra de rolagem e o minimapa), e um teste assim passa medindo o editor em
+ * vez da comemoração. O confete é o único que a biblioteca pendura direto no
+ * `body`.
+ */
+export async function canvasDeConfete(page: Page): Promise<number> {
+  return page.evaluate(
+    () => [...document.querySelectorAll('canvas')].filter((c) => c.parentElement === document.body).length
+  );
+}
+
 export async function esperarConteudo(page: Page): Promise<void> {
   await page.getByRole('main').waitFor();
   await page.locator('[data-carregando]').waitFor({ state: 'detached', timeout: 15_000 });

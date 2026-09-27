@@ -383,9 +383,15 @@ cresce e roda de novo):
    fundo (AA; o alto contraste, AAA). A loja mostra um trecho de código na
    paleta ("Ver no editor") sem carregar o Monaco; o inventário troca num
    toque. Só o editor muda: os blocos de código da aula ficam no padrão.
-2. [ ] **Celebração ao concluir**: o efeito ao fechar uma aula ou projeto
-   (confete, estrelas, fogos, chuva de código), respeitando o movimento
-   reduzido.
+2. [x] **Celebração ao concluir**: o efeito ao fechar uma aula ou projeto.
+   Feito assim: quatro à venda (Estrelas, Bolhas, Chuva de código, Fogos) e
+   o confete de todo mundo. Cada uma é uma lista de disparos do
+   `canvas-confetti` (`disparosDe`, puro e testado: o projeto é sempre mais
+   forte que a aula, nenhuma é o confete com outro nome, as bolhas sobem, os
+   fogos estouram em sequência, a chuva de código cai com caracteres de
+   verdade). **Nenhuma toca para quem pediu menos movimento — a comprada
+   inclusive**, nem nos disparos atrasados; a loja diz isso no lugar de tocar
+   escondido. A prévia toca no clique de quem pediu, não ao montar.
 3. [ ] **Ícone da sequência**: a chama, ou outro (raio, foguete, café, planta
    que cresce), onde a sequência aparece.
 4. [ ] **Adesivos no perfil**: até três, escolhidos no inventário, no
