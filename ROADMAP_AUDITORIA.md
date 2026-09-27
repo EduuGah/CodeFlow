@@ -233,10 +233,15 @@ validadas por uma função `equipar(p_categoria, p_item)` que confere posse
    Inventário com "Sem moldura"/"Sem fundo"; a leitura do perfil tolera banco
    sem a 0011. De carona: as migrações perderam o cifrão dentro de texto
    (o editor do Supabase se confunde), com teste.
-6. **Temas novos** como pares de tokens (`data-accent`) com o teste de
+6. [x] **Temas novos** como pares de tokens (`data-accent`) com o teste de
    contraste cobrindo cada um nas duas variantes: leituras próprias de "escuro
    de editor", "Drácula", "Nord", "Tokyo Night", "Solarized", "Matrix" — nomes
    próprios se a paleta lembrar demais a original.
+   Feito assim (0011): Grafite (cinza-azulado), Meia-noite (índigo) e
+   Crepúsculo (rosa) — nomes e paletas próprios, geradas da Floresta em
+   OKLCH (mesma luminosidade por degrau, outro matiz). Verde, âmbar e
+   vermelho ficaram de fora de propósito: são sucesso, "ainda não" e erro.
+   O teste de contraste itera `ACENTOS` (as sete × os dois modos).
 7. **Badges e títulos**: "Caçador de Bugs" (conquista de 100 `find-bug`), "Mestre
    dos Loops", "Full Stack Apprentice" (trilhas da etapa 5)… Título aparece
    ao lado do nome (`Carlos — Caçador de Bugs`).

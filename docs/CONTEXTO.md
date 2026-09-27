@@ -41,7 +41,7 @@ Números lidos do catálogo, não de memória.
 | Projetos | 10, com 34 critérios de aceitação — os 3 capstones são página + API + banco (motor 7), os outros 7 são JavaScript puro |
 | Conceitos | 151, com grafo de pré-requisitos |
 | Flashcards | 67 (93 conceitos ainda sem cartão) |
-| Testes | 3.474 de unidade + ~454 de navegador |
+| Testes | 3.607 de unidade + ~456 de navegador |
 | Pacote | 3.095 kB (851 kB comprimido) no chunk principal — o corpo das aulas vai junto (é quase metade), e separá-lo é o maior problema de performance aberto (P2-1b do roadmap). Aula, revisão, refazer erros, projeto e admin são rotas sob demanda (`App.tsx`), e o Zod só entra no chunk do admin; o Monaco são mais 3.362 kB (869 kB) num chunk à parte, baixado só quando o primeiro editor monta, e o worker de TypeScript (7 MB) só quando um modelo JS/TS abre. O motor de TypeScript não acrescentou arquivo; o de React acrescentou um chunk de 143 kB (47 kB) com o React e o ReactDOM como texto, baixado só por um exercício de React; o de SQL acrescentou o worker (49 kB) e o SQLite em WebAssembly (658 kB), baixados só por um exercício de SQL; o de Python acrescentou o worker (~22 kB) e o Pyodide inteiro (~13,5 MB: o WebAssembly do CPython, a biblioteca padrão zipada, o manifesto de pacotes), copiados para `/pyodide/` na build e baixados só por um exercício de Python |
 
 ## 4. Decisões que não devem ser desfeitas sem motivo forte
@@ -99,7 +99,8 @@ nível *n* é `75·n·(n−1)`, e os títulos marcam faixas (Explorador… Mestr
 
 **Tema e cor de destaque são variáveis de CSS, não classes.** Todo token de
 cor do `@theme inline` aponta para uma variável em `:root`; o modo escuro e as
-quatro cores de destaque (Floresta, Oceano, Brasa, Ameixa) só redefinem as
+sete cores de destaque (Floresta, Oceano, Brasa, Ameixa e, da Loja 2.0,
+Grafite, Meia-noite, Crepúsculo) só redefinem as
 variáveis conforme `data-theme` e `data-accent` no `<html>`. Os papéis da
 escala da marca se mantêm entre os modos (50/100 fundo, 600 preenchimento com
 texto branco, 700 texto sobre fundo claro, e `brand-hover` para o hover da
@@ -432,7 +433,7 @@ docs/curriculo.md       Roadmap de conteúdo — fonte canônica
 ```bash
 npm run typecheck   # inclui e2e/ e playwright.config.ts
 npm run lint        # ESLint mínimo: typescript-eslint + react-hooks
-npm test            # 3.474 testes
+npm test            # 3.607 testes
 npm run test:e2e    # ~410 no navegador (antes: npx playwright install chromium;
                     # com um Chromium já instalado: PW_CHROMIUM=/caminho/do/chrome)
 npm run build
@@ -758,6 +759,13 @@ Cada uma custou tempo. Não repita.
   leitura nova com `.eq`/`.not` recebe o histórico inteiro, e a tela parece
   certa pelo motivo errado. A leitura do caderno ganhou os dois filtros dela
   em `fixtures.ts`; uma leitura filtrada nova precisa do mesmo.
+- **Uma cor de destaque nova nasce da Floresta, não do olho.** As três da
+  Loja 2.0 foram geradas mantendo a luminosidade OKLCH de cada degrau da
+  Floresta e trocando o matiz (e a saturação) — o contraste vem junto, e o
+  teste de contraste, que agora itera `ACENTOS`, confirma nos dois modos. Os
+  matizes livres são poucos: verde é sucesso, âmbar é "ainda não", vermelho é
+  erro; por isso não há cor "Terminal" verde. O teste também exige os dois
+  blocos da cor no CSS — sem eles a variante cairia na Floresta e passaria.
 - **O SQL Editor do Supabase também se confunde com cifrão dentro de texto**
   no corpo de uma função (`'…{0,99}$'` numa regex): ele o lê como começo de um
   bloco `$$`. Âncora de fim se escreve como "nada fora do conjunto"

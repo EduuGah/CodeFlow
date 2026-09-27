@@ -27,6 +27,9 @@ export const ACENTOS: Array<{ id: Acento; title: string; description: string; am
   { id: 'oceano', title: 'Oceano', description: 'Azul-profundo.', amostra: '#1f5a92', item: 'tema-oceano' },
   { id: 'brasa', title: 'Brasa', description: 'Laranja-queimado.', amostra: '#a1461a', item: 'tema-brasa' },
   { id: 'ameixa', title: 'Ameixa', description: 'Roxo-ameixa.', amostra: '#643876', item: 'tema-ameixa' },
+  { id: 'grafite', title: 'Grafite', description: 'Cinza-azulado, sóbrio.', amostra: '#4e5b6b', item: 'tema-grafite' },
+  { id: 'meia-noite', title: 'Meia-noite', description: 'Índigo profundo.', amostra: '#4e4e9d', item: 'tema-meia-noite' },
+  { id: 'crepusculo', title: 'Crepúsculo', description: 'Rosa de fim de tarde.', amostra: '#8b3859', item: 'tema-crepusculo' },
 ];
 
 export function ehTema(valor: unknown): valor is Tema {

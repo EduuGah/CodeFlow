@@ -291,6 +291,12 @@ select verificacao.ok(
   (select count(*) from public.store_items where tipo in ('moldura', 'fundo')) = 9,
   'o catálogo tem as molduras e os fundos'
 );
+update public.users set accent = 'meia-noite' where id = auth.uid();
+select verificacao.ok((select accent = 'meia-noite' from public.users where id = auth.uid()), 'cor nova aceita no perfil');
+select verificacao.recusa(
+  $$update public.users set accent = 'arco-iris' where id = auth.uid()$$,
+  'users_accent_check', 'cor que não existe'
+);
 
 -- ------------------------------------------------------------ foto
 insert into storage.objects (bucket_id, name) values ('avatars', '00000000-0000-4000-8000-00000000000d/foto.jpg');

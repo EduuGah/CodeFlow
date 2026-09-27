@@ -64,7 +64,8 @@ para refazer em 3, 7 e 21 dias), XP e níveis sem teto,
 sequência de dias com congelamento, moedas e loja (dobro de XP, temas,
 avatares), desafios do dia e da semana, 67 conquistas (com um destaque para
 as mais perto de fechar, e trilhas/etapas numa parede compacta de emblemas),
-perfil com nome e foto, modo escuro e quatro cores de destaque, avisos de
+perfil com nome e foto, modo escuro e sete cores de destaque, molduras e
+capas de perfil, inventário e histórico de compras, avisos de
 novidade ao voltar — tudo **derivado do histórico**, nada é contador.
 
 ## Rodando o projeto
@@ -133,7 +134,7 @@ Redirect URLs.
 
 ```bash
 npm run typecheck   # tipos, incluindo os testes de navegador
-npm test            # 3.474 testes de unidade, propriedade e componente (Vitest)
+npm test            # 3.607 testes de unidade, propriedade e componente (Vitest)
 npm run test:e2e    # 408 testes de navegador (Playwright, Chromium, celular e desktop)
 ```
 

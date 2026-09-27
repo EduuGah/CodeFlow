@@ -325,3 +325,29 @@ test('moldura e fundo comprados se equipam no inventário e aparecem no perfil',
   await expect(page.getByRole('status').filter({ hasText: 'Moldura tirada.' })).toBeVisible();
   expect(banco.perfil.moldura).toBeNull();
 });
+
+test('uma cor nova comprada se aplica de verdade: o token da marca muda no navegador', async ({
+  logado: page,
+  banco,
+}) => {
+  banco.purchases = [{ item: 'tema-crepusculo', price: 220, created_at: new Date().toISOString() }];
+  await page.goto('/app/perfil/aparencia');
+  await esperarConteudo(page);
+
+  const crepusculo = page.getByRole('button', { name: /Crepúsculo/ });
+  await expect(crepusculo).toBeEnabled();
+  await crepusculo.click();
+  await expect(page.locator('html')).toHaveAttribute('data-accent', 'crepusculo');
+  expect(banco.perfil.accent).toBe('crepusculo');
+
+  // O que a pessoa vê é o token resolvido, não o atributo.
+  const { ACENTOS } = await import('../src/client/lib/tema');
+  const amostra = ACENTOS.find((a) => a.id === 'crepusculo')!.amostra;
+  const preenchimento = await page.evaluate(() =>
+    getComputedStyle(document.documentElement).getPropertyValue('--cf-brand-600').trim()
+  );
+  expect(preenchimento.toLowerCase()).toBe(amostra.toLowerCase());
+
+  // As que não são dela continuam trancadas, dizendo o que abre.
+  await expect(page.getByRole('button', { name: /Meia-noite/ })).toBeDisabled();
+});

@@ -45,7 +45,7 @@ export interface MudancasDoPerfil {
   moldura: string | null;
   fundo: string | null;
 }
-export type Acento = 'floresta' | 'oceano' | 'brasa' | 'ameixa';
+export type Acento = 'floresta' | 'oceano' | 'brasa' | 'ameixa' | 'grafite' | 'meia-noite' | 'crepusculo';
 
 export interface Perfil {
   /** O nome que a pessoa escolheu; `null` cai no nome do Google. */

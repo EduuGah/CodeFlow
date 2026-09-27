@@ -1,4 +1,5 @@
--- Loja 2.0: molduras e fundos (categorias novas) e o que o perfil guarda deles.
+-- Loja 2.0: molduras e fundos (categorias novas), três cores de destaque
+-- novas, e o que o perfil guarda de tudo isso.
 --
 -- A compra continua sendo só a `comprar_item` da 0009: ela lê o preço de
 -- `store_items`, recusa cosmético repetido e o gasto acima do teto. O que
@@ -31,12 +32,21 @@ insert into public.store_items (id, price, tipo) values
   ('fundo-grade', 100, 'fundo'),
   ('fundo-circuito', 150, 'fundo'),
   ('fundo-por-do-sol', 180, 'fundo'),
-  ('fundo-aurora', 220, 'fundo')
+  ('fundo-aurora', 220, 'fundo'),
+  ('tema-grafite', 130, 'tema'),
+  ('tema-meia-noite', 170, 'tema'),
+  ('tema-crepusculo', 220, 'tema')
 on conflict (id) do update
   set price = excluded.price,
       tipo = excluded.tipo;
 
 -- ------------------------------------------------------------ perfil
+
+-- As cores de destaque que o perfil aceita: as quatro da 0007 e as três
+-- novas (`src/client/lib/tema.ts`).
+alter table public.users drop constraint if exists users_accent_check;
+alter table public.users add constraint users_accent_check
+  check (accent in ('floresta', 'oceano', 'brasa', 'ameixa', 'grafite', 'meia-noite', 'crepusculo'));
 
 -- O id curto do que está equipado (`neon`, `aurora`), ou nulo.
 alter table public.users add column if not exists moldura text;

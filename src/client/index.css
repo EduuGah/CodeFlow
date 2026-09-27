@@ -211,6 +211,46 @@
   --cf-brand-hover: #4f2c5d;
 }
 
+/* Grafite: cinza-azulado, sóbrio. A mesma luminosidade de cada degrau da
+   Floresta (em OKLCH), com o matiz trocado — o contraste vem junto. */
+:root[data-accent="grafite"] {
+  --cf-brand-50: #f2f4f7;
+  --cf-brand-100: #dee3ea;
+  --cf-brand-200: #bfc8d4;
+  --cf-brand-400: #7a8ba2;
+  --cf-brand-500: #637286;
+  --cf-brand-600: #4e5b6b;
+  --cf-brand-700: #3d4855;
+  --cf-brand-900: #242a33;
+  --cf-brand-hover: #3d4855;
+}
+
+/* Meia-noite: índigo. Entre o azul do Oceano e o roxo da Ameixa. */
+:root[data-accent="meia-noite"] {
+  --cf-brand-50: #f2f3ff;
+  --cf-brand-100: #dde1fe;
+  --cf-brand-200: #bcc2fb;
+  --cf-brand-400: #797be7;
+  --cf-brand-500: #6263c3;
+  --cf-brand-600: #4e4e9d;
+  --cf-brand-700: #3d3e7e;
+  --cf-brand-900: #23244c;
+  --cf-brand-hover: #3d3e7e;
+}
+
+/* Crepúsculo: rosa. Longe do laranja da Brasa e do vermelho de erro. */
+:root[data-accent="crepusculo"] {
+  --cf-brand-50: #fdf0f4;
+  --cf-brand-100: #fad9e3;
+  --cf-brand-200: #f1b3c7;
+  --cf-brand-400: #cf5e89;
+  --cf-brand-500: #ad4970;
+  --cf-brand-600: #8b3859;
+  --cf-brand-700: #702c46;
+  --cf-brand-900: #431929;
+  --cf-brand-hover: #702c46;
+}
+
 /* Modo escuro: pedra escura, levemente esverdeada como o `ink` do claro. O
    texto não é branco puro, e as superfícies sobem de tom em vez de descer. */
 :root[data-theme="escuro"] {
@@ -287,6 +327,42 @@
   --cf-brand-700: #d9b4e6;
   --cf-brand-900: #e6d4ec;
   --cf-brand-hover: #6a3d7d;
+}
+
+:root[data-theme="escuro"][data-accent="grafite"] {
+  --cf-brand-50: #262b32;
+  --cf-brand-100: #323942;
+  --cf-brand-200: #495360;
+  --cf-brand-400: #8ea1bb;
+  --cf-brand-500: #7a8ba2;
+  --cf-brand-600: #4e5b6b;
+  --cf-brand-700: #b7c5d8;
+  --cf-brand-900: #dee3ea;
+  --cf-brand-hover: #637286;
+}
+
+:root[data-theme="escuro"][data-accent="meia-noite"] {
+  --cf-brand-50: #252747;
+  --cf-brand-100: #31335d;
+  --cf-brand-200: #484b87;
+  --cf-brand-400: #8e92fd;
+  --cf-brand-500: #797be7;
+  --cf-brand-600: #4e4e9d;
+  --cf-brand-700: #b8befc;
+  --cf-brand-900: #dde1fe;
+  --cf-brand-hover: #6263c3;
+}
+
+:root[data-theme="escuro"][data-accent="crepusculo"] {
+  --cf-brand-50: #401e2a;
+  --cf-brand-100: #542738;
+  --cf-brand-200: #7a3a52;
+  --cf-brand-400: #ec6f9f;
+  --cf-brand-500: #cf5e89;
+  --cf-brand-600: #8b3859;
+  --cf-brand-700: #fda6c3;
+  --cf-brand-900: #fad9e3;
+  --cf-brand-hover: #ad4970;
 }
 
 @layer base {

@@ -117,6 +117,33 @@ export const ITENS: ItemDaLoja[] = [
     raridade: 'incomum',
     nivelQueLibera: 8,
   },
+  {
+    id: 'tema-grafite',
+    title: 'Tema Grafite',
+    description: 'A cor de destaque em cinza-azulado, sóbria como um editor à noite.',
+    price: 130,
+    tipo: 'tema',
+    raridade: 'comum',
+    nivelQueLibera: 4,
+  },
+  {
+    id: 'tema-meia-noite',
+    title: 'Tema Meia-noite',
+    description: 'A cor de destaque em índigo profundo.',
+    price: 170,
+    tipo: 'tema',
+    raridade: 'incomum',
+    nivelQueLibera: 7,
+  },
+  {
+    id: 'tema-crepusculo',
+    title: 'Tema Crepúsculo',
+    description: 'A cor de destaque em rosa de fim de tarde.',
+    price: 220,
+    tipo: 'tema',
+    raridade: 'raro',
+    nivelQueLibera: 10,
+  },
   // Os avatares que não vêm de graça, do mais barato ao mais raro. O nível
   // que abre cada um sobe junto com o preço: quem estuda chega neles de
   // qualquer jeito; as moedas só encurtam a espera.

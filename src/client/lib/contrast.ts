@@ -1,3 +1,5 @@
+import type { Acento } from './perfil';
+
 /**
  * Contraste segundo a WCAG 2.1.
  *
@@ -94,7 +96,7 @@ export function contrastOfHex(frente: string, fundo: string): number {
  */
 export interface VarianteDeTema {
   tema?: 'claro' | 'escuro';
-  acento?: 'floresta' | 'oceano' | 'brasa' | 'ameixa';
+  acento?: Acento;
 }
 
 /** As declarações `--cf-x: #hex` de um bloco `seletor { … }`. */

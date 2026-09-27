@@ -12,6 +12,7 @@ import {
   relativeLuminance,
   type VarianteDeTema,
 } from './contrast';
+import { ACENTOS } from './tema';
 import { CORES_DAS_TRILHAS } from './cores-das-trilhas';
 
 /**
@@ -31,13 +32,14 @@ const css = readFileSync(new URL('../index.css', import.meta.url), 'utf8');
 const cor = extractColorTokens(css);
 
 /**
- * As oito variantes: dois modos vezes quatro cores de destaque. Todo par de
- * texto é conferido em todas — o modo escuro é onde um token de texto claro
- * usado como fundo passa despercebido no claro e quebra no escuro.
+ * As variantes: dois modos vezes cada cor de destaque de `ACENTOS` — uma cor
+ * nova entra aqui sozinha. Todo par de texto é conferido em todas — o modo
+ * escuro é onde um token de texto claro usado como fundo passa despercebido
+ * no claro e quebra no escuro.
  */
 const VARIANTES: Array<[string, VarianteDeTema]> = [];
 for (const tema of ['claro', 'escuro'] as const) {
-  for (const acento of ['floresta', 'oceano', 'brasa', 'ameixa'] as const) {
+  for (const { id: acento } of ACENTOS) {
     VARIANTES.push([`${tema} · ${acento}`, { tema, acento }]);
   }
 }
@@ -81,6 +83,22 @@ describe('a matemática do contraste', () => {
 });
 
 describe('os tokens existem', () => {
+  it.each(ACENTOS.filter((a) => a.id !== 'floresta').map((a) => a.id))(
+    'a cor %s tem os dois blocos, o claro e o escuro',
+    (acento) => {
+      // Sem o bloco, a variante cai na Floresta e o teste de contraste
+      // aprovaria a cor errada.
+      expect(css).toContain(`:root[data-accent="${acento}"] {`);
+      expect(css).toContain(`:root[data-theme="escuro"][data-accent="${acento}"] {`);
+    }
+  );
+
+  it('a amostra de cada cor é o preenchimento dela no modo claro', () => {
+    for (const a of ACENTOS) {
+      expect(a.amostra.toLowerCase(), a.id).toBe(token('brand-600', extractColorTokens(css, { acento: a.id })).toLowerCase());
+    }
+  });
+
   it('index.css declara a paleta esperada', () => {
     for (const nome of [
       'canvas',
