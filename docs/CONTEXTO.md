@@ -41,7 +41,7 @@ Números lidos do catálogo, não de memória.
 | Projetos | 10, com 34 critérios de aceitação — os 3 capstones são página + API + banco (motor 7), os outros 7 são JavaScript puro |
 | Conceitos | 151, com grafo de pré-requisitos |
 | Flashcards | 67 (93 conceitos ainda sem cartão) |
-| Testes | 3.894 de unidade + ~498 de navegador |
+| Testes | 3.898 de unidade + ~498 de navegador |
 | Pacote | 3.095 kB (851 kB comprimido) no chunk principal — o corpo das aulas vai junto (é quase metade), e separá-lo é o maior problema de performance aberto (P2-1b do roadmap). Aula, revisão, refazer erros, projeto e admin são rotas sob demanda (`App.tsx`), e o Zod só entra no chunk do admin; o Monaco são mais 3.362 kB (869 kB) num chunk à parte, baixado só quando o primeiro editor monta, e o worker de TypeScript (7 MB) só quando um modelo JS/TS abre. O motor de TypeScript não acrescentou arquivo; o de React acrescentou um chunk de 143 kB (47 kB) com o React e o ReactDOM como texto, baixado só por um exercício de React; o de SQL acrescentou o worker (49 kB) e o SQLite em WebAssembly (658 kB), baixados só por um exercício de SQL; o de Python acrescentou o worker (~22 kB) e o Pyodide inteiro (~13,5 MB: o WebAssembly do CPython, a biblioteca padrão zipada, o manifesto de pacotes), copiados para `/pyodide/` na build e baixados só por um exercício de Python |
 
 ## 4. Decisões que não devem ser desfeitas sem motivo forte
@@ -333,7 +333,14 @@ src/content/            Aulas, exercícios, projetos, conceitos, flashcards
   bancos/               Os bancos de exemplo da trilha de SQL (`loja`): o SQL
                         que cria, e a descrição que o aluno lê
   schema.ts             Espelhos Zod; valida na carga e falha alto em DEV
-  index.ts              Única fronteira de leitura do conteúdo
+  index.ts              Única fronteira de leitura do conteúdo para as telas
+  catalogo.ts           O catálogo inteiro (todas as aulas com o corpo), a
+                        validação e as consultas sobre ele — o que testes,
+                        E2E e o gerador do índice usam
+  indice.gerado.ts      GERADO (`npm run indice`): trilhas à parte, o resumo
+                        de cada aula, exercício e projeto, e o `import()` do
+                        corpo de cada um; `indice.test.ts` confere contra o
+                        catálogo. `montar-indice.ts` é o gerador
   content.test.ts       Integridade: 1.082 checagens sobre o catálogo
   lessons/              Uma aula por arquivo
   tracks/               A ORDEM da trilha vive aqui, não nos arquivos de aula
@@ -538,10 +545,12 @@ docs/curriculo.md       Roadmap de conteúdo — fonte canônica
 ```bash
 npm run typecheck   # inclui e2e/ e playwright.config.ts
 npm run lint        # ESLint mínimo: typescript-eslint + react-hooks
-npm test            # 3.894 testes
-npm run test:e2e    # ~484 no navegador (antes: npx playwright install chromium;
+npm test            # 3.898 testes
+npm run test:e2e    # ~498 no navegador (antes: npx playwright install chromium;
                     # com um Chromium já instalado: PW_CHROMIUM=/caminho/do/chrome)
 npm run build
+npm run indice      # depois de mudar qualquer aula ou projeto: regera
+                    # src/content/indice.gerado.ts (o teste do índice cobra)
 
 # As migrações num Postgres de verdade: um banco novo, o mínimo do Supabase,
 # 0001→última aplicadas duas vezes, e a verificação de comportamento.

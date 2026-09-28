@@ -11,7 +11,8 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "indice": "tsx scripts/gerar-indice.ts"
   },
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",

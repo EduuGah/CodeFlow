@@ -545,3 +545,23 @@ export interface Track {
   sections?: TrackSection[];
   status: ContentStatus;
 }
+
+// ------------------------------------------------------------- o índice
+
+/**
+ * A aula sem o corpo: o que o índice (`indice.gerado.ts`) guarda e o pacote
+ * principal carrega. Sem `blocks`, e só isso — então a aula inteira serve em
+ * qualquer lugar que pede o resumo.
+ */
+export type ResumoDaAula = Omit<Lesson, 'blocks'>;
+
+/** O que o pacote principal sabe de um exercício sem abrir a aula. */
+export interface ResumoDeExercicio {
+  id: string;
+  type: Exercise['type'];
+  concepts: string[];
+  lessonId: string;
+}
+
+/** O projeto sem o enunciado, o código e os critérios. */
+export type ResumoDoProjeto = Omit<Project, 'brief' | 'initialCode' | 'checkpoints' | 'referenceSolution' | 'servidor'>;
