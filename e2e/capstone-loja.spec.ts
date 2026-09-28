@@ -1,4 +1,4 @@
-import { getProject } from '../src/content';
+import { getProject } from '../src/content/catalogo';
 import { escreverNoEditor, expect, test } from './fixtures';
 
 /**

@@ -1,9 +1,10 @@
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 
-import { getLesson, getLessonAfter, getLessonsOfTrack, listTracks } from '../../content';
+import { aulaCarregada, carregarAula } from '../../content';
+import { getLesson, getLessonAfter, getLessonsOfTrack, listTracks } from '../../content/catalogo';
 import { buildLessonSteps } from '../lib/lesson-steps';
 import { Lesson } from './Lesson';
 import { irAtePasso } from './aula.test-utils';
@@ -90,6 +91,9 @@ describe('trocar de aula', () => {
     const user = userEvent.setup();
     const { atual, proxima, passosDaAtual } = parQueEncolhe();
 
+    // Só a aula atual chega antes: a seguinte a própria tela pede ao abrir
+    // esta (P2-1b), e é isso que deixa o "Próxima aula" abrir sem esqueleto.
+    await carregarAula(atual);
     abrir(atual);
 
     // Até o último passo da aula atual, onde mora o link para a próxima.
@@ -107,6 +111,7 @@ describe('trocar de aula', () => {
     const user = userEvent.setup();
     const { atual, proxima, passosDaAtual } = parQueEncolhe();
 
+    await carregarAula(atual);
     abrir(atual);
     await irAtePasso(user, buildLessonSteps(getLesson(atual)!), passosDaAtual - 1);
     await user.click(screen.getByRole('link', { name: /Próxima aula/ }));
@@ -118,6 +123,20 @@ describe('trocar de aula', () => {
         screen.getByLabelText(`0 de ${exercicios.length} exercícios resolvidos`)
       ).toBeInTheDocument();
     }
+  });
+});
+
+describe('a aula seguinte chega antes do clique', () => {
+  it('abrir uma aula já pede o corpo da seguinte', async () => {
+    // Outra trilha que a dos testes acima, que já abriram as aulas deles.
+    const [atual, seguinte] = getLessonsOfTrack(listTracks()[listTracks().length - 1].id);
+    expect(aulaCarregada(seguinte.id), 'ninguém pediu a seguinte ainda').toBeUndefined();
+
+    await carregarAula(atual.id);
+    abrir(atual.id);
+
+    // Sem isto, "Próxima aula" mostraria o esqueleto enquanto o arquivo baixa.
+    await waitFor(() => expect(aulaCarregada(seguinte.id)).toBeDefined());
   });
 });
 

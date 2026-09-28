@@ -154,7 +154,7 @@ test('o elemento focado tem indicador visível', async ({ logado: page }) => {
 
 test('a aula inteira se percorre sem mouse', async ({ logado: page }) => {
   test.setTimeout(150_000);
-  const { getLesson } = await import('../src/content');
+  const { getLesson } = await import('../src/content/catalogo');
   const { buildLessonSteps } = await import('../src/client/lib/lesson-steps');
   const aula = getLesson(AULA)!;
   const passos = buildLessonSteps(aula);

@@ -1,4 +1,4 @@
-import { getLesson, getLessonsOfTrack } from '../src/content';
+import { getLesson, getLessonsOfTrack } from '../src/content/catalogo';
 import { buildLessonSteps } from '../src/client/lib/lesson-steps';
 import { concluirAula, expect, irAteOEditor, test } from './fixtures';
 

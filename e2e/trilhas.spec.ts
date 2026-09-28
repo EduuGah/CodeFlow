@@ -1,4 +1,4 @@
-import { listProjects, listTracks } from '../src/content';
+import { listProjects, listTracks } from '../src/content/catalogo';
 import { ETAPAS_DO_PERCURSO } from '../src/content/percurso';
 import { expect, test } from './fixtures';
 

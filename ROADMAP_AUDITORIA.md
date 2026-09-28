@@ -98,9 +98,19 @@ A fazer, nesta ordem:
 
 1. [x] **P2-1a** `React.lazy` para `Lesson`/`ProjectWorkspace`/`Review`/admin,
    o chunk da aula adiantado no ócio: 972 → 847 kB gzip, com o item 7.
-2. **P2-1b** índice × corpo do catálogo: `content/indice.ts` (ids, títulos,
-   ordem, exercícios, conceitos — gerado ou derivado) no chunk principal;
-   corpo de cada trilha por `import()`. Meta: chunk principal < 400 kB gz.
+2. [x] **P2-1b** índice × corpo do catálogo. Meta: chunk principal < 400 kB
+   gz. **3.095 → 999 kB (851 → 280 kB gzip, −67%).** Feito assim:
+   `content/indice.gerado.ts`, gerado por `npm run indice` a partir do
+   catálogo e conferido por `indice.test.ts` (texto com texto: esquecer de
+   regerar reprova), tem o resumo de cada aula, exercício e projeto e o
+   `import()` do corpo de cada um; `content/index.ts` só lê o índice, e
+   `catalogo.ts` (o de antes) ficou para testes, E2E, admin e o gerador.
+   Um arquivo **por aula**, não por trilha como estava planejado: a mediana
+   é 5 kB comprimida, e abrir uma aula não deve custar as outras 25 da
+   trilha. O "Próxima aula" não espera porque a tela pede a seguinte ao
+   abrir; voltar a uma aula já aberta não pisca o esqueleto; o arquivo que
+   não chega (rede, deploy novo) mostra "tentar de novo" e vai ao registro
+   de eventos só com o nome do erro.
 3. **Orçamento de pacote no CI** para a meta não escorregar.
 4. [x] **P2-2** índice por dia nos desafios (1,5 s → 22 ms com um ano de
    histórico) e calculados uma vez só por recálculo do painel.

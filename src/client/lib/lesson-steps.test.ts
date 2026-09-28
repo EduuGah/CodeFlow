@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { getLesson } from '../../content';
+import { getLesson } from '../../content/catalogo';
 import type { Exercise, Lesson, LessonBlock } from '../../content/types';
 import { buildLessonSteps, countInteractiveSteps } from './lesson-steps';
 

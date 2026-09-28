@@ -1,9 +1,10 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { getLesson } from '../../content';
+import { carregarAula } from '../../content';
+import { getLesson } from '../../content/catalogo';
 import { buildLessonSteps } from '../lib/lesson-steps';
 import { Lesson } from './Lesson';
 import { botaoDeAvanco, irAtePasso as andarAte } from './aula.test-utils';
@@ -61,6 +62,9 @@ vi.mock('../contexts/AuthContext', () => ({
 }));
 
 const AULA = 'lesson-js-1';
+
+// O corpo da aula vem por `import()` (P2-1b): já aqui, a tela abre pronta.
+beforeAll(() => carregarAula(AULA));
 const passos = buildLessonSteps(getLesson(AULA)!);
 const total = passos.length;
 

@@ -1,6 +1,6 @@
 import type { Page } from '@playwright/test';
 
-import { getLesson } from '../src/content';
+import { getLesson } from '../src/content/catalogo';
 import { buildLessonSteps } from '../src/client/lib/lesson-steps';
 import { AULA_CURTA, concluirAula, expect, irAteOEditor, passarPelaAula, test } from './fixtures';
 

@@ -563,5 +563,7 @@ export interface ResumoDeExercicio {
   lessonId: string;
 }
 
-/** O projeto sem o enunciado, o código e os critérios. */
-export type ResumoDoProjeto = Omit<Project, 'brief' | 'initialCode' | 'checkpoints' | 'referenceSolution' | 'servidor'>;
+/** O projeto sem o enunciado, o código e os critérios — só quantos critérios são. */
+export type ResumoDoProjeto = Omit<Project, 'brief' | 'initialCode' | 'checkpoints' | 'referenceSolution' | 'servidor'> & {
+  criterios: number;
+};

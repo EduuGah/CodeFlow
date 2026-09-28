@@ -17,23 +17,7 @@ import {
 
 import { concepts as allConcepts } from './concepts';
 import { flashcards as allFlashcards } from './flashcards';
-import { trackJsFundamentos } from './tracks/javascript';
-import { trackLogica } from './tracks/logica';
-import { trackWeb } from './tracks/web';
-import { trackPagina } from './tracks/pagina';
-import { trackTypescript } from './tracks/typescript';
-import { trackReact } from './tracks/react';
-import { trackSql } from './tracks/sql';
-import { trackNode } from './tracks/node';
-import { trackEngenharia } from './tracks/engenharia';
-import { trackProjeto } from './tracks/projeto';
-import { trackTestes } from './tracks/testes';
-import { trackGit } from './tracks/git';
-import { trackTerminal } from './tracks/terminal';
-import { trackPython } from './tracks/python';
-import { trackDeploy } from './tracks/deploy';
-import { trackEstruturas } from './tracks/estruturas';
-import { trackOrm } from './tracks/orm';
+import { TRILHA_PADRAO, TRILHAS } from './trilhas';
 import { lessonVariaveis } from './lessons/js-01-variaveis';
 import { lessonTiposEOperadores } from './lessons/js-02-tipos-e-operadores';
 import { lessonCondicoes } from './lessons/js-03-condicoes';
@@ -372,25 +356,7 @@ const projects: Project[] = [
   projetoCapstoneLoja,
   projetoCapstoneBlog,
 ];
-const tracks: Track[] = [
-  trackJsFundamentos,
-  trackLogica,
-  trackEstruturas,
-  trackGit,
-  trackWeb,
-  trackPagina,
-  trackTypescript,
-  trackReact,
-  trackSql,
-  trackNode,
-  trackOrm,
-  trackEngenharia,
-  trackTestes,
-  trackProjeto,
-  trackDeploy,
-  trackTerminal,
-  trackPython,
-];
+const tracks: readonly Track[] = TRILHAS;
 
 /**
  * Checagem de integridade referencial que o Zod sozinho não faz: schema garante
@@ -449,7 +415,7 @@ function checkReferences(): string[] {
 function validateAll(): string[] {
   const problems: string[] = [];
 
-  const run = (label: string, schema: { safeParse: (v: unknown) => { success: boolean; error?: unknown } }, items: unknown[]) => {
+  const run = (label: string, schema: { safeParse: (v: unknown) => { success: boolean; error?: unknown } }, items: readonly unknown[]) => {
     items.forEach((item, i) => {
       const result = schema.safeParse(item);
       if (!result.success) {
@@ -472,6 +438,10 @@ function validateAll(): string[] {
 // mais); validar de novo a cada carga custava CPU no celular e levava o Zod
 // inteiro — 239 kB antes de minificar — no pacote que a página pública baixa.
 //
+// Desde o P2-1b as telas do aluno leem o índice e não carregam este módulo:
+// em `npm run dev`, isto só roda quando o admin abre. Quem escreve uma aula
+// descobre o erro no `npm test` (`content.test.ts` e `indice.test.ts`).
+//
 // `typeof` primeiro: o E2E importa este módulo direto no Node do Playwright,
 // onde `import.meta.env` não existe. No build, o Vite troca
 // `import.meta.env.DEV` por `false` e o bloco inteiro some.
@@ -493,7 +463,7 @@ export const todosOsProjetos = (): readonly Project[] => projects;
 export const getTrack = (id: string): Track | undefined =>
   tracks.find((t) => t.id === id && isPublished(t));
 
-export const getDefaultTrack = (): Track => trackJsFundamentos;
+export const getDefaultTrack = (): Track => TRILHA_PADRAO;
 
 /** Todas as trilhas publicadas, na ordem em que devem aparecer ao aluno. */
 export const listTracks = (): Track[] => tracks.filter(isPublished);

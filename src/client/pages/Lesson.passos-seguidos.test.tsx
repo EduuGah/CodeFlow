@@ -1,9 +1,10 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeAll, describe, expect, it, vi } from 'vitest';
 
-import { getLesson } from '../../content';
+import { carregarAula } from '../../content';
+import { getLesson } from '../../content/catalogo';
 import { buildLessonSteps } from '../lib/lesson-steps';
 import { Lesson } from './Lesson';
 import { botaoDeAvanco, irAtePasso } from './aula.test-utils';
@@ -42,6 +43,9 @@ const ALUNO = { id: 'aluno-de-teste' };
 vi.mock('../contexts/AuthContext', () => ({ useAuth: () => ({ user: ALUNO }) }));
 
 const AULA = 'lesson-ts-2';
+
+// O corpo da aula vem por `import()` (P2-1b): já aqui, a tela abre pronta.
+beforeAll(() => carregarAula(AULA));
 const passos = buildLessonSteps(getLesson(AULA)!);
 
 /** O primeiro par de passos seguidos de múltipla escolha. Lança em vez de pular. */

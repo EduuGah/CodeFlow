@@ -1,9 +1,10 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeAll, describe, expect, it, vi } from 'vitest';
 
-import { listProjects } from '../../content';
+import { carregarProjeto } from '../../content';
+import { listProjects } from '../../content/catalogo';
 import { ProjectWorkspace } from './ProjectWorkspace';
 
 /**
@@ -30,6 +31,9 @@ vi.mock('../lib/sandbox', () => ({
 }));
 
 const projeto = listProjects()[0];
+
+// O corpo do projeto vem por `import()` (P2-1b): já aqui, a tela abre pronta.
+beforeAll(() => carregarProjeto(projeto.id));
 
 function abrir() {
   return render(

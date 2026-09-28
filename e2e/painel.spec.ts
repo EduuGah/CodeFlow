@@ -1,4 +1,4 @@
-import { getDefaultTrack, getLessonsOfTrack, listTracks } from '../src/content';
+import { getDefaultTrack, getLessonsOfTrack, listTracks } from '../src/content/catalogo';
 import { esperarConteudo, expect, test } from './fixtures';
 
 /**

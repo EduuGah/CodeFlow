@@ -444,7 +444,7 @@ function aulaAberta(page: Page): string {
  * respondê-lo.
  */
 export async function irAteOExercicio(page: Page, alvo: (e: Exercise) => boolean): Promise<void> {
-  const { getLesson } = await import('../src/content');
+  const { getLesson } = await import('../src/content/catalogo');
   const { buildLessonSteps } = await import('../src/client/lib/lesson-steps');
   const aula = getLesson(aulaAberta(page))!;
   const passos = buildLessonSteps(aula);
@@ -520,7 +520,7 @@ export async function responderErrado(page: Page, exercicio: Exercise): Promise<
 
 /** Passa pela aula aberta inteira sem resolver nada: responde errado e segue. */
 export async function passarPelaAula(page: Page): Promise<void> {
-  const { getLesson } = await import('../src/content');
+  const { getLesson } = await import('../src/content/catalogo');
   const { buildLessonSteps } = await import('../src/client/lib/lesson-steps');
   const passos = buildLessonSteps(getLesson(aulaAberta(page))!);
   await page.getByText(/Passo 1 de/).waitFor();
@@ -556,7 +556,7 @@ export const AULA_CURTA = 'lesson-js-11';
  * causa real.
  */
 export async function concluirAula(page: Page, aulaId: string): Promise<void> {
-  const { getLesson } = await import('../src/content');
+  const { getLesson } = await import('../src/content/catalogo');
   const { buildLessonSteps } = await import('../src/client/lib/lesson-steps');
 
   const aula = getLesson(aulaId)!;

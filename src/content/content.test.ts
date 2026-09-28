@@ -25,7 +25,7 @@ import {
   listProjects,
   listTracks,
   localizarExercicio,
-} from './index';
+} from './catalogo';
 import { preencher } from '../client/lib/fill-blank';
 import { NOME_DA_GUARDA, protegerLacos } from '../client/lib/protecao-de-laco';
 import { embaralhar, estaOrdenado } from '../client/lib/ordenar';

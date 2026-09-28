@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, Navigate, useParams } from 'react-router-dom';
 
 import { getProject, listProjects } from '../../content';
-import { LANGUAGE_LABELS, type TestCase } from '../../content/types';
+import { LANGUAGE_LABELS, type Project, type TestCase } from '../../content/types';
 import { useAuth } from '../contexts/AuthContext';
 import { useStudentDataOpcional } from '../contexts/StudentDataContext';
 import { fetchProgress, markProjectCompleted } from '../lib/progress';
@@ -12,11 +12,13 @@ import { SANDBOX_DO_IFRAME } from '../lib/pagina-core';
 import { montarCodigoDoServidor } from '../lib/servidor-core';
 import { CheckpointList, type CheckpointResult } from '../components/project/CheckpointList';
 import { Trocas } from '../components/lesson/ServerExerciseStep';
+import { useProjeto } from '../hooks/useConteudo';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { celebrar } from '../lib/celebrar';
 import { MarkdownReader } from '../components/ui/MarkdownReader';
 import { Button } from '../components/ui/Button';
 import { Card, SectionLabel } from '../components/ui/Card';
+import { ConteudoCarregando, ConteudoNaoCarregou } from '../components/ui/ConteudoSobDemanda';
 import { CodeEditor } from '../components/ui/CodeEditor';
 import { codigoDoErro, registrar } from '../lib/registro';
 import { Badge } from '../components/ui/Badge';
@@ -58,14 +60,26 @@ import {
 
 type Aba = 'enunciado' | 'codigo';
 
+/**
+ * O projeto pelo id da rota (o primeiro, se o id não existir), com o corpo —
+ * enunciado, código inicial, critérios — vindo sob demanda (P2-1b). A chave
+ * pelo id faz trocar de projeto começar do zero, como abrir a página de novo.
+ */
 export function ProjectWorkspace() {
   const { id } = useParams();
+  const resumo = (id ? getProject(id) : undefined) ?? listProjects()[0];
+  const carregamento = useProjeto(resumo.id);
+  useDocumentTitle(resumo.title);
+
+  if (carregamento.estado === 'carregando') return <ConteudoCarregando o="o projeto" />;
+  if (carregamento.estado === 'falhou') return <ConteudoNaoCarregou o="o projeto" onTentar={carregamento.tentarDeNovo} />;
+  if (carregamento.estado === 'ausente') return <Navigate to="/app/trilhas" replace />;
+  return <EspacoDoProjeto key={carregamento.valor.id} project={carregamento.valor} />;
+}
+
+function EspacoDoProjeto({ project }: { project: Project }) {
   const { user } = useAuth();
   const estiloDaCelebracao = useStudentDataOpcional()?.perfil.celebracao;
-
-  const project = (id ? getProject(id) : undefined) ?? listProjects()[0];
-
-  useDocumentTitle(project.title);
 
   const [aba, setAba] = useState<Aba>('enunciado');
   const [code, setCode] = useState(project.initialCode);

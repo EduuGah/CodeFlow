@@ -1,4 +1,4 @@
-import type { Concept, Lesson } from '../../content/types';
+import type { Concept, ResumoDaAula } from '../../content/types';
 import type { Attempt, ConceptMastery } from './mastery';
 
 /**
@@ -23,7 +23,7 @@ export type PathNodeState =
   | 'proxima';
 
 export interface PathNode {
-  lesson: Lesson;
+  lesson: ResumoDaAula;
   state: PathNodeState;
   /** Posição na trilha, começando em 1. */
   position: number;
@@ -53,7 +53,7 @@ const NIVEIS_FRACOS: ReadonlyArray<ConceptMastery['level']> = ['nao-iniciado', '
  * conceitos que a própria aula introduz — não são pré-requisito dela mesma.
  */
 function prerequisitosFracos(
-  lesson: Lesson,
+  lesson: ResumoDaAula,
   concepts: Concept[],
   mastery: Map<string, ConceptMastery>,
   ensinados: Set<string>
@@ -82,7 +82,7 @@ function prerequisitosFracos(
  * sequência e, portanto, qual é a etapa atual.
  */
 export function buildPath(
-  lessons: Lesson[],
+  lessons: ResumoDaAula[],
   completedLessonIds: string[],
   concepts: Concept[],
   mastery: ConceptMastery[],

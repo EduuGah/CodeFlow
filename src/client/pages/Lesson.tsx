@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
 
-import { getLesson, getLessonAfter } from '../../content';
+import { carregarAula, getLessonAfter } from '../../content';
 import { LANGUAGE_LABELS } from '../../content/types';
 import { useAuth } from '../contexts/AuthContext';
 import { useStudentDataOpcional } from '../contexts/StudentDataContext';
@@ -16,11 +16,13 @@ import {
 } from '../lib/exercise-state';
 import { celebrar } from '../lib/celebrar';
 import { corDaTrilha } from '../lib/cores-das-trilhas';
+import { useAula } from '../hooks/useConteudo';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { ExercicioDoPasso } from '../components/lesson/ExercicioDoPasso';
 import { LessonBlocks } from '../components/lesson/LessonBlocks';
 import { Button, buttonClasses } from '../components/ui/Button';
 import { Card, SectionLabel } from '../components/ui/Card';
+import { ConteudoCarregando, ConteudoNaoCarregou } from '../components/ui/ConteudoSobDemanda';
 import { MarkdownReader } from '../components/ui/MarkdownReader';
 import { IconArrowLeft, IconArrowRight, IconCheck, IconClose, IconCoin, IconTarget } from '../components/ui/Icon';
 import { EmblemaDaTrilha } from '../components/ui/Emblema';
@@ -67,7 +69,9 @@ export function Lesson() {
   const estiloDaCelebracao = useRef<string | null | undefined>(null);
   estiloDaCelebracao.current = useStudentDataOpcional()?.perfil.celebracao;
 
-  const lesson = id ? getLesson(id) : undefined;
+  // O corpo da aula vem sob demanda (P2-1b); o resto da página espera por ele.
+  const carregamento = useAula(id);
+  const lesson = carregamento.estado === 'pronto' ? carregamento.valor : undefined;
   const steps = useMemo(() => (lesson ? buildLessonSteps(lesson) : []), [lesson]);
 
   const exerciseIds = useMemo(
@@ -213,6 +217,14 @@ export function Lesson() {
       });
   }, []);
 
+  // A próxima aula baixa enquanto esta é estudada: "Próxima aula" abre sem
+  // esqueleto. Uma falha aqui não tem a quem ser dita — se o arquivo não vier,
+  // a aula seguinte mostra o erro e o "tentar de novo" quando abrir.
+  const proximaId = lessonId ? getLessonAfter(lessonId)?.id : undefined;
+  useEffect(() => {
+    if (proximaId) carregarAula(proximaId).catch(() => undefined);
+  }, [proximaId]);
+
   /**
    * Conclusão da aula: todos os exercícios resolvidos.
    *
@@ -234,6 +246,8 @@ export function Lesson() {
     salvar(userId, lessonId);
   }, [lessonId, tudoResolvido, jaConcluida, userId, progressoCarregado, salvar]);
 
+  if (carregamento.estado === 'carregando') return <ConteudoCarregando o="a aula" />;
+  if (carregamento.estado === 'falhou') return <ConteudoNaoCarregou o="a aula" onTentar={carregamento.tentarDeNovo} />;
   if (!lesson || steps.length === 0) {
     return <Navigate to="/app" replace />;
   }

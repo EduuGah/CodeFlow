@@ -1,4 +1,4 @@
-import { getLesson } from '../src/content';
+import { getLesson } from '../src/content/catalogo';
 import { esperarConteudo, expect, test, type BancoFalso } from './fixtures';
 
 /**

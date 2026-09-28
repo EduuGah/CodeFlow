@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { getLesson } from '../../content';
+import { getLesson } from '../../content/catalogo';
 import { buildLessonSteps } from '../lib/lesson-steps';
 import { Lesson } from './Lesson';
 import { botaoDeAvanco } from './aula.test-utils';

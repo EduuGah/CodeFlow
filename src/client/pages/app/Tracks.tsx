@@ -175,7 +175,7 @@ export function Tracks() {
                           {DIFFICULTY_LABELS[projeto.difficulty]} · {LANGUAGE_LABELS[projeto.language]} ·{' '}
                           {entregue
                             ? 'entregue'
-                            : `${projeto.checkpoints.length} critérios de aceitação`}
+                            : `${projeto.criterios} critérios de aceitação`}
                         </span>
                       </span>
 

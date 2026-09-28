@@ -1,4 +1,4 @@
-import { getExercises, getLessonsOfTrack, listProjects, listTracks } from '../../content';
+import { exerciciosDaAula, getLessonsOfTrack, listProjects, listTracks } from '../../content';
 import { ETAPAS_DO_PERCURSO } from '../../content/percurso';
 import type { Attempt } from './mastery';
 import type { FlashcardReview } from './review';
@@ -282,7 +282,7 @@ export function computeAchievements(
   const tipoDoExercicio = new Map<string, string>();
   for (const t of trilhas) {
     for (const licao of getLessonsOfTrack(t.id)) {
-      for (const exercicio of getExercises(licao)) tipoDoExercicio.set(exercicio.id, exercicio.type);
+      for (const exercicio of exerciciosDaAula(licao.id)) tipoDoExercicio.set(exercicio.id, exercicio.type);
     }
   }
   const tiposResolvidos = new Set([...exerciciosResolvidos].map((id) => tipoDoExercicio.get(id)));

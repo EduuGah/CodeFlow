@@ -1,6 +1,6 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 
-import { getExercises, getLessonsOfTrack, listConcepts, listFlashcards, listTracks, localizarExercicio } from '../../content';
+import { exerciciosDaAula, getLessonsOfTrack, listConcepts, listFlashcards, listTracks, resumoDoExercicio } from '../../content';
 import { useAuth } from './AuthContext';
 import { useTemaOpcional } from './TemaContext';
 import { fetchAttempts, fetchFlashcardReviews, fetchProgress } from '../lib/progress';
@@ -273,7 +273,7 @@ export function StudentDataProvider({ children }: { children: React.ReactNode })
     const conceptIds = listConcepts().map((c) => c.id);
     const todosExercicios = listTracks()
       .flatMap((t) => getLessonsOfTrack(t.id))
-      .flatMap((l) => getExercises(l))
+      .flatMap((l) => exerciciosDaAula(l.id))
       .map((e) => e.id);
 
     const entradaDeJogo = { attempts, completedLessons, completedProjects, reviews, purchases };
@@ -315,7 +315,7 @@ export function StudentDataProvider({ children }: { children: React.ReactNode })
       pendingExercises: unsolvedExerciseIds(todosExercicios, attempts),
       abandonedExercises: abandonedExerciseIds(attempts),
       // Exercício que saiu do catálogo não tem como ser mostrado nem refeito.
-      caderno: montarCaderno(attempts, DEPENDENTES()).filter((e) => localizarExercicio(e.exerciseId)),
+      caderno: montarCaderno(attempts, DEPENDENTES()).filter((e) => resumoDoExercicio(e.exerciseId)),
       totalExercises: todosExercicios.length,
       dueCards: dueCount(listFlashcards(), reviews),
       cards: countCards(listFlashcards(), reviews),

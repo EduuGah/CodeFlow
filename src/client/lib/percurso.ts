@@ -1,4 +1,4 @@
-import type { Concept, Lesson, Track } from '../../content/types';
+import type { Concept, ResumoDaAula, Track } from '../../content/types';
 import type { EtapaDoPercurso } from '../../content/percurso';
 import type { Attempt, ConceptMastery } from './mastery';
 import { buildPath, summarizePath, type PathNode, type PathSummary } from './path';
@@ -37,7 +37,7 @@ export interface EtapaMontada {
 export function montarPercurso(
   etapas: EtapaDoPercurso[],
   trackPorId: (id: string) => Track | undefined,
-  aulasDaTrilha: (trackId: string) => Lesson[],
+  aulasDaTrilha: (trackId: string) => ResumoDaAula[],
   completedLessonIds: string[],
   concepts: Concept[],
   mastery: ConceptMastery[],

@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
-import { getExercises, getLesson, getLessonsOfTrack, listProjects, listTracks } from '../../../content';
+// O catálogo inteiro, com o corpo de tudo: a auditoria precisa dele, e esta
+// rota já é um pedaço à parte — não pesa no pacote principal.
+import { getExercises, getLesson, getLessonsOfTrack, listProjects, listTracks } from '../../../content/catalogo';
 import { fetchExercisePerformance, fetchSaudeDaPlataforma } from '../../lib/progress';
 import {
   auditCatalog,

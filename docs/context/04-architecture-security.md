@@ -28,6 +28,12 @@
   validados por Zod em desenvolvimento e provados no CI — a solução de
   referência passa, o esqueleto não. As telas de administração **geram** o
   código para revisão em pull request; não escrevem no banco.
+- **O pacote principal leva o índice do conteúdo, não o conteúdo.** As telas
+  leem `src/content/index.ts`: o resumo de cada aula, exercício e projeto
+  (`indice.gerado.ts`, gerado do catálogo por `npm run indice` e conferido
+  por teste). O corpo de cada aula é um arquivo próprio, baixado por
+  `import()` quando ela abre. `content/catalogo.ts`, com tudo, é só de
+  testes, admin e do gerador.
 - **Quase nada é contador.** XP, nível, sequência, moedas, desafios, domínio
   e revisão são derivados do histórico append-only (`exercise_attempts`,
   `flashcard_reviews`, `purchases`). Não há saldo guardado para dessincronizar.

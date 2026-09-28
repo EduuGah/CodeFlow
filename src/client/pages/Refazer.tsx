@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 
-import { localizarExercicio } from '../../content';
+import { getExercises, resumoDoExercicio } from '../../content';
 import { useStudentData } from '../contexts/StudentDataContext';
 import { INTERVALOS_DO_CADERNO, sessaoDeRefazer, type EntradaDoCaderno } from '../lib/caderno';
 import { avancoLiberado, rotuloDeAvanco, type ExerciseState } from '../lib/exercise-state';
@@ -9,7 +9,9 @@ import { ExercicioDoPasso } from '../components/lesson/ExercicioDoPasso';
 import { Button, buttonClasses } from '../components/ui/Button';
 import { IconArrowRight, IconCheck, IconClose, IconSpinner } from '../components/ui/Icon';
 import { VinhetaAlvo } from '../components/ui/Ilustracao';
+import { ConteudoNaoCarregou } from '../components/ui/ConteudoSobDemanda';
 import { EmptyState } from '../components/ui/States';
+import { useAulas } from '../hooks/useConteudo';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 
 /**
@@ -37,7 +39,7 @@ export function Refazer() {
 
   useEffect(() => {
     if (loading || sessao !== null) return;
-    setSessao(sessaoDeRefazer(caderno, pedido, (id) => localizarExercicio(id) !== undefined));
+    setSessao(sessaoDeRefazer(caderno, pedido, (id) => resumoDoExercicio(id) !== undefined));
   }, [loading, sessao, caderno, pedido]);
 
   // O foco acompanha o exercício novo, como na aula: sem isto, quem navega por
@@ -46,7 +48,12 @@ export function Refazer() {
     if (indice > 0) conteudoRef.current?.focus();
   }, [indice]);
 
-  if (sessao === null) {
+  // O corpo das aulas da sessão, de uma vez (P2-1b): no máximo uma por exercício.
+  const aulas = useAulas((sessao ?? []).flatMap((e) => resumoDoExercicio(e.exerciseId)?.lessonId ?? []));
+
+  if (aulas.estado === 'falhou') return <ConteudoNaoCarregou o="a sessão" onTentar={aulas.tentarDeNovo} />;
+
+  if (sessao === null || aulas.estado === 'carregando') {
     return (
       <div className="flex min-h-screen items-center justify-center bg-canvas" role="status" aria-label="Carregando">
         <IconSpinner size={32} className="animate-spin text-ink-faint" />
@@ -56,7 +63,10 @@ export function Refazer() {
 
   const terminou = indice >= sessao.length;
   const atual = terminou ? undefined : sessao[indice];
-  const local = atual ? localizarExercicio(atual.exerciseId) : undefined;
+  const resumoAtual = atual ? resumoDoExercicio(atual.exerciseId) : undefined;
+  const aulaAtual = resumoAtual && aulas.estado === 'pronto' ? aulas.valor.get(resumoAtual.lessonId) : undefined;
+  const exercicioAtual = aulaAtual && getExercises(aulaAtual).find((e) => e.id === atual?.exerciseId);
+  const local = aulaAtual && exercicioAtual ? { lesson: aulaAtual, exercise: exercicioAtual } : undefined;
   const estadoAtual = atual ? estados.get(atual.exerciseId) : undefined;
   const acertos = sessao.filter((e) => estados.get(e.exerciseId) === 'acertou').length;
 

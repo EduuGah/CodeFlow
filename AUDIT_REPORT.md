@@ -184,7 +184,7 @@ Legenda de estado: **Corrigido** (com teste, nesta rodada), **Parcial**,
 | P1-8 | Renovação de token recarregava todos os dados e reembaralhava a revisão | Corrigido |
 | P1-9 | Sem limite de ritmo de escrita; sem validação de formato das tentativas | Corrigido (0009) |
 | P1-10 | O progresso é autoridade do navegador (tentativas e conclusões forjáveis) | Limitado (0021) — a correção segue no navegador, por desenho |
-| P2-1 | Pacote principal de 3,5 MB com o catálogo inteiro, até na página pública | Parcial |
+| P2-1 | Pacote principal de 3,5 MB com o catálogo inteiro, até na página pública | Corrigido (999 kB, 280 kB gzip) |
 | P2-2 | Derivações O(dias × tentativas) recalculadas a cada mudança de estado | Corrigido |
 | P2-3 | O histórico inteiro é baixado a cada entrada no aplicativo | Parcial |
 | P2-4 | Bloqueio de rede dos workers contornável pelo protótipo; código duplicado | Corrigido |
@@ -384,7 +384,7 @@ Legenda de estado: **Corrigido** (com teste, nesta rodada), **Parcial**,
 
 ### P2 — médio
 
-#### P2-1 · Pacote principal de 3,5 MB — Parcial
+#### P2-1 · Pacote principal de 3,5 MB — Corrigido
 - **Arquivo:** `src/content/index.ts` (importa as 154 aulas), `App.tsx` (sem
   divisão por rota)
 - **Por quê:** o conteúdo inteiro (3,2 MB de fonte) entra no chunk principal, que
@@ -399,10 +399,15 @@ Legenda de estado: **Corrigido** (com teste, nesta rodada), **Parcial**,
   validação do catálogo roda só em desenvolvimento (P3-8), e o `AppShell`
   adianta o chunk da aula quando a tela fica ociosa. **3.512 → 3.080 kB
   (972 → 847 kB gzip, −13%).**
-- **Falta:** separar o catálogo em **índice** (ids, títulos, ordem, ids de
-  exercícios e conceitos — o que as telas de orientação usam) e **corpo** de
-  aula por trilha, carregado por `import()` quando a aula abre. `content/index`
-  continua sendo a única fronteira; ganha uma variante assíncrona para o corpo.
+- **Depois (P2-1b):** o catálogo foi separado em **índice** e **corpo**. O
+  índice (`content/indice.gerado.ts`: o resumo de cada aula, exercício e
+  projeto, gerado do catálogo e conferido por teste) é o que o pacote
+  principal leva; o corpo de cada aula é um arquivo próprio (~5 kB gzip),
+  baixado por `import()` quando ela abre, junto com a seguinte.
+  `content/index` continua sendo a única fronteira das telas, com
+  `carregarAula` / `carregarProjeto` para o corpo. **3.095 → 999 kB
+  (851 → 280 kB gzip, −67%).** O que sobra no principal é o Supabase, o
+  React e as telas.
 
 #### P2-2 · Derivações caras recalculadas a cada mudança — Corrigido
 - **Arquivos:** `desafios.ts` (`desafiosConcluidos` filtra todas as tentativas
@@ -732,7 +737,8 @@ Nada roda no backend. Memória: um laço que aloca sem parar derruba só o worke
 
 ## Performance
 
-- **Pacote:** P2-1. Números do build: principal 3.512 kB (972 kB gz); Monaco
+- **Pacote:** P2-1 (corrigido depois: principal 999 kB, 280 kB gz). Números
+  do build na auditoria: principal 3.512 kB (972 kB gz); Monaco
   3.362 kB (869 kB) sob demanda; worker de TS 7 MB sob demanda; Pyodide
   ~13,5 MB sob demanda. Os pesados já são sob demanda — o problema é o
   principal.

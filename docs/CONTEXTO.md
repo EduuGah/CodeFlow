@@ -41,8 +41,8 @@ Números lidos do catálogo, não de memória.
 | Projetos | 10, com 34 critérios de aceitação — os 3 capstones são página + API + banco (motor 7), os outros 7 são JavaScript puro |
 | Conceitos | 151, com grafo de pré-requisitos |
 | Flashcards | 67 (93 conceitos ainda sem cartão) |
-| Testes | 3.898 de unidade + ~498 de navegador |
-| Pacote | 3.095 kB (851 kB comprimido) no chunk principal — o corpo das aulas vai junto (é quase metade), e separá-lo é o maior problema de performance aberto (P2-1b do roadmap). Aula, revisão, refazer erros, projeto e admin são rotas sob demanda (`App.tsx`), e o Zod só entra no chunk do admin; o Monaco são mais 3.362 kB (869 kB) num chunk à parte, baixado só quando o primeiro editor monta, e o worker de TypeScript (7 MB) só quando um modelo JS/TS abre. O motor de TypeScript não acrescentou arquivo; o de React acrescentou um chunk de 143 kB (47 kB) com o React e o ReactDOM como texto, baixado só por um exercício de React; o de SQL acrescentou o worker (49 kB) e o SQLite em WebAssembly (658 kB), baixados só por um exercício de SQL; o de Python acrescentou o worker (~22 kB) e o Pyodide inteiro (~13,5 MB: o WebAssembly do CPython, a biblioteca padrão zipada, o manifesto de pacotes), copiados para `/pyodide/` na build e baixados só por um exercício de Python |
+| Testes | 3.906 de unidade + ~496 de navegador |
+| Pacote | 999 kB (280 kB comprimido) no chunk principal, eram 3.095 kB (851 kB) — o corpo das aulas saiu (P2-1b): o pacote leva só o índice (196 kB antes de minificar), e cada aula é um arquivo próprio de ~15 kB (5 kB comprimido; o maior tem 31 kB), baixado quando ela abre, junto com a seguinte. O que sobra no principal é o Supabase (~850 kB antes de minificar), o React, o React Router e as telas. Aula, revisão, refazer erros, projeto e admin são rotas sob demanda (`App.tsx`), e o Zod só entra no chunk do admin; o Monaco são mais 3.362 kB (869 kB) num chunk à parte, baixado só quando o primeiro editor monta, e o worker de TypeScript (7 MB) só quando um modelo JS/TS abre. O motor de TypeScript não acrescentou arquivo; o de React acrescentou um chunk de 143 kB (47 kB) com o React e o ReactDOM como texto, baixado só por um exercício de React; o de SQL acrescentou o worker (49 kB) e o SQLite em WebAssembly (658 kB), baixados só por um exercício de SQL; o de Python acrescentou o worker (~22 kB) e o Pyodide inteiro (~13,5 MB: o WebAssembly do CPython, a biblioteca padrão zipada, o manifesto de pacotes), copiados para `/pyodide/` na build e baixados só por um exercício de Python |
 
 ## 4. Decisões que não devem ser desfeitas sem motivo forte
 
@@ -54,6 +54,16 @@ cada exercício é resolvível — rodando a solução de referência no sandbox
 verdade — e que o esqueleto **não** passa. Um formulário gravando no banco jogaria
 fora essas três garantias. Por isso a tela de administração **gera o módulo** para
 revisão em pull request, em vez de escrever no banco.
+
+**O pacote principal leva o índice, não o catálogo** (P2-1b). As telas leem
+`content/index.ts`, que só conhece `indice.gerado.ts`: o resumo de cada aula
+(a aula sem os `blocks`), exercício e projeto. O corpo vem por
+`carregarAula` / `carregarProjeto`, um arquivo por aula — não por trilha:
+abrir uma aula não deve custar as outras 25. O índice é **gerado** do
+catálogo (`npm run indice`) e o teste compara texto com texto, em vez de
+escrito à mão, para não existirem duas fontes do título de uma aula.
+Importar `content/catalogo` numa tela do aluno põe as 154 aulas de volta
+no pacote dela; só testes, E2E, admin e o gerador importam de lá.
 
 **Quase nada é contador.** XP, nível, sequência, domínio por conceito, cartões
 vencidos, **moedas ganhas e desafios cumpridos** são todos derivados do
@@ -332,11 +342,19 @@ src/content/            Aulas, exercícios, projetos, conceitos, flashcards
   percurso.ts           As seis etapas do percurso, na ordem das trilhas
   bancos/               Os bancos de exemplo da trilha de SQL (`loja`): o SQL
                         que cria, e a descrição que o aluno lê
-  schema.ts             Espelhos Zod; valida na carga e falha alto em DEV
-  index.ts              Única fronteira de leitura do conteúdo para as telas
+  schema.ts             Espelhos Zod; `catalogo.ts` valida com eles e falha
+                        alto em DEV (só onde ele carrega: testes e admin)
+  index.ts              Única fronteira de leitura do conteúdo para as telas,
+                        e só o índice: trilhas e o resumo de cada aula,
+                        exercício e projeto vão no pacote principal; o corpo
+                        vem por `carregarAula` / `carregarProjeto`, um
+                        arquivo por aula, guardado depois da primeira vez
+                        (`aulaCarregada` responde sem esperar)
+  trilhas.ts            As 17 trilhas na ordem do aluno, e a padrão
   catalogo.ts           O catálogo inteiro (todas as aulas com o corpo), a
                         validação e as consultas sobre ele — o que testes,
-                        E2E e o gerador do índice usam
+                        E2E, admin e o gerador do índice usam. Tela do aluno
+                        que importar daqui põe as 154 aulas no pacote de novo
   indice.gerado.ts      GERADO (`npm run indice`): trilhas à parte, o resumo
                         de cada aula, exercício e projeto, e o `import()` do
                         corpo de cada um; `indice.test.ts` confere contra o
@@ -452,7 +470,14 @@ src/client/lib/         Lógica pura e testada
                         pela import() do CodeEditor
 
 src/client/pages/       Telas
+src/client/hooks/       `useConteudo.ts`: `useAula`, `useAulas`, `useProjeto`
+                        — o corpo sob demanda como estado da tela (pronto,
+                        carregando, ausente, falhou com tentar de novo);
+                        o que já veio sai pronto no primeiro render
 src/client/components/  Componentes
+  ui/ConteudoSobDemanda.tsx
+                        O esqueleto e a falha de uma tela cujo conteúdo vem
+                        sob demanda (aula, projeto, caderno, refazer)
   layout/Novidades.tsx  Os avisos de nível, conquista e desafio: um de cada
                         vez, só nas telas de orientação (a aula é foco)
   ui/Button.tsx         O botão — o único. Variantes × tamanhos, `loading`,
@@ -545,7 +570,7 @@ docs/curriculo.md       Roadmap de conteúdo — fonte canônica
 ```bash
 npm run typecheck   # inclui e2e/ e playwright.config.ts
 npm run lint        # ESLint mínimo: typescript-eslint + react-hooks
-npm test            # 3.898 testes
+npm test            # 3.906 testes
 npm run test:e2e    # ~498 no navegador (antes: npx playwright install chromium;
                     # com um Chromium já instalado: PW_CHROMIUM=/caminho/do/chrome)
 npm run build
@@ -627,6 +652,15 @@ Cada uma custou tempo. Não repita.
   nova com o índice da anterior, e `steps[indice]` vira `undefined`. Foi tela
   branca em produção. Ajuste o estado **durante o render** (`if (idAtual !== id)
   { setId(id); ... }`), que é o padrão do React para isso.
+- **Teste de componente que abre aula ou projeto precisa do corpo antes.**
+  Desde o P2-1b o corpo vem por `import()`, e o primeiro render é o
+  esqueleto. `beforeAll(() => carregarAula(id))` — de `content`, não de
+  `content/catalogo`: é o cache do índice que a tela lê.
+- **No Vitest, o `import()` do corpo resolve dentro do mesmo clique.** Um
+  teste que navega para a aula seguinte passa com ou sem a tela ter pedido
+  a seguinte antes — foi assim que a primeira sabotagem do pré-carregamento
+  passou. O teste mede o que a tela pediu (`aulaCarregada`), não a
+  navegação.
 - **`useAuth()` devolve um objeto de contexto novo a cada render.** Um efeito que
   depende dele roda sempre; se o efeito produz array ou objeto novo em `setState`,
   vira laço infinito. Dependa de `user?.id`, e faça o `setState` devolver o valor

@@ -12,7 +12,7 @@ import {
   type GamificationInput,
 } from './gamification';
 import { desafiosDoDia, RECOMPENSA } from './desafios';
-import { listTracks } from '../../content';
+import { listTracks } from '../../content/catalogo';
 
 /**
  * O risco desta área não é bug de cálculo — é incentivo errado. Um XP que

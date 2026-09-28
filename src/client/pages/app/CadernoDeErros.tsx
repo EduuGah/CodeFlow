@@ -1,7 +1,8 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 
-import { localizarExercicio } from '../../../content';
+import { getExercises, resumoDoExercicio } from '../../../content';
+import type { Lesson } from '../../../content/types';
 import { useAuth } from '../../contexts/AuthContext';
 import { useStudentData } from '../../contexts/StudentDataContext';
 import {
@@ -23,7 +24,9 @@ import { Card } from '../../components/ui/Card';
 import { IconArrowRight, IconChevronDown, IconRetry } from '../../components/ui/Icon';
 import { VinhetaAlvo } from '../../components/ui/Ilustracao';
 import { Carregando, Skeleton } from '../../components/ui/Skeleton';
+import { ConteudoNaoCarregou } from '../../components/ui/ConteudoSobDemanda';
 import { EmptyState } from '../../components/ui/States';
+import { useAulas } from '../../hooks/useConteudo';
 import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 
 /**
@@ -63,6 +66,9 @@ export function CadernoDeErros() {
   const userId = user?.id;
 
   const [evidencias, setEvidencias] = useState<Evidencias | null>(null);
+  // O enunciado de cada exercício mora no corpo da aula dele, que vem sob
+  // demanda (P2-1b): só as aulas dos exercícios que estão no caderno.
+  const aulas = useAulas(caderno.flatMap((e) => resumoDoExercicio(e.exerciseId)?.lessonId ?? []));
 
   useEffect(() => {
     if (!userId) return;
@@ -85,7 +91,16 @@ export function CadernoDeErros() {
     />
   );
 
-  if (loading) {
+  if (aulas.estado === 'falhou') {
+    return (
+      <div className="space-y-6">
+        {cabecalho}
+        <ConteudoNaoCarregou o="o caderno" onTentar={aulas.tentarDeNovo} />
+      </div>
+    );
+  }
+
+  if (loading || aulas.estado === 'carregando') {
     return (
       <div className="space-y-6">
         {cabecalho}
@@ -106,6 +121,7 @@ export function CadernoDeErros() {
     .sort((a, b) => (a.proximaRevisao ?? '').localeCompare(b.proximaRevisao ?? ''));
   const dominados = caderno.filter((e) => e.estado === 'dominado');
   const mapa = evidencias && evidencias.de === userId ? evidencias.mapa : undefined;
+  const corpos = aulas.estado === 'pronto' ? aulas.valor : new Map<string, Lesson>();
 
   if (caderno.length === 0) {
     return (
@@ -169,7 +185,7 @@ export function CadernoDeErros() {
       {fila.length > 0 && (
         <Secao titulo="Para refazer" descricao="O que ainda não foi consertado vem primeiro, depois as revisões do dia.">
           {fila.map((e) => (
-            <Entrada key={e.exerciseId} entrada={e} evidencia={mapa?.get(e.exerciseId)} />
+            <Entrada key={e.exerciseId} entrada={e} evidencia={mapa?.get(e.exerciseId)} aulas={corpos} />
           ))}
         </Secao>
       )}
@@ -177,7 +193,7 @@ export function CadernoDeErros() {
       {emDia.length > 0 && (
         <Secao titulo="Em dia" descricao="Você acertou depois do erro. Cada um volta na data marcada, para confirmar.">
           {emDia.map((e) => (
-            <Entrada key={e.exerciseId} entrada={e} evidencia={mapa?.get(e.exerciseId)} />
+            <Entrada key={e.exerciseId} entrada={e} evidencia={mapa?.get(e.exerciseId)} aulas={corpos} />
           ))}
         </Secao>
       )}
@@ -193,7 +209,7 @@ export function CadernoDeErros() {
           </p>
           <ul className="space-y-3">
             {dominados.map((e) => (
-              <Entrada key={e.exerciseId} entrada={e} evidencia={mapa?.get(e.exerciseId)} />
+              <Entrada key={e.exerciseId} entrada={e} evidencia={mapa?.get(e.exerciseId)} aulas={corpos} />
             ))}
           </ul>
         </details>
@@ -212,10 +228,19 @@ function Secao({ titulo, descricao, children }: { titulo: string; descricao: str
   );
 }
 
-function Entrada({ entrada, evidencia }: { entrada: EntradaDoCaderno; evidencia: EvidenciaDoErro | undefined }) {
-  const local = localizarExercicio(entrada.exerciseId);
-  if (!local) return null;
-  const { exercise, lesson } = local;
+function Entrada({
+  entrada,
+  evidencia,
+  aulas,
+}: {
+  entrada: EntradaDoCaderno;
+  evidencia: EvidenciaDoErro | undefined;
+  aulas: ReadonlyMap<string, Lesson>;
+}) {
+  const resumo = resumoDoExercicio(entrada.exerciseId);
+  const lesson = resumo && aulas.get(resumo.lessonId);
+  const exercise = lesson && getExercises(lesson).find((e) => e.id === entrada.exerciseId);
+  if (!lesson || !exercise) return null;
   const estado = ESTADOS[entrada.estado];
   const daUltimaVez = evidencia?.createdAt === entrada.ultimoErro.createdAt;
 

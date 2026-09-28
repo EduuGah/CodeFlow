@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { getExercises, getLessonsOfTrack, listTracks } from '../../content';
+import { getExercises, getLessonsOfTrack, listTracks } from '../../content/catalogo';
 import { desafiosConcluidos } from './desafios';
 import { ITENS, moedasGanhas, PRECO_DO_NIVEL, RARIDADES, raridadeDoNivel } from './economia';
 import { computeXp, levelFromXp } from './gamification';

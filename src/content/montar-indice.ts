@@ -55,7 +55,7 @@ export async function montarIndice(catalogo: string, importar: Importar): Promis
       }
       corpoDaAula.push(`  ${JSON.stringify(resumo.id)}: ${carregador},`);
     } else {
-      const resumo: Record<string, unknown> = { ...(item as Project) };
+      const resumo: Record<string, unknown> = { ...(item as Project), criterios: (item as Project).checkpoints.length };
       for (const campo of SO_NA_TELA_DO_PROJETO) delete resumo[campo];
       projetos.push(resumo as ResumoDoProjeto);
       corpoDoProjeto.push(`  ${JSON.stringify(resumo.id)}: ${carregador},`);

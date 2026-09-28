@@ -202,7 +202,7 @@ test.describe('celular', () => {
     logado: page,
   }) => {
     test.setTimeout(150_000);
-    const { getLesson } = await import('../src/content');
+    const { getLesson } = await import('../src/content/catalogo');
     const { buildLessonSteps } = await import('../src/client/lib/lesson-steps');
     const passos = buildLessonSteps(getLesson('lesson-js-1')!);
 

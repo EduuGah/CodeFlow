@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { getExercises, getLessonsOfTrack, listProjects, listTracks } from '../../content';
+import { getExercises, getLessonsOfTrack, listProjects, listTracks } from '../../content/catalogo';
 import type { Exercise, Lesson } from '../../content/types';
 import { TIPOS_DE_EVENTO } from './registro';
 import {
