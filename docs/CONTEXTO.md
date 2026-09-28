@@ -42,7 +42,7 @@ Números lidos do catálogo, não de memória.
 | Conceitos | 151, com grafo de pré-requisitos |
 | Flashcards | 67 (93 conceitos ainda sem cartão) |
 | Testes | 3.906 de unidade + ~496 de navegador |
-| Pacote | 999 kB (280 kB comprimido) no chunk principal, eram 3.095 kB (851 kB) — o corpo das aulas saiu (P2-1b): o pacote leva só o índice (196 kB antes de minificar), e cada aula é um arquivo próprio de ~15 kB (5 kB comprimido; o maior tem 31 kB), baixado quando ela abre, junto com a seguinte. O que sobra no principal é o Supabase (~850 kB antes de minificar), o React, o React Router e as telas. Aula, revisão, refazer erros, projeto e admin são rotas sob demanda (`App.tsx`), e o Zod só entra no chunk do admin; o Monaco são mais 3.362 kB (869 kB) num chunk à parte, baixado só quando o primeiro editor monta, e o worker de TypeScript (7 MB) só quando um modelo JS/TS abre. O motor de TypeScript não acrescentou arquivo; o de React acrescentou um chunk de 143 kB (47 kB) com o React e o ReactDOM como texto, baixado só por um exercício de React; o de SQL acrescentou o worker (49 kB) e o SQLite em WebAssembly (658 kB), baixados só por um exercício de SQL; o de Python acrescentou o worker (~22 kB) e o Pyodide inteiro (~13,5 MB: o WebAssembly do CPython, a biblioteca padrão zipada, o manifesto de pacotes), copiados para `/pyodide/` na build e baixados só por um exercício de Python |
+| Pacote | 999 kB (280 kB comprimido) no chunk principal, eram 3.095 kB (851 kB) — o corpo das aulas saiu (P2-1b): o pacote leva só o índice (196 kB antes de minificar), e cada aula é um arquivo próprio de ~15 kB (5 kB comprimido; o maior tem 31 kB), baixado quando ela abre, junto com a seguinte. O que sobra no principal é o Supabase (~850 kB antes de minificar), o React, o React Router e as telas. O CI reprova acima de 320 kB comprimido (`npm run orcamento`). Aula, revisão, refazer erros, projeto e admin são rotas sob demanda (`App.tsx`), e o Zod só entra no chunk do admin; o Monaco são mais 3.362 kB (869 kB) num chunk à parte, baixado só quando o primeiro editor monta, e o worker de TypeScript (7 MB) só quando um modelo JS/TS abre. O motor de TypeScript não acrescentou arquivo; o de React acrescentou um chunk de 143 kB (47 kB) com o React e o ReactDOM como texto, baixado só por um exercício de React; o de SQL acrescentou o worker (49 kB) e o SQLite em WebAssembly (658 kB), baixados só por um exercício de SQL; o de Python acrescentou o worker (~22 kB) e o Pyodide inteiro (~13,5 MB: o WebAssembly do CPython, a biblioteca padrão zipada, o manifesto de pacotes), copiados para `/pyodide/` na build e baixados só por um exercício de Python |
 
 ## 4. Decisões que não devem ser desfeitas sem motivo forte
 
@@ -63,7 +63,11 @@ abrir uma aula não deve custar as outras 25. O índice é **gerado** do
 catálogo (`npm run indice`) e o teste compara texto com texto, em vez de
 escrito à mão, para não existirem duas fontes do título de uma aula.
 Importar `content/catalogo` numa tela do aluno põe as 154 aulas de volta
-no pacote dela; só testes, E2E, admin e o gerador importam de lá.
+no pacote dela; só testes, E2E, admin e o gerador importam de lá — o
+ESLint recusa (`no-restricted-imports`), e o CI reprova o pacote principal
+acima de 320 kB comprimido (`npm run orcamento`). O limite é o número de
+hoje com folga pequena, não a meta de 400: reprova a regressão que acabou
+de entrar, e subi-lo é uma linha com o motivo no commit.
 
 **Quase nada é contador.** XP, nível, sequência, domínio por conceito, cartões
 vencidos, **moedas ganhas e desafios cumpridos** são todos derivados do
@@ -568,12 +572,14 @@ docs/curriculo.md       Roadmap de conteúdo — fonte canônica
 ## 6. Como verificar
 
 ```bash
-npm run typecheck   # inclui e2e/ e playwright.config.ts
+npm run typecheck   # inclui e2e/, scripts/ e playwright.config.ts
 npm run lint        # ESLint mínimo: typescript-eslint + react-hooks
 npm test            # 3.906 testes
-npm run test:e2e    # ~498 no navegador (antes: npx playwright install chromium;
+npm run test:e2e    # ~496 no navegador (antes: npx playwright install chromium;
                     # com um Chromium já instalado: PW_CHROMIUM=/caminho/do/chrome)
 npm run build
+npm run orcamento   # depois do build: o pacote principal comprimido contra o
+                    # limite de scripts/orcamento-do-pacote.ts (320 kB)
 npm run indice      # depois de mudar qualquer aula ou projeto: regera
                     # src/content/indice.gerado.ts (o teste do índice cobra)
 
@@ -582,7 +588,7 @@ npm run indice      # depois de mudar qualquer aula ou projeto: regera
 PGHOST=localhost PGUSER=postgres PGPASSWORD=postgres bash supabase/verificacao/rodar.sh
 ```
 
-CI: tipos → lint → testes → build, as migrações num Postgres de serviço
+CI: tipos → lint → testes → build → orçamento do pacote, as migrações num Postgres de serviço
 (`supabase/verificacao/`), e o E2E num job separado depois.
 
 **Método que tem funcionado, e vale manter:**

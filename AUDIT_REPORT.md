@@ -831,8 +831,9 @@ Falta:
 - ~~**migrações num Postgres de verdade**~~ — feito depois do relatório: job
   `banco` com `postgres:16` de serviço (`supabase/verificacao/`), migrações
   aplicadas duas vezes e verificação de comportamento com os papéis da API;
-- **orçamento de pacote**: falhar o build se o chunk principal crescer mais que
-  X% (evita P2-1 voltar).
+- ~~**orçamento de pacote**~~ — feito depois do relatório: `npm run
+  orcamento` no CI reprova o pacote principal acima de 320 kB comprimido
+  (hoje 280), e o ESLint recusa `content/catalogo` nas telas do aluno.
 
 ## Observabilidade (proposta leve)
 

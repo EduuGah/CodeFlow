@@ -111,7 +111,12 @@ A fazer, nesta ordem:
    abrir; voltar a uma aula já aberta não pisca o esqueleto; o arquivo que
    não chega (rede, deploy novo) mostra "tentar de novo" e vai ao registro
    de eventos só com o nome do erro.
-3. **Orçamento de pacote no CI** para a meta não escorregar.
+3. [x] **Orçamento de pacote no CI** para a meta não escorregar.
+   `npm run orcamento`, depois do build: o JavaScript que o `index.html`
+   manda baixar, comprimido, contra 320 kB — o número de hoje (280) com
+   folga pequena, para reprovar a regressão que acabou de entrar e não a
+   quarta somada. E o ESLint recusa `content/catalogo` nas telas do aluno:
+   uma rota sob demanda que o importasse engordaria sem o orçamento ver.
 4. [x] **P2-2** índice por dia nos desafios (1,5 s → 22 ms com um ano de
    histórico) e calculados uma vez só por recálculo do painel.
 5. [x] **P2-3** provider acima das rotas; voltar ao app revalida sem esqueleto.

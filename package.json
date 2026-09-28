@@ -12,7 +12,8 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "test:e2e": "playwright test",
-    "indice": "tsx scripts/gerar-indice.ts"
+    "indice": "tsx scripts/gerar-indice.ts",
+    "orcamento": "tsx scripts/orcamento-do-pacote.ts"
   },
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",

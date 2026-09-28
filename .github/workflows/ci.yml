@@ -73,6 +73,11 @@ jobs:
       - name: Build de produção
         run: npm run build
 
+      # O JavaScript que qualquer visita baixa antes da primeira tela. O limite
+      # e o motivo dele estão no próprio script; a falha vira anotação.
+      - name: Orçamento do pacote principal
+        run: npm run orcamento
+
   banco:
     name: Migrações num Postgres de verdade
     runs-on: ubuntu-latest
