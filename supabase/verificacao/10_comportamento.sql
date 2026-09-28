@@ -57,6 +57,7 @@ insert into auth.users (id, email, raw_user_meta_data) values
   ('00000000-0000-4000-8000-00000000000c', 'c@teste.local', '{}'),
   ('00000000-0000-4000-8000-00000000000d', 'd@teste.local', '{}'),
   ('00000000-0000-4000-8000-00000000000e', 'e@teste.local', '{}'),
+  ('00000000-0000-4000-8000-00000000000f', 'f@teste.local', '{}'),
   ('00000000-0000-4000-8000-0000000000ad', 'adm@teste.local', '{}');
 
 delete from public.users where id = '00000000-0000-4000-8000-00000000000c';
@@ -100,9 +101,13 @@ select verificacao.ok(
 );
 select verificacao.recusa($$select public.concluir('role', 'admin')$$, 'coluna_invalida', 'concluir só mexe nas duas listas');
 
--- Autopromoção continua barrada.
-update public.users set role = 'admin' where id = auth.uid();
-select verificacao.ok((select role from public.users where id = auth.uid()) = 'student', 'aluno não se promove a admin');
+-- Autopromoção continua barrada — desde a 0021, nem chega ao gatilho da 0001:
+-- `role` não é coluna que o cliente escreve.
+select verificacao.recusa(
+  $$update public.users set role = 'admin' where id = auth.uid()$$,
+  'permission denied', 'aluno não se promove a admin'
+);
+select verificacao.ok((select role from public.users where id = auth.uid()) = 'student', 'o papel continua o de aluno');
 
 -- C não tem linha em public.users: concluir cria.
 select set_config('request.jwt.claims', '{"sub": "00000000-0000-4000-8000-00000000000c", "email": "c@teste.local"}', true);
@@ -551,6 +556,80 @@ select verificacao.ok(
   (select encrypted_password from auth.users where email = 'a@teste.local') = 'outra',
   'conta comum não é afetada pela proteção'
 );
+
+-- ------------------------------------------------------------ autoridade do progresso (0021)
+-- F é conta nova, sem nada: as contas dos testes acima ficam como estavam.
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub": "00000000-0000-4000-8000-00000000000f", "email": "f@teste.local"}', true);
+
+-- A hora é a do servidor, mande o cliente o que mandar.
+insert into public.exercise_attempts (user_id, exercise_id, lesson_id, correct, created_at)
+values (auth.uid(), 'ex-hora', 'aula-1', true, now() - interval '400 days');
+select verificacao.ok(
+  (select created_at > now() - interval '1 minute' from public.exercise_attempts where user_id = auth.uid() and exercise_id = 'ex-hora'),
+  'tentativa datada no passado fica com a hora do servidor'
+);
+insert into public.flashcard_reviews (user_id, flashcard_id, rating, created_at)
+values (auth.uid(), 'fc-hora', 'facil', now() - interval '400 days');
+select verificacao.ok(
+  (select created_at > now() - interval '1 minute' from public.flashcard_reviews where user_id = auth.uid() and flashcard_id = 'fc-hora'),
+  'revisão datada no passado fica com a hora do servidor'
+);
+
+-- E o ritmo não se burla com data antiga: as 119 datadas no passado contam no minuto.
+insert into public.exercise_attempts (user_id, exercise_id, lesson_id, correct, created_at)
+select auth.uid(), 'ex-velho-' || n, 'aula-1', true, now() - (n || ' days')::interval from generate_series(1, 119) n;
+select verificacao.recusa(
+  $$insert into public.exercise_attempts (user_id, exercise_id, lesson_id, correct, created_at) values (auth.uid(), 'ex-121', 'aula-1', true, now() - interval '9 days')$$,
+  'ritmo_excedido', 'a 121ª tentativa do minuto é recusada, mesmo datada no passado'
+);
+
+-- As listas de progresso só mudam pela `concluir`.
+select verificacao.recusa(
+  $$update public.users set completed_lessons = array['aula-inventada'] where id = auth.uid()$$,
+  'permission denied', 'a lista de aulas não se regrava por fora da concluir'
+);
+select verificacao.recusa(
+  $$update public.users set completed_projects = array['projeto-inventado'] where id = auth.uid()$$,
+  'permission denied', 'a lista de projetos não se regrava por fora da concluir'
+);
+select verificacao.recusa(
+  $$insert into public.users (id, completed_lessons) values (auth.uid(), array['x']) on conflict (id) do update set completed_lessons = excluded.completed_lessons$$,
+  'permission denied', 'nem pelo upsert'
+);
+-- O perfil continua gravando como o `updatePerfil` grava (o upsert do PostgREST
+-- repete as colunas enviadas, o id incluído, no `do update`).
+insert into public.users (id, display_name, tema_editor) values (auth.uid(), 'Fábia', 'papel')
+on conflict (id) do update set id = excluded.id, display_name = excluded.display_name, tema_editor = excluded.tema_editor;
+select verificacao.ok(
+  (select display_name = 'Fábia' and tema_editor = 'papel' from public.users where id = auth.uid()),
+  'o perfil continua gravando pelo upsert'
+);
+
+-- O limite da lista: acima do catálogo inteiro, e o teto não passa dele. F tem
+-- um dia e uma semana de atividade (tudo com a hora de agora) e nenhuma
+-- proteção: 400·10 + 1·2·2·15 + 1·2·2·50 + ceil(2/7)·130 = 4390.
+reset role;
+update public.users set completed_lessons = array(select 'aula-' || n from generate_series(1, 450) n)
+ where id = '00000000-0000-4000-8000-00000000000f';
+select verificacao.ok(
+  public.teto_de_moedas('00000000-0000-4000-8000-00000000000f') = 4390,
+  'o teto conta no máximo 400 aulas, mesmo com uma lista antiga maior — e só um dia de atividade'
+);
+update public.users set completed_lessons = array(select 'aula-' || n from generate_series(1, 400) n)
+ where id = '00000000-0000-4000-8000-00000000000f';
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub": "00000000-0000-4000-8000-00000000000f", "email": "f@teste.local"}', true);
+select verificacao.recusa(
+  $$select public.concluir('completed_lessons', 'aula-401')$$,
+  'lista_cheia', 'a 401ª aula não entra'
+);
+select public.concluir('completed_lessons', 'aula-400');
+select verificacao.ok(
+  (select cardinality(completed_lessons) from public.users where id = auth.uid()) = 400,
+  'concluir de novo uma que já está na lista cheia não é erro'
+);
+reset role;
 
 select 'verificação de comportamento: tudo certo' as resultado;
 

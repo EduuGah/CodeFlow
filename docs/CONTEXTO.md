@@ -41,7 +41,7 @@ Números lidos do catálogo, não de memória.
 | Projetos | 10, com 34 critérios de aceitação — os 3 capstones são página + API + banco (motor 7), os outros 7 são JavaScript puro |
 | Conceitos | 151, com grafo de pré-requisitos |
 | Flashcards | 67 (93 conceitos ainda sem cartão) |
-| Testes | 3.890 de unidade + ~498 de navegador |
+| Testes | 3.894 de unidade + ~498 de navegador |
 | Pacote | 3.095 kB (851 kB comprimido) no chunk principal — o corpo das aulas vai junto (é quase metade), e separá-lo é o maior problema de performance aberto (P2-1b do roadmap). Aula, revisão, refazer erros, projeto e admin são rotas sob demanda (`App.tsx`), e o Zod só entra no chunk do admin; o Monaco são mais 3.362 kB (869 kB) num chunk à parte, baixado só quando o primeiro editor monta, e o worker de TypeScript (7 MB) só quando um modelo JS/TS abre. O motor de TypeScript não acrescentou arquivo; o de React acrescentou um chunk de 143 kB (47 kB) com o React e o ReactDOM como texto, baixado só por um exercício de React; o de SQL acrescentou o worker (49 kB) e o SQLite em WebAssembly (658 kB), baixados só por um exercício de SQL; o de Python acrescentou o worker (~22 kB) e o Pyodide inteiro (~13,5 MB: o WebAssembly do CPython, a biblioteca padrão zipada, o manifesto de pacotes), copiados para `/pyodide/` na build e baixados só por um exercício de Python |
 
 ## 4. Decisões que não devem ser desfeitas sem motivo forte
@@ -70,7 +70,16 @@ diferença. **A compra passa pelo banco** (0009, `comprar_item`): o preço vem d
 pessoa, cosmético uma vez só, e o gasto total não passa de `teto_de_moedas` —
 um teto que nenhum histórico real ultrapassa em nenhum fuso, porque o saldo
 exato depende do dia local, que o banco não conhece. O `INSERT` direto em
-`purchases` não existe mais. **A aula fecha num instante fixo**
+`purchases` não existe mais. **O teto só vale se as entradas dele forem do
+banco** (0021): a hora de cada tentativa e revisão é a do servidor (datada
+pelo cliente, ela inventava dias de atividade e escapava do limite de
+ritmo); as listas de progresso só mudam pela `concluir`, que roda como dona
+(o cliente escreve em `users` só as colunas do perfil — **coluna nova de
+perfil precisa entrar no grant da 0021**, e o teste de migrações cobra); e
+cada lista tem um limite acima do catálogo (400 aulas, 50 projetos), que o
+teto respeita. A correção continua no navegador, por desenho: o banco não
+adivinha o acerto, só garante que o teto nunca passe do que o catálogo
+inteiro renderia. **A aula fecha num instante fixo**
 (`fechamentoDasAulas` em `study.ts`: o primeiro acerto do último exercício
 dela); é ele que o dobro de XP e o desafio "conclua uma aula" leem — datar
 pela última tentativa certa deixava refazer um exercício "reconcluir" a aula. A Loja 2.0 anda em etapas (`ROADMAP_AUDITORIA.md`, Fase 8); na primeira,
@@ -503,7 +512,9 @@ src/client/components/  `caderno/`: a resposta no formato do exercício
                         (`RespostaDoAluno`) e o enunciado numa linha
                         (`TextoEmLinha`, sem o leitor de Markdown inteiro)
 e2e/                    Playwright; `fixtures.ts` tem o dublê do Supabase
-supabase/migrations/    0001 a 0020, aplicadas em ordem (0020: as
+supabase/migrations/    0001 a 0021, aplicadas em ordem (0021: hora do
+                        servidor nas tentativas, progresso só pela
+                        `concluir`, limite das listas; 0020: as
                         categorias além do perfil — tema do editor,
                         celebração, ícone da sequência, adesivos; 0019: registro
                         de eventos; 0018: épicos só
@@ -527,7 +538,7 @@ docs/curriculo.md       Roadmap de conteúdo — fonte canônica
 ```bash
 npm run typecheck   # inclui e2e/ e playwright.config.ts
 npm run lint        # ESLint mínimo: typescript-eslint + react-hooks
-npm test            # 3.890 testes
+npm test            # 3.894 testes
 npm run test:e2e    # ~484 no navegador (antes: npx playwright install chromium;
                     # com um Chromium já instalado: PW_CHROMIUM=/caminho/do/chrome)
 npm run build
@@ -882,6 +893,18 @@ Cada uma custou tempo. Não repita.
   aceita as duas formas — só o editor não —, então a verificação local passa
   com qualquer uma; quem segura é o teste "o editor do Supabase consegue rodar
   cada migração" em `migrations.test.ts`. Nem em comentário escreva a forma.
+- **Copie a migração do "Raw" do GitHub, e só depois do push.** A 0021 foi
+  copiada antes de estar no GitHub, de outra visualização, e chegou ao SQL
+  Editor cortada no meio da `concluir` ("unterminated dollar-quoted string").
+  Esse erro é de leitura: o Postgres recusa o texto inteiro, nada roda — mas
+  a pessoa não sabe disso sem que alguém diga. De carona, a `concluir` da
+  0021 manteve o corpo exato da 0009 (que o editor já tinha aceitado) e a
+  checagem nova foi para uma função SQL à parte, `lista_cheia`.
+- **`default now()` não é a hora do servidor.** É só o valor quando o cliente
+  não manda nenhum — e pela API ele pode mandar. Da 0009 à 0021, o limite de
+  ritmo (que conta o último minuto) e o teto de moedas (que conta dias)
+  confiaram numa coluna que o cliente escrevia, e nenhum teste perguntou. Quem conta tempo precisa
+  da hora forçada por gatilho (0021, `hora_do_servidor`).
 - **Uma checagem de lista redefinida depois precisa ser `not valid` na
   migração antiga.** A 0011 criava `store_items_tipo_check` com cinco tipos;
   a 0020 a alarga para nove e grava itens de editor. Rodando tudo de novo, a
@@ -1142,85 +1165,16 @@ JavaScript, Página, Git, Terminal, TypeScript, Web e o resto de Python.
 
 ## 9. Pendências do lado do usuário
 
-- **Rodar `supabase/migrations/0020_itens_gerais.sql` no SQL Editor.** As
-  quatro categorias novas da loja (temas do editor, celebrações, ícones da
-  sequência, adesivos) e as colunas do perfil onde elas moram. Pode rodar de
-  novo — quem rodou uma versão anterior dela roda esta por cima.
-  Sem ela, a loja mostra os temas e o banco recusa a compra; equipar diz qual
-  migração rodar. A 0011 mudou (a checagem de tipo ficou `not valid`): quem
-  já a rodou não precisa rodar de novo.
+- ~~**Rodar `supabase/migrations/0021_autoridade_do_progresso.sql` no SQL
+  Editor.**~~ Feito pelo usuário em 2026-09-28, e conferido no app publicado
+  (perfil salva, aula conclui). A primeira tentativa chegou ao editor cortada
+  no meio da `concluir` — ver as armadilhas.
 
-- **Rodar `supabase/migrations/0019_eventos.sql` no SQL Editor.** O registro
-  de eventos. Sem ela, os eventos são recusados em silêncio (o registro não
-  registra a própria falha) e a seção "Saúde" do painel diz qual migração
-  rodar; nada mais muda.
-
-- **Rodar `supabase/migrations/0018_so_por_moedas.sql` no SQL Editor.** Só
-  catálogo: os quatro épicos sem nível. Sem ela, a loja os mostra e o banco
-  recusa a compra.
-
-- **Rodar `supabase/migrations/0017_admin_da_loja.sql` no SQL Editor.** A
-  função que tira um item da venda pela tela `/admin/loja`. Sem ela, o botão
-  diz qual migração rodar; o resto da tela (banco × código, gerador) funciona.
-
-- **Rodar `supabase/migrations/0016_sazonais.sql` no SQL Editor.** O Fundo
-  Fogos com a janela de 15/12 a 15/01. Sem ela, em dezembro a loja mostra o
-  item e o banco recusa a compra.
-
-- **Rodar `supabase/migrations/0015_precos_recalibrados.sql` no SQL Editor.**
-  Só preços. Sem ela, a loja mostra um preço e o banco cobra outro (o de
-  antes) — a compra passa, mas pelo número velho.
-
-- **Rodar `supabase/migrations/0014_loja_itens_novos.sql` no SQL Editor.** Só
-  catálogo: quatro avatares, duas molduras, dois fundos. Sem ela, a loja
-  mostra os itens mas o banco recusa a compra ("não está disponível agora");
-  pelo nível, eles abrem do mesmo jeito.
-
-- **Rodar `supabase/migrations/0013_recuperar_sequencia.sql` no SQL Editor.**
-  O item "recuperar a sequência" no catálogo e o teto de moedas que o conta.
-  Sem ela, a loja mostra o item mas o banco recusa a compra ("não está
-  disponível agora").
-
-- **Rodar `supabase/migrations/0012_titulos.sql` no SQL Editor.** Uma coluna,
-  `users.titulo`, com formato conferido. Sem ela, os títulos aparecem no
-  inventário mas escolher um diz qual migração rodar; o resto do perfil
-  continua (a leitura cai para as colunas de antes).
-
-- **Rodar `supabase/migrations/0011_loja_molduras_fundos_cores.sql` no SQL
-  Editor.** Categorias novas no catálogo (`moldura`, `fundo`) e os itens delas,
-  e as colunas `users.moldura` e `users.fundo`. Sem ela, a loja mostra os
-  itens mas o banco recusa a compra ("não está à venda"), e equipar diz qual
-  migração rodar; o resto do perfil continua (a leitura tolera a falta das
-  colunas).
-
-- ~~**Rodar `supabase/migrations/0010_caderno_de_erros.sql` no SQL Editor.**~~
-  Feito pelo usuário em 2026-09-27. Duas
-  colunas opcionais em `exercise_attempts` (`resposta`, `feedback`) com teto de
-  tamanho, e um gatilho que não guarda texto livre da conta de demonstração
-  (compartilhada entre visitantes). Sem ela, a tentativa é gravada sem a
-  resposta (`recordAttempt` tenta de novo sem as colunas) e o Caderno de Erros
-  mostra os erros sem "o que você respondeu".
-- **Rodar `supabase/migrations/0009_integridade.sql` no SQL Editor.** Conclusão
-  atômica (`concluir`), painel de admin por agregado (as policies que deixavam a
-  conta `admin`/`admin` ler e-mail e nome de todo mundo saem), contas de
-  demonstração com senha e e-mail imutáveis, a compra pela função
-  `comprar_item` com o catálogo `store_items`, e o limite de 120 escritas por
-  minuto. Sem ela o aplicativo funciona pelo caminho antigo — já sem a perda de
-  progresso —, mas a exposição de dados da conta demo continua até ela rodar.
-- **Rodar `supabase/migrations/0008_contas_demo.sql` no SQL Editor.** Cria as
-  contas de demonstração `aluno`/`aluno` e `admin`/`admin` (o endereço interno é
-  `usuario@demo.codeflow.app`, montado em `src/client/lib/demo.ts`). A tela de
-  entrada tem um botão para cada uma, para quem chega pelo portfólio testar sem
-  conta Google. Pode rodar de novo: as senhas voltam ao padrão. O progresso do
-  aluno de demonstração é compartilhado entre todos os visitantes.
-- **Rodar `supabase/migrations/0007_perfil_e_loja.sql` no SQL Editor.** Ela
-  acrescenta as colunas do perfil (`display_name`, `avatar`, `theme`,
-  `accent`), cria a tabela `purchases` (a loja) e o bucket `avatars` do
-  Storage com as políticas (leitura pública, escrita só na própria pasta).
-  Sem ela, salvar o perfil, comprar na loja e enviar foto falham com a
-  mensagem da tela — o resto continua funcionando.
-- Rodar `supabase/migrations/0006_promote_admin.sql` no SQL Editor, se ainda não
-  rodou. Ela conserta o gatilho que impedia promover alguém a administrador.
+- ~~**Rodar as migrações de 0006 a 0020 no SQL Editor.**~~ Feito pelo
+  usuário — confirmado em 2026-09-28, depois da 0020 (e da 0009 corrigida).
+  O que cada uma faz está na tabela do `README.md`; a 0020 pode rodar de
+  novo, e a 0008 também (as senhas das contas de demonstração voltam ao
+  padrão).
 - Para virar administrador: `select public.set_user_role('SEU-EMAIL', 'admin');`
 - Conferir o aplicativo publicado num telefone de verdade — inclusive um
   exercício de código, que agora depende do editor servido pela Vercel, uma

@@ -114,6 +114,14 @@ const COLUNAS_POR_MIGRACAO = [
   'display_name, avatar, theme, accent',
 ];
 
+/**
+ * As colunas do perfil de hoje — as que `updatePerfil` grava. Desde a 0021 o
+ * cliente só escreve em `users` o que o grant libera, e o teste de migrações
+ * confere que o grant é esta lista (mais o `id`): uma coluna nova esquecida
+ * lá viraria "Não foi possível salvar" sem motivo aparente.
+ */
+export const COLUNAS_DO_PERFIL: readonly string[] = COLUNAS_POR_MIGRACAO[0].split(', ');
+
 export async function fetchPerfil(userId: string): Promise<Perfil> {
   if (!supabase) return { ...VAZIO, error: 'Supabase não configurado.' };
 

@@ -4,7 +4,8 @@ import { describe, expect, it } from 'vitest';
 
 import { ITENS, MOEDAS } from '../src/client/lib/economia';
 import { POR_PERIODO, RECOMPENSA } from '../src/client/lib/desafios';
-import { MAXIMO_DE_ADESIVOS } from '../src/client/lib/perfil';
+import { getLessonsOfTrack, listProjects, listTracks } from '../src/content';
+import { COLUNAS_DO_PERFIL, MAXIMO_DE_ADESIVOS } from '../src/client/lib/perfil';
 import { CHAVES_DE_EVENTO, TIPOS_DE_EVENTO } from '../src/client/lib/registro';
 import { type RespostaEnviada, resumirFeedback, resumirResposta } from '../src/client/lib/resposta';
 
@@ -360,9 +361,59 @@ describe('a loja no banco', () => {
     expect(Number(zero20.match(/cardinality\(adesivos\) <= (\d+)/)![1])).toBe(MAXIMO_DE_ADESIVOS);
   });
 
+  it('o cliente escreve em users só as colunas do perfil — e o grant acompanha o que o perfil grava', () => {
+    // Desde a 0021 as listas de progresso só mudam pela `concluir`. O grant é
+    // por coluna, depois do revoke (o Supabase dá tudo a `authenticated`); uma
+    // coluna nova do perfil esquecida aqui faria o `updatePerfil` falhar.
+    const texto = semComentarios(tudo);
+    const esperadas = ['id', ...COLUNAS_DO_PERFIL].sort();
+    for (const operacao of ['insert', 'update']) {
+      const grants = [...texto.matchAll(new RegExp(`grant ${operacao} \\(([^)]*)\\)\\s+on public\\.users to authenticated`, 'gi'))];
+      expect(grants.length, `sem grant de ${operacao} por coluna em users`).toBeGreaterThan(0);
+      const colunas = grants.at(-1)![1].split(',').map((c) => c.trim()).sort();
+      expect(colunas, operacao).toEqual(esperadas);
+      for (const proibida of ['completed_lessons', 'completed_projects', 'role']) expect(colunas).not.toContain(proibida);
+    }
+    expect(texto).toMatch(/revoke insert, update on public\.users from anon, authenticated;\s+grant insert/i);
+  });
+
+  it('o limite das listas de progresso cabe o catálogo inteiro, e o teto usa o mesmo', () => {
+    // A `concluir` recusa passar do limite, e o teto conta no máximo ele. Um
+    // limite abaixo do catálogo recusaria a conclusão de quem estudou tudo.
+    const ultima = (nome: string) =>
+      [...sql].reverse().find((f) => new RegExp(`function public\\.${nome}\\b`, 'i').test(semComentarios(f.texto)))!;
+    const lista = semComentarios(ultima('lista_cheia').texto);
+    const teto = semComentarios(ultima('teto_de_moedas').texto);
+
+    // A `concluir` pergunta à `lista_cheia` antes de gravar.
+    expect(semComentarios(ultima('concluir').texto)).toMatch(/if public\.lista_cheia\(p_coluna, p_id\) then\s+raise/i);
+    const [, limiteDeAulas, limiteDeProjetos] = lista.match(
+      /case when p_coluna = 'completed_lessons' then (\d+) else (\d+) end as limite/i
+    )!;
+    const tetoDe = (coluna: string) =>
+      Number(teto.match(new RegExp(`least\\(coalesce\\(array_length\\(${coluna}, 1\\), 0\\), (\\d+)\\)`, 'i'))![1]);
+
+    const aulas = listTracks().flatMap((t) => getLessonsOfTrack(t.id)).length;
+    expect(Number(limiteDeAulas)).toBe(tetoDe('completed_lessons'));
+    expect(Number(limiteDeProjetos)).toBe(tetoDe('completed_projects'));
+    expect(Number(limiteDeAulas), `o catálogo tem ${aulas} aulas`).toBeGreaterThanOrEqual(aulas);
+    expect(Number(limiteDeProjetos)).toBeGreaterThanOrEqual(listProjects().length);
+  });
+
+  it('tentativa e revisão pela API ficam com a hora do servidor', () => {
+    // Com a hora do cliente, uma linha datada no passado escapava do limite de
+    // ritmo (que conta o último minuto) e somava dias ao teto de moedas.
+    const texto = semComentarios(tudo);
+    for (const tabela of ['exercise_attempts', 'flashcard_reviews']) {
+      expect(texto).toMatch(
+        new RegExp(`create trigger hora_do_servidor\\s+before insert on public\\.${tabela}\\s+for each row`, 'i')
+      );
+    }
+  });
+
   it('o teto de moedas usa os números da economia', () => {
     // Um teto abaixo do que o histórico rende recusaria compras legítimas. A
-    // definição que vale é a da migração mais nova que o redefine (0013).
+    // definição que vale é a da migração mais nova que o redefine (a 0021).
     const ultima = [...sql].reverse().find((f) => /function public\.teto_de_moedas/i.test(semComentarios(f.texto)))!;
     const teto = semComentarios(ultima.texto).match(/function public\.teto_de_moedas[\s\S]*?\$\$([\s\S]*?)\$\$/i)![1];
 

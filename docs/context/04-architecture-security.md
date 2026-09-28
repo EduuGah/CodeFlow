@@ -71,9 +71,14 @@ competição ou certificado.
   vê agregados, nunca e-mail, nome ou tentativas de outra pessoa. As contas de
   demonstração têm senha e e-mail imutáveis, não sobem foto nem guardam texto
   livre, e a conta admin de demonstração não mexe na loja.
-- **O que ainda é autoridade do navegador:** a correção. Quem tem a própria
-  sessão consegue gravar um acerto que não fez — hoje só sobre a própria
-  conta, sem ranking nem prêmio real (P1-10 da auditoria, aberto).
+- **O que ainda é autoridade do navegador, por desenho:** a correção. O
+  código do aluno roda no navegador dele, então quem tem a própria sessão
+  consegue gravar um acerto que não fez — só sobre a própria conta, sem
+  ranking nem prêmio real. O banco não tenta adivinhar o acerto; ele limita
+  o estrago (0021): a hora de cada tentativa é a do servidor (dias não se
+  inventam, e o limite de ritmo não se burla), as listas de progresso só
+  mudam pela `concluir`, e o teto de moedas nunca passa do que o catálogo
+  inteiro renderia.
 - **Frontend:** nada de `dangerouslySetInnerHTML`; o Markdown das aulas passa
   pelo `react-markdown` sem HTML cru. Cabeçalhos em `vercel.json` (nosniff,
   referrer, permissions); a CSP da aplicação está pendente (P2-7).

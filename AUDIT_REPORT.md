@@ -183,7 +183,7 @@ Legenda de estado: **Corrigido** (com teste, nesta rodada), **Parcial**,
 | P1-7 | "Progresso salvo" / "Entregue" afirmados sem a gravação ter acontecido; confete repetido ao revisitar | Corrigido |
 | P1-8 | Renovação de token recarregava todos os dados e reembaralhava a revisão | Corrigido |
 | P1-9 | Sem limite de ritmo de escrita; sem validação de formato das tentativas | Corrigido (0009) |
-| P1-10 | O progresso é autoridade do navegador (tentativas e conclusões forjáveis) | Pendente — arquitetural |
+| P1-10 | O progresso é autoridade do navegador (tentativas e conclusões forjáveis) | Limitado (0021) — a correção segue no navegador, por desenho |
 | P2-1 | Pacote principal de 3,5 MB com o catálogo inteiro, até na página pública | Parcial |
 | P2-2 | Derivações O(dias × tentativas) recalculadas a cada mudança de estado | Corrigido |
 | P2-3 | O histórico inteiro é baixado a cada entrada no aplicativo | Parcial |
@@ -358,7 +358,17 @@ Legenda de estado: **Corrigido** (com teste, nesta rodada), **Parcial**,
   tentativas e revisões) e `check` de tamanho de ids, conceitos e dicas (`not
   valid`, para não reprovar linhas antigas).
 
-#### P1-10 · O progresso é autoridade do navegador — Pendente (arquitetural)
+#### P1-10 · O progresso é autoridade do navegador — Limitado (0021)
+- **Atualização (0021):** a correção continua no navegador, por desenho; o
+  que se fechou é o estrago possível. A hora das tentativas e revisões passou
+  a ser a do servidor (uma linha datada no passado escapava do limite de
+  ritmo e somava dias ao teto de moedas — furo que o relatório original não
+  viu); as listas de progresso só mudam pela `concluir` (a policy da própria
+  linha deixava regravá-las inteiras); e cada lista tem um limite acima do
+  catálogo, que o teto de moedas respeita. A solução proposta abaixo (catálogo
+  no banco, "todas as tentativas certas") não entrou: quem forja a conclusão
+  forja as tentativas, e o preço seria recusar conclusões legítimas quando
+  uma tentativa não chega ao banco. Detalhe no `ROADMAP_AUDITORIA.md`.
 - **Arquivos:** policies de `insert` em `exercise_attempts`, `update` em `users`
 - **Por quê:** a correção roda no navegador (é o desenho do produto: oito
   motores, nenhum servidor). Quem tem a própria sessão pode gravar `correct:
@@ -693,7 +703,7 @@ a compra agora também tem trava no contexto e no banco.
 
 | Categoria | Situação |
 | --- | --- |
-| A01 Controle de acesso | RLS em todas as tabelas, views com `security_invoker`, gatilho contra autopromoção. **Corrigido:** admin lia PII (P0-3), compra sem regra (P1-2), demo sequestrável (P1-1). **Pendente:** P1-10 |
+| A01 Controle de acesso | RLS em todas as tabelas, views com `security_invoker`, gatilho contra autopromoção. **Corrigido:** admin lia PII (P0-3), compra sem regra (P1-2), demo sequestrável (P1-1). **Limitado:** P1-10 (0021) |
 | A02 Criptografia | Nada próprio; Supabase/HTTPS. A URL tem de ser `https://` (validado) |
 | A03 Injeção | Sem SQL montado no cliente (PostgREST); `format('%I')` no gatilho de ritmo; markdown sem HTML cru; `new Function` só dentro dos sandboxes |
 | A04 Design inseguro | Economia no cliente (mitigada: P1-2) |

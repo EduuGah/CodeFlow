@@ -41,10 +41,33 @@ A fazer, nesta ordem:
 2. [x] **P2-7** cabeçalhos em `vercel.json` (nosniff, referrer, permissions).
    Falta a CSP da aplicação (em `Report-Only` primeiro) e decidir
    `frame-ancestors` — depende de saber se algum portfólio embute o site.
-3. **P1-10** catálogo de exercícios no banco, gerado do conteúdo pelo CI
+3. [x] **P1-10** catálogo de exercícios no banco, gerado do conteúdo pelo CI
    (`supabase/seed/catalogo.sql`, conferido por teste como o `store_items`), e
    `registrar_tentativa`/`concluir` validando id e pertinência à aula; `concluir`
    de aula exige todos os exercícios dela acertados no histórico.
+   Feito de outro jeito (0021), porque a análise achou dois furos maiores que
+   o do plano e mostrou que o plano não fechava o dele:
+   - **A hora das tentativas e revisões era a do cliente.** Uma linha datada
+     no passado escapava do limite de ritmo da 0009 (que conta o último
+     minuto) e somava dias ao teto de moedas — sem limite nenhum. Agora, pela
+     API, a hora é a do servidor.
+   - **A policy da própria linha deixava regravar `completed_lessons`
+     inteira**, por fora da `concluir`. Agora o cliente escreve em `users` só
+     as colunas do perfil (grant por coluna, conferido por teste contra o que
+     `lib/perfil.ts` grava), e a `concluir` roda como dona, só sobre
+     `auth.uid()`.
+   - **Mil aulas inventadas eram dez mil moedas de teto.** Cada lista ganhou
+     um limite acima do catálogo inteiro (400 aulas, 50 projetos; o teste
+     confere que o catálogo cabe), e o teto conta no máximo isso.
+
+   **Desvio do plano:** nem o catálogo no banco nem "todas as tentativas
+   certas" entraram. A correção roda no navegador por desenho, então quem
+   forja uma conclusão forja as tentativas também — com a hora do servidor e
+   o ritmo valendo, uns minutos de script. O ganho seria pouco; o custo, recusar
+   conclusões legítimas quando uma tentativa não chegou ao banco (a gravação
+   dela nunca bloqueia a aula), e exigir rodar SQL a cada aula nova. Com o
+   limite, o teto nunca passa do que o catálogo inteiro renderia a quem
+   estudasse de verdade.
 4. **P2-9** Vite 6+ e Vitest 3+ numa etapa própria; revalidar
    `semSourcemapNosGigantes`, `worker.format` e o E2E dos oito motores.
 5. [x] **P3-9** mensagens do OAuth por código, sem texto da URL.
