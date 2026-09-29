@@ -205,11 +205,25 @@ A fazer, nesta ordem:
 
 ## Fase 7 — Gamificação
 
-1. **Missões** (evolução dos desafios, mesma derivação, sem tabela de resgate):
+1. [x] **Missões** (evolução dos desafios, mesma derivação, sem tabela de resgate):
    diárias com "corrigir 1 bug" (`find-bug`), "revisar 3 do caderno de erros";
    semanais com "estudar 4 dias", "20 exercícios", "entregar um projeto".
    Recompensas em XP e moedas; sem punição por não cumprir; nada que premie
    velocidade ou volume repetido.
+   Feito assim: desafios como os outros, no mesmo rodízio — diários "caçar
+   um bug", "prever antes de rodar" (2 previsões) e "três jeitos" (3 tipos
+   de exercício); semanais "consertar o caderno" (2 que já tinham sido
+   errados) e "duas trilhas". Dois por período e a mesma recompensa: o teto
+   do banco vale como estava, e o aluno-modelo foi de 221 para 219 moedas
+   por semana. Entram em `ESTREIA_DAS_MISSOES` (segunda, 2026-10-05) —
+   antes dela o rodízio original fica intacto, porque moedas e XP de
+   desafio são recalculados do histórico inteiro e um dia já vivido não
+   pode trocar de desafio. Desvios: "entregar um projeto" ficou de fora — a
+   conclusão de projeto não tem data no banco (`completed_projects` é uma
+   lista), então não dá para dizer em que semana aconteceu sem uma
+   migração; "estudar 4 dias" e "exercícios" já existiam; e o caderno
+   ficou semanal com meta 2, porque num dia só quem errou pouco não teria
+   como cumprir.
 2. **Conquistas por níveis** (bronze, prata, ouro, platina) nas de contagem,
    em categorias novas: debugging, projetos, desafios, linguagens, revisão.
    Algumas liberam cosméticos exclusivos (Fase 8). Trocar "Coruja".

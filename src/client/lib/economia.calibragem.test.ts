@@ -66,13 +66,16 @@ function simular(inicio: Date, dias: number): Dia[] {
   return curva;
 }
 
-// Segunda, quarta e sexta de janeiro, e duas datas longe dali.
+// Segunda, quarta e sexta de janeiro, duas datas longe dali, e a estreia das
+// missões (`ESTREIA_DAS_MISSOES`): as outras curvas terminam antes dela, e o
+// rodízio novo precisa caber na mesma faixa.
 const INICIOS = [
   new Date(2026, 0, 5, 10),
   new Date(2026, 0, 7, 10),
   new Date(2026, 0, 9, 10),
   new Date(2026, 1, 11, 10),
   new Date(2026, 2, 21, 10),
+  new Date(2026, 9, 5, 10),
 ];
 const MAIOR_NIVEL = Math.max(...ITENS.map((i) => i.nivelQueLibera ?? 0));
 // Dias bastantes para todos chegarem ao maior nível à venda, com folga.

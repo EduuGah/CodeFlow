@@ -190,6 +190,38 @@ test('o perfil abre com o anel do nível e uma porta por assunto', async ({ loga
   await expect(page).toHaveURL(/\/app\/perfil$/);
 });
 
+test('as missões estreiam no rodízio: o bug caçado conta no dia, e as duas da semana aparecem', async ({
+  logado: page,
+  banco,
+}) => {
+  // `ESTREIA_DAS_MISSOES`, ao meio-dia de Brasília: o primeiro dia do rodízio novo.
+  await page.clock.setFixedTime(new Date('2026-10-05T12:00:00-03:00'));
+  banco.attempts = [
+    // Um exercício de encontrar o bug, acertado de manhã.
+    {
+      exercise_id: 'ex-js-7-achar-ponto',
+      lesson_id: 'lesson-js-7',
+      concepts: ['objetos'],
+      correct: true,
+      hints_used: 0,
+      created_at: new Date('2026-10-05T10:00:00-03:00').toISOString(),
+    },
+  ];
+
+  await page.goto('/app/perfil/desafios');
+  await esperarConteudo(page);
+
+  const hoje = page.getByRole('region', { name: 'Hoje' });
+  await expect(hoje.getByRole('progressbar', { name: 'Caçar um bug: 1 de 1' })).toBeVisible();
+  await expect(hoje.getByRole('listitem').filter({ hasText: 'Caçar um bug' })).toContainText('feito');
+
+  const semana = page.getByRole('region', { name: 'Esta semana' });
+  await expect(semana.getByText('Consertar o caderno')).toBeVisible();
+  await expect(semana.getByText('Duas trilhas')).toBeVisible();
+  // Uma trilha praticada até aqui: metade do caminho.
+  await expect(semana.getByRole('progressbar', { name: 'Duas trilhas: 1 de 2' })).toBeVisible();
+});
+
 test('o domínio diz o que falta: três acertos na mesma manhã ainda não são domínio', async ({
   logado: page,
   banco,

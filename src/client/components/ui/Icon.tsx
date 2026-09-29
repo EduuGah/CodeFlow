@@ -412,6 +412,21 @@ export const IconFlag = (p: IconProps) => (
   </Base>
 );
 
+/** Um inseto de seis patas: o bug que se caça. */
+export const IconBug = (p: IconProps) => (
+  <Base {...p}>
+    <rect x="8" y="8" width="8" height="11.5" rx="4" />
+    <path d="M10 8V7a2 2 0 0 1 4 0v1" />
+    <path d="M12 12v7.5" />
+    <path d="M8 10.5 5.5 8" />
+    <path d="M16 10.5 18.5 8" />
+    <path d="M8 14H4.5" />
+    <path d="M16 14h3.5" />
+    <path d="M8.5 17.5 6 20" />
+    <path d="M15.5 17.5 18 20" />
+  </Base>
+);
+
 /** Camadas: vários conceitos, um sobre o outro. */
 export const IconLayers = (p: IconProps) => (
   <Base {...p}>

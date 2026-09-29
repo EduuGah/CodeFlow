@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
+import { getExercises, getLessonsOfTrack, listTracks } from '../../content/catalogo';
+import type { Exercise, Lesson } from '../../content/types';
 import type { Attempt } from './mastery';
 import type { FlashcardReview } from './review';
 import {
@@ -9,9 +11,12 @@ import {
   desafiosConcluidos,
   desafiosDaSemana,
   desafiosDoDia,
+  ESTREIA_DAS_MISSOES,
   inicioDaSemana,
   POR_PERIODO,
   RECOMPENSA,
+  RODIZIO,
+  type ContextoDoPeriodo,
 } from './desafios';
 import { diaLocal, somarDias } from './sequencia';
 import { fechamentoDasAulas } from './study';
@@ -239,5 +244,174 @@ describe('o índice por dia dá o mesmo resultado da conta ingênua', () => {
 
     const rapido = desafiosConcluidos(entrada).map((c) => `${c.periodo} ${c.dia} ${c.id}`);
     expect(rapido.sort()).toEqual(referencia(entrada).sort());
+  });
+});
+
+describe('as missões (Fase 7)', () => {
+  /**
+   * O rodízio como ele era antes das missões, copiado da saída do código
+   * antigo **antes** da mudança — não recalculado por ele. É desse rodízio
+   * que sai o histórico de moedas e XP de quem já estudou: se um dia vivido
+   * trocasse de desafio, o saldo de alguém encolheria.
+   */
+  const DIAS_ANTES: Array<[string, string[]]> = [
+    ['2026-09-14', ['dia-revisar-5', 'dia-insistir-1']],
+    ['2026-09-15', ['dia-aula-1', 'dia-resolver-3']],
+    ['2026-09-16', ['dia-sem-dica-2', 'dia-revisar-5']],
+    ['2026-09-17', ['dia-insistir-1', 'dia-aula-1']],
+    ['2026-09-18', ['dia-resolver-3', 'dia-sem-dica-2']],
+    ['2026-09-19', ['dia-revisar-5', 'dia-insistir-1']],
+    ['2026-09-20', ['dia-aula-1', 'dia-resolver-3']],
+    ['2026-09-21', ['dia-sem-dica-2', 'dia-revisar-5']],
+    ['2026-09-22', ['dia-insistir-1', 'dia-aula-1']],
+    ['2026-09-23', ['dia-resolver-3', 'dia-sem-dica-2']],
+    ['2026-09-24', ['dia-revisar-5', 'dia-insistir-1']],
+    ['2026-09-25', ['dia-aula-1', 'dia-resolver-3']],
+    ['2026-09-26', ['dia-sem-dica-2', 'dia-revisar-5']],
+    ['2026-09-27', ['dia-insistir-1', 'dia-aula-1']],
+    ['2026-09-28', ['dia-resolver-3', 'dia-sem-dica-2']],
+    ['2026-09-29', ['dia-revisar-5', 'dia-insistir-1']],
+    ['2026-09-30', ['dia-aula-1', 'dia-resolver-3']],
+    ['2026-10-01', ['dia-sem-dica-2', 'dia-revisar-5']],
+    ['2026-10-02', ['dia-insistir-1', 'dia-aula-1']],
+    ['2026-10-03', ['dia-resolver-3', 'dia-sem-dica-2']],
+    ['2026-10-04', ['dia-revisar-5', 'dia-insistir-1']],
+  ];
+  const SEMANAS_ANTES: Array<[string, string[]]> = [
+    ['2026-08-24', ['semana-dias-4', 'semana-exercicios-15']],
+    ['2026-08-31', ['semana-aulas-3', 'semana-sem-dica-8']],
+    ['2026-09-07', ['semana-conceitos-5', 'semana-revisar-20']],
+    ['2026-09-14', ['semana-dias-4', 'semana-exercicios-15']],
+    ['2026-09-21', ['semana-aulas-3', 'semana-sem-dica-8']],
+    ['2026-09-28', ['semana-conceitos-5', 'semana-revisar-20']],
+  ];
+
+  const ids = (lista: { id: string }[]) => lista.map((d) => d.id);
+  const MISSOES_DO_DIA = ['dia-bug-1', 'dia-prever-2', 'dia-tipos-3'];
+  const MISSOES_DA_SEMANA = ['semana-caderno-2', 'semana-trilhas-2'];
+
+  it('não mudam o rodízio de nenhum dia nem semana antes da estreia', () => {
+    for (const [dia, esperado] of DIAS_ANTES) expect(ids(desafiosDoDia(dia)), dia).toEqual(esperado);
+    for (const [segunda, esperado] of SEMANAS_ANTES) expect(ids(desafiosDaSemana(segunda)), segunda).toEqual(esperado);
+  });
+
+  it('nenhuma missão aparece antes da estreia, que é uma segunda-feira', () => {
+    expect(inicioDaSemana(ESTREIA_DAS_MISSOES)).toBe(ESTREIA_DAS_MISSOES);
+    for (let dia = '2026-01-01'; dia < ESTREIA_DAS_MISSOES; dia = somarDias(dia, 1)) {
+      for (const id of ids(desafiosDoDia(dia))) expect(MISSOES_DO_DIA, dia).not.toContain(id);
+    }
+    for (let segunda = '2025-12-29'; segunda < ESTREIA_DAS_MISSOES; segunda = somarDias(segunda, 7)) {
+      for (const id of ids(desafiosDaSemana(segunda))) expect(MISSOES_DA_SEMANA, segunda).not.toContain(id);
+    }
+  });
+
+  it('dois dias seguidos nunca repetem um desafio, inclusive na virada', () => {
+    let anterior = new Set(ids(desafiosDoDia(somarDias(ESTREIA_DAS_MISSOES, -1))));
+    for (let i = 0; i < 90; i++) {
+      const dia = somarDias(ESTREIA_DAS_MISSOES, i);
+      const atual = ids(desafiosDoDia(dia));
+      expect(atual, dia).toHaveLength(POR_PERIODO.dia);
+      expect(new Set(atual).size, dia).toBe(atual.length);
+      for (const id of atual) expect(anterior.has(id), `${dia}: ${id} repetiu a véspera`).toBe(false);
+      anterior = new Set(atual);
+    }
+  });
+
+  it('duas semanas seguidas também não, inclusive na virada', () => {
+    let anterior = new Set(ids(desafiosDaSemana(somarDias(ESTREIA_DAS_MISSOES, -7))));
+    for (let i = 0; i < 20; i++) {
+      const segunda = somarDias(ESTREIA_DAS_MISSOES, 7 * i);
+      const atual = ids(desafiosDaSemana(segunda));
+      expect(new Set(atual).size, segunda).toBe(POR_PERIODO.semana);
+      for (const id of atual) expect(anterior.has(id), `${segunda}: ${id} repetiu a semana anterior`).toBe(false);
+      anterior = new Set(atual);
+    }
+  });
+
+  it('todo desafio entra no rodízio novo na primeira volta', () => {
+    // Uma volta: o tamanho da lista dividido por quantos saem em cada período.
+    const volta = (periodos: number, doPeriodo: (i: number) => string[]) =>
+      new Set(Array.from({ length: periodos }, (_, i) => doPeriodo(i)).flat());
+    const dias = volta(RODIZIO.dia.comMissoes.length / POR_PERIODO.dia, (i) =>
+      ids(desafiosDoDia(somarDias(ESTREIA_DAS_MISSOES, i)))
+    );
+    const semanas = volta(RODIZIO.semana.comMissoes.length / POR_PERIODO.semana, (i) =>
+      ids(desafiosDaSemana(somarDias(ESTREIA_DAS_MISSOES, 7 * i)))
+    );
+    expect([...dias].sort()).toEqual(ids(DESAFIOS_DO_DIA).sort());
+    expect([...semanas].sort()).toEqual(ids(DESAFIOS_DA_SEMANA).sort());
+  });
+
+  describe('o progresso, com exercícios de verdade do catálogo', () => {
+    const DIA = somarDias(ESTREIA_DAS_MISSOES, 1);
+    const doCatalogo = listTracks().flatMap((trilha) =>
+      getLessonsOfTrack(trilha.id).flatMap((aula) => getExercises(aula).map((exercicio) => ({ exercicio, aula })))
+    );
+    const doTipo = (tipo: Exercise['type']) => doCatalogo.filter((x) => x.exercicio.type === tipo);
+    const tentativa = ({ exercicio, aula }: { exercicio: Exercise; aula: Lesson }, over: Partial<Attempt> = {}) =>
+      t(DIA, { exerciseId: exercicio.id, lessonId: aula.id, concepts: exercicio.concepts, ...over });
+    const ctx = (tentativas: Attempt[], jaErrados: string[] = []): ContextoDoPeriodo => ({
+      tentativas,
+      jaErrados: new Set(jaErrados),
+      revisoes: [],
+      aulasConcluidas: 0,
+    });
+    const definicao = (id: string) => [...DESAFIOS_DO_DIA, ...DESAFIOS_DA_SEMANA].find((d) => d.id === id)!;
+
+    it('"caçar um bug" conta só acertos de encontrar o bug', () => {
+      const [bug] = doTipo('find-bug');
+      const [escolha] = doTipo('multiple-choice');
+      const def = definicao('dia-bug-1');
+      expect(def.progresso(ctx([tentativa(escolha)]))).toBe(0);
+      expect(def.progresso(ctx([tentativa(bug, { correct: false })]))).toBe(0);
+      expect(def.progresso(ctx([tentativa(bug)]))).toBe(1);
+    });
+
+    it('"prever antes de rodar" conta previsões distintas', () => {
+      const [a, b] = doTipo('predict-output');
+      const def = definicao('dia-prever-2');
+      expect(def.progresso(ctx([tentativa(a), tentativa(a)]))).toBe(1);
+      expect(def.progresso(ctx([tentativa(a), tentativa(b)]))).toBe(2);
+    });
+
+    it('"três jeitos" conta tipos distintos acertados, e ignora o que saiu do catálogo', () => {
+      const [bug] = doTipo('find-bug');
+      const [escolha] = doTipo('multiple-choice');
+      const [lacuna] = doTipo('fill-blank');
+      const def = definicao('dia-tipos-3');
+      const errou = tentativa(lacuna, { correct: false });
+      const saiu = t(DIA, { exerciseId: 'ex-que-saiu-do-catalogo' });
+      expect(def.progresso(ctx([tentativa(bug), tentativa(escolha), errou, saiu]))).toBe(2);
+      expect(def.progresso(ctx([tentativa(bug), tentativa(escolha), tentativa(lacuna)]))).toBe(3);
+    });
+
+    it('"consertar o caderno" conta só o que já tinha sido errado', () => {
+      const [a, b] = doTipo('code');
+      const def = definicao('semana-caderno-2');
+      expect(def.progresso(ctx([tentativa(a), tentativa(b)], [a.exercicio.id]))).toBe(1);
+      expect(def.progresso(ctx([tentativa(a), tentativa(b)], [a.exercicio.id, b.exercicio.id]))).toBe(2);
+    });
+
+    it('"duas trilhas" conta trilhas distintas, e ignora aula fora do catálogo', () => {
+      const [primeira, segunda] = listTracks().map((trilha) => getLessonsOfTrack(trilha.id)[0]);
+      const def = definicao('semana-trilhas-2');
+      const em = (aula: Lesson) => t(DIA, { lessonId: aula.id, correct: false });
+      expect(def.progresso(ctx([em(primeira), em(primeira), t(DIA, { lessonId: 'aula-que-saiu' })]))).toBe(1);
+      expect(def.progresso(ctx([em(primeira), em(segunda)]))).toBe(2);
+    });
+
+    it('cumprida no dia em que está no rodízio, rende a recompensa de sempre', () => {
+      expect(ids(desafiosDoDia(ESTREIA_DAS_MISSOES))).toContain('dia-bug-1');
+      const [bug] = doTipo('find-bug');
+      const acerto = { ...tentativa(bug), createdAt: new Date(`${ESTREIA_DAS_MISSOES}T10:00:00`).toISOString() };
+      const concluidos = desafiosConcluidos({
+        attempts: [acerto],
+        reviews: [],
+        completedLessons: [],
+        hoje: new Date(`${ESTREIA_DAS_MISSOES}T22:00:00`),
+      });
+      const missao = concluidos.find((c) => c.id === 'dia-bug-1');
+      expect(missao).toEqual({ id: 'dia-bug-1', periodo: 'dia', dia: ESTREIA_DAS_MISSOES, recompensa: RECOMPENSA.dia });
+    });
   });
 });

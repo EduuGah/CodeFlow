@@ -1,3 +1,4 @@
+import { getLesson, resumoDoExercicio } from '../../content';
 import type { Attempt } from './mastery';
 import type { FlashcardReview } from './review';
 import { diaLocal, somarDias } from './sequencia';
@@ -14,10 +15,15 @@ import { fechamentoDasAulas } from './study';
  * tabela de desafios aceitos nem de recompensas resgatadas; cumprir é receber.
  *
  * Os desafios de cada dia vêm de um rodízio pela data, então todo mundo vê os
- * mesmos e eles não mudam ao recarregar. O rodízio anda de dois em dois num
- * conjunto de cinco, e por isso dois dias seguidos nunca repetem um desafio.
- * Nenhum deles premia velocidade ou repetição: as metas são sobre exercícios
- * **distintos**, dias distintos, cartões distintos.
+ * mesmos e eles não mudam ao recarregar. O rodízio anda de dois em dois, e
+ * os pares de dias seguidos nunca se cruzam: dois dias seguidos nunca
+ * repetem um desafio. Nenhum deles premia velocidade ou repetição: as metas
+ * são sobre exercícios **distintos**, dias distintos, cartões distintos,
+ * tipos e trilhas distintos.
+ *
+ * As missões (Fase 7) são desafios como os outros, com os mesmos dois por
+ * período e a mesma recompensa — a economia e o teto do banco não mudam. O
+ * que muda é o rodízio, e só a partir de `ESTREIA_DAS_MISSOES`: veja lá.
  */
 
 export type Periodo = 'dia' | 'semana';
@@ -43,6 +49,20 @@ export interface DefinicaoDeDesafio {
 }
 
 const exerciciosCertos = (t: Attempt[]) => new Set(t.filter((a) => a.correct).map((a) => a.exerciseId));
+
+/**
+ * O tipo de um exercício, pelo índice do catálogo. `undefined` para o que
+ * saiu do catálogo: a tentativa antiga continua no histórico, mas não conta
+ * para uma missão de tipo.
+ */
+const tipoDo = (exerciseId: string) => resumoDoExercicio(exerciseId)?.type;
+
+/** Exercícios distintos acertados, de um tipo só. */
+const certosDoTipo = (t: Attempt[], tipo: string) =>
+  new Set(t.filter((a) => a.correct && tipoDo(a.exerciseId) === tipo).map((a) => a.exerciseId)).size;
+
+/** Exercícios acertados no período em que a pessoa já tinha errado alguma vez. */
+const consertados = (c: ContextoDoPeriodo) => [...exerciciosCertos(c.tentativas)].filter((id) => c.jaErrados.has(id)).length;
 
 export const DESAFIOS_DO_DIA: DefinicaoDeDesafio[] = [
   {
@@ -75,7 +95,7 @@ export const DESAFIOS_DO_DIA: DefinicaoDeDesafio[] = [
     title: 'Voltar e resolver',
     description: 'Resolva um exercício em que você já tinha errado.',
     meta: 1,
-    progresso: (c) => [...exerciciosCertos(c.tentativas)].filter((id) => c.jaErrados.has(id)).length,
+    progresso: consertados,
   },
   {
     id: 'dia-aula-1',
@@ -84,6 +104,32 @@ export const DESAFIOS_DO_DIA: DefinicaoDeDesafio[] = [
     description: 'Conclua uma aula hoje.',
     meta: 1,
     progresso: (c) => c.aulasConcluidas,
+  },
+  // Missões (Fase 7): entram no rodízio em `ESTREIA_DAS_MISSOES`.
+  {
+    id: 'dia-bug-1',
+    periodo: 'dia',
+    title: 'Caçar um bug',
+    description: 'Acerte um exercício de encontrar o bug hoje.',
+    meta: 1,
+    progresso: (c) => certosDoTipo(c.tentativas, 'find-bug'),
+  },
+  {
+    id: 'dia-prever-2',
+    periodo: 'dia',
+    title: 'Prever antes de rodar',
+    description: 'Acerte 2 previsões de saída hoje.',
+    meta: 2,
+    progresso: (c) => certosDoTipo(c.tentativas, 'predict-output'),
+  },
+  {
+    id: 'dia-tipos-3',
+    periodo: 'dia',
+    title: 'Três jeitos',
+    description: 'Acerte exercícios de 3 tipos diferentes hoje.',
+    meta: 3,
+    progresso: (c) =>
+      new Set(c.tentativas.filter((a) => a.correct).map((a) => tipoDo(a.exerciseId)).filter((t) => t !== undefined)).size,
   },
 ];
 
@@ -136,6 +182,24 @@ export const DESAFIOS_DA_SEMANA: DefinicaoDeDesafio[] = [
     meta: 20,
     progresso: (c) => new Set(c.revisoes.map((r) => r.flashcardId)).size,
   },
+  // Missões (Fase 7): entram no rodízio em `ESTREIA_DAS_MISSOES`.
+  {
+    id: 'semana-caderno-2',
+    periodo: 'semana',
+    title: 'Consertar o caderno',
+    description: 'Resolva esta semana 2 exercícios em que você já tinha errado.',
+    meta: 2,
+    progresso: consertados,
+  },
+  {
+    id: 'semana-trilhas-2',
+    periodo: 'semana',
+    title: 'Duas trilhas',
+    description: 'Pratique em 2 trilhas diferentes esta semana.',
+    meta: 2,
+    progresso: (c) =>
+      new Set(c.tentativas.map((a) => getLesson(a.lessonId)?.trackId).filter((t) => t !== undefined)).size,
+  },
 ];
 
 export const RECOMPENSA = {
@@ -145,6 +209,69 @@ export const RECOMPENSA = {
 
 /** Quantos desafios cada período tem. */
 export const POR_PERIODO = { dia: 2, semana: 2 } as const;
+
+/**
+ * O dia em que as missões entram no rodízio.
+ *
+ * O histórico de desafios cumpridos é recalculado do começo a cada carga — é
+ * dele que saem as moedas e o XP de desafio —, então o rodízio de um dia que
+ * já passou **não pode mudar**: quem cumpriu "Três exercícios" numa terça
+ * continua tendo cumprido, e o saldo de ninguém encolhe. Antes desta data
+ * vale o rodízio original, intacto; a partir dela, o novo. É uma segunda,
+ * para o dia e a semana virarem juntos.
+ */
+export const ESTREIA_DAS_MISSOES = '2026-10-05';
+
+const porId = (lista: DefinicaoDeDesafio[], ids: string[]) =>
+  ids.map((id) => {
+    const achado = lista.find((d) => d.id === id);
+    if (!achado) throw new Error(`desafio ${id} fora da lista`);
+    return achado;
+  });
+
+/**
+ * Os rodízios. O original é a ordem das listas antes das missões. O novo
+ * forma pares que nunca se cruzam (dois por dia, de dois em dois numa lista
+ * de oito), e a ordem foi escolhida para a virada também não repetir: o
+ * último dia do original termina em "revisar" e "insistir", e o primeiro do
+ * novo começa com "resolver" e "caçar um bug"; a última semana termina em
+ * "conceitos" e "revisar", e a primeira nova traz as duas missões semanais.
+ */
+export const RODIZIO = {
+  dia: {
+    original: porId(DESAFIOS_DO_DIA, ['dia-resolver-3', 'dia-sem-dica-2', 'dia-revisar-5', 'dia-insistir-1', 'dia-aula-1']),
+    comMissoes: porId(DESAFIOS_DO_DIA, [
+      'dia-tipos-3',
+      'dia-insistir-1',
+      'dia-resolver-3',
+      'dia-bug-1',
+      'dia-sem-dica-2',
+      'dia-revisar-5',
+      'dia-prever-2',
+      'dia-aula-1',
+    ]),
+  },
+  semana: {
+    original: porId(DESAFIOS_DA_SEMANA, [
+      'semana-dias-4',
+      'semana-exercicios-15',
+      'semana-aulas-3',
+      'semana-sem-dica-8',
+      'semana-conceitos-5',
+      'semana-revisar-20',
+    ]),
+    comMissoes: porId(DESAFIOS_DA_SEMANA, [
+      'semana-dias-4',
+      'semana-exercicios-15',
+      'semana-aulas-3',
+      'semana-sem-dica-8',
+      'semana-conceitos-5',
+      'semana-revisar-20',
+      'semana-caderno-2',
+      'semana-trilhas-2',
+    ]),
+  },
+} as const;
 
 /** Dias desde 2026-01-01, para o rodízio andar com o calendário. */
 function indiceDoDia(dia: string): number {
@@ -176,12 +303,14 @@ export function inicioDaSemana(dia: string): string {
 
 /** Os desafios de um dia (`AAAA-MM-DD`). */
 export function desafiosDoDia(dia: string): DefinicaoDeDesafio[] {
-  return escolher(DESAFIOS_DO_DIA, POR_PERIODO.dia, indiceDoDia(dia));
+  const lista = dia < ESTREIA_DAS_MISSOES ? RODIZIO.dia.original : RODIZIO.dia.comMissoes;
+  return escolher(lista, POR_PERIODO.dia, indiceDoDia(dia));
 }
 
 /** Os desafios de uma semana, pela segunda-feira dela. */
 export function desafiosDaSemana(segunda: string): DefinicaoDeDesafio[] {
-  return escolher(DESAFIOS_DA_SEMANA, POR_PERIODO.semana, Math.floor(indiceDoDia(segunda) / 7));
+  const lista = segunda < ESTREIA_DAS_MISSOES ? RODIZIO.semana.original : RODIZIO.semana.comMissoes;
+  return escolher(lista, POR_PERIODO.semana, Math.floor(indiceDoDia(segunda) / 7));
 }
 
 export interface EstadoDoDesafio {

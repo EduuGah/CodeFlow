@@ -5,6 +5,7 @@ import {
   IconAlert,
   IconAward,
   IconBolt,
+  IconBug,
   IconCalendar,
   IconCalendarCheck,
   IconCheckCircle,
@@ -103,6 +104,11 @@ const POR_DESAFIO: Array<[RegExp, ComponentType<IconProps>]> = [
   [/aula/, IconLesson],
   [/dias/, IconCalendarCheck],
   [/conceitos/, IconLayers],
+  [/bug/, IconBug],
+  [/prever/, IconPlay],
+  [/tipos/, IconChecklist],
+  [/caderno/, IconRetry],
+  [/trilhas/, IconTrack],
 ];
 
 export function iconeDoDesafio(id: string): ComponentType<IconProps> {

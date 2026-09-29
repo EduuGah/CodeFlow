@@ -41,7 +41,7 @@ Números lidos do catálogo, não de memória.
 | Projetos | 10, com 34 critérios de aceitação — os 3 capstones são página + API + banco (motor 7), os outros 7 são JavaScript puro |
 | Conceitos | 151, com grafo de pré-requisitos |
 | Flashcards | 67 (93 conceitos ainda sem cartão) |
-| Testes | 3.925 de unidade + ~536 de navegador |
+| Testes | 3.938 de unidade + ~538 de navegador |
 | Pacote | 999 kB (280 kB comprimido) no chunk principal, eram 3.095 kB (851 kB) — o corpo das aulas saiu (P2-1b): o pacote leva só o índice (196 kB antes de minificar), e cada aula é um arquivo próprio de ~15 kB (5 kB comprimido; o maior tem 31 kB), baixado quando ela abre, junto com a seguinte. O que sobra no principal é o Supabase (~850 kB antes de minificar), o React, o React Router e as telas. O CI reprova acima de 320 kB comprimido (`npm run orcamento`). Aula, revisão, refazer erros, projeto e admin são rotas sob demanda (`App.tsx`), e o Zod só entra no chunk do admin; o Monaco são mais 3.362 kB (869 kB) num chunk à parte, baixado só quando o primeiro editor monta, e o worker de TypeScript (7 MB) só quando um modelo JS/TS abre. O motor de TypeScript não acrescentou arquivo; o de React acrescentou um chunk de 143 kB (47 kB) com o React e o ReactDOM como texto, baixado só por um exercício de React; o de SQL acrescentou o worker (49 kB) e o SQLite em WebAssembly (658 kB), baixados só por um exercício de SQL; o de Python acrescentou o worker (~22 kB) e o Pyodide inteiro (~13,5 MB: o WebAssembly do CPython, a biblioteca padrão zipada, o manifesto de pacotes), copiados para `/pyodide/` na build e baixados só por um exercício de Python |
 
 ## 4. Decisões que não devem ser desfeitas sem motivo forte
@@ -176,9 +176,17 @@ zera; consumido sozinho no primeiro dia perdido depois da compra —
 janela — exercício pelo primeiro acerto, aula pelo fechamento, revisão pela
 primeira; projeto não tem hora e não dobra), e cosméticos (temas e avatares)
 que também abrem por nível. Nada compra resposta, dica nem avanço. Os
-**desafios** (`lib/desafios.ts`) são um rodízio pela data — dois por dia de
-cinco, dois por semana de seis; dias seguidos nunca repetem — e cumprir é
-receber: não há tabela de resgate. Os **níveis não têm teto**: o mínimo do
+**desafios** (`lib/desafios.ts`) são um rodízio pela data — dois por dia e
+dois por semana; dias seguidos nunca repetem — e cumprir é receber: não há
+tabela de resgate. As **missões** (Fase 7) entraram no rodízio em
+`ESTREIA_DAS_MISSOES` (2026-10-05): caçar um bug, prever antes de rodar,
+três tipos de exercício no dia; consertar o caderno e duas trilhas na
+semana — de oito por dia e oito por semana, com a mesma recompensa, então o
+teto do banco não mudou. **O rodízio de um dia vivido nunca muda**: moedas e
+XP de desafio são recalculados do histórico inteiro a cada carga, e trocar
+o desafio de uma terça passada encolheria o saldo de quem a cumpriu. Por
+isso o rodízio original vale até a véspera da estreia, intacto, e o teste
+guarda uma fotografia dele. Os **níveis não têm teto**: o mínimo do
 nível *n* é `75·n·(n−1)`, e os títulos marcam faixas (Explorador… Mestre).
 
 **O registro de eventos nunca leva a mensagem de um erro** (`lib/registro.ts`,
@@ -454,8 +462,10 @@ src/client/lib/         Lógica pura e testada
   sequencia.ts          A sequência de dias com congelamentos; as correntes
                         da história (com o dia em que cada uma começou), para
                         os marcos valerem uma vez e terem data
-  desafios.ts           Desafios diários e semanais: rodízio, progresso,
-                        os cumpridos desde o primeiro estudo
+  desafios.ts           Desafios diários e semanais: rodízio (o original até
+                        a estreia das missões, o novo depois), progresso,
+                        os cumpridos desde o primeiro estudo; as missões de
+                        tipo e de trilha leem o índice do catálogo
   progress.ts           Leitura e escrita do progresso. `lerTodasAsPaginas`
                         (o Supabase corta em 1.000 linhas), `concluir` pela
                         função do banco, `Leitura<T>` = { dados, erro };
@@ -578,8 +588,8 @@ docs/curriculo.md       Roadmap de conteúdo — fonte canônica
 ```bash
 npm run typecheck   # inclui e2e/, scripts/ e playwright.config.ts
 npm run lint        # ESLint mínimo: typescript-eslint + react-hooks
-npm test            # 3.925 testes
-npm run test:e2e    # ~536 no navegador (antes: npx playwright install chromium;
+npm test            # 3.938 testes
+npm run test:e2e    # ~538 no navegador (antes: npx playwright install chromium;
                     # com um Chromium já instalado: PW_CHROMIUM=/caminho/do/chrome)
 npm run build
 npm run orcamento   # depois do build: o pacote principal comprimido contra o
@@ -894,6 +904,12 @@ Cada uma custou tempo. Não repita.
   servidor.** Os resolvidos de visitas anteriores eram escritos no mesmo mapa
   que os exercícios atualizam; o `'inicial'` do componente recém-montado
   apagava o `'acertou'` antigo. Cada fonte no seu estado (`resolvidosAntes`).
+- **Mudar a lista de desafios muda o passado.** O rodízio é função da data, e
+  o histórico de cumpridos é recalculado do começo: acrescentar um desafio
+  à lista redistribui os dias já vividos, e as moedas de quem estudou mudam
+  junto. Desafio novo entra por uma data de estreia no futuro, como
+  `ESTREIA_DAS_MISSOES`, e o teste da fotografia prova que antes dela nada
+  mexeu.
 - **Teste de desafio precisa escolher dias em que o desafio está no rodízio.**
   Sem isso ele passa vazio — o primeiro teste do "conclua uma aula" dessa
   auditoria passou antes da correção porque o dia não tinha o desafio.
