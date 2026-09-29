@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import type { LanguageId, PredictOutputExercise } from '../../../content/types';
 import type { ExerciseState, OnExerciseState } from '../../lib/exercise-state';
 import { executarNaLinguagem } from '../../lib/executar';
+import { normalizarSaida, previsaoConfere } from '../../lib/previsao';
 import { Card, SectionLabel } from '../ui/Card';
 import { MarkdownReader } from '../ui/MarkdownReader';
 import { ExerciseAction, ExerciseFeedback } from './ExerciseAction';
@@ -21,14 +22,6 @@ import { useReportarEstado } from '../../hooks/useReportarEstado';
  * informação mais útil que um exercício pode dar.
  */
 
-/** Compara ignorando espaços nas pontas e linhas em branco no fim. */
-function normalizar(texto: string): string {
-  return texto
-    .split('\n')
-    .map((linha) => linha.trim())
-    .join('\n')
-    .trim();
-}
 
 export function PredictOutput({
   exercise,
@@ -51,7 +44,7 @@ export function PredictOutput({
   const [ultimaRegistrada, setUltimaRegistrada] = useState<string | null>(null);
 
   const registrar = useRecordAttempt();
-  const acertou = saidaReal !== null && normalizar(previsao) === normalizar(saidaReal);
+  const acertou = saidaReal !== null && previsaoConfere(previsao, saidaReal);
 
   const estado: ExerciseState = executando
     ? 'verificando'
@@ -76,14 +69,14 @@ export function PredictOutput({
     setExecutando(false);
 
     // Reenviar a mesma previsão não é uma tentativa nova.
-    if (normalizar(previsao) === ultimaRegistrada) return;
+    if (normalizarSaida(previsao) === ultimaRegistrada) return;
 
-    setUltimaRegistrada(normalizar(previsao));
+    setUltimaRegistrada(normalizarSaida(previsao));
     registrar({
       exerciseId: exercise.id,
       lessonId,
       concepts: exercise.concepts,
-      correct: normalizar(previsao) === normalizar(real),
+      correct: previsaoConfere(previsao, real),
       hintsUsed: dicasAbertas,
       resposta: { tipo: 'previsao', texto: previsao },
       feedback: `Resultado real: ${real || '(nenhuma saída)'}`,

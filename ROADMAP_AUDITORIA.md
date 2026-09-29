@@ -181,6 +181,15 @@ A fazer, nesta ordem:
    também em UTC+14 no CI.
 4. **P2-14** dicas: CI cobra ≥ 3 níveis nos exercícios de produção; rodada de
    conteúdo trilha por trilha, começando por Fundamentos de JavaScript.
+   **Em andamento.** Feito: objetos (js-7) e `map`/`filter`/`reduce` (js-8),
+   depois de quem estuda dizer que não conseguia sem ajuda de IA — texto em
+   partes com prática no meio, o rastro volta a volta de quem chama a função
+   do `map` e de onde vem o parâmetro, degraus novos antes dos exercícios
+   combinados (o `map` sozinho, com objetos, o `filter` sozinho), 3 a 4
+   dicas em cada exercício. De carona: a previsão de uma lista não cobra
+   mais o espaço depois da vírgula (`lib/previsao.ts`), e a trilha ganhou o
+   E2E que conclui as 20 aulas no navegador. Falta: js-11 a js-20, o resto
+   da trilha, e a regra no CI.
 5. Flashcards para os 93 conceitos sem cartão, começando pelos que são
    pré-requisito de mais aulas.
 6. Projetos intermediários de TypeScript e React.
