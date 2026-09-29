@@ -197,7 +197,7 @@ Legenda de estado: **Corrigido** (com teste, nesta rodada), **Parcial**,
 | P2-11 | Quatro telas sem `<h1>` (trilha, aula, revisão, projeto) | Corrigido |
 | P2-12 | Sem ESLint | Corrigido |
 | P2-13 | Camada de persistência e `StudentDataContext` sem testes | Corrigido |
-| P2-14 | 85% dos exercícios com ≤ 2 dicas; a diretriz pede 4 níveis | Pendente |
+| P2-14 | 85% dos exercícios com ≤ 2 dicas; a diretriz pede 4 níveis | Parcial — Fundamentos de JavaScript inteira, cobrada no CI |
 | P2-15 | Nenhum caminho para refazer um exercício errado; 62% dos conceitos sem flashcard | Parcial — caderno e refazer feitos (0010); faltam os flashcards |
 | P2-16 | Economia: cosméticos esgotam em ~8 semanas e competem com a liberação por nível | Corrigido (preço pelo nível, medido; épicos só por moedas depois da semana ~13) |
 | P2-17 | Documentação de arquitetura desatualizada | Corrigido |
@@ -539,12 +539,20 @@ banco, sessão renovada com o mesmo id, troca de pessoa), todos sabotados.
 Seguem sem teste de componente próprio, cobertos pelo E2E: `Novidades`,
 `Aparencia`, `EditarPerfil`, `Review`.
 
-#### P2-14 · Dicas rasas — Pendente (conteúdo)
+#### P2-14 · Dicas rasas — Parcial
 Medido no catálogo: 328 exercícios com 1 dica, 429 com 2, 98 com 3, **33 com
 4**. A diretriz (`03-learning-experience.md` §3) pede quatro níveis:
 orientação conceitual → específica → parte da solução → solução explicada.
 O CI pode cobrar ao menos três para exercícios de produção (código, SQL,
 servidor, teste, refatorar).
+
+**Depois:** a rodada começou pela trilha de Fundamentos de JavaScript, a
+primeira do percurso, e por um motivo concreto — quem estuda disse que não
+conseguia as aulas de objetos, de `map` e da reta final sem ajuda de IA. Os
+123 exercícios da trilha têm agora 3 ou 4 dicas (os de código terminam na
+solução), e o CI cobra isso trilha a trilha: a lista `TRILHAS_REVISADAS` em
+`content.test.ts` cresce conforme cada trilha passa pela rodada. No
+catálogo inteiro: 325 com uma, 336 com duas, 187 com três, 45 com quatro.
 
 #### P2-15 · Não há como refazer o que se errou — Parcial
 - "Praticar" diz "N exercícios tentados e não resolvidos… siga pela trilha" e

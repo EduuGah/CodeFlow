@@ -92,6 +92,7 @@ console.log(a - b);`,
         hints: [
           'Repare no tipo de cada variável antes de decidir o que o operador faz.',
           '`a` está entre aspas. Isso muda o comportamento do `+`, mas e o do `-`?',
+          'Com um texto de um lado, o `+` junta os dois como texto: "10" e 5 viram "105". O `-` não sabe juntar texto, então converte para número e subtrai.',
         ],
       },
     },
@@ -136,6 +137,7 @@ String(42);        // '42'
         hints: [
           'Texto vazio é diferente de texto inválido. Os dois convertem para a mesma coisa?',
           'Esta é uma das conversões que surpreendem. Vale testar no console.',
+          '`Number("abc")` dá `NaN`, mas o texto vazio não: ele vira zero. É por isso que um campo vazio precisa ser conferido à parte.',
         ],
       },
     },
@@ -191,6 +193,7 @@ String(42);        // '42'
         hints: [
           'A mesma função entra nas duas lacunas.',
           'É a que transforma texto em número, e tem o nome do tipo.',
+          'O nome começa com letra maiúscula e é, em inglês, o nome do tipo "número".',
         ],
         solution: ['Number'],
       },
@@ -344,6 +347,7 @@ if (total !== 50) throw new Error("esperava 50, veio " + total);`,
         hints: [
           'Leia a saída impressa antes do erro. Que número é aquele?',
           'Um dos dois lados do `+` é texto. Qual, e de onde ele veio?',
+          'O valor digitado chega como texto. Converta-o para número **antes** de somar — no ponto em que o total é calculado.',
         ],
       },
     },

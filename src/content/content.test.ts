@@ -1150,6 +1150,21 @@ describe('estrutura do catálogo', () => {
       expect(unicas.size, `dicas repetidas em ${exercise.id}`).toBe(exercise.hints.length);
     }
   });
+
+  it('as trilhas que passaram pela rodada do P2-14 têm ao menos três dicas em todo exercício', () => {
+    // Com duas dicas, faltava o degrau entre "pense no conceito" e a
+    // resposta, e quem estudava ia pedir a solução para uma IA. A trilha
+    // entra nesta lista quando a rodada termina nela; daí em diante, um
+    // exercício novo com menos de três dicas reprova.
+    const TRILHAS_REVISADAS = ['track-js-fundamentos'];
+
+    const faltando = TRILHAS_REVISADAS.flatMap((trilha) => getLessonsOfTrack(trilha))
+      .flatMap((aula) => getExercises(aula))
+      .filter((exercicio) => exercicio.hints.length < 3)
+      .map((exercicio) => `${exercicio.id} (${exercicio.hints.length})`);
+
+    expect(faltando, 'exercícios com menos de três dicas').toEqual([]);
+  });
 });
 
 describe('blocos das trilhas', () => {

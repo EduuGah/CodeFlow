@@ -83,6 +83,7 @@ console.log(dados.usuario?.nome ?? "—"); // "—"
         hints: [
           'Compare: ReferenceError é sobre o nome não existir; TypeError é sobre o valor não ser o esperado.',
           'A mensagem diz "is not a function". O que acontece se você acessa uma propriedade que não existe e tenta chamá-la?',
+          '`pedidos.filtrar` lê uma propriedade que arrays não têm — isso dá `undefined`, sem erro. O erro vem ao tentar **chamar** `undefined` como função.',
         ],
       },
     },
@@ -108,6 +109,7 @@ console.log(dados.usuario?.nome ?? "—"); // "—"
         hints: [
           '"Cannot read properties **of undefined**" — de quem a frase está falando?',
           'Se `nome` estivesse undefined, ler seria possível. O problema é ler DE alguém que não existe.',
+          'Em `usuario.nome`, quem precisa existir para a leitura funcionar é `usuario`. A mensagem diz que esse lado era `undefined`.',
         ],
       },
     },
@@ -165,6 +167,7 @@ E existe o \`finally\`, que roda sempre — deu certo, deu errado, teve \`return
         hints: [
           'A chamada `salvar(pedido)` passou a funcionar, ou só parou de avisar que não funcionou?',
           'Quem vai descobrir esse problema, e quando?',
+          'Um `catch` vazio não conserta nada: o erro continua acontecendo, só que ninguém mais é avisado. Qual opção descreve isso?',
         ],
       },
     },
@@ -196,6 +199,7 @@ console.log(tentar());`,
         hints: [
           'O `return` dentro do `catch` impede o `finally` de rodar?',
           'Em que momento o valor do `return` chega a quem chamou?',
+          'O `finally` roda sempre, mesmo com `return` no `catch`: o valor fica guardado, o `finally` imprime, e só então a função entrega o valor — que o `console.log` de fora imprime por último.',
         ],
       },
     },
@@ -302,6 +306,7 @@ A segunda diz o que era esperado. Quem receber essa mensagem às duas da manhã 
         hints: [
           'A palavra que dispara um erro é a mesma que já aparece na segunda guarda.',
           'O valor é um número, então não é problema de tipo. Qual dos erros da tabela cobre "fora da faixa"?',
+          'O erro de "fora da faixa permitida" tem no nome a palavra inglesa para faixa — *range* — seguida de Error.',
         ],
         solution: ['throw', 'RangeError'],
       },
@@ -466,6 +471,7 @@ console.log(total({ itens: [{ preco: 10 }] }));`,
         hints: [
           'A mensagem diz que `itens` não é iterável. De onde veio o valor de `itens`?',
           'Compare os nomes de propriedade: o que a função lê, e o que o objeto passado realmente tem.',
+          'O objeto passado tem a chave `itens`, mas a função lê outra chave, que não existe — e o `for...of` recebe `undefined`.',
         ],
       },
     },

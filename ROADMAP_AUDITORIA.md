@@ -194,7 +194,11 @@ A fazer, nesta ordem:
    exercício — a de código termina na solução —, e pontes no texto onde
    travava (o que são o `resolver` e o `rejeitar` de `new Promise`; o
    callback como o mesmo gesto do `map`; o que fica guardado em `contar`).
-   Falta: js-1 a js-6, js-9 e js-10, e a regra no CI.
+   E o resto da trilha (js-1 a js-6, js-9, js-10), com a regra no CI: toda
+   trilha da lista `TRILHAS_REVISADAS` (`content.test.ts`) precisa de ao
+   menos três dicas em todo exercício. **A trilha de Fundamentos está
+   inteira.** Falta: as outras dezesseis, uma de cada vez, começando pelas
+   que vêm logo depois no percurso (Lógica, Estruturas, Web).
 5. Flashcards para os 93 conceitos sem cartão, começando pelos que são
    pré-requisito de mais aulas.
 6. Projetos intermediários de TypeScript e React.

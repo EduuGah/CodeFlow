@@ -36,12 +36,12 @@ Números lidos do catálogo, não de memória.
 | --- | --- |
 | Trilhas | 17 — Fundamentos de JavaScript (20 aulas), Lógica (3), Estruturas de Dados e Big O (4), Git e Equipe (6), Como a Web Funciona (8), A Página (26), TypeScript (10), React (14), SQL e Bancos de Dados (10), Node e APIs (10), ORM (3), Engenharia: Organizar um Projeto (8), Testes e Qualidade (8), Projeto Final (5), Deploy (4), Terminal e Ferramentas (5), Python (10) |
 | Aulas | 154, em blocos por assunto (`Track.sections`) |
-| Exercícios | 893, em 10 tipos — 260 de múltipla escolha, 169 de código, 110 de prever saída, 89 de lacuna, 74 de encontrar o bug, 74 de ordenar passos, 46 de SQL, 41 de servidor, 15 de escrever o teste, 15 de refatorar. Dicas: 326 com uma, 377 com duas, 145 com três, 45 com quatro (a rodada do P2-14 vai pela trilha de Fundamentos: js-7, js-8 e js-11 a js-20 já têm 3 ou 4 em todo exercício). 78 exercícios de página (`runtime: 'iframe'`), 42 de componente React (a aula é `language: 'react'`), 16 com trechos de tipo (`typeTests`). **Toda aula tem ao menos um dos quatro tipos de prática de dev** |
+| Exercícios | 893, em 10 tipos — 260 de múltipla escolha, 169 de código, 110 de prever saída, 89 de lacuna, 74 de encontrar o bug, 74 de ordenar passos, 46 de SQL, 41 de servidor, 15 de escrever o teste, 15 de refatorar. Dicas: 325 com uma, 336 com duas, 187 com três, 45 com quatro. A rodada do P2-14 terminou a trilha de Fundamentos de JavaScript (3 ou 4 em todo exercício), e o CI cobra ao menos três nas trilhas da lista `TRILHAS_REVISADAS` do `content.test.ts` — uma trilha entra quando a rodada passa por ela. 78 exercícios de página (`runtime: 'iframe'`), 42 de componente React (a aula é `language: 'react'`), 16 com trechos de tipo (`typeTests`). **Toda aula tem ao menos um dos quatro tipos de prática de dev** |
 | Verificação | 1.015 casos fixos + 62 propriedades + 71 verificações de SQL (por linhas devolvidas) |
 | Projetos | 10, com 34 critérios de aceitação — os 3 capstones são página + API + banco (motor 7), os outros 7 são JavaScript puro |
 | Conceitos | 151, com grafo de pré-requisitos |
 | Flashcards | 67 (93 conceitos ainda sem cartão) |
-| Testes | 3.924 de unidade + ~536 de navegador |
+| Testes | 3.925 de unidade + ~536 de navegador |
 | Pacote | 999 kB (280 kB comprimido) no chunk principal, eram 3.095 kB (851 kB) — o corpo das aulas saiu (P2-1b): o pacote leva só o índice (196 kB antes de minificar), e cada aula é um arquivo próprio de ~15 kB (5 kB comprimido; o maior tem 31 kB), baixado quando ela abre, junto com a seguinte. O que sobra no principal é o Supabase (~850 kB antes de minificar), o React, o React Router e as telas. O CI reprova acima de 320 kB comprimido (`npm run orcamento`). Aula, revisão, refazer erros, projeto e admin são rotas sob demanda (`App.tsx`), e o Zod só entra no chunk do admin; o Monaco são mais 3.362 kB (869 kB) num chunk à parte, baixado só quando o primeiro editor monta, e o worker de TypeScript (7 MB) só quando um modelo JS/TS abre. O motor de TypeScript não acrescentou arquivo; o de React acrescentou um chunk de 143 kB (47 kB) com o React e o ReactDOM como texto, baixado só por um exercício de React; o de SQL acrescentou o worker (49 kB) e o SQLite em WebAssembly (658 kB), baixados só por um exercício de SQL; o de Python acrescentou o worker (~22 kB) e o Pyodide inteiro (~13,5 MB: o WebAssembly do CPython, a biblioteca padrão zipada, o manifesto de pacotes), copiados para `/pyodide/` na build e baixados só por um exercício de Python |
 
 ## 4. Decisões que não devem ser desfeitas sem motivo forte
@@ -578,7 +578,7 @@ docs/curriculo.md       Roadmap de conteúdo — fonte canônica
 ```bash
 npm run typecheck   # inclui e2e/, scripts/ e playwright.config.ts
 npm run lint        # ESLint mínimo: typescript-eslint + react-hooks
-npm test            # 3.924 testes
+npm test            # 3.925 testes
 npm run test:e2e    # ~536 no navegador (antes: npx playwright install chromium;
                     # com um Chromium já instalado: PW_CHROMIUM=/caminho/do/chrome)
 npm run build

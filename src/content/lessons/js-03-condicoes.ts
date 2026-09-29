@@ -98,6 +98,7 @@ if (nota >= 5) {
         hints: [
           'Nota 9 é maior ou igual a 5? E o que acontece depois que uma condição passa?',
           'As condições seguintes são testadas, ou puladas?',
+          'Numa cadeia de `if`/`else if`, só o primeiro caminho que passa roda; os seguintes nem são testados. Qual é o primeiro que a nota 9 satisfaz?',
         ],
       },
     },
@@ -157,6 +158,7 @@ if (nota >= 5) {
         hints: [
           'A primeira condição é a mais restritiva: qual nota separa excelente de aprovado?',
           'Excelente começa em 9, aprovado em 7.',
+          'Teste a nota mais alta primeiro: se o 7 viesse antes, uma nota 9 pararia em "aprovado" e nunca chegaria a "excelente".',
         ],
         solution: ['9', '7'],
       },
@@ -292,6 +294,7 @@ if (nada) console.log('null passou');`,
         hints: [
           'São seis os valores falsos. Quais desta lista estão entre eles?',
           'Uma lista vazia é falsa, ou é um objeto que por acaso não tem itens?',
+          'Os falsos são `false`, `0`, `""`, `null`, `undefined` e `NaN`. Todo o resto é verdadeiro — inclusive `[]`.',
         ],
       },
     },
@@ -411,6 +414,7 @@ if (resultado !== false) throw new Error("um visitante foi tratado como administ
         hints: [
           'A função devolve `true` para todo mundo. O que faz um `if` entrar sempre?',
           'Conte os sinais de igual na condição.',
+          'Um `=` só **guarda** um valor; para **comparar**, são três. Guardar "admin" deixa um texto não vazio — que é sempre verdadeiro.',
         ],
       },
     },
@@ -432,7 +436,11 @@ for (const idade of idades) {
         expectedOutput: '10 menor\n18 adulto\n25 adulto',
         explanation:
           'O ternário `idade >= 18 ? \'adulto\' : \'menor\'` é avaliado a cada volta: 10 é menor que 18 (menor), 18 já satisfaz `>=` (adulto), 25 também (adulto). É a mesma lógica de um `if`/`else` de duas linhas, só que como uma expressão que já produz o valor de `status`.',
-        hints: ['Antes do `?` está a condição; entre `?` e `:` o valor se verdadeira; depois de `:` o valor se falsa.'],
+        hints: [
+          'Antes do `?` está a condição; entre `?` e `:` o valor se verdadeira; depois de `:` o valor se falsa.',
+          'Para cada idade, a condição é `idade >= 18`. 18 é maior ou igual a 18?',
+          'O `console.log(idade, status)` imprime os dois valores separados por um espaço, uma linha por idade.',
+        ],
       },
     },
     {
@@ -468,6 +476,7 @@ console.log(tipo);`,
         hints: [
           'O que acontece quando um `case` não termina em `break`?',
           'Compare o `case 5` com os outros dois — o que ele tem a menos?',
+          'Sem `break`, o `switch` continua para o próximo `case` sem testar nada: o valor é trocado de novo antes de sair.',
         ],
       },
     },
