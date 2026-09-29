@@ -79,8 +79,9 @@ console.log(copia.itens);`,
         explanation:
           '`copia` é um objeto novo, então mexer nele não afeta `original`. `apelido` é apenas outro nome para o mesmo objeto — por isso `original.itens` virou 50. O espalhamento `...` é o que separa os dois casos.',
         hints: [
-          'Qual das duas linhas criou um objeto novo, e qual só criou outro nome?',
-          '`{ ...original }` produz um objeto novo. `= original` produz o quê?',
+          'Qual das duas linhas criou um objeto novo, e qual só criou outro nome para o mesmo?',
+          '`{ ...original }` é um objeto novo, separado. `= original` é outro nome para o mesmo objeto.',
+          'Mudar `apelido` muda `original` (são o mesmo objeto). Mudar `copia` não mexe em nenhum dos dois.',
         ],
       },
     },
@@ -138,8 +139,9 @@ console.log(copia.itens);`,
         explanation:
           '`sort` ordena no lugar e devolve a mesma lista. Espalhar os itens num array novo antes de ordenar deixa o original onde estava — quem chamou a função não é surpreendido.',
         hints: [
-          'Os colchetes já estão ali. Falta o que espalha os itens de `numeros` dentro deles.',
-          'São três pontos.',
+          'Os colchetes já estão ali: eles criam uma lista nova. Falta o que coloca os itens de `numeros` dentro dela.',
+          'É o espalhamento — o mesmo operador que copia um objeto dentro de chaves, agora dentro de colchetes.',
+          'São três pontos, colados no nome da lista.',
         ],
         solution: ['...'],
       },
@@ -203,7 +205,8 @@ console.log(config.avancado.limite);`,
           'O congelamento vale para as propriedades **do objeto de fora**: alterar `tema` é recusado, e dentro de um módulo essa recusa vira um `TypeError` — em código antigo, fora de módulo, ela seria silenciosa. Já `avancado` é outro objeto, e ele não foi congelado: a alteração passa sem nenhum aviso. `Object.freeze` é raso, exatamente como o espalhamento.',
         hints: [
           'O `freeze` congela as propriedades do objeto, ou tudo que está dentro delas?',
-          '`config.avancado` é o mesmo objeto que foi congelado, ou um objeto diferente?',
+          'Mudar `config.tema` é recusado — e dentro de um módulo, a recusa é um `TypeError`, que o `catch` imprime.',
+          '`config.avancado` é outro objeto, que ninguém congelou: a mudança nele passa.',
         ],
       },
     },
@@ -260,9 +263,10 @@ const carrinho = [
 console.log(comQuantidade(carrinho, 2, 5));
 console.log(carrinho[1].quantidade); // esperado: 1 — o original não muda`,
         hints: [
-          '`map` já devolve uma lista nova. O que falta é não devolver o mesmo objeto nos itens que mudam.',
-          'Para o item que bate: `{ ...item, quantidade }`. Para os outros, devolva o item como está.',
-          'Estrutura: `return carrinho.map((item) => item.id === id ? { ...item, quantidade } : item);`',
+          '`map` já devolve uma lista nova. O que falta é não alterar os objetos que estão dentro dela.',
+          'Para o item cujo `id` bate, devolva um objeto novo: `{ ...item, quantidade }`. Para os outros, devolva o próprio item.',
+          'Um ternário dentro do `map` decide: `item.id === id ? (objeto novo) : item`. E um `return` na frente do `map`.',
+          'return carrinho.map((item) =>\n  item.id === id ? { ...item, quantidade } : item\n);',
         ],
         tests: [
           {

@@ -89,7 +89,8 @@ console.log('C');`,
           '`await` pausa **apenas** a função `principal`. Quando ela para para esperar, o programa continua e imprime `C`. Só depois, com a promise resolvida, `principal` retoma e imprime `B 7`.',
         hints: [
           'O `await` pausa o programa inteiro, ou só a função onde ele está?',
-          'Enquanto `principal` espera, o que o resto do programa está fazendo?',
+          '`principal()` começa a rodar na hora: imprime `A` e para no `await`, devolvendo o controle.',
+          'Com `principal` pausada, o programa segue para a última linha. Só depois ela retoma e imprime o que falta.',
         ],
       },
     },
@@ -147,8 +148,9 @@ console.log('2');`,
         explanation:
           'Uma função `async` roda de forma **síncrona** até o primeiro `await` — por isso o `A` sai logo depois do `1`, antes do `2`. No `await` ela é suspensa e devolve o controle: o `2` roda, e só quando a pilha esvazia o corpo restante volta a rodar, imprimindo `B`. Repare que o `await null` não espera nada de verdade e mesmo assim adia o resto: é o `await`, e não a demora, que agenda a continuação.',
         hints: [
-          'A função começa a rodar no momento da chamada, ou só depois?',
-          'A partir de qual linha o corpo da função é adiado?',
+          'A função `async` começa a rodar no momento da chamada, ou só depois?',
+          'Ela roda normal até o primeiro `await`: tudo antes dele sai na hora.',
+          'No `await` ela é suspensa, e o programa segue para a linha depois da chamada. O resto do corpo fica para depois — mesmo esperando `null`.',
         ],
       },
     },
@@ -188,8 +190,9 @@ console.log('2');`,
         explanation:
           'Sem `await`, `primeira` receberia a promise em vez do número — e somar duas promises dá `NaN`. E `await` só é permitido dentro de uma função marcada com `async`: as duas palavras andam juntas.',
         hints: [
-          'A primeira lacuna marca a função inteira. A segunda aparece duas vezes, antes de cada chamada.',
-          'Uma delas permite a outra: sem a primeira, a segunda é erro de sintaxe.',
+          'A primeira lacuna marca a função inteira. A segunda aparece duas vezes, antes de cada chamada que devolve uma promise.',
+          'Uma palavra permite a outra: a que faz esperar só é aceita dentro de uma função marcada com a primeira.',
+          'São as duas palavras da aula: a que marca a função vai antes de `function`; a que espera vai antes de `buscarNota()`.',
         ],
         solution: ['async', 'await'],
       },
@@ -257,7 +260,8 @@ A regra para levar: **\`await\` dentro de \`forEach\` não espera nada.** Quando
           '`forEach` descarta o valor devolvido pela função que recebe. Como uma função `async` devolve uma promise, o `forEach` joga fora exatamente a coisa que permitiria esperar — ele termina imediatamente e o programa segue. Pôr `await` antes do `forEach` não ajuda: ele devolve `undefined`, e esperar por `undefined` não espera pelas buscas. As duas saídas certas são `for...of`, que espera uma de cada vez, e `Promise.all` com `map`, que dispara todas juntas e espera o conjunto.',
         hints: [
           'O que o `forEach` faz com o valor que a função dele devolve?',
-          'Uma função `async` devolve o quê, mesmo quando o corpo não tem `return`?',
+          'Uma função `async` devolve uma promise — e o `forEach` joga essa promise fora, então ninguém espera por ela.',
+          'A correção precisa de algo que espere: um laço onde o `await` pausa a função de fora, ou um método que junte as promises numa só.',
         ],
       },
     },
@@ -313,9 +317,10 @@ async function nomeDoUsuario(id) {
 nomeDoUsuario(3).then(console.log);   // esperado: Usuário 3
 nomeDoUsuario(-1).then(console.log);  // esperado: desconhecido`,
         hints: [
-          'Envolva a chamada num `try`, e devolva o valor de reserva no `catch`.',
-          'Sem `await` você guardaria a promise, não o objeto — e `.nome` daria `undefined`.',
-          'Estrutura: `try { const u = await buscarUsuario(id); return u.nome; } catch { return "desconhecido"; }`',
+          'A busca pode falhar. Com `await`, uma falha vira erro lançado — e erro lançado se trata com `try/catch`.',
+          'Dentro do `try`: espere `buscarUsuario(id)` com `await`, guarde numa constante e devolva o `nome` dela.',
+          'No `catch`, devolva `"desconhecido"`. Sem o `await` você guardaria a promise, não o usuário — e `.nome` daria `undefined`.',
+          'try {\n  const usuario = await buscarUsuario(id);\n  return usuario.nome;\n} catch (erro) {\n  return "desconhecido";\n}',
         ],
         tests: [
           {
@@ -420,6 +425,7 @@ function cidadeDoUsuario(usuarioId) {
         ],
         hints: [
           'Cada `.then(function (x) {...})` é um lugar onde você esperou por um valor. `await` faz a mesma espera, sem abrir função nova.',
+          'Marque a função com `async` na frente de `function` — só assim o `await` é aceito dentro dela.',
           'Guarde cada resultado numa constante: primeiro o usuário, depois a cidade. A segunda busca usa um campo do primeiro resultado.',
           'async function cidadeDoUsuario(usuarioId) {\n  const usuario = await buscarUsuario(usuarioId);\n  const cidade = await buscarCidade(usuario.cidadeId);\n  return usuario.nome + " mora em " + cidade.nome;\n}',
         ],

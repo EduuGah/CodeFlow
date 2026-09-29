@@ -27,7 +27,7 @@ Lendo em partes: \`^\` é o começo do texto, \`\\d\` é um dígito, \`{5}\` sã
 
 O vocabulário que resolve a maioria dos casos:
 
-| | |
+| Símbolo | Quer dizer |
 | --- | --- |
 | \`\\d\` \`\\w\` \`\\s\` | dígito, letra ou número, espaço |
 | \`.\` | qualquer caractere |
@@ -81,8 +81,9 @@ console.log(texto.match(/:.+?;/)[0]);`,
         explanation:
           'O primeiro `.+` é guloso: vai até o **último** ponto e vírgula do texto. O segundo tem `?`, que o torna preguiçoso — para no primeiro que servir. Quando um padrão "pega demais", quase sempre é isso.',
         hints: [
-          'O `.+` sozinho para no primeiro `;` que encontra, ou vai até o último?',
-          'O `?` depois do `+` muda o comportamento para qual dos dois?',
+          'Os dois padrões começam em `:` e terminam em `;`. A diferença é só o `?` depois do `+`.',
+          'Sozinho, `.+` é guloso: pega o máximo que conseguir, e só para no **último** `;` do texto.',
+          'Com o `?`, ele vira preguiçoso: para no **primeiro** `;` que servir. Os dois começam no primeiro `:` do texto.',
         ],
       },
     },
@@ -146,6 +147,7 @@ console.log(texto.match(/:.+?;/)[0]);`,
           'Sem âncoras, `test` procura o padrão em qualquer posição do texto. `^` prende no começo e `$` no fim — juntos, transformam "contém" em "é". Esquecer disso é a falha de validação mais comum com expressões regulares.',
         hints: [
           'Um símbolo marca o começo do texto, outro marca o fim.',
+          'Sem símbolos nas pontas, o `test` procura o padrão em qualquer lugar: "abc123def" passa porque contém três dígitos.',
           'São `^` e `$`. Qual vai em cada lacuna?',
         ],
         solution: ['^', '$'],
@@ -211,7 +213,8 @@ console.log(temNumero.test('a1'));`,
           'A marca `g` faz a expressão guardar um `lastIndex` — a posição onde parou. A primeira chamada acha o `1` na posição 1 e deixa `lastIndex` valendo 2. A segunda começa a procurar **da posição 2 em diante**, não acha nada, devolve `false` e zera o `lastIndex`. A terceira volta ao começo e acha de novo. É por isso que uma validação com `g` funciona no primeiro item de uma lista e falha no segundo, alternando: a expressão está guardando estado entre as chamadas.',
         hints: [
           'A expressão com `g` guarda alguma coisa entre uma chamada e a seguinte. O quê?',
-          'Depois de achar o `1` na posição 1, de onde a próxima busca começa?',
+          'Depois de achar o `1` na posição 1, ela guarda `lastIndex` valendo 2: a próxima busca começa dali.',
+          'Da posição 2 de "a1" em diante não há dígito: `false`, e o `lastIndex` volta a 0. A terceira chamada recomeça do início.',
         ],
       },
     },
@@ -232,9 +235,10 @@ console.log(temNumero.test('a1'));`,
 console.log(extrairTelefones('ligue (11) 91234-5678 ou (21) 3456-7890'));
 // esperado: ['(11) 91234-5678', '(21) 3456-7890']`,
         hints: [
-          'Parênteses têm significado especial no padrão. Para casar o caractere literal, escape com barra invertida.',
-          'Para "4 ou 5 dígitos", use a faixa `{4,5}`.',
-          '`match` com `g` devolve `null` quando não encontra nada — não uma lista vazia.',
+          'Monte o padrão pedaço por pedaço, na ordem do formato: `(`, dois dígitos, `)`, espaço, 4 ou 5 dígitos, traço, 4 dígitos.',
+          'Parênteses têm significado especial num padrão: para casar o caractere, escape com barra invertida — `\\(` e `\\)`. "4 ou 5" é a faixa `{4,5}`.',
+          '`texto.match(padrao)` com a marca `g` devolve todas as ocorrências — ou `null` quando não acha nada; troque o `null` por `[]`. E crie o padrão dentro da função.',
+          'const padrao = /\\(\\d{2}\\) \\d{4,5}-\\d{4}/g;\nreturn texto.match(padrao) || [];',
         ],
         tests: [
           {
@@ -379,7 +383,11 @@ console.log(contemPythonSemCaixa.test('Amo Python'));`,
         expectedOutput: 'false\ntrue',
         explanation:
           'Sem a marca `i`, o padrão `/python/` só bate com "python" em minúsculas exatas — "Python", com P maiúsculo, não casa. Com `/python/i`, a marca faz a comparação ignorar a diferença entre maiúsculas e minúsculas.',
-        hints: ['Qual das duas expressões tem a marca que ignora maiúsculas de minúsculas?'],
+        hints: [
+          'Qual das duas expressões tem uma marca depois da barra de fechamento?',
+          'Sem marca, a comparação diferencia maiúsculas de minúsculas: "Python" não casa com /python/.',
+          'A marca `i` manda ignorar a diferença de caixa.',
+        ],
       },
     },
     {

@@ -48,6 +48,8 @@ promessa.then(function (valor) {
 });
 ~~~
 
+Leia o \`new Promise(...)\` assim: a função que você passa roda **na hora**, e recebe **duas funções prontas**, criadas pela própria promise. Chame a primeira (aqui, \`resolver\`) com o valor quando der certo, ou a segunda (\`rejeitar\`) com um erro quando falhar — os nomes são seus; \`resolve\` e \`reject\` são os mais comuns. Quem usa a promise lê o valor com \`.then\` e a falha com \`.catch\`.
+
 Três estados, e a transição é definitiva: **pendente** enquanto espera, depois **resolvida** ou **rejeitada**. Uma promise nunca volta atrás nem muda de valor.
 `.trim(),
     },
@@ -107,8 +109,9 @@ Promise.resolve(2)
         explanation:
           '`C` nunca aparece. Quando um `.then` lança, a cadeia **pula todos os `.then` seguintes** e vai direto para o primeiro `.catch`. É o que substitui o `if (erro) return` repetido em cada nível dos callbacks.',
         hints: [
-          'O que o primeiro `.then` devolve? Esse valor chega em qual lugar?',
-          'Depois de um `throw` no meio da cadeia, os `.then` seguintes rodam ou são pulados?',
+          'Siga o valor: o primeiro `.then` recebe 5. O que ele imprime, e o que devolve?',
+          'O que um `.then` devolve é o que o próximo recebe: o segundo recebe o dobro de 5.',
+          'O segundo lança um erro. Depois de um `throw`, os `.then` seguintes são pulados e a cadeia vai direto para o `.catch`.',
         ],
       },
     },
@@ -158,8 +161,9 @@ E existe o \`.finally\`, que roda nos dois desfechos e **não** altera o valor q
         explanation:
           'O primeiro `.then` calcula `n * 10` e joga fora: com chaves no corpo, a seta precisa de `return` explícito. Como ele não devolve nada, a promise seguinte resolve com `undefined`, e é isso que o segundo `.then` recebe. O segundo devolve `"fim"`, e aí o terceiro recebe o valor certo. Um `undefined` inesperado no meio de uma cadeia quase sempre é um `return` que faltou no passo anterior.',
         hints: [
-          'O primeiro `.then` tem chaves no corpo. Ele devolve alguma coisa?',
-          'O valor que um `.then` recebe é o que o anterior retornou.',
+          'O primeiro `.then` tem chaves no corpo. Ele tem `return`?',
+          'Sem `return`, um `.then` devolve `undefined` — e é isso que o próximo recebe como `n`.',
+          'O segundo `.then` devolve `"fim"` com `return`, então o terceiro recebe `"fim"`.',
         ],
       },
     },
@@ -228,8 +232,9 @@ E existe o \`.finally\`, que roda nos dois desfechos e **não** altera o valor q
         explanation:
           'A função recebida por `new Promise` ganha dois caminhos: o primeiro parâmetro entrega o valor, o segundo entrega a falha. Chamar um deles fecha a promise para sempre — chamar o outro depois não faz nada.',
         hints: [
-          'Os dois parâmetros da função dentro de `new Promise` têm nomes que dizem o que fazem.',
-          'Erro vai pelo primeiro parâmetro ou pelo segundo? Leia os nomes.',
+          'A função dentro de `new Promise` recebe dois parâmetros, e os nomes dizem para que serve cada um.',
+          'Um deles fecha a promise com sucesso, entregando um valor; o outro fecha com falha, entregando um erro.',
+          'A primeira lacuna está no caminho do erro: use o **segundo** parâmetro. A segunda está no caminho do sucesso: use o **primeiro**.',
         ],
         solution: ['rejeitar', 'resolver'],
       },
@@ -282,8 +287,9 @@ O caso que sobra é o pior: uma promise que rejeita e **ninguém** trata. Ela n�
         explanation:
           'Tratar um erro **conserta** a cadeia: a partir do `.catch` ela volta a estar resolvida, com o valor que o `catch` retornou. Como esse `catch` só imprime e não retorna nada, o `.then` seguinte recebe `undefined` e chama `usar(undefined)`. Duas saídas: mover o `.catch` para o fim, e aí ele pega tanto a falha da busca quanto a de `usar`; ou, se a intenção era mesmo seguir, retornar um valor de reserva explícito — `.catch(() => [])`.',
         hints: [
-          'Depois que o `.catch` roda, a cadeia continua rejeitada ou volta a estar resolvida?',
-          'O que a função dentro do `.catch` retorna? É esse valor que o `.then` recebe.',
+          'Depois que o `.catch` roda, a cadeia continua rejeitada, ou volta a estar resolvida?',
+          'Tratar o erro conserta a cadeia: o próximo `.then` roda normalmente, com o valor que o `.catch` devolveu.',
+          'A função dentro desse `.catch` só imprime — ela não tem `return`. Então o `.then` seguinte recebe qual valor?',
         ],
       },
     },
@@ -330,9 +336,10 @@ function precoTotal(produtos) {
 
 precoTotal(['pao', 'leite']).then((t) => console.log(t)); // esperado: 16`,
         hints: [
-          '`produtos.map(buscarPreco)` devolve uma lista de promises, não de preços.',
-          '`Promise.all` recebe essa lista e devolve uma promise com a lista de valores.',
-          'Depois de ter os preços, some com `reduce`.',
+          '`produtos.map(buscarPreco)` dispara todas as buscas de uma vez e devolve uma lista de **promises**, não de preços.',
+          '`Promise.all(listaDePromises)` espera todas e devolve **uma** promise com a lista dos preços, na mesma ordem.',
+          'Encadeie um `.then((precos) => ...)` no `Promise.all` e some os preços com `reduce`, começando em 0. Não esqueça do `return` na frente de tudo.',
+          'return Promise.all(produtos.map(buscarPreco)).then((precos) =>\n  precos.reduce((soma, preco) => soma + preco, 0)\n);',
         ],
         tests: [
           {
@@ -435,7 +442,8 @@ buscarPedido(1).then(function (pedido) {
           'A promise é criada, mas não é **devolvida**: sem `return`, `buscarPedido` termina e entrega `undefined`, como qualquer função sem `return`. A promise existe, resolve, e ninguém consegue alcançá-la.\n\nÉ o mesmo `return` perdido da aula de callbacks, em roupa nova. Uma função que "devolve uma promise" precisa, literalmente, de `return` na frente do `new Promise` — ou ser `async`, que faz isso por você.',
         hints: [
           'O que uma função devolve quando não tem `return`?',
-          'A promise é criada. Ela é entregue a quem chamou `buscarPedido`?',
+          'A promise é criada dentro de `buscarPedido`. Ela chega a quem chamou, ou fica perdida lá dentro?',
+          'Para `buscarPedido(1).then(...)` funcionar, a função precisa entregar a promise que cria. Falta uma palavra na frente de onde ela é criada.',
         ],
       },
     },

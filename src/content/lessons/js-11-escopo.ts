@@ -77,8 +77,9 @@ console.log(mensagem);`,
         explanation:
           'São **duas variáveis diferentes** com o mesmo nome. A de dentro da função não substitui a de fora: ela existe em outro território e some quando a função termina. Por isso o segundo `console.log` ainda vê `fora`.',
         hints: [
-          'Existem dois `let mensagem`. Eles criam a mesma variável, ou duas?',
-          'A função declara a sua própria `mensagem`. Isso apaga a de fora, ou cria outra?',
+          'Existem dois `let mensagem` no código. Eles criam a mesma variável, ou duas?',
+          'O `let` de dentro da função cria uma `mensagem` nova, que só existe ali. A de fora continua com o valor dela.',
+          'O primeiro `console.log` está dentro da função e enxerga a `mensagem` de dentro; o segundo está fora e só enxerga a de fora.',
         ],
       },
     },
@@ -159,8 +160,9 @@ console.log(contador);`,
         explanation:
           'Declarações de função sobem **inteiras**: `saudar` já está pronta antes da primeira linha rodar. Já `var` sobe só o nome, sem o valor — por isso a segunda linha imprime `undefined` em vez de dar erro, e só depois da atribuição o valor aparece. Com `let` ou `const` no lugar do `var`, a segunda linha lançaria `ReferenceError: Cannot access before initialization`, que é um comportamento melhor: erra alto em vez de entregar `undefined` calado.',
         hints: [
-          'Antes de rodar, o JavaScript anota os nomes que existem no território. O que ele consegue anotar de uma `function`? E de uma `var`?',
-          'A segunda linha dá erro, ou imprime alguma coisa?',
+          'Antes de rodar a primeira linha, o JavaScript anota os nomes do arquivo. O que ele consegue anotar de uma `function`? E de uma `var`?',
+          'A `function` é anotada inteira: já dá para chamar antes da linha dela. A `var` é anotada só pelo nome, ainda sem o valor.',
+          'Uma `var` lida antes da linha que a declara não dá erro: vale `undefined` até a atribuição rodar. Depois dela, vale o que foi atribuído.',
         ],
       },
     },
@@ -218,8 +220,9 @@ console.log(contador);`,
         explanation:
           '`total` precisa nascer **fora** do loop, senão cada volta criaria uma variável nova e o acumulado se perderia. Já `numero` nasce **dentro**, porque muda a cada volta — e `const` funciona aqui justamente por ser um valor novo em cada iteração.',
         hints: [
-          'A primeira lacuna declara algo que vai mudar de valor várias vezes.',
-          'A segunda declara um nome que recebe um valor novo a cada volta e nunca é reatribuído dentro dela.',
+          'Cada lacuna pede uma palavra de declaração. A pergunta é qual delas combina com o que cada nome faz depois.',
+          'A primeira declara o acumulador: ele começa em 0 e recebe um valor novo a cada volta (`total += numero`). A declaração precisa permitir reatribuir.',
+          'A segunda declara `numero`, que ganha um valor novo em cada volta mas nunca é reatribuído dentro dela: serve a declaração que proíbe reatribuir — a que você usa por padrão.',
         ],
         solution: ['let', 'const'],
       },
@@ -280,8 +283,9 @@ A boa notícia é que isso acabou. Dentro de um módulo — que é como todo có
         explanation:
           'O `let` de dentro cria uma variável **nova**, que faz sombra na de fora — por isso a de fora nunca muda. Sem o `let`, a linha vira uma atribuição à variável que já existe no território de cima, que é o que se queria. Trocar por `var` não ajuda: continua sendo uma declaração nova, só que com regras piores. E `const` impediria qualquer alteração.\n\nNa prática, porém, uma função que mexe em variável de fora é difícil de testar e de prever. A quarta opção aponta para o desenho melhor: receber o valor e **retornar** o novo total, em vez de alterar algo de fora.',
         hints: [
-          'A função declara um `total` próprio. Ela está alterando o de fora, ou criando outro?',
-          'O que acontece se você tirar a palavra `let` da linha de dentro?',
+          'A linha de dentro da função começa com `let`. Um `let` altera uma variável que já existe, ou cria uma nova?',
+          'O `let` de dentro cria um `total` novo, só da função — ele faz sombra no de fora, que nunca é tocado.',
+          'Para mexer no `total` de fora, a linha de dentro não pode declarar nada: só atribuir. Qual opção tira a declaração e mantém a conta?',
         ],
       },
     },
@@ -301,9 +305,10 @@ A boa notícia é que isso acabou. Dentro de um módulo — que é como todo có
 
 console.log(contarMaioresQue([1, 5, 9], 4)); // esperado: 2`,
         hints: [
-          'Você precisa de um número que sobreviva a todas as voltas. Ele nasce antes ou dentro do loop?',
-          'Dentro do loop, compare cada item com o limite e some 1 quando for maior.',
-          'Comece com `let quantidade = 0;` antes do loop e devolva `quantidade` no final.',
+          'Você precisa de um número que sobreviva a todas as voltas do laço. Ele nasce antes do laço, ou dentro dele?',
+          'Comece com `let quantidade = 0;` **antes** do laço — se nascesse dentro, voltaria a 0 em cada volta.',
+          'Dentro do laço, compare cada número com o limite e some 1 à `quantidade` quando ele for maior. Depois do laço, devolva `quantidade`.',
+          'let quantidade = 0;\nfor (const numero of numeros) {\n  if (numero > limite) quantidade += 1;\n}\nreturn quantidade;',
         ],
         tests: [
           {
@@ -385,8 +390,9 @@ console.log(contarAprovados([8, 5, 9]));`,
         explanation:
           'O `let` dentro do `if` não atualiza a variável de cima: ele **declara uma variável nova**, com o mesmo nome, que só existe naquele bloco. E o lado direito, `aprovados + 1`, já se refere a essa nova — que ainda não recebeu valor. Daí o erro de "antes da inicialização".\n\nSem o `let`, a linha volta a ser uma atribuição à variável de fora, que é o que se queria. A regra da aula: `let` e `const` criam nomes no bloco onde aparecem. Reaproveitar um nome que já existe fora é sombreamento, e quase sempre é engano.',
         hints: [
-          'A mensagem fala de uma variável que ainda não foi inicializada. Mas ela foi, com 0. Então de qual `aprovados` a mensagem está falando?',
-          'Procure a palavra `let` dentro do laço e pergunte o que ela faz ali.',
+          'A mensagem diz que `aprovados` foi usada antes de ser inicializada. Mas ela foi inicializada com 0, lá em cima. Então de qual `aprovados` a mensagem está falando?',
+          'Procure uma palavra de declaração dentro do laço. O que ela faz com o nome `aprovados` naquele bloco?',
+          'Dentro do `if`, uma declaração cria um `aprovados` novo — e o lado direito do `=` já lê esse novo, que ainda não tem valor. A linha que deveria só atribuir está declarando.',
         ],
       },
     },

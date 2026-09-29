@@ -91,8 +91,9 @@ principal();`,
         explanation:
           'O `try/catch` não pega nada porque falta o `await`. Sem ele, `falhar()` só devolve uma promise e a função segue para o `console.log("A")` — a rejeição acontece depois, quando o `try` já terminou. O `catch` só funciona se você **esperar** dentro dele.',
         hints: [
-          'O `try` chega a esperar por `falhar()`, ou só a chama?',
-          'Quando a promise rejeita, o bloco `try` ainda está em execução?',
+          'O `try` espera por `falhar()`, ou só a chama?',
+          'Sem `await`, `falhar()` devolve uma promise e a função segue em frente: o `console.log("A")` roda.',
+          'Quando a promise rejeita, o `try` já terminou — o `catch` não está mais esperando. Então o que sai?',
         ],
       },
     },
@@ -152,8 +153,9 @@ async function consultarComRegistro(id) {
         explanation:
           'Sem o `await`, o `try` não teria o que capturar. E sem o `throw`, a função devolveria `undefined` depois de imprimir — quem chamou acharia que deu certo e receberia um valor vazio. Registrar e relançar mantém as duas coisas: o rastro e a falha.',
         hints: [
-          'A primeira lacuna é a mesma palavra que faz o `try` conseguir capturar.',
-          'A segunda é a palavra que faz um erro subir para quem chamou.',
+          'A primeira lacuna é a palavra que faz o `try` conseguir capturar a falha de uma promise.',
+          'Sem ela, a rejeição aconteceria depois que o `try` já terminou. É a palavra que espera.',
+          'A segunda lacuna faz o erro seguir para quem chamou, depois de registrado — a mesma palavra que você usa para lançar um erro novo.',
         ],
         solution: ['await', 'throw'],
       },
@@ -212,7 +214,8 @@ E repare na última linha do \`catch\`: depois de esgotar as tentativas, o erro 
           'Repetir só ajuda quando a falha é **passageira**, e o 503 diz exatamente isso: o servidor está fora agora e volta depois. As outras três não mudam com insistência. O 400 vai recusar o mesmo pedido para sempre — o defeito está no que foi enviado. O 401 precisa de uma ação diferente, renovar o token, e não de mais uma tentativa igual. E o `TypeError` é um bug no seu próprio código: repetir só o esconde. Além disso, antes de repetir qualquer coisa, confira se a operação pode acontecer duas vezes sem consequência: buscar, sim; cobrar, não.',
         hints: [
           'Qual dessas falhas tem chance de dar um resultado diferente daqui a meio segundo?',
-          'Duas delas exigem uma ação diferente, não uma tentativa igual.',
+          'Um pedido malformado e um bug no seu próprio código vão falhar igual, quantas vezes você tentar.',
+          'O token expirado precisa de uma ação diferente (renovar), não de mais uma tentativa igual. Sobra a que diz "indisponível agora".',
         ],
       },
     },
@@ -267,8 +270,9 @@ async function precosDisponiveis(produtos) {
 precosDisponiveis(['pao', '', 'leite']).then(console.log); // esperado: [6, 10]`,
         hints: [
           '`Promise.all` rejeita quando qualquer uma rejeita. Existe outro método que espera todas sem desistir.',
-          '`Promise.allSettled` devolve objetos com `status`, e `value` só nos que deram certo.',
-          'Filtre por `status === "fulfilled"` e depois pegue o `value` de cada um.',
+          '`await Promise.allSettled(produtos.map(buscarPreco))` devolve uma lista de objetos: `{ status: "fulfilled", value }` nos que deram certo, `{ status: "rejected", reason }` nos outros.',
+          'Fique com os de `status === "fulfilled"` (filter) e pegue o `value` de cada um (map).',
+          'const resultados = await Promise.allSettled(produtos.map(buscarPreco));\nreturn resultados\n  .filter((r) => r.status === "fulfilled")\n  .map((r) => r.value);',
         ],
         tests: [
           {
@@ -367,6 +371,7 @@ precosDisponiveis(['pao', '', 'leite']).then(console.log); // esperado: [6, 10]`
         hints: [
           'Os `.then` rodam na hora em que são escritos, ou só quando a promise decide?',
           'Quem trata rejeição: `.then` ou `.catch`?',
+          'Depois da rejeição, ela procura o primeiro tratador de erro da cadeia — passando direto pelos `.then`, que só sabem tratar sucesso.',
         ],
       },
     },

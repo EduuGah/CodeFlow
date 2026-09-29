@@ -33,6 +33,8 @@ console.log(contar());   // 1
 console.log(contar());   // 2
 ~~~
 
+\`criarContador()\` roda **uma vez só**: cria \`contagem\`, monta a função de dentro e a devolve. O que fica guardado em \`contar\` é essa função de dentro — e é ela que roda a cada \`contar()\`.
+
 \`criarContador\` já terminou. Mesmo assim \`contagem\` continua existindo, porque a função devolvida ainda precisa dela. Esse par — a função mais o território que ela carrega junto — é o que se chama **closure**.
 
 Repare no que isso resolve: \`contagem\` é privada. Nada fora consegue ler nem mexer nela, só chamar \`contar()\`. É estado guardado sem variável global.
@@ -90,8 +92,9 @@ console.log(carrinhoB());`,
         explanation:
           'Cada chamada de `criarCarrinho` cria um território novo, com o seu próprio `itens`. `carrinhoB` não continua de onde `carrinhoA` parou — ele começa do zero, porque são dois territórios separados.',
         hints: [
-          'Quantas vezes `criarCarrinho()` foi chamada? Cada chamada cria quantos `itens`?',
-          '`carrinhoA` e `carrinhoB` compartilham a mesma variável, ou cada um tem a sua?',
+          'Quantas vezes `criarCarrinho()` foi chamada? Cada chamada cria o seu próprio `itens`.',
+          '`carrinhoA` e `carrinhoB` vieram de chamadas diferentes: cada um carrega o `itens` da sua chamada, e eles não se misturam.',
+          '`++itens` soma 1 e devolve o valor novo. O A é chamado duas vezes seguidas; o B, uma vez, começando do zero dele.',
         ],
       },
     },
@@ -156,8 +159,9 @@ console.log(comLet.map(function (f) { return f(); }));`,
         explanation:
           '`var` cria **uma** variável para a função inteira, então as três closures apontam para a mesma — e quando elas são chamadas, o laço já terminou e ela vale 3. `let` cria uma variável nova a cada volta, então cada closure carrega a sua. A frase que resume os dois casos: closure captura a **variável**, não o valor que ela tinha no momento.',
         hints: [
-          'Quantas variáveis `i` existem no primeiro laço? E quantas variáveis `j` no segundo?',
-          'As funções são chamadas depois que os laços terminaram. Quanto vale o contador nesse momento?',
+          'Quantas variáveis `i` existem no primeiro laço? E quantas `j` no segundo?',
+          '`var` ignora as chaves: há um `i` só, para o laço inteiro. `let` cria um `j` novo a cada volta.',
+          'As funções só são chamadas depois que os laços acabam. Nesse momento o `i` único já vale 3; cada `j` guardou o valor da sua volta.',
         ],
       },
     },
@@ -203,8 +207,9 @@ console.log(comLet.map(function (f) { return f(); }));`,
         explanation:
           'A função de dentro continua enxergando `fator`, mesmo depois que `criarMultiplicador` terminou. É por isso que `dobro` e `decuplo` se comportam diferente: cada uma carrega o território onde nasceu.',
         hints: [
-          'A função de dentro recebe `numero`. Que outro nome ela ainda consegue enxergar?',
-          'Multiplique o parâmetro de dentro pelo parâmetro da fábrica.',
+          'A função de dentro recebe `numero`. Que outro nome ela ainda consegue enxergar, mesmo depois que a fábrica terminou?',
+          'Ela enxerga o `fator` que a fábrica recebeu — é isso que a closure guarda.',
+          'Devolva o produto dos dois: o parâmetro da função de dentro vezes o parâmetro da fábrica.',
         ],
         solution: ['numero * fator'],
       },
@@ -276,8 +281,9 @@ console.log(b.ler());`,
         explanation:
           'Cada chamada de `criarContador` executa a função do zero e cria um `n` próprio, então `a` e `b` não se enxergam. Dentro de uma mesma chamada, porém, `somar` e `ler` nasceram juntas e compartilham o **mesmo** `n` — é por isso que `a.ler()` enxerga o que `a.somar()` fez. Territórios separados entre chamadas, território compartilhado dentro de uma.',
         hints: [
-          'Quantas vezes a função `criarContador` foi executada? Cada execução cria quantos `n`?',
-          '`somar` e `ler` de `a` nasceram na mesma execução, ou em execuções diferentes?',
+          'Quantas vezes `criarContador` foi executada? Cada execução cria quantos `n`?',
+          '`somar` e `ler` de `a` nasceram na mesma execução e dividem o mesmo `n`. Os de `b` dividem outro.',
+          '`a.somar()` rodou duas vezes; `b.somar()`, uma. Cada `ler` mostra o `n` da sua própria execução.',
         ],
       },
     },
@@ -315,9 +321,10 @@ console.log(cofre.abrir('errada'));  // esperado: null
 console.log(cofre.abrir('1234'));    // esperado: meu segredo
 console.log(cofre.senha);            // esperado: undefined`,
         hints: [
-          'O valor guardado precisa sobreviver entre as chamadas de `guardar` e `abrir`. Onde ele nasce?',
-          'Se você colocar a senha como propriedade do objeto devolvido, qualquer um lê. Deixe-a só no território da função.',
-          'Devolva `{ guardar: (v) => { ... }, abrir: (t) => { ... } }` — as duas enxergam `senha` e o valor guardado.',
+          'Dois valores precisam sobreviver entre as chamadas: a senha (que já chega como parâmetro) e o que for guardado. Os dois moram no território de `criarCofre`, não no objeto devolvido.',
+          'Crie `let guardado = null;` dentro de `criarCofre`. O objeto devolvido tem só os dois métodos — nada de `senha` nele.',
+          '`guardar(valor)` troca o `guardado`; `abrir(tentativa)` compara `tentativa` com `senha` e devolve `guardado` ou `null`.',
+          'let guardado = null;\nreturn {\n  guardar(valor) { guardado = valor; },\n  abrir(tentativa) { return tentativa === senha ? guardado : null; },\n};',
         ],
         tests: [
           {
@@ -423,7 +430,8 @@ console.log(cofre.senha);            // esperado: undefined`,
           'O ponto inteiro está no passo do meio: quando uma função termina, o escopo dela normalmente vai embora — mas não se alguma função criada lá dentro continua viva. A função devolvida "fecha" sobre o escopo (daí *closure*), e cada chamada dela encontra o mesmo `total`, com o valor que ficou da chamada anterior. Um segundo `criarContador()` criaria outro escopo, com outro `total`: por isso dois contadores não se atrapalham.',
         hints: [
           'Antes de a função interna existir, o que precisa existir?',
-          'O que impede o `total` de sumir quando a fábrica termina?',
+          'O que impede o `total` de sumir quando `criarContador` termina?',
+          'Os dois últimos passos são as duas chamadas de `contar()`: cada uma encontra o `total` que a anterior deixou.',
         ],
       },
     },

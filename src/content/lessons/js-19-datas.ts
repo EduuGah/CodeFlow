@@ -82,8 +82,9 @@ console.log(d.getFullYear());`,
         explanation:
           '`11` é dezembro: o mês vai de 0 a 11. Para mostrar ao usuário, some 1 — ou use `toLocaleDateString`, que já faz isso. `getDate` devolve 25, o dia do mês.',
         hints: [
-          'Se janeiro é 0, quanto é dezembro?',
-          '`getMonth` devolve o mesmo número que você passou na criação.',
+          'Se janeiro é o mês 0, que número é dezembro?',
+          '`getMonth` devolve o mesmo número que foi passado na criação — sem somar nada.',
+          '`getDate` é o dia do mês, e `getFullYear` é o ano: esses dois contam normal.',
         ],
       },
     },
@@ -149,7 +150,8 @@ console.log(d.getFullYear());`,
           '`getMonth` devolve de 0 a 11 porque é assim que o índice é guardado internamente. Quem lê espera de 1 a 12, então a conversão é responsabilidade de quem mostra.',
         hints: [
           'Se dezembro devolve 11 e você quer mostrar 12, qual é a operação?',
-          'Some um.',
+          'O ajuste vale para todo mês: janeiro, que vem como 0, precisa aparecer como 01.',
+          'Some um ao que `getMonth()` devolve — a lacuna fica logo depois dele, antes de fechar o parêntese.',
         ],
         solution: ['+ 1'],
       },
@@ -216,7 +218,8 @@ console.log(manha.toDateString() === noite.toDateString());`,
           'A primeira comparação é `false` porque `===` entre objetos pergunta se são **o mesmo objeto**, e são dois. `getTime()` devolve números, então a segunda compara conteúdo e dá `true`. A terceira mostra o limite dessa comparação: manhã e noite do mesmo dia são instantes diferentes, e é isso que ela responde. Quando a pergunta era "é o mesmo dia?", o que serve é descartar a hora antes de comparar — que é o que `toDateString` faz.',
         hints: [
           'O que `===` compara quando os dois lados são objetos?',
-          'Manhã e noite do mesmo dia: mesmo instante, ou mesmo dia?',
+          '`===` entre objetos só é verdadeiro se for o **mesmo** objeto. `getTime()` devolve números, e números comparam pelo valor.',
+          'Manhã e noite do mesmo dia: é o mesmo instante? E o mesmo dia? `toDateString` descarta a hora.',
         ],
       },
     },
@@ -259,9 +262,10 @@ Assim o dia 10 continua sendo o dia 10 em qualquer lugar do mundo.
 console.log(diasEntre(new Date(2026, 2, 10), new Date(2026, 2, 15))); // 5
 console.log(diasEntre(new Date(2026, 2, 15), new Date(2026, 2, 10))); // 5`,
         hints: [
-          'Subtrair duas datas devolve a diferença em milissegundos.',
-          'Um dia tem 24 × 60 × 60 × 1000 milissegundos.',
-          '`Math.abs` resolve a ordem, e `Math.round` resolve a sobra de horas.',
+          'Subtrair duas datas (`fim - inicio`) devolve a diferença em milissegundos.',
+          'Divida essa diferença pelo tamanho de um dia em milissegundos: 24 × 60 × 60 × 1000.',
+          '`Math.abs` deixa o resultado positivo em qualquer ordem, e `Math.round` apaga a sobra de horas (como a do horário de verão).',
+          'const UM_DIA = 24 * 60 * 60 * 1000;\nreturn Math.round(Math.abs(fim - inicio) / UM_DIA);',
         ],
         tests: [
           {
@@ -360,7 +364,8 @@ if (texto !== "25/12/2024") throw new Error('esperava "25/12/2024", veio "' + te
           '`getMonth()` devolve o mês contando de **zero**: janeiro é 0, dezembro é 11. É o que faz `new Date(2024, 11, 25)` ser 25 de dezembro — e é o que faz um mês lido direto sair um a menos ao ser mostrado. Somar 1 na hora de **exibir** é o conserto; o valor interno continua como está.\n\nÉ o erro de um dia da aula, em versão de um mês: a data está certa na memória e errada na tela.',
         hints: [
           'O dia e o ano saíram certos. Só o mês está errado — errado por quanto?',
-          'Como `getMonth()` conta os meses?',
+          'Como `getMonth()` conta os meses? Janeiro é qual número?',
+          'A data está certa na memória; o erro está em mostrar o mês do jeito que ele é guardado. Procure a linha que monta o mês.',
         ],
       },
     },

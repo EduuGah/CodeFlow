@@ -86,8 +86,9 @@ console.log(volta.aplicar);`,
         explanation:
           'Só `tema` e `itens` atravessam — por isso `Object.keys` devolve 2. Funções e `undefined` não têm representação em JSON, então `stringify` simplesmente os omite. Nenhum erro é lançado: eles somem em silêncio.',
         hints: [
-          'Quais das quatro chaves o JSON consegue representar?',
-          'Uma função tem como virar texto JSON? E `undefined`?',
+          'Quais das quatro chaves o JSON consegue representar como texto?',
+          'Função e `undefined` não existem em JSON: o `stringify` simplesmente omite essas chaves, sem erro.',
+          'Sobram `tema` e `itens`. E ler uma chave que sumiu devolve o quê?',
         ],
       },
     },
@@ -145,8 +146,9 @@ function recuperar(texto) {
         explanation:
           'Os nomes dizem a direção: `stringify` produz uma **string**, `parse` **analisa** uma string e reconstrói o valor. Trocar os dois é o engano mais comum, e o sintoma é um `[object Object]` aparecendo na tela.',
         hints: [
-          'Uma das duas tem "string" no nome. Qual direção ela faz?',
-          'A outra analisa um texto para reconstruir o valor.',
+          'Uma das funções transforma objeto em texto; a outra faz o caminho de volta, de texto para objeto.',
+          'A que produz texto tem a palavra "string" no nome.',
+          'A que reconstrói o objeto tem um nome de cinco letras, que em inglês quer dizer "analisar".',
         ],
         solution: ['stringify', 'parse'],
       },
@@ -207,7 +209,8 @@ console.log(copia.tags === original.tags);`,
           'Das cinco chaves, duas não sobreviveram: `apelido` valia `undefined` e `saudar` era uma função, e o JSON não representa nenhum dos dois — as chaves somem sem aviso. A data virou texto, então `typeof` responde `"string"` e qualquer `.getFullYear()` adiante vai quebrar. Já o array é uma cópia de verdade, construída do zero pelo `parse`: por isso a comparação por identidade dá `false`, que é justamente o efeito desejado quando o objetivo era copiar.',
         hints: [
           'Quais tipos de valor o JSON não sabe escrever? O que acontece com essas chaves?',
-          'A data volta como `Date`, ou como outra coisa?',
+          '`apelido` (undefined) e `saudar` (função) somem. A data volta — mas como texto, não como `Date`.',
+          'O `parse` constrói tudo do zero, inclusive a lista `tags`. Ela é a mesma lista do original, ou outra?',
         ],
       },
     },
@@ -249,9 +252,10 @@ console.log(lerProduto('{"nome":"Café","preco":19.9}')); // { nome: 'Café', pr
 console.log(lerProduto('{quebrado'));                    // null
 console.log(lerProduto('{"nome":"","preco":10}'));       // null`,
         hints: [
-          'Comece protegendo o `JSON.parse` com `try/catch`.',
-          'Depois de analisar, confira: `typeof dados.nome === "string"`, nome não vazio, e `typeof dados.preco === "number"`.',
-          'Cuidado com `null`: `JSON.parse("null")` funciona e devolve `null`, que não tem propriedades.',
+          'São duas verificações, nesta ordem: o texto é JSON válido? E o que veio dele tem os campos certos?',
+          'Proteja o `JSON.parse` com `try/catch`, devolvendo `null` no `catch`.',
+          'Depois confira: `dados` é um objeto e não é `null`; `typeof dados.nome === "string"` e não vazio; `typeof dados.preco === "number"`. Qualquer falha devolve `null`. Cuidado: `JSON.parse("null")` funciona e devolve `null`.',
+          'let dados;\ntry {\n  dados = JSON.parse(texto);\n} catch (erro) {\n  return null;\n}\nif (typeof dados !== "object" || dados === null) return null;\nif (typeof dados.nome !== "string" || dados.nome === "") return null;\nif (typeof dados.preco !== "number") return null;\nreturn dados;',
         ],
         tests: [
           {
@@ -357,7 +361,8 @@ console.log(usuario.nome.toUpperCase());`,
           'O que chega da rede é sempre **texto**. `resposta` é uma string, e string não tem propriedade `nome` — ler `usuario.nome` devolve `undefined` em silêncio, e o erro só aparece ao tentar usar isso.\n\n`JSON.parse` é a fronteira: transforma o texto no objeto que ele descreve. Sem ele, o programa está tratando a **descrição** de um usuário como se fosse o usuário. No `console.log` os dois parecem iguais, e é por isso que a aula insiste em converter na entrada, uma vez, e nunca mais carregar texto pelo programa.',
         hints: [
           'Que tipo de valor `resposta` é? Olhe as aspas que envolvem tudo.',
-          'Que função transforma um texto JSON no objeto correspondente?',
+          'Um texto que descreve um objeto não é o objeto: ler `.nome` de uma string dá `undefined`.',
+          'Em algum momento o texto precisa virar objeto. Qual função faz isso, e onde ela deveria estar?',
         ],
       },
     },

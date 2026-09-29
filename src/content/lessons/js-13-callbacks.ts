@@ -18,6 +18,8 @@ Algumas coisas não terminam na hora: buscar dados de um servidor, ler um arquiv
 
 Então o JavaScript faz diferente: ele **agenda** a tarefa e segue em frente. Quando ela termina, chama uma função que você deixou preparada. Essa função é o **callback** — literalmente, "chame de volta".
 
+Você já fez isso na aula de \`map\`: entregou uma função para outro código chamar. O callback é a mesma ideia — a diferença é que quem chama é o \`setTimeout\` (ou a resposta da rede, ou o clique), e só **mais tarde**.
+
 O resultado surpreende quem está começando:
 
 ~~~javascript
@@ -77,8 +79,9 @@ console.log('C');`,
         explanation:
           'Atraso zero não significa "agora". O `setTimeout` coloca a função na fila, e a fila só é atendida depois que o código atual termina. Por isso `C` vem antes de `B`, mesmo tendo sido escrito depois.',
         hints: [
-          'O `setTimeout` executa a função na hora, ou agenda para depois?',
-          'O programa chega ao fim antes de atender qualquer coisa agendada.',
+          'O `setTimeout` roda a função na hora, ou só agenda para depois?',
+          'Agendar não é executar: o programa segue para a próxima linha sem esperar, mesmo com atraso 0.',
+          'O que foi agendado só roda quando o código atual termina — depois de todas as linhas de fora.',
         ],
       },
     },
@@ -136,8 +139,9 @@ console.log('F');`,
         explanation:
           'Primeiro roda tudo que está na pilha: `A` e `F`. Os dois `setTimeout` só foram **agendados**. Com a pilha vazia, a fila começa a andar na ordem em que entrou: o primeiro agendamento imprime `B`, agenda mais um, e imprime `D` — repare que o `C` não sai no meio, porque ele foi para o fim da fila. Depois vem `E`, que já esperava. E `C` por último, porque entrou na fila depois de todo mundo.',
         hints: [
-          'Nada sai da fila enquanto ainda houver código rodando na pilha.',
-          'O `setTimeout` de dentro entra na fila em que momento — antes ou depois do que já estava lá?',
+          'Nada sai da fila enquanto ainda houver código rodando. Quais linhas rodam antes de qualquer agendado?',
+          'Depois de `A` e `F`, a fila anda na ordem em que entrou: primeiro a função que imprime `B`, depois a que imprime `E`.',
+          'Dentro da primeira, o `setTimeout` de dentro vai para o **fim** da fila — atrás da função do `E`, que já esperava. E o `D` sai logo depois do `B`, porque está na mesma função.',
         ],
       },
     },
@@ -179,8 +183,9 @@ console.log('F');`,
         explanation:
           'A função não tem como devolver o resultado com `return`: quando o `setTimeout` dispara, quem chamou já foi embora há muito tempo. Por isso ela **avisa** — chama a função que recebeu como parâmetro, entregando o valor.',
         hints: [
-          'O segundo parâmetro da função é uma função. O que se faz com ela?',
-          'Chame o parâmetro que recebeu, passando o resultado.',
+          'A função não pode devolver o resultado com `return`: quando o `setTimeout` dispara, quem chamou já seguiu em frente. Ela precisa **avisar**.',
+          'Quem avisa é uma função que chegou como parâmetro. Olhe a assinatura: qual dos dois parâmetros é uma função?',
+          'Chame o segundo parâmetro, passando o resultado entre os parênteses que já estão ali.',
         ],
         solution: ['aoTerminar'],
       },
@@ -239,8 +244,9 @@ Guarde a forma da pergunta, porque ela reaparece: **uma função não consegue r
         explanation:
           'São duas funções, e o `return` pertence à de dentro. `buscar` só agenda e chega ao fim — devolvendo `undefined` na mesma hora, cerca de 100ms antes de o `return` sequer acontecer. Aumentar o atraso não muda nada, e nenhuma sintaxe de declaração resolve: **uma função não consegue retornar um valor que ainda não chegou**. A saída é receber um callback e chamá-lo com o resultado, ou devolver uma promise — que é o assunto da próxima aula.',
         hints: [
-          'Quantas funções existem nesse trecho? A que função o `return` pertence?',
-          'Em que momento `buscar` chega ao fim: antes ou depois dos 100ms?',
+          'Quantas funções existem nesse trecho? A qual delas o `return` pertence?',
+          'O `return` está dentro da função anônima que o `setTimeout` chama — ele devolve para o `setTimeout`, não para quem chamou `buscar`.',
+          'E `buscar` chega ao fim quando: antes ou depois dos 100ms? Uma função sem `return` próprio devolve o quê?',
         ],
       },
     },
@@ -294,9 +300,10 @@ verificarIdade(20, function (erro, podeEntrar) {
   console.log(erro, podeEntrar); // esperado: null true
 });`,
         hints: [
-          'Tudo acontece dentro do `setTimeout`: a verificação e a chamada do callback.',
-          'Para checar se é número: `typeof idade !== "number"`.',
-          'Erro primeiro: quando dá certo, o primeiro argumento é `null`.',
+          'Tudo acontece dentro do `setTimeout`: a verificação e a chamada de `aoTerminar`. Nada de `return` com o resultado.',
+          'São três casos, nesta ordem: não é número (`typeof idade !== "number"`), é menor que 18, e o resto.',
+          'Erro primeiro: no caso inválido, `aoTerminar(new Error("idade inválida"), null)`; nos outros, `aoTerminar(null, ...)` com `true` ou `false`. Um `return` depois do erro impede de seguir.',
+          'setTimeout(function () {\n  if (typeof idade !== "number") {\n    aoTerminar(new Error("idade inválida"), null);\n    return;\n  }\n  aoTerminar(null, idade >= 18);\n}, 10);',
         ],
         tests: [
           {
@@ -401,7 +408,8 @@ buscarUsuario(7, function (erro, usuario) {
           'O callback espera `(erro, usuario)`, mas `buscarUsuario` o chama com um argumento só. O objeto do usuário vai parar na **primeira** vaga, a do erro, e `usuario` fica `undefined`. Como um objeto conta como verdadeiro, o `if (erro)` entra — e `erro.message` não existe, daí o "Falhou: undefined".\n\nCallback é um contrato entre quem chama e quem recebe. No padrão erro-primeiro, sucesso se avisa com `aoTerminar(null, resultado)`: o `null` está ali de propósito, ocupando a vaga do erro que não aconteceu.',
         hints: [
           'Conte quantos argumentos o callback espera, e quantos ele recebe na chamada.',
-          'No padrão erro-primeiro, o que vai na primeira posição quando não houve erro?',
+          'O callback espera `(erro, usuario)`. Com um argumento só, em qual vaga o usuário vai parar?',
+          'No padrão erro-primeiro, a primeira vaga é do erro. Quando deu certo, algo precisa ocupar essa vaga para o usuário cair na segunda — o valor que significa "nenhum erro".',
         ],
       },
     },

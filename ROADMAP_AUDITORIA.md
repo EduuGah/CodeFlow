@@ -188,8 +188,13 @@ A fazer, nesta ordem:
    combinados (o `map` sozinho, com objetos, o `filter` sozinho), 3 a 4
    dicas em cada exercício. De carona: a previsão de uma lista não cobra
    mais o espaço depois da vírgula (`lib/previsao.ts`), e a trilha ganhou o
-   E2E que conclui as 20 aulas no navegador. Falta: js-11 a js-20, o resto
-   da trilha, e a regra no CI.
+   E2E que conclui as 20 aulas no navegador. Depois, a reta final (js-11 a
+   js-20: escopo, closures, callbacks, promises, async, falhas assíncronas,
+   JSON, imutabilidade, datas, expressões regulares): 3 a 4 dicas em todo
+   exercício — a de código termina na solução —, e pontes no texto onde
+   travava (o que são o `resolver` e o `rejeitar` de `new Promise`; o
+   callback como o mesmo gesto do `map`; o que fica guardado em `contar`).
+   Falta: js-1 a js-6, js-9 e js-10, e a regra no CI.
 5. Flashcards para os 93 conceitos sem cartão, começando pelos que são
    pré-requisito de mais aulas.
 6. Projetos intermediários de TypeScript e React.
